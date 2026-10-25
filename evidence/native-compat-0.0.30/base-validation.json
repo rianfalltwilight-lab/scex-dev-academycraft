@@ -1,0 +1,9 @@
+{
+  "verified": true,
+  "files": 10013,
+  "bytes": 978658916,
+  "manifest_sha256": "031019b874738c2aba2723c15b9e8b9e2ccefdd9d31f951909c9f44d505e033b",
+  "remote_free_bytes": 316219392,
+  "fallback_reason": "Vicerach free memory below 6 GiB runtime threshold",
+  "root": "D:\\SCEX-Work\\01-Mods\\Other-Ports\\AcademyCraft\\0.0.30-20261025"
+}

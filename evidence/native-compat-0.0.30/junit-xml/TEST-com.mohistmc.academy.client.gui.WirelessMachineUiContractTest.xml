@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.mohistmc.academy.client.gui.WirelessMachineUiContractTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-25T09:39:17.726Z" hostname="MONARCH" time="0.039">
+  <properties/>
+  <testcase name="realClientGateCoversProtectedNodeMouseKeyboardAndServerFlow()" classname="com.mohistmc.academy.client.gui.WirelessMachineUiContractTest" time="0.009"/>
+  <testcase name="emptyNodeResponseIsDistinctFromLoadingAndExplained()" classname="com.mohistmc.academy.client.gui.WirelessMachineUiContractTest" time="0.002"/>
+  <testcase name="nodeMatrixConnectionUsesTheRelayAware107DiscoveryRule()" classname="com.mohistmc.academy.client.gui.WirelessMachineUiContractTest" time="0.003"/>
+  <testcase name="remoteNodeAccessUsesTheLegacyPublicOrPasswordContract()" classname="com.mohistmc.academy.client.gui.WirelessMachineUiContractTest" time="0.002"/>
+  <testcase name="regularMachineCompositionIncludesAllThreeLegacyLayers()" classname="com.mohistmc.academy.client.gui.WirelessMachineUiContractTest" time="0.001"/>
+  <testcase name="matrixReadinessIsSharedByClientAndServerAuthority()" classname="com.mohistmc.academy.client.gui.WirelessMachineUiContractTest" time="0.002"/>
+  <testcase name="jeiReservesTheLegacySidebarAndInformationCard()" classname="com.mohistmc.academy.client.gui.WirelessMachineUiContractTest" time="0.002"/>
+  <testcase name="nodeNameOpeningSnapshotDoesNotDependOnTheClientBlockEntity()" classname="com.mohistmc.academy.client.gui.WirelessMachineUiContractTest" time="0.003"/>
+  <testcase name="auxiliaryWirelessPageReplacesRatherThanOverlaysMachineWidgets()" classname="com.mohistmc.academy.client.gui.WirelessMachineUiContractTest" time="0.006"/>
+  <testcase name="everyFormedMatrixPartForwardsInteractionToTheMainMachine()" classname="com.mohistmc.academy.client.gui.WirelessMachineUiContractTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

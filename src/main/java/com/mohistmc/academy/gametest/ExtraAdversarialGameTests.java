@@ -128,7 +128,7 @@ public final class ExtraAdversarialGameTests {
         data.learnSkill("flying");
         var pos = helper.absolutePos(new BlockPos(3, 2, 3));
         try {
-            if (!AeroPassiveRuntime.toggleFlying(player, data) || !player.getAbilities().mayfly) {
+            if (!AeroPassiveRuntime.toggleFlying(player, data) || !player.mayFly()) {
                 helper.fail("flight fixture did not engage"); return;
             }
             helper.getLevel().setBlock(pos, AcademyBlocks.ABILITY_INTERFERER.get().defaultBlockState(), 3);
@@ -140,13 +140,13 @@ public final class ExtraAdversarialGameTests {
                 helper.fail("interference fixture is inactive"); return;
             }
             AeroPassiveRuntime.playerTick(new PlayerTickEvent.Post(player));
-            if (player.getAbilities().mayfly || player.getAbilities().flying) {
+            if (player.mayFly() || player.getAbilities().flying) {
                 helper.fail("interference retained skill-granted flight"); return;
             }
             machine.setEnabled(false);
             AbilityInterferenceService.remove(machine);
             AeroPassiveRuntime.playerTick(new PlayerTickEvent.Post(player));
-            if (AeroPassiveRuntime.isFlyingActive(player) || player.getAbilities().mayfly) {
+            if (AeroPassiveRuntime.isFlyingActive(player) || player.mayFly()) {
                 helper.fail("flight resumed after interference without a fresh activation"); return;
             }
             helper.succeed();
@@ -196,7 +196,7 @@ public final class ExtraAdversarialGameTests {
             AeroPassiveRuntime.playerTick(new PlayerTickEvent.Post(player));
             data.learnSkill("flying");
             AeroPassiveRuntime.playerTick(new PlayerTickEvent.Post(player));
-            if (AeroPassiveRuntime.isFlyingActive(player) || player.getAbilities().mayfly) {
+            if (AeroPassiveRuntime.isFlyingActive(player) || player.mayFly()) {
                 helper.fail("relearning flying resumed the stale session"); return;
             }
             helper.succeed();

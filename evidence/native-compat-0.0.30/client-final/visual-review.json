@@ -1,0 +1,13 @@
+{
+  "reviewed": true,
+  "reviewer": "Codex root via view_image",
+  "run": "client-r3",
+  "screenshots": 9,
+  "observed": [
+    "Charging and terminal installation HUD visible, both absent with F1, both restored after F1.",
+    "English, Chinese and Japanese settings labels readable with green active state.",
+    "Skill slot dropdowns render one state without the previous probe tooltip residue.",
+    "Japanese presets fit their tabs; English key labels are bounded with ellipses."
+  ],
+  "scope": "Actual screenshots plus 12 functional checks; not an all-resolution layout or pixel-perfect legacy fidelity claim."
+}

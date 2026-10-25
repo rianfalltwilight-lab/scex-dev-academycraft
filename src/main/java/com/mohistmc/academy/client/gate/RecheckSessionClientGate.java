@@ -139,7 +139,7 @@ public final class RecheckSessionClientGate {
                         if (mc.player.tickCount < 20 || mc.screen != null) return;
                         if (role.equals("a")) RecheckClientPersistenceProbe.verify("RECONNECT");
                         log(role, "rejoined UUID=" + mc.player.getUUID() + " local charging=" + KeyInputHandler.isSkillHeld(2)
-                                + " mayfly=" + mc.player.getAbilities().mayfly + " flying=" + mc.player.getAbilities().flying);
+                                + " mayfly=" + mc.player.mayFly() + " flying=" + mc.player.getAbilities().flying);
                         if (KeyInputHandler.isSkillHeld(2)) throw new IllegalStateException("local charging survived reconnect");
                         acted = true;
                     }

@@ -136,7 +136,7 @@ public final class RecheckSkillLifecycleGameTests {
                 else check(AeroPassiveRuntime.toggleOffenseArmour(player, data), "armour setup failed");
                 helper.runAfterDelay(3, () -> {
                     try {
-                        check(flight ? AeroPassiveRuntime.isFlyingActive(player) && player.getAbilities().mayfly
+                        check(flight ? AeroPassiveRuntime.isFlyingActive(player) && player.mayFly()
                                         : AeroPassiveRuntime.isOffenseArmourEngaged(player)
                                         && player.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE) >= .89,
                                 "natural real-player ticks did not engage " + (flight ? "flight" : "armour"));
@@ -146,12 +146,12 @@ public final class RecheckSkillLifecycleGameTests {
                         double resistance = player.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
                         LogUtils.getLogger().info("RECHECK_AERO_LIFECYCLE flight={} {} deaths={} logouts={} dimensions={} alive={} armour={} flying={} mayfly={} kbr={}",
                                 flight, exit, observer.deaths, observer.logouts, observer.dimensions, player.isAlive(),
-                                armour, flying, player.getAbilities().mayfly, resistance);
+                                armour, flying, player.mayFly(), resistance);
                         observer.checkExit(exit);
                         if (exit == Exit.CANCELED_DEATH) check(player.isAlive()
-                                        && (flight ? flying && player.getAbilities().mayfly : armour && resistance >= .89),
+                                        && (flight ? flying && player.mayFly() : armour && resistance >= .89),
                                 "canceled real death revoked alive player's paid " + (flight ? "flight" : "armour"));
-                        else check(!armour && !flying && !player.getAbilities().mayfly
+                        else check(!armour && !flying && !player.mayFly()
                                         && !player.getAbilities().flying && resistance < .01,
                                 "real " + exit + " retained armour/flight grant or modifier");
                         helper.succeed();

@@ -3,6 +3,7 @@ package com.mohistmc.academy.client;
 import com.mohistmc.academy.AcademyCraft;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -38,7 +39,7 @@ public class TerminalInstallProgress {
         }
 
         Minecraft mc = Minecraft.getInstance();
-        if (mc.screen != null) return;
+        if (mc.screen != null || mc.options.hideGui) return;
 
         int screenWidth = mc.getWindow().getGuiScaledWidth();
         int screenHeight = mc.getWindow().getGuiScaledHeight();
@@ -52,7 +53,7 @@ public class TerminalInstallProgress {
         graphics.fill(x, y, x + barWidth, y + barHeight, 0xFF1a1a2e);
         graphics.fill(x, y, x + (int)(barWidth * progress), y + barHeight, 0xFF00bcd4);
 
-        String text = String.format("安装中... %.0f%%", progress * 100);
+        Component text = Component.translatable("hud.academy.terminal.installing", Math.round(progress * 100));
         int textWidth = mc.font.width(text);
         graphics.drawString(mc.font, text, (screenWidth - textWidth) / 2, y - 15, 0xFF00e5ff);
     }

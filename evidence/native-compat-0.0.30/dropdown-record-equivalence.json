@@ -1,0 +1,5 @@
+{
+  "class": "SkillSlotGui$DropdownEntry",
+  "signatures_constants_bytecode_equal": true,
+  "basis": "javap -p -c -s -constants; source line movement changes debug metadata only"
+}

@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -54,7 +55,7 @@ public class SkillSlotGui extends AcademyScreen {
     private int hoveredDropdownItem = -1;
 
     public SkillSlotGui() {
-        super(Component.literal("技能槽"));
+        super(Component.translatable("ac.skill_slot.title"));
     }
 
     @Override
@@ -116,7 +117,7 @@ public class SkillSlotGui extends AcademyScreen {
             if (isHovered && !isActive && dropdownSlot < 0) bgColor = 0xFF4a6a7e;
 
             graphics.fill(tabX, tabY, tabX + TAB_WIDTH, tabY + TAB_HEIGHT, bgColor);
-            String text = "预设 " + (i + 1);
+            Component text = Component.translatable("ac.skill_slot.preset", i + 1);
             int tw = this.font.width(text);
             graphics.drawString(this.font, text, tabX + (TAB_WIDTH - tw) / 2, tabY + 5, AcademyColors.TEXT);
         }
@@ -167,6 +168,10 @@ public class SkillSlotGui extends AcademyScreen {
 
             String keyLabel = i < keys.length ? keys[i].getTranslatedKeyMessage().getString() : "?";
             String display = "§7[" + keyLabel + "]";
+            if (this.font.width(display) > SLOT_SIZE) {
+                display = "§7[" + this.font.plainSubstrByWidth(keyLabel,
+                        SLOT_SIZE - this.font.width("[…]")) + "…]";
+            }
             int kw = this.font.width(display);
             graphics.drawString(this.font, display, slotX + (SLOT_SIZE - kw) / 2, slotY + SLOT_SIZE + 4, AcademyColors.TEXT_SECONDARY);
         }
@@ -196,13 +201,13 @@ public class SkillSlotGui extends AcademyScreen {
 
             if (entry.icon() != null) {
                 RenderUtils.render(16, 16, ix + 2, iy + 1, graphics, entry.icon());
-                String label = entry.displayName();
+                String label = entry.displayName().getString();
                 if (this.font.width(label) > DROPDOWN_WIDTH - 26) {
                     label = this.font.plainSubstrByWidth(label, DROPDOWN_WIDTH - 30) + "…";
                 }
                 graphics.drawString(this.font, label, ix + 22, iy + 5, AcademyColors.TEXT);
             } else {
-                String label = "§c清空";
+                Component label = entry.displayName();
                 int textWidth = this.font.width(label);
                 int textX = ix + (DROPDOWN_WIDTH - DROPDOWN_PADDING * 2 - textWidth) / 2;
                 int textY = iy + (DROPDOWN_ITEM_HEIGHT - 8) / 2;
@@ -223,7 +228,7 @@ public class SkillSlotGui extends AcademyScreen {
 
 
     private void drawHint(GuiGraphics graphics) {
-        String hint = "左键: 选择技能  右键: 清除";
+        Component hint = Component.translatable("ac.skill_slot.hint");
         int tw = this.font.width(hint);
         graphics.drawString(this.font, hint, guiLeft + (GUI_WIDTH - tw) / 2, guiTop + GUI_HEIGHT - 16, AcademyColors.TEXT_SECONDARY);
     }
@@ -241,18 +246,29 @@ public class SkillSlotGui extends AcademyScreen {
             Skill skill = SkillRegistry.getSkill(data.getCurrentAbility(), skillId);
             if (skill != null) {
                 tooltip.add(Component.translatable(skill.getTranslationKey()));
-                tooltip.add(Component.literal("§f等级: " + skill.getLevel() + "  类型: " + (skill.getType() == SkillType.PASSIVE ? "被动" : "主动")));
+                tooltip.add(Component.translatable("ac.skill_slot.level_type", skill.getLevel(),
+                        Component.translatable(skill.getType() == SkillType.PASSIVE ? "ac.skill_slot.passive" : "ac.skill_slot.active"))
+                        .withStyle(ChatFormatting.WHITE));
                 if (skill.getBaseCpCost() > 0) {
-                    tooltip.add(Component.literal("§b计算力: " + (int) skill.getBaseCpCost() + "  §c过载: " + (int) skill.getBaseOverload()));
+                    tooltip.add(Component.translatable("ac.skill_slot.cp", (int) skill.getBaseCpCost()).withStyle(ChatFormatting.AQUA)
+                            .append(Component.literal("  "))
+                            .append(Component.translatable("ac.skill_slot.overload", (int) skill.getBaseOverload()).withStyle(ChatFormatting.RED)));
                 }
                 float prof = data.getProficiency(skillId);
-                tooltip.add(Component.literal("§e熟练度: " + String.format("%.1f%%", prof * 100)));
+                tooltip.add(Component.translatable("ac.skill_slot.proficiency", String.format(java.util.Locale.ROOT, "%.1f", prof * 100))
+                        .withStyle(ChatFormatting.YELLOW));
                 tooltip.add(Component.empty());
-                tooltip.add(Component.literal("§7左键选择 / 右键清除"));
+                tooltip.add(Component.translatable("ac.skill_slot.select_clear").withStyle(ChatFormatting.GRAY));
             }
         } else {
-            tooltip.add(Component.literal("§7空槽位"));
-            tooltip.add(Component.literal("§7左键选择技能"));
+            tooltip.add(Component.translatable("ac.skill_slot.empty").withStyle(ChatFormatting.GRAY));
+            tooltip.add(Component.translatable("ac.skill_slot.select").withStyle(ChatFormatting.GRAY));
+        }
+
+        KeyMapping[] keys = KeyInputHandler.getSkillKeys();
+        if (hoveredSlot < keys.length) {
+            tooltip.add(Component.literal("[").append(keys[hoveredSlot].getTranslatedKeyMessage())
+                    .append("]").withStyle(ChatFormatting.GRAY));
         }
 
         graphics.pose().pushPose();
@@ -275,12 +291,17 @@ public class SkillSlotGui extends AcademyScreen {
         if (skill == null) return;
         List<Component> tooltip = new ArrayList<>();
         tooltip.add(Component.translatable(skill.getTranslationKey()));
-        tooltip.add(Component.literal("§f等级: " + skill.getLevel() + "  类型: " + (skill.getType() == SkillType.PASSIVE ? "被动" : "主动")));
+        tooltip.add(Component.translatable("ac.skill_slot.level_type", skill.getLevel(),
+                Component.translatable(skill.getType() == SkillType.PASSIVE ? "ac.skill_slot.passive" : "ac.skill_slot.active"))
+                .withStyle(ChatFormatting.WHITE));
         if (skill.getBaseCpCost() > 0) {
-            tooltip.add(Component.literal("§b计算力: " + (int) skill.getBaseCpCost() + "  §c过载: " + (int) skill.getBaseOverload()));
+            tooltip.add(Component.translatable("ac.skill_slot.cp", (int) skill.getBaseCpCost()).withStyle(ChatFormatting.AQUA)
+                    .append(Component.literal("  "))
+                    .append(Component.translatable("ac.skill_slot.overload", (int) skill.getBaseOverload()).withStyle(ChatFormatting.RED)));
         }
         float prof = data.getProficiency(entry.skillId());
-        tooltip.add(Component.literal("§e熟练度: " + String.format("%.1f%%", prof * 100)));
+        tooltip.add(Component.translatable("ac.skill_slot.proficiency", String.format(java.util.Locale.ROOT, "%.1f", prof * 100))
+                .withStyle(ChatFormatting.YELLOW));
 
         graphics.pose().pushPose();
         graphics.pose().translate(0, 0, 400);
@@ -343,22 +364,22 @@ public class SkillSlotGui extends AcademyScreen {
         }
 
         dropdownEntries.clear();
-        dropdownEntries.add(new DropdownEntry(null, "清空", null));
+        dropdownEntries.add(new DropdownEntry(null, Component.translatable("ac.skill_slot.clear"), null));
 
         List<String> learned = getLearnedActiveSkills(data);
         for (String skillId : learned) {
             if (usedSkills.contains(skillId)) continue;
             Skill skill = SkillRegistry.getSkill(data.getCurrentAbility(), skillId);
             if (skill == null) continue;
-            String name = Component.translatable(skill.getTranslationKey()).getString();
+            Component name = Component.translatable(skill.getTranslationKey());
             dropdownEntries.add(new DropdownEntry(skillId, name, skill.getIconLocation()));
         }
 
         if (currentSkillId != null && usedSkills.contains(currentSkillId)) {
             Skill skill = SkillRegistry.getSkill(data.getCurrentAbility(), currentSkillId);
             if (skill != null) {
-                String name = Component.translatable(skill.getTranslationKey()).getString();
-                dropdownEntries.add(new DropdownEntry(currentSkillId, name + " (当前)", skill.getIconLocation()));
+                Component name = Component.translatable(skill.getTranslationKey());
+                dropdownEntries.add(new DropdownEntry(currentSkillId, Component.translatable("ac.skill_slot.current", name), skill.getIconLocation()));
             }
         }
 
@@ -422,6 +443,6 @@ public class SkillSlotGui extends AcademyScreen {
         return result;
     }
 
-    private record DropdownEntry(String skillId, String displayName, ResourceLocation icon) {
+    private record DropdownEntry(String skillId, Component displayName, ResourceLocation icon) {
     }
 }

@@ -189,7 +189,7 @@ public class StormWingEffect implements ChargingSkillEffect {
         }
         if(old!=null&&old.grantedMayfly()&&!player.isCreative()&&!player.isSpectator()&&!EXTERNAL_FLIGHT.contains(player.getUUID())){
             player.getAbilities().mayfly=false;
-            if(!old.flying())player.getAbilities().flying=false;
+            if(!player.mayFly())player.getAbilities().flying=false;
             player.onUpdateAbilities();
         }
         player.fallDistance = 0;

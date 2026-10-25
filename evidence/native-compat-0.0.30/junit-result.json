@@ -1,0 +1,10 @@
+{
+  "tests": 342,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "suites": 103,
+  "build_log": "build-r4.log",
+  "java": "21.0.12.1+1",
+  "neoforge": "21.1.248"
+}

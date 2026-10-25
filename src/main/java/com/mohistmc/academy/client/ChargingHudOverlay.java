@@ -56,7 +56,7 @@ public class ChargingHudOverlay {
         if (Minecraft.getInstance().screen != null) return;
 
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null) return;
+        if (mc.player == null || mc.options.hideGui) return;
 
         int screenWidth = mc.getWindow().getGuiScaledWidth();
         int screenHeight = mc.getWindow().getGuiScaledHeight();

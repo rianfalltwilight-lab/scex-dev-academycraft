@@ -11,9 +11,9 @@
 
 ## 当前状态
 
-当前开发版本为 **0.0.29-scex-deep-audit**。本轮对照 AcademyCraft 与 ExtraAcC 固定源码审计网络权限、能力管线、机器与无线能源、持久化、客户端资源和测试真实性，并按台账修复。客户端与服务端使用 **payload-v19-data-v4** 协议，能力存档保持 v4；新增实体需要两端配套更新。构建固定 **NeoForge 21.1.248 / Java 21**，加载范围为 Minecraft 1.21.1 对应的 NeoForge 21.1 系列；其他 21.1 小版本尚未逐一运行验证。完整缺陷、修复和实际验证记录见 [深度自检台账](docs/audit-20261025/DEEP-AUDIT.md)。
+当前开发版本为 **0.0.30-scex-native-compat**。本轮修复飞行权限与其他来源的兼容、共振装甲原版附魔入口、F1 隐藏 HUD 和设置／技能槽界面本地化。客户端与服务端继续使用 **payload-v19-data-v4** 协议，能力存档保持 v4。构建固定 **NeoForge 21.1.248 / Java 21**，加载范围为 Minecraft 1.21.1 对应的 NeoForge 21.1 系列；其他 21.1 小版本尚未逐一运行验证。0.0.29 的历史审计记录见 [深度自检台账](docs/audit-20261025/DEEP-AUDIT.md)。
 
-本仓库包含 ExtraAcC 行为参考的 25 个物品、23 个专属技能和 29 个配方；这些数量是盘点范围，不能当作玩法或视觉完成率。测试结果应以配套交付报告中的精确 JAR SHA-256、证据路径及已验证层级为准。本次源码修改和隔离测试不代表已经公开发布或部署生产。
+本轮变更、验收范围与构建入口见 [0.0.30 原生兼容说明](docs/NATIVE-COMPAT-0.0.30.md)。本仓库包含 ExtraAcC 行为参考的 25 个物品、23 个专属技能和 29 个配方；这些数量是盘点范围，不能当作玩法或视觉完成率。测试结果应以配套交付报告中的精确 JAR SHA-256、证据路径及已验证层级为准。本次源码修改和隔离测试不代表已经公开发布或部署生产。
 
 ExtraAcC 原仓库固定快照没有 LICENSE。本轮按用户指定的原始资源来源，纳入 **43 个逐字节保留的 PNG**：25 个物品外观、7 个额外状态纹理、2 个诱导因子、8 个穿戴护甲层和 1 个水人皮肤；物品模型 JSON 按 1.21.1 格式适配并保留原显示变换，没有逐字导入其 Java 实现。逐文件来源与 SHA-256 见 [资源溯源清单](src/main/resources/assets/academy/extraacc-provenance.json)，权利声明见 [NOTICE](NOTICE)；来源记录不代表获得新的授权或重新许可。液态分身已注册独立实体，采用上游水人皮肤与僵尸式模型动画。
 
@@ -24,10 +24,10 @@ ExtraAcC 原仓库固定快照没有 LICENSE。本轮按用户指定的原始资
 | Minecraft | 1.21.1 |
 | NeoForge | 21.1 系列；本轮构建与实测固定 21.1.248 |
 | Java | 21 |
-| AcademyCraft | 0.0.29-scex-deep-audit |
+| AcademyCraft | 0.0.30-scex-native-compat |
 | JEI / Jade | 可选，不是硬前置 |
 
-使用交付目录中的主 JAR `AcademyCraft-neoforge-1.21.1-0.0.29-scex-deep-audit.jar`，同时放入客户端与服务端的 `mods` 目录；带 `audit-tests` 后缀的独立探针包仅供测试。不要与其他使用 `academy` 模组 ID 的 AcademyCraft JAR 同时安装。准确 SHA-256 以本轮验证回执为准；此次本地审计不代表 GitHub Release 已更新。
+使用交付目录中的主 JAR `AcademyCraft-neoforge-1.21.1-0.0.30-scex-native-compat.jar`，同时放入客户端与服务端的 `mods` 目录；带 `audit-tests` 后缀的独立探针包仅供测试。不要与其他使用 `academy` 模组 ID 的 AcademyCraft JAR 同时安装。准确 SHA-256 以配套 Release 和本轮验证回执为准。
 
 ## 构建与测试
 

@@ -100,12 +100,12 @@ public final class AerohandGameTests {
             helper.fail("flying context could not start"); return;
         }
         AeroPassiveRuntime.playerTick(new PlayerTickEvent.Post(player));
-        if (!player.getAbilities().mayfly) {
+        if (!player.mayFly()) {
             helper.fail("flying passive did not grant survival flight"); return;
         }
         data.setAbilityActive(false);
         AeroPassiveRuntime.playerTick(new PlayerTickEvent.Post(player));
-        if (player.getAbilities().mayfly || player.getAbilities().flying) {
+        if (player.mayFly() || player.getAbilities().flying) {
             helper.fail("flying passive leaked flight after ability deactivation"); return;
         }
         helper.succeed();

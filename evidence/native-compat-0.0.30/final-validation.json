@@ -1,0 +1,132 @@
+{
+  "schema_version": 1,
+  "status": "PASS",
+  "completed_at_utc": "2026-10-25T09:43:23.446774+00:00",
+  "version": "0.0.30-scex-native-compat",
+  "source_tree_sha256": "d93f89bd8e8943e258185f5f2f67192eeb5df102840ff79deac1a8d40ebba54b",
+  "source_files": 1872,
+  "runtime": {
+    "minecraft": "1.21.1",
+    "neoforge": "21.1.248",
+    "java": "21.0.12.1+1",
+    "host": "MONARCH",
+    "heap_mib": 1536,
+    "cpu_workers": 2
+  },
+  "junit": {
+    "tests": 342,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "gametests": {
+    "expected_failures": 0,
+    "forced": false,
+    "passed": true,
+    "host": "MONARCH",
+    "exit_code": 0,
+    "failures": 0,
+    "expected_tests": 443,
+    "expectation_met": true,
+    "tests": 443,
+    "process_exited": true,
+    "namespaces": "academy,academy_charging,academy_audit,academy_followup,academy_projectiles,academy_native_compat",
+    "basis": "Actual NeoForge GameTestServer; release JAR plus separate probe mod"
+  },
+  "new_native_gametests": {
+    "flight": 9,
+    "enchantments": 4
+  },
+  "client": {
+    "host": "MONARCH",
+    "forced": false,
+    "close_reason": null,
+    "passed": true,
+    "saved_after_stop": true,
+    "process_exited": true,
+    "visual_review": "pending",
+    "exit_code": 0
+  },
+  "client_checks": 12,
+  "visual_review": {
+    "reviewed": true,
+    "reviewer": "Codex root via view_image",
+    "run": "client-r3",
+    "screenshots": 9,
+    "observed": [
+      "Charging and terminal installation HUD visible, both absent with F1, both restored after F1.",
+      "English, Chinese and Japanese settings labels readable with green active state.",
+      "Skill slot dropdowns render one state without the previous probe tooltip residue.",
+      "Japanese presets fit their tabs; English key labels are bounded with ellipses."
+    ],
+    "scope": "Actual screenshots plus 12 functional checks; not an all-resolution layout or pixel-perfect legacy fidelity claim."
+  },
+  "artifacts": [
+    {
+      "name": "AcademyCraft-neoforge-1.21.1-0.0.30-scex-native-compat.jar",
+      "bytes": 27830169,
+      "sha256": "22c5a8599879bd8fb3b8fdfd81feab0a1840b844bb9b9bcd1c95d923ce2856f9"
+    },
+    {
+      "name": "AcademyCraft-neoforge-1.21.1-0.0.30-scex-native-compat-sources.zip",
+      "bytes": 27117166,
+      "sha256": "1722f7f5368d58cbf0c76e1343e5850c3704c9879a44e5da5112d93639b346e5"
+    },
+    {
+      "name": "AcademyCraft-neoforge-1.21.1-0.0.30-scex-native-compat-audit-tests.jar",
+      "bytes": 211229,
+      "sha256": "a2f7e8b194dd2a095b4449a61e297f7974a2c59534c56c470104d7b1127136aa"
+    }
+  ],
+  "entry_comparison": {
+    "server_main": {
+      "tested_sha256": "1334df40e43ade7567a38aedc97dcd51c4a31990fe13bd7e44ea1bcddc809c39",
+      "final_sha256": "22c5a8599879bd8fb3b8fdfd81feab0a1840b844bb9b9bcd1c95d923ce2856f9",
+      "changed_entries": [
+        "BUILD-INFO.txt",
+        "META-INF/MANIFEST.MF",
+        "README.md",
+        "com/mohistmc/academy/client/gui/SkillSlotGui$DropdownEntry.class",
+        "com/mohistmc/academy/client/gui/SkillSlotGui.class"
+      ]
+    },
+    "client_main": {
+      "tested_sha256": "25d4ec51bc92aef08ddda1a9f303e5461ae1057cd740d07271b2b9b5469d6064",
+      "final_sha256": "22c5a8599879bd8fb3b8fdfd81feab0a1840b844bb9b9bcd1c95d923ce2856f9",
+      "changed_entries": [
+        "BUILD-INFO.txt",
+        "META-INF/MANIFEST.MF"
+      ]
+    },
+    "server_probe": {
+      "tested_sha256": "64fffaf04a029087bf431e95165152a11347f5c523b79c6ca613f44f952673f2",
+      "final_sha256": "a2f7e8b194dd2a095b4449a61e297f7974a2c59534c56c470104d7b1127136aa",
+      "changed_entries": [
+        "com/mohistmc/academy/regression/NativeCompatibilityClientGate$DrawnText.class",
+        "com/mohistmc/academy/regression/NativeCompatibilityClientGate$TrackingGraphics.class",
+        "com/mohistmc/academy/regression/NativeCompatibilityClientGate.class"
+      ]
+    },
+    "client_probe": {
+      "tested_sha256": "a2f7e8b194dd2a095b4449a61e297f7974a2c59534c56c470104d7b1127136aa",
+      "final_sha256": "a2f7e8b194dd2a095b4449a61e297f7974a2c59534c56c470104d7b1127136aa",
+      "changed_entries": []
+    }
+  },
+  "server_applicability": "All server classes/resources identical; only client SkillSlotGui and metadata differ from gt-r2.",
+  "client_applicability": "Every runtime class/resource identical to client-r3; final main changes only build metadata.",
+  "probe_isolation": true,
+  "source_package": {
+    "ArchivePath": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\build\\distributions\\AcademyCraft-neoforge-1.21.1-0.0.30-scex-native-compat-sources.zip",
+    "ModVersion": "0.0.30-scex-native-compat",
+    "SourceFileCount": 1872,
+    "SourceTreeSHA256": "d93f89bd8e8943e258185f5f2f67192eeb5df102840ff79deac1a8d40ebba54b",
+    "Verification": "PASS: archive bytes reproduce BUILD-INFO source tree hash; no source checkout used"
+  },
+  "limits": [
+    "Only NeoForge 21.1.248 executed, not every permitted 21.1 patch or a full third-party pack.",
+    "Existing 22 historical aliases and 10 optional compatibility cases remain excluded.",
+    "Client input uses the real keyboard handler programmatically; no physical keyboard or survival unlock claim.",
+    "GitHub archival release only; no production deployment."
+  ]
+}

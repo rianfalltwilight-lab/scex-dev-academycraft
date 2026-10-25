@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.mohistmc.academy.config.LegacyAbilityRulesTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-25T09:39:17.818Z" hostname="MONARCH" time="0.009">
+  <properties/>
+  <testcase name="skillDisableAndMultipliersAreParsed()" classname="com.mohistmc.academy.config.LegacyAbilityRulesTest" time="0.004"/>
+  <testcase name="malformedOrOtherSkillEntriesCannotPoisonDefaults()" classname="com.mohistmc.academy.config.LegacyAbilityRulesTest" time="0.001"/>
+  <testcase name="recoveryCurvesMatch107CpDataFormula()" classname="com.mohistmc.academy.config.LegacyAbilityRulesTest" time="0.002"/>
+  <testcase name="defaultsMatch107Config()" classname="com.mohistmc.academy.config.LegacyAbilityRulesTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

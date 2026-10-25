@@ -75,7 +75,10 @@ class AerohandBehaviorSourceContractTest {
         assertTrue(runtime.contains("DamageTypes.DROWN"));
         assertTrue(runtime.contains("PlayerTickEvent.Post"));
         assertTrue(runtime.contains("setAirSupply"));
-        assertTrue(runtime.contains("GRANTED_FLIGHT"));
+        assertTrue(runtime.contains("NeoForgeMod.CREATIVE_FLIGHT"));
+        assertTrue(runtime.contains("addTransientModifier"));
+        assertTrue(runtime.contains("!player.mayFly()"));
+        assertFalse(runtime.contains(".mayfly ="));
         assertTrue(runtime.contains("projectile.discard()"));
         assertTrue(runtime.contains("ServerStoppedEvent"));
     }

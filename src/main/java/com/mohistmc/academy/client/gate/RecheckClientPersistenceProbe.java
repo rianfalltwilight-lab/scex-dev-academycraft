@@ -41,7 +41,7 @@ public final class RecheckClientPersistenceProbe {
                     "client air_blade cooldown missing or increased");
             require(player.getInventory().getItem(0).is(Items.DIAMOND) && player.getInventory().getItem(0).getCount() == 7, "client inventory mismatch");
             require(player.experienceLevel == 13 && player.totalExperience == 257, "client XP mismatch");
-            require(!player.getAbilities().mayfly && !player.getAbilities().flying && !player.isNoGravity(), "client survival flight/gravity leaked");
+            require(!player.mayFly() && !player.getAbilities().flying && !player.isNoGravity(), "client survival flight/gravity leaked");
             for (int slot = 0; slot < KeyInputHandler.getSkillKeys().length; slot++)
                 require(!KeyInputHandler.isSkillHeld(slot), "client held skill leaked at slot=" + slot);
             RecheckSessionState.append("a-evidence.txt", phase + " CLIENT_PERSISTENCE_PASS uuid=" + player.getUUID()

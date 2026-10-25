@@ -43,21 +43,21 @@ public class SettingsAppGui extends AcademyScreen {
     private void buildRows() {
         rows.clear();
         Minecraft mc = Minecraft.getInstance();
-        rows.add(new SettingRow("快捷键设置", "", RowType.HEADER));
-        rows.add(new SettingRow("技能槽界面",
-                KeyInputHandler.OPEN_SKILL_SLOT.getTranslatedKeyMessage().getString(), RowType.INFO));
-        rows.add(new SettingRow("激活/关闭能力",
-                KeyInputHandler.TOGGLE_ABILITY.getTranslatedKeyMessage().getString(), RowType.INFO));
-        rows.add(new SettingRow("切换预设组",
-                KeyInputHandler.SWITCH_PRESET.getTranslatedKeyMessage().getString(), RowType.INFO));
+        rows.add(new SettingRow(Component.translatable("ac.settings.cat.keys"), Component.empty(), RowType.HEADER));
+        rows.add(new SettingRow(Component.translatable("ac.settings.key.open_slots"),
+                KeyInputHandler.OPEN_SKILL_SLOT.getTranslatedKeyMessage(), RowType.INFO));
+        rows.add(new SettingRow(Component.translatable("ac.settings.key.toggle_ability"),
+                KeyInputHandler.TOGGLE_ABILITY.getTranslatedKeyMessage(), RowType.INFO));
+        rows.add(new SettingRow(Component.translatable("ac.settings.key.switch_preset"),
+                KeyInputHandler.SWITCH_PRESET.getTranslatedKeyMessage(), RowType.INFO));
 
         for (int i = 0; i < KeyInputHandler.getSkillKeys().length; i++) {
-            rows.add(new SettingRow("技能槽 " + (i + 1),
-                    KeyInputHandler.getSkillKeys()[i].getTranslatedKeyMessage().getString(), RowType.INFO));
+            rows.add(new SettingRow(Component.translatable("ac.settings.key.slot", i + 1),
+                    KeyInputHandler.getSkillKeys()[i].getTranslatedKeyMessage(), RowType.INFO));
         }
 
-        rows.add(new SettingRow("", "", RowType.SEPARATOR));
-        rows.add(new SettingRow(Component.translatable("ac.settings.cat.generic").getString(), "", RowType.HEADER));
+        rows.add(new SettingRow(Component.empty(), Component.empty(), RowType.SEPARATOR));
+        rows.add(new SettingRow(Component.translatable("ac.settings.cat.generic"), Component.empty(), RowType.HEADER));
         if (mc.hasSingleplayerServer()) {
             rows.add(toggleRow("ac.settings.prop.attackPlayer", ACConfig.Server.pvpEnabled(), SettingKey.PVP));
             boolean destroyBlocks;
@@ -67,43 +67,51 @@ public class SettingsAppGui extends AcademyScreen {
         }
         rows.add(toggleRow("ac.settings.prop.headsOrTails", ACConfig.Client.headsOrTails(), SettingKey.HEADS_OR_TAILS));
 
-        rows.add(new SettingRow("", "", RowType.SEPARATOR));
-        rows.add(new SettingRow(Component.translatable("ac.settings.cat.interface").getString(), "", RowType.HEADER));
+        rows.add(new SettingRow(Component.empty(), Component.empty(), RowType.SEPARATOR));
+        rows.add(new SettingRow(Component.translatable("ac.settings.cat.interface"), Component.empty(), RowType.HEADER));
         rows.add(toggleRow("ac.settings.prop.showHud", ACConfig.Client.showHud(), SettingKey.SHOW_HUD));
         rows.add(toggleRow("ac.settings.prop.showCpBar", ACConfig.Client.showCpBar(), SettingKey.SHOW_CP_BAR));
         rows.add(toggleRow("ac.settings.prop.showChargingHud", ACConfig.Client.showChargingHud(), SettingKey.SHOW_CHARGING_HUD));
         rows.add(toggleRow("ac.settings.prop.showKeyHints", ACConfig.Client.showKeyHints(), SettingKey.SHOW_KEY_HINTS));
         rows.add(toggleRow("ac.settings.prop.autoAvoidJade", ACConfig.Client.autoAvoidJade(), SettingKey.AUTO_AVOID_JADE));
-        rows.add(new SettingRow(Component.translatable("ac.settings.prop.editHud").getString(), ">",
-                RowType.ACTION, SettingKey.EDIT_HUD));
+        rows.add(new SettingRow(Component.translatable("ac.settings.prop.editHud"), Component.literal(">"),
+                RowType.ACTION, SettingKey.EDIT_HUD, false));
 
-        rows.add(new SettingRow("", "", RowType.SEPARATOR));
-        rows.add(new SettingRow(Component.translatable("ac.settings.cat.audio").getString(), "", RowType.HEADER));
+        rows.add(new SettingRow(Component.empty(), Component.empty(), RowType.SEPARATOR));
+        rows.add(new SettingRow(Component.translatable("ac.settings.cat.audio"), Component.empty(), RowType.HEADER));
         rows.add(toggleRow("ac.settings.prop.skillSounds", ACConfig.Client.enableSkillSounds(), SettingKey.SKILL_SOUNDS));
 
-        rows.add(new SettingRow("", "", RowType.SEPARATOR));
-        rows.add(new SettingRow("能力信息", "", RowType.HEADER));
+        rows.add(new SettingRow(Component.empty(), Component.empty(), RowType.SEPARATOR));
+        rows.add(new SettingRow(Component.translatable("ac.settings.cat.ability"), Component.empty(), RowType.HEADER));
 
         if (mc.player != null) {
             PlayerAbilityData data = mc.player.getData(AcademyAttachments.PLAYER_ABILITY);
             if (data.hasAbility()) {
-                String abilityName = Component.translatable("item.academy.factor_" + data.getCurrentAbility().id()).getString();
-                rows.add(new SettingRow("当前能力", abilityName, RowType.INFO));
-                rows.add(new SettingRow("能力等级", "Lv." + data.getPlayerLevel(), RowType.INFO));
-                rows.add(new SettingRow("计算力", String.format("%.0f / %.0f", data.getCurrentCp(), data.getMaxCp()), RowType.INFO));
-                rows.add(new SettingRow("过载值", String.format("%.0f / %.0f", data.getCurrentOverload(), data.getMaxOverload()), RowType.INFO));
-                rows.add(new SettingRow("已学技能", data.getLearnedSkills().size() + " 个", RowType.INFO));
-                rows.add(new SettingRow("能力状态", data.isAbilityActive() ? "已激活" : "未激活", RowType.STATUS));
+                Component abilityName = Component.translatable("item.academy.factor_" + data.getCurrentAbility().id());
+                rows.add(new SettingRow(Component.translatable("ac.settings.ability.current"), abilityName, RowType.INFO));
+                rows.add(new SettingRow(Component.translatable("ac.settings.ability.level"),
+                        Component.translatable("ac.settings.ability.level_value", data.getPlayerLevel()), RowType.INFO));
+                rows.add(new SettingRow(Component.translatable("ac.settings.ability.cp"),
+                        Component.literal(String.format("%.0f / %.0f", data.getCurrentCp(), data.getMaxCp())), RowType.INFO));
+                rows.add(new SettingRow(Component.translatable("ac.settings.ability.overload"),
+                        Component.literal(String.format("%.0f / %.0f", data.getCurrentOverload(), data.getMaxOverload())), RowType.INFO));
+                rows.add(new SettingRow(Component.translatable("ac.settings.ability.skills"),
+                        Component.translatable("ac.settings.ability.skill_count", data.getLearnedSkills().size()), RowType.INFO));
+                boolean active = data.isAbilityActive();
+                rows.add(new SettingRow(Component.translatable("ac.settings.ability.status"),
+                        Component.translatable(active ? "ac.settings.ability.active" : "ac.settings.ability.inactive"),
+                        RowType.STATUS, null, active));
             } else {
-                rows.add(new SettingRow("当前能力", "尚未获得能力", RowType.INFO));
+                rows.add(new SettingRow(Component.translatable("ac.settings.ability.current"),
+                        Component.translatable("ac.settings.ability.none"), RowType.INFO));
             }
         }
     }
 
     private static SettingRow toggleRow(String translationKey, boolean enabled, SettingKey key) {
-        return new SettingRow(Component.translatable(translationKey).getString(),
-                Component.translatable(enabled ? "ac.settings.enabled" : "ac.settings.disabled").getString(),
-                RowType.TOGGLE, key);
+        return new SettingRow(Component.translatable(translationKey),
+                Component.translatable(enabled ? "ac.settings.enabled" : "ac.settings.disabled"),
+                RowType.TOGGLE, key, enabled);
     }
 
     @Override
@@ -124,7 +132,7 @@ public class SettingsAppGui extends AcademyScreen {
         int backY = guiTop + 5;
         hoveredBack = drawBackButton(graphics, backX, backY, mouseX, mouseY);
 
-        String title = Component.translatable("item.academy.app_settings").getString();
+        Component title = Component.translatable("item.academy.app_settings");
         int titleX = backX + 18 + 6;
         graphics.drawString(this.font, title, titleX, guiTop + 9, AcademyColors.TEXT_ACCENT);
 
@@ -163,11 +171,8 @@ public class SettingsAppGui extends AcademyScreen {
             } else {
                 graphics.drawString(this.font, row.label, guiLeft + 10, rowY + 6, AcademyColors.TEXT);
                 int valW = this.font.width(row.value);
-                int valColor = row.type == RowType.STATUS
-                        ? (row.value.contains("已激活") ? AcademyColors.SUCCESS : AcademyColors.ERROR)
-                        : row.type == RowType.TOGGLE
-                        ? (row.value.equals(Component.translatable("ac.settings.enabled").getString())
-                            ? AcademyColors.SUCCESS : AcademyColors.ERROR)
+                int valColor = row.type == RowType.STATUS || row.type == RowType.TOGGLE
+                        ? (row.enabled ? AcademyColors.SUCCESS : AcademyColors.ERROR)
                         : row.type == RowType.ACTION ? AcademyColors.TEXT_ACCENT
                         : AcademyColors.TEXT_SECONDARY;
                 graphics.drawString(this.font, row.value, guiLeft + GUI_WIDTH - valW - 10, rowY + 6, valColor);
@@ -239,9 +244,9 @@ public class SettingsAppGui extends AcademyScreen {
         AUTO_AVOID_JADE, EDIT_HUD, SKILL_SOUNDS
     }
 
-    private record SettingRow(String label, String value, RowType type, SettingKey key) {
-        private SettingRow(String label, String value, RowType type) {
-            this(label, value, type, null);
+    private record SettingRow(Component label, Component value, RowType type, SettingKey key, boolean enabled) {
+        private SettingRow(Component label, Component value, RowType type) {
+            this(label, value, type, null, false);
         }
     }
 }

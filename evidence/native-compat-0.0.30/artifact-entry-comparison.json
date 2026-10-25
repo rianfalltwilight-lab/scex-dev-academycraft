@@ -1,0 +1,35 @@
+{
+  "server_main": {
+    "tested_sha256": "1334df40e43ade7567a38aedc97dcd51c4a31990fe13bd7e44ea1bcddc809c39",
+    "final_sha256": "22c5a8599879bd8fb3b8fdfd81feab0a1840b844bb9b9bcd1c95d923ce2856f9",
+    "changed_entries": [
+      "BUILD-INFO.txt",
+      "META-INF/MANIFEST.MF",
+      "README.md",
+      "com/mohistmc/academy/client/gui/SkillSlotGui$DropdownEntry.class",
+      "com/mohistmc/academy/client/gui/SkillSlotGui.class"
+    ]
+  },
+  "client_main": {
+    "tested_sha256": "25d4ec51bc92aef08ddda1a9f303e5461ae1057cd740d07271b2b9b5469d6064",
+    "final_sha256": "22c5a8599879bd8fb3b8fdfd81feab0a1840b844bb9b9bcd1c95d923ce2856f9",
+    "changed_entries": [
+      "BUILD-INFO.txt",
+      "META-INF/MANIFEST.MF"
+    ]
+  },
+  "server_probe": {
+    "tested_sha256": "64fffaf04a029087bf431e95165152a11347f5c523b79c6ca613f44f952673f2",
+    "final_sha256": "a2f7e8b194dd2a095b4449a61e297f7974a2c59534c56c470104d7b1127136aa",
+    "changed_entries": [
+      "com/mohistmc/academy/regression/NativeCompatibilityClientGate$DrawnText.class",
+      "com/mohistmc/academy/regression/NativeCompatibilityClientGate$TrackingGraphics.class",
+      "com/mohistmc/academy/regression/NativeCompatibilityClientGate.class"
+    ]
+  },
+  "client_probe": {
+    "tested_sha256": "a2f7e8b194dd2a095b4449a61e297f7974a2c59534c56c470104d7b1127136aa",
+    "final_sha256": "a2f7e8b194dd2a095b4449a61e297f7974a2c59534c56c470104d7b1127136aa",
+    "changed_entries": []
+  }
+}

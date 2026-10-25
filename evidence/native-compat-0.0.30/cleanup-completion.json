@@ -1,0 +1,76 @@
+{
+  "ports": [],
+  "temporary_container": "D:/SCEX-Work/01-Mods/Other-Ports/AcademyCraft",
+  "schema_version": 1,
+  "inputs": [
+    {
+      "sha256": "22C5A8599879BD8FB3B8FDFD81FEAB0A1840B844BB9B9BCD1C95D923CE2856F9",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\build\\libs\\AcademyCraft-neoforge-1.21.1-0.0.30-scex-native-compat.jar"
+    },
+    {
+      "sha256": "A2F7E8B194DD2A095B4449A61E297F7974A2C59534C56C470104D7B1127136AA",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\build\\libs\\AcademyCraft-neoforge-1.21.1-0.0.30-scex-native-compat-audit-tests.jar"
+    },
+    {
+      "sha256": "1722F7F5368D58CBF0C76E1343E5850C3704C9879A44E5DA5112D93639B346E5",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\build\\distributions\\AcademyCraft-neoforge-1.21.1-0.0.30-scex-native-compat-sources.zip"
+    }
+  ],
+  "run_id": "academycraft-native-compat-0.0.30-20261025",
+  "pending_checks": [],
+  "basis": "All five executed runs passed and exited. Final 443 GameTests, 12 client checks, 9 screenshot review, exact runtime-entry comparison and source package verification retained outside temporary run; original frozen Vicerach base and shared caches retained.",
+  "run_root": "D:\\SCEX-Work\\01-Mods\\Other-Ports\\AcademyCraft\\0.0.30-20261025",
+  "status": "COMPLETE",
+  "exit_codes": [
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "cleanup_targets": [
+    {
+      "path": "D:\\SCEX-Work\\01-Mods\\Other-Ports\\AcademyCraft\\0.0.30-20261025",
+      "kind": "disposable-test-copy",
+      "created_utc": "2026-10-25T09:14:21.8761088Z"
+    }
+  ],
+  "protected_roots": [
+    "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025",
+    "D:/Minecraft-Projects/upstream-cache",
+    "C:/Users/Win10/.gradle"
+  ],
+  "complete": true,
+  "evidence": [
+    {
+      "sha256": "A0DBBA4F38F99651AF95013ED9A58B8ECB71C6ECF4EC7B536E2D8ACA59FFEA1E",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\native-compat-0.0.30\\final-validation.json"
+    },
+    {
+      "sha256": "68579A3266DA29D7C1EBEE1B2360400ECCDCA7A420290E01A70AFFBF86A0A662",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\native-compat-0.0.30\\artifact-entry-comparison.json"
+    },
+    {
+      "sha256": "AB0E5EC90F1091C1DE3A1A361059A34111664F17BA3BA98141B91317289FD64E",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\native-compat-0.0.30\\source-package-verification.json"
+    },
+    {
+      "sha256": "B7C79BBCD411F6C4F944399A5F41EF5461BCA8C7BD6435002F1928396FAAD64C",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\native-compat-0.0.30\\client-final\\visual-review.json"
+    },
+    {
+      "sha256": "D3EB9AFF82479367C41E07D0C8ADC8137F25A7C98245C60A957A9688F3909C44",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\native-compat-0.0.30\\base-validation.json"
+    }
+  ],
+  "java_baseline": [
+    {
+      "created": "2026-10-25T07:40:50.6413090Z",
+      "pid": 82556
+    },
+    {
+      "created": "2026-10-25T09:03:42.2158750Z",
+      "pid": 90264
+    }
+  ]
+}

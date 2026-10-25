@@ -1,0 +1,12 @@
+[
+  {
+    "sha256": "a2f7e8b194dd2a095b4449a61e297f7974a2c59534c56c470104d7b1127136aa",
+    "bytes": 211229,
+    "name": "AcademyCraft-neoforge-1.21.1-0.0.30-scex-native-compat-audit-tests.jar"
+  },
+  {
+    "sha256": "25d4ec51bc92aef08ddda1a9f303e5461ae1057cd740d07271b2b9b5469d6064",
+    "bytes": 27830042,
+    "name": "AcademyCraft-neoforge-1.21.1-0.0.30-scex-native-compat.jar"
+  }
+]

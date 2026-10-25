@@ -111,8 +111,8 @@ public final class RecheckSessionServerGate {
                     RecheckPersistenceProbe.prepare(a); next(9);
                 }
                 case 9 -> {
-                    check("real-flying-before-disconnect", AeroPassiveRuntime.isFlyingActive(a) && a.getAbilities().mayfly,
-                            "active=" + AeroPassiveRuntime.isFlyingActive(a) + " mayfly=" + a.getAbilities().mayfly + " flying=" + a.getAbilities().flying);
+                    check("real-flying-before-disconnect", AeroPassiveRuntime.isFlyingActive(a) && a.mayFly(),
+                            "active=" + AeroPassiveRuntime.isFlyingActive(a) + " mayfly=" + a.mayFly() + " flying=" + a.getAbilities().flying);
                     next(10);
                 }
                 case 11 -> {
@@ -126,8 +126,8 @@ public final class RecheckSessionServerGate {
                     a.closeContainer(); b.closeContainer(); data(a).setCurrentCp(5000); data(a).clearCooldowns(); data(a).syncTo(a); next(13);
                 }
                 case 13 -> {
-                    require(AeroPassiveRuntime.isFlyingActive(a) && a.getAbilities().mayfly, "real flying must be active before normal server stop");
-                    check("real-flying-before-stop", true, "active=true mayfly=" + a.getAbilities().mayfly + " flying=" + a.getAbilities().flying + " cp=" + data(a).getCurrentCp());
+                    require(AeroPassiveRuntime.isFlyingActive(a) && a.mayFly(), "real flying must be active before normal server stop");
+                    check("real-flying-before-stop", true, "active=true mayfly=" + a.mayFly() + " flying=" + a.getAbilities().flying + " cp=" + data(a).getCurrentCp());
                     RecheckShutdownTransientProbe.armJet(b);
                     finish(server, "server-result.txt");
                 }

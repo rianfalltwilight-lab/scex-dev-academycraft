@@ -120,20 +120,20 @@ public final class RecheckPersistenceProbe {
     }
     private static CompoundTag snapshot(ServerPlayer player) {
         CompoundTag tag = new CompoundTag(); tag.put("attachment", attachment(player));
-        tag.putBoolean("mayfly", player.getAbilities().mayfly); tag.putBoolean("flying", player.getAbilities().flying);
+        tag.putBoolean("mayfly", player.mayFly()); tag.putBoolean("flying", player.getAbilities().flying);
         tag.putBoolean("noGravity", player.isNoGravity()); return tag;
     }
     private static void assertNoTransientSession(ServerPlayer player) {
         ensure(!SkillChargingManager.isCharging(player.getUUID()), "charging session leaked");
         ensure(!AeroPassiveRuntime.isFlyingActive(player) && !AeroPassiveRuntime.isOffenseArmourEngaged(player), "Aero paid session leaked");
         ensure(!TelekinesisPassiveHandler.isHardened(player), "hardening session leaked");
-        ensure(!player.getAbilities().mayfly && !player.getAbilities().flying && !player.isNoGravity(), "survival flight/gravity flags leaked: " + summary(player));
+        ensure(!player.mayFly() && !player.getAbilities().flying && !player.isNoGravity(), "survival flight/gravity flags leaked: " + summary(player));
     }
     private static String summary(ServerPlayer player) {
         PlayerAbilityData d = player.getData(AcademyAttachments.PLAYER_ABILITY);
         return "uuid=" + player.getUUID() + " cp=" + d.getCurrentCp() + " ol=" + d.getCurrentOverload()
                 + " learned=" + d.getLearnedSkills().size() + " cooldown=" + d.getCooldownTicks("air_blade")
-                + " mayfly=" + player.getAbilities().mayfly + " flying=" + player.getAbilities().flying + " noGravity=" + player.isNoGravity();
+                + " mayfly=" + player.mayFly() + " flying=" + player.getAbilities().flying + " noGravity=" + player.isNoGravity();
     }
     private static boolean isTarget(ServerPlayer player) {
         return Boolean.getBoolean("academy.recheckSessionGate") && player.getGameProfile().getName().equals(System.getProperty("academy.recheckPersistencePlayer", "AcademyGateA"));

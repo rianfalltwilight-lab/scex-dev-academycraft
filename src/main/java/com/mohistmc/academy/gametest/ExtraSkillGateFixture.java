@@ -268,7 +268,7 @@ public final class ExtraSkillGateFixture {
         f.paperMin = Math.min(f.paperMin, count(player, Items.PAPER));
         f.cooldownMax = Math.max(f.cooldownMax, data.getCooldownTicks(f.skill));
         f.everSustained |= f.sustained(); f.everCharging |= SkillChargingManager.isCharging(player.getUUID());
-        f.flightGranted |= player.getAbilities().mayfly && player.getAbilities().flying;
+        f.flightGranted |= player.mayFly() && player.getAbilities().flying;
         f.slowApplied |= player.hasEffect(MobEffects.MOVEMENT_SLOWDOWN);
         f.knockbackMax = Math.max(f.knockbackMax, player.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
         f.playerMove = Math.max(f.playerMove, player.position().distanceTo(f.origin));
@@ -314,7 +314,7 @@ public final class ExtraSkillGateFixture {
             case "offense_armour" -> require(f.everSustained && !f.sustained() && f.knockbackMax >= .89
                     && f.targetMin < f.targetStart && f.projectileGone, "armour defense/contact/toggle missing");
             case "flying" -> require(f.everSustained && f.flightGranted && f.playerMove > .3 && !f.sustained()
-                    && !player.getAbilities().mayfly && !player.getAbilities().flying, "survival flight or key-off revocation missing");
+                    && !player.mayFly() && !player.getAbilities().flying, "survival flight or key-off revocation missing");
             case "storm_core" -> require(f.age >= 105 && f.closestCore < 2 && f.targetMin < f.targetPreBurst - 10,
                     "storm attraction/late burst missing");
             case "aero_separator" -> require(f.hpStart-f.hpMin >= 49 && f.airMin <= 4 && f.targetMin < f.targetStart,

@@ -1,0 +1,11 @@
+{
+  "review": "Independent source/API review plus root screenshot review",
+  "resolved_findings": [
+    "Native flight cleanup removes only its own grant and consults current effective permission.",
+    "StormWing also clears flying when a previously present external grant expires.",
+    "Japanese preset label is bounded to 50 pixels using the actual client font.",
+    "Enchantment damage test waits for ordinary login invulnerability to expire.",
+    "Screenshot probe captures a single screen state on a fresh frame."
+  ],
+  "scope": "0.0.30 native interoperability and localization only; no network/storage/machine modernization"
+}

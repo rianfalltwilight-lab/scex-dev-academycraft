@@ -25,6 +25,7 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import com.mohistmc.academy.skill.AcceptedAbilityDamage;
+import net.neoforged.neoforge.common.NeoForgeMod;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
@@ -42,10 +43,10 @@ public final class AeroPassiveRuntime {
     private static final ResourceLocation ARMOUR_KNOCKBACK_RESISTANCE =
             ResourceLocation.fromNamespaceAndPath(AcademyCraft.MODID,
                     "offense_armour_knockback_resistance");
+    private static final ResourceLocation FLIGHT_PERMISSION =
+            ResourceLocation.fromNamespaceAndPath(AcademyCraft.MODID, "aerohand_flying");
     private static final Set<UUID> ACTIVE_ARMOUR = new HashSet<>();
     private static final Set<UUID> ACTIVE_FLYING = new HashSet<>();
-    /** Players for whom this class, rather than another mod/game mode, granted mayfly. */
-    private static final Set<UUID> GRANTED_FLIGHT = new HashSet<>();
 
     private AeroPassiveRuntime() {}
 
@@ -94,7 +95,7 @@ public final class AeroPassiveRuntime {
         stopArmour(player, data, true);
         ACTIVE_FLYING.add(player.getUUID());
         grantFlight(player);
-        player.getAbilities().flying = true;
+        player.getAbilities().flying = player.mayFly();
         player.onUpdateAbilities();
         return true;
     }
@@ -151,7 +152,7 @@ public final class AeroPassiveRuntime {
             float p = data.getProficiency(FLYING);
             if (p >= 0.5F) player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED,
                     39, p >= 0.999F ? 1 : 0, false, false, false));
-        } else if (GRANTED_FLIGHT.contains(player.getUUID())) {
+        } else {
             revokeGrantedFlight(player);
         }
     }
@@ -255,18 +256,18 @@ public final class AeroPassiveRuntime {
     }
 
     private static void grantFlight(ServerPlayer player) {
-        if (player.getAbilities().instabuild || player.isSpectator()
-                || player.getAbilities().mayfly) return;
-        player.getAbilities().mayfly = true;
-        GRANTED_FLIGHT.add(player.getUUID());
-        player.onUpdateAbilities();
+        var attribute = player.getAttribute(NeoForgeMod.CREATIVE_FLIGHT);
+        if (attribute == null || attribute.hasModifier(FLIGHT_PERMISSION)) return;
+        // BooleanAttribute's additive grants compose with other mods and game modes.
+        attribute.addTransientModifier(new AttributeModifier(FLIGHT_PERMISSION,
+                1, AttributeModifier.Operation.ADD_VALUE));
     }
 
     private static void revokeGrantedFlight(ServerPlayer player) {
-        if (!GRANTED_FLIGHT.remove(player.getUUID())) return;
-        if (!player.getAbilities().instabuild && !player.isSpectator()) {
+        var attribute = player.getAttribute(NeoForgeMod.CREATIVE_FLIGHT);
+        if (attribute == null || !attribute.removeModifier(FLIGHT_PERMISSION)) return;
+        if (player.getAbilities().flying && !player.mayFly()) {
             player.getAbilities().flying = false;
-            player.getAbilities().mayfly = false;
             player.onUpdateAbilities();
         }
     }
@@ -290,7 +291,6 @@ public final class AeroPassiveRuntime {
             removeArmourKnockbackResistance(player);
             revokeGrantedFlight(player);
         }
-        else GRANTED_FLIGHT.remove(entity.getUUID());
     }
 
     private static void stopArmour(ServerPlayer player, PlayerAbilityData data, boolean cooldown) {
@@ -312,6 +312,5 @@ public final class AeroPassiveRuntime {
     @SubscribeEvent public static void stopped(ServerStoppedEvent event) {
         ACTIVE_ARMOUR.clear();
         ACTIVE_FLYING.clear();
-        GRANTED_FLIGHT.clear();
     }
 }

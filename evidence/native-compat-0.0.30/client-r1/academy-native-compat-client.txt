@@ -1,0 +1,13 @@
+status=PASS
+PASS native flight server -> real client phase=0: own=true, external=false, mayFly=true, flying=true, vanillaMayfly=false; actual Aero toggle grant
+PASS native flight server -> real client phase=1: own=false, external=true, mayFly=true, flying=true, vanillaMayfly=false; own grant revoked, external grant retained
+PASS native flight server -> real client phase=2: own=false, external=false, mayFly=false, flying=false, vanillaMayfly=false; last external grant removed, native tick revoked flying
+PASS HUD visible positive control: charging fills=6, installation fills=2; actual production handlers, active state retained
+PASS HUD F1 hidden: charging fills=0, installation fills=0; actual production handlers, active state retained
+PASS HUD F1 restored: charging fills=6, installation fills=2; actual production handlers, active state retained
+PASS en_us settings actual render: translated header/no-ability/active/inactive; boolean on/off state draws green/red
+PASS en_us skill slots actual render/click: title, preset, hint, populated tooltip and clear entry translated; actual-font preset widths <= 50px
+PASS zh_cn settings actual render: translated header/no-ability/active/inactive; boolean on/off state draws green/red
+PASS zh_cn skill slots actual render/click: title, preset, hint, populated tooltip and clear entry translated; actual-font preset widths <= 50px
+PASS ja_jp settings actual render: translated header/no-ability/active/inactive; boolean on/off state draws green/red
+PASS ja_jp skill slots actual render/click: title, preset, hint, populated tooltip and clear entry translated; actual-font preset widths <= 50px

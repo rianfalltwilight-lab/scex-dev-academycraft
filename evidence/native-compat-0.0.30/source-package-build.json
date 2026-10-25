@@ -1,0 +1,7 @@
+{
+  "ArchivePath": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\build\\distributions\\AcademyCraft-neoforge-1.21.1-0.0.30-scex-native-compat-sources.zip",
+  "ModVersion": "0.0.30-scex-native-compat",
+  "SourceFileCount": 1872,
+  "SourceTreeSHA256": "d93f89bd8e8943e258185f5f2f67192eeb5df102840ff79deac1a8d40ebba54b",
+  "Verification": "PASS: archive bytes reproduce BUILD-INFO source tree hash; no source checkout used"
+}

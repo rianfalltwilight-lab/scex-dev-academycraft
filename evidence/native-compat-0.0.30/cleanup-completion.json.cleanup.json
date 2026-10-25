@@ -1,0 +1,24 @@
+{
+  "removed": [
+    "D:\\SCEX-Work\\01-Mods\\Other-Ports\\AcademyCraft\\0.0.30-20261025"
+  ],
+  "schema_version": 1,
+  "logical_bytes": 1573612200,
+  "receipt_sha256": "8D30D7EC1AE3D11418BD4E3D9665DE4D6267B75D6218348B2905E94DE27112DE",
+  "targets": [
+    {
+      "path": "D:\\SCEX-Work\\01-Mods\\Other-Ports\\AcademyCraft\\0.0.30-20261025",
+      "files": 12441,
+      "logical_bytes": 1573612200
+    }
+  ],
+  "checked_at": "2026-10-25T09:44:50.9617630Z",
+  "free_before": {
+    "D:\\": 50501349376
+  },
+  "status": "CLEANED",
+  "free_after": {
+    "D:\\": 52096090112
+  },
+  "finished_at": "2026-10-25T09:44:56.8181552Z"
+}

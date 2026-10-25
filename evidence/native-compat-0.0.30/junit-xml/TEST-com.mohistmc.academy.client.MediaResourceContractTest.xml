@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.mohistmc.academy.client.MediaResourceContractTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-25T09:39:15.730Z" hostname="MONARCH" time="0.054">
+  <properties/>
+  <testcase name="legacyExternalMediaWorkspaceStreamingCoversAndEditableMetadataAreRestored()" classname="com.mohistmc.academy.client.MediaResourceContractTest" time="0.001"/>
+  <testcase name="allLegacyBuiltinTracksHaveIndependentStreamResources()" classname="com.mohistmc.academy.client.MediaResourceContractTest" time="0.05"/>
+  <testcase name="legacyTransportVolumeAndAuxHudAreImplementedWithoutGlobalAudioPause()" classname="com.mohistmc.academy.client.MediaResourceContractTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.mohistmc.academy.network.PayloadRateLimiterTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-25T09:39:17.951Z" hostname="MONARCH" time="0.022">
+  <properties/>
+  <testcase name="boundsFloodAndReopensAtWindowBoundary()" classname="com.mohistmc.academy.network.PayloadRateLimiterTest" time="0.017"/>
+  <testcase name="validFirstPressIsImmediateAndSeparateFromFeedbackBudget()" classname="com.mohistmc.academy.network.PayloadRateLimiterTest" time="0.0"/>
+  <testcase name="boundsEntryAndNegativeFeedbackIndependentlyThenRecovers()" classname="com.mohistmc.academy.network.PayloadRateLimiterTest" time="0.003"/>
+  <testcase name="rejectsInvalidPolicyInsteadOfFailingOpen()" classname="com.mohistmc.academy.network.PayloadRateLimiterTest" time="0.001"/>
+  <testcase name="isolatesPlayersAndChannelsAndHandlesClockReset()" classname="com.mohistmc.academy.network.PayloadRateLimiterTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.mohistmc.academy.client.gui.LegacyMachineScreenLayoutContractTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-25T09:39:17.656Z" hostname="MONARCH" time="0.021">
+  <properties/>
+  <testcase name="officialMachineLayersDoNotReceiveVanillaContainerCaptions()" classname="com.mohistmc.academy.client.gui.LegacyMachineScreenLayoutContractTest" time="0.001"/>
+  <testcase name="wirelessNodeListPagesAndPasswordsAreNotTruncatedOrLeaked()" classname="com.mohistmc.academy.client.gui.LegacyMachineScreenLayoutContractTest" time="0.001"/>
+  <testcase name="imagFusorUsesTheOfficial107ProgressLayerAndXmlCoordinates()" classname="com.mohistmc.academy.client.gui.LegacyMachineScreenLayoutContractTest" time="0.001"/>
+  <testcase name="solarUsesTheOfficialWindbaseLayerRatherThanPhaseGeneratorArt()" classname="com.mohistmc.academy.client.gui.LegacyMachineScreenLayoutContractTest" time="0.002"/>
+  <testcase name="matrixControlsLiveInASeparateSynchronizedPanelWithoutABlankWirelessPage()" classname="com.mohistmc.academy.client.gui.LegacyMachineScreenLayoutContractTest" time="0.002"/>
+  <testcase name="nodeNamesRefreshFromThePublicMirrorWithoutReplacingUnsubmittedDrafts()" classname="com.mohistmc.academy.client.gui.LegacyMachineScreenLayoutContractTest" time="0.004"/>
+  <testcase name="regularMachineOriginReservesTheLegacySideInformationPanel()" classname="com.mohistmc.academy.client.gui.LegacyMachineScreenLayoutContractTest" time="0.001"/>
+  <testcase name="machineStatusPanelsUseAuthoritativeMenuData()" classname="com.mohistmc.academy.client.gui.LegacyMachineScreenLayoutContractTest" time="0.002"/>
+  <testcase name="developerScreensHaveInteractiveCompactPagesAndExternalFullCanvasSidebars()" classname="com.mohistmc.academy.client.gui.LegacyMachineScreenLayoutContractTest" time="0.001"/>
+  <testcase name="sidebarHighlightsTheVisiblePageRatherThanTheConstructorDefault()" classname="com.mohistmc.academy.client.gui.LegacyMachineScreenLayoutContractTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

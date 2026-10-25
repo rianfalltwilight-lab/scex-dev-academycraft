@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.mohistmc.academy.skill.ElectromasterRulesTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-25T09:39:18.303Z" hostname="MONARCH" time="0.005">
+  <properties/>
+  <testcase name="legacyMetalConfigurationNamesMapToModernRegistryIds()" classname="com.mohistmc.academy.skill.ElectromasterRulesTest" time="0.002"/>
+  <testcase name="mineDetectKeepsLegacyRangeCapAndAdvancedColorIndices()" classname="com.mohistmc.academy.skill.ElectromasterRulesTest" time="0.001"/>
+  <testcase name="rejectedEnergyReceiveIsNotEffective()" classname="com.mohistmc.academy.skill.ElectromasterRulesTest" time="0.0"/>
+  <testcase name="hostileChargingCommitIsBoundedBySimulation()" classname="com.mohistmc.academy.skill.ElectromasterRulesTest" time="0.001"/>
+  <testcase name="bodyIntensifyOnlyConsumesThroughLegacyFortyTickWindow()" classname="com.mohistmc.academy.skill.ElectromasterRulesTest" time="0.0"/>
+  <testcase name="thunderClapFadesDamageAndWalkSpeedLikeTheLegacyContexts()" classname="com.mohistmc.academy.skill.ElectromasterRulesTest" time="0.0"/>
+  <testcase name="thunderClapKeepsExactLegacyChargeCurve()" classname="com.mohistmc.academy.skill.ElectromasterRulesTest" time="0.001"/>
+  <testcase name="thunderBoltAoeIsTheLegacyEightBlockSphere()" classname="com.mohistmc.academy.skill.ElectromasterRulesTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
