@@ -1,0 +1,121 @@
+{
+  "status": "PASS",
+  "reviewer": "player_sync31 child agent",
+  "reviewed_at": "2026-10-25T20:31:24.787031+09:00",
+  "source_run": "Root-executed client-r2; corrected screenshots now stored in client-final.",
+  "method": "Each of the 12 PNGs was opened individually with view_image detail=original and visually inspected. Hashes identify the exact inspected files.",
+  "scope": "English and Chinese, effective GUI scales 2 and 3, Settings/Skill slots/Metal former. Japanese six screenshots are reviewed separately by root.",
+  "limitations": "Visual review of these captured states; runtime interaction and narration assertions belong to the root-executed client gate, not to this image review.",
+  "reviewed_count": 12,
+  "blocking_findings": [],
+  "screenshots": [
+    {
+      "path": "D:/Minecraft-Projects/academycraft-deep-audit-0.0.29-20261025/evidence/automation-ui-0.0.32/client-final/screenshots/automation-ui-en_us-scale2-settings.png",
+      "sha256": "caa8a1a21e6274d4806587e08a07e70fd3cc796f19e186bb7186f36f14d0af60",
+      "status": "PASS",
+      "language": "en_us",
+      "effective_gui_scale": 2,
+      "page": "settings",
+      "observation": "Settings title, back arrow, labels and Enabled/Disabled values are legible and separated. Show HUD has a complete white focus border inside the scroll viewport. The next bottom row is deliberately clipped by the viewport; the focused row is fully visible. Scale 2 presentation remains readable within the 1280x960 frame."
+    },
+    {
+      "path": "D:/Minecraft-Projects/academycraft-deep-audit-0.0.29-20261025/evidence/automation-ui-0.0.32/client-final/screenshots/automation-ui-en_us-scale2-slots.png",
+      "sha256": "1b5fbc1031c2610cddec945a52cc5409d4fd088ed91930668768137225f01be6",
+      "status": "PASS",
+      "language": "en_us",
+      "effective_gui_scale": 2,
+      "page": "slots",
+      "observation": "Preset 2 is highlighted. Clear, Arc Generation and Railgun are legible with a visible white focus border on Railgun. The skill tooltip overlaps the popup right edge but does not obscure option labels; its text remains inside the screen. Long key-binding labels retain their intended ellipsis. Scale 2 presentation remains readable within the 1280x960 frame."
+    },
+    {
+      "path": "D:/Minecraft-Projects/academycraft-deep-audit-0.0.29-20261025/evidence/automation-ui-0.0.32/client-final/screenshots/automation-ui-en_us-scale2-metal.png",
+      "sha256": "c6b503cfa844184cacdb3aee13b09634244f2e7c585e758ded584559d1df4fe4",
+      "status": "PASS",
+      "language": "en_us",
+      "effective_gui_scale": 2,
+      "page": "metal",
+      "observation": "Original machine textures and inventory slots remain aligned. The previous-mode arrow focus outline is visible. Energy and Mode labels are separated from 0 IF and Incising with visible spacing; all information-card text remains inside the card. Scale 2 presentation remains readable within the 1280x960 frame."
+    },
+    {
+      "path": "D:/Minecraft-Projects/academycraft-deep-audit-0.0.29-20261025/evidence/automation-ui-0.0.32/client-final/screenshots/automation-ui-en_us-scale3-settings.png",
+      "sha256": "12cbe4ff758c9d83525d4c7e2210b74be803ab2ccbbd97ab22371aff0e5f74cc",
+      "status": "PASS",
+      "language": "en_us",
+      "effective_gui_scale": 3,
+      "page": "settings",
+      "observation": "Settings title, back arrow, labels and Enabled/Disabled values are legible and separated. Show HUD has a complete white focus border inside the scroll viewport. The next bottom row is deliberately clipped by the viewport; the focused row is fully visible. Scale 3 presentation stays fully within the 1280x960 frame."
+    },
+    {
+      "path": "D:/Minecraft-Projects/academycraft-deep-audit-0.0.29-20261025/evidence/automation-ui-0.0.32/client-final/screenshots/automation-ui-en_us-scale3-slots.png",
+      "sha256": "23f05ec76f039bcae0d34c07101c83cd03dc1243c0e00dfac55351e57e2d16dc",
+      "status": "PASS",
+      "language": "en_us",
+      "effective_gui_scale": 3,
+      "page": "slots",
+      "observation": "Preset 2 is highlighted. Clear, Arc Generation and Railgun are legible with a visible white focus border on Railgun. The skill tooltip overlaps the popup right edge but does not obscure option labels; its text remains inside the screen. Long key-binding labels retain their intended ellipsis. Scale 3 presentation stays fully within the 1280x960 frame."
+    },
+    {
+      "path": "D:/Minecraft-Projects/academycraft-deep-audit-0.0.29-20261025/evidence/automation-ui-0.0.32/client-final/screenshots/automation-ui-en_us-scale3-metal.png",
+      "sha256": "56e9f3b1fdb2293a5aad2187bdd198bd2de741010470513e09dcdca25d843fc4",
+      "status": "PASS",
+      "language": "en_us",
+      "effective_gui_scale": 3,
+      "page": "metal",
+      "observation": "Original machine textures and inventory slots remain aligned. The previous-mode arrow focus outline is visible. Energy and Mode labels are separated from 0 IF and Incising with visible spacing; all information-card text remains inside the card. Scale 3 presentation stays fully within the 1280x960 frame."
+    },
+    {
+      "path": "D:/Minecraft-Projects/academycraft-deep-audit-0.0.29-20261025/evidence/automation-ui-0.0.32/client-final/screenshots/automation-ui-zh_cn-scale2-settings.png",
+      "sha256": "9577b6af5cebfbd71e00853451b54d4c3023411fb3a46fde51782a88970b179c",
+      "status": "PASS",
+      "language": "zh_cn",
+      "effective_gui_scale": 2,
+      "page": "settings",
+      "observation": "Chinese settings title, labels and status values display correctly without replacement glyphs or overlap. The Show HUD row has a complete white focus border. Bottom-edge clipping affects the next unfocused row only and matches the scroll viewport. Scale 2 presentation remains readable within the 1280x960 frame."
+    },
+    {
+      "path": "D:/Minecraft-Projects/academycraft-deep-audit-0.0.29-20261025/evidence/automation-ui-0.0.32/client-final/screenshots/automation-ui-zh_cn-scale2-slots.png",
+      "sha256": "22d36cee87c8d244b0c2709298f1f490ecd05733218b05b57ca2ab4d5605d3c1",
+      "status": "PASS",
+      "language": "zh_cn",
+      "effective_gui_scale": 2,
+      "page": "slots",
+      "observation": "Preset 2, Clear, Arc Generation and Railgun are localized in Chinese. The focused Railgun option, icon and white outline remain visible. Chinese skill tooltip and mouse instructions are legible; the popup intentionally covers the underlying slot/key area. Scale 2 presentation remains readable within the 1280x960 frame."
+    },
+    {
+      "path": "D:/Minecraft-Projects/academycraft-deep-audit-0.0.29-20261025/evidence/automation-ui-0.0.32/client-final/screenshots/automation-ui-zh_cn-scale2-metal.png",
+      "sha256": "16ad5ad824edfc4ebaac5c74b9af12b64cd7ac8dfcea809c60aca3cd0d3c8191",
+      "status": "PASS",
+      "language": "zh_cn",
+      "effective_gui_scale": 2,
+      "page": "metal",
+      "observation": "Original machine textures and inventory slots remain aligned, with the previous-mode arrow focus outline visible. Chinese Energy/Mode labels and Cutting value are legible; labels and 0 IF/value column have clear spacing and no overlap. Scale 2 presentation remains readable within the 1280x960 frame."
+    },
+    {
+      "path": "D:/Minecraft-Projects/academycraft-deep-audit-0.0.29-20261025/evidence/automation-ui-0.0.32/client-final/screenshots/automation-ui-zh_cn-scale3-settings.png",
+      "sha256": "f43de40c1664e92fa9f368279caddb30cfd235113b095534aad694028080b6db",
+      "status": "PASS",
+      "language": "zh_cn",
+      "effective_gui_scale": 3,
+      "page": "settings",
+      "observation": "Chinese settings title, labels and status values display correctly without replacement glyphs or overlap. The Show HUD row has a complete white focus border. Bottom-edge clipping affects the next unfocused row only and matches the scroll viewport. Scale 3 presentation stays fully within the 1280x960 frame."
+    },
+    {
+      "path": "D:/Minecraft-Projects/academycraft-deep-audit-0.0.29-20261025/evidence/automation-ui-0.0.32/client-final/screenshots/automation-ui-zh_cn-scale3-slots.png",
+      "sha256": "6cc5557f150e0fd134acb9af84e8aa4d109feff21fd3738c8b9e160c39e76588",
+      "status": "PASS",
+      "language": "zh_cn",
+      "effective_gui_scale": 3,
+      "page": "slots",
+      "observation": "Preset 2, Clear, Arc Generation and Railgun are localized in Chinese. The focused Railgun option, icon and white outline remain visible. Chinese skill tooltip and mouse instructions are legible; the popup intentionally covers the underlying slot/key area. Scale 3 presentation stays fully within the 1280x960 frame."
+    },
+    {
+      "path": "D:/Minecraft-Projects/academycraft-deep-audit-0.0.29-20261025/evidence/automation-ui-0.0.32/client-final/screenshots/automation-ui-zh_cn-scale3-metal.png",
+      "sha256": "fe0fef1a771bbf779b476868e925aea882c869d49321bbd84b9bdea788a9cf39",
+      "status": "PASS",
+      "language": "zh_cn",
+      "effective_gui_scale": 3,
+      "page": "metal",
+      "observation": "Original machine textures and inventory slots remain aligned, with the previous-mode arrow focus outline visible. Chinese Energy/Mode labels and Cutting value are legible; labels and 0 IF/value column have clear spacing and no overlap. Scale 3 presentation stays fully within the 1280x960 frame."
+    }
+  ]
+}

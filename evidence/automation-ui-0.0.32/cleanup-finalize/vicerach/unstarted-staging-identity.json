@@ -1,0 +1,103 @@
+{
+  "test_java_started": false,
+  "status": "NOT_STARTED_RESOURCE_GUARD",
+  "final_runtime_host": "MONARCH",
+  "files": [
+    {
+      "sha256": "5D7C2E707D9F8F545299258D73A6C8EA46DB4EB7EA6C11CC1DDCA53EBA7BC985",
+      "bytes": 1883,
+      "relative_path": "dispatch-client.ps1"
+    },
+    {
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "bytes": 0,
+      "relative_path": "gt-r1-runner.log"
+    },
+    {
+      "sha256": "AE58EA02B3D76CC75240DDE57F50AC7A04B8329C0B08857506EF76C55984B1EB",
+      "bytes": 1524,
+      "relative_path": "preflight.json"
+    },
+    {
+      "sha256": "46702193083FEB225C2ADD06AB430DB5BACB600CB3D2264396B890F4EE036106",
+      "bytes": 356,
+      "relative_path": "prelaunch-block.json"
+    },
+    {
+      "sha256": "4FAA5CDEE5C208060D8FDCFED7416FE10D6315B4641B2100A2FE23EA31740183",
+      "bytes": 8085,
+      "relative_path": "run-audit-gametests-vicerach.ps1"
+    },
+    {
+      "sha256": "B2B3A1A8BE2363485275C27800E39263C81DCA104443698588B249A0EF07F9EA",
+      "bytes": 7063,
+      "relative_path": "run-deep-audit-client-vicerach.ps1"
+    },
+    {
+      "sha256": "FBBCA567E8F1A3676730EC9884F7A487C36999D401702A55D4AE21E549903571",
+      "bytes": 399,
+      "relative_path": "runs\\gt-r1\\artifacts.json"
+    },
+    {
+      "sha256": "D6E12E0DB5A9C6FC6079E2E1CBA5C6360A8A87613523C3E6B832E49675D0A7EE",
+      "bytes": 13013,
+      "relative_path": "runs\\gt-r1\\derived-launch.json"
+    },
+    {
+      "sha256": "94169D86BECDFCCBB25AB7800C7FFEC69ABA470FBC1A7E4604E36833AB2EEB8F",
+      "bytes": 9,
+      "relative_path": "runs\\gt-r1\\eula.txt"
+    },
+    {
+      "sha256": "B83B38EEAFDCB3FECAE4CE4740A3EB38E69581A6E4C525E7CE8B794808267E81",
+      "bytes": 11805,
+      "relative_path": "runs\\gt-r1\\server.classpath"
+    },
+    {
+      "sha256": "954FF74BFC077A1C9279480FFFEE8EC5741B4E617B1119AFB0259C8604BFA340",
+      "bytes": 215,
+      "relative_path": "runs\\gt-r1\\server.programargs"
+    },
+    {
+      "sha256": "5AD24E0A1CB593560E510D5CE8460B357999A3D7E30F7045F1BA3CEE0FB999B7",
+      "bytes": 52,
+      "relative_path": "runs\\gt-r1\\server.properties"
+    },
+    {
+      "sha256": "376B7D2AF65AB2EFDD8A504A1D2250DE53F25F3EC89DA5D17DA9E9E436EA8102",
+      "bytes": 1820,
+      "relative_path": "runs\\gt-r1\\server.vmargs"
+    },
+    {
+      "sha256": "D5569CB68E50F5805E1A0E757AB8B1FFC02957BFBCBE9190AB4E0A957FF3C499",
+      "bytes": 310697,
+      "relative_path": "runs\\gt-r1\\mods\\AcademyCraft-neoforge-1.21.1-0.0.32-scex-automation-ui-audit-tests.jar"
+    },
+    {
+      "sha256": "8DA8ADF4CC4077776698443C7B254BF59666F28061D95C2C8F9550CB1481FE42",
+      "bytes": 27861227,
+      "relative_path": "runs\\gt-r1\\mods\\AcademyCraft-neoforge-1.21.1-0.0.32-scex-automation-ui.jar"
+    },
+    {
+      "sha256": "FBBCA567E8F1A3676730EC9884F7A487C36999D401702A55D4AE21E549903571",
+      "bytes": 399,
+      "relative_path": "runs\\gt-r1\\mods\\tested-r1-artifacts.json"
+    },
+    {
+      "sha256": "FBBCA567E8F1A3676730EC9884F7A487C36999D401702A55D4AE21E549903571",
+      "bytes": 399,
+      "relative_path": "runs\\client-r1\\artifacts.json"
+    },
+    {
+      "sha256": "D5569CB68E50F5805E1A0E757AB8B1FFC02957BFBCBE9190AB4E0A957FF3C499",
+      "bytes": 310697,
+      "relative_path": "runs\\client-r1\\mods\\AcademyCraft-neoforge-1.21.1-0.0.32-scex-automation-ui-audit-tests.jar"
+    },
+    {
+      "sha256": "8DA8ADF4CC4077776698443C7B254BF59666F28061D95C2C8F9550CB1481FE42",
+      "bytes": 27861227,
+      "relative_path": "runs\\client-r1\\mods\\AcademyCraft-neoforge-1.21.1-0.0.32-scex-automation-ui.jar"
+    }
+  ],
+  "runtime_exit_code": null
+}

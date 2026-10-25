@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.mohistmc.academy.skill.ChargingSettlementTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-25T11:23:05.933Z" hostname="MONARCH" time="0.011">
+  <properties/>
+  <testcase name="successfulReleaseIsTheOnlyRewardingOutcome()" classname="com.mohistmc.academy.skill.ChargingSettlementTest" time="0.003"/>
+  <testcase name="insufficientChargeOrFailedReleaseNeverRewards()" classname="com.mohistmc.academy.skill.ChargingSettlementTest" time="0.001"/>
+  <testcase name="resourceAbortNeverAttemptsOrRewards()" classname="com.mohistmc.academy.skill.ChargingSettlementTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

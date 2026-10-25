@@ -1,0 +1,21 @@
+{
+  "created_utc": "2026-10-25T10:47:18.5129554Z",
+  "processes_referencing_run": [],
+  "java_baseline": [
+    {
+      "created": "2026-10-22T01:37:32.9106130Z",
+      "pid": 45576
+    },
+    {
+      "created": "2026-10-24T15:11:54.9303780Z",
+      "pid": 37876
+    },
+    {
+      "created": "2026-10-25T07:36:39.0961470Z",
+      "pid": 38776
+    }
+  ],
+  "run_root": "D:\\Minecraft-Validation\\runs\\academy-automation32-20261025",
+  "host": "VICERACH",
+  "inspected_utc": "2026-10-25T11:37:00.4864843Z"
+}

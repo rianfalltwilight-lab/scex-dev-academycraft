@@ -603,5 +603,16 @@
   "ac.skill_slot.select_clear": "左键选择 / 右键清除",
   "ac.skill_slot.empty": "空槽位",
   "ac.skill_slot.select": "左键选择技能",
-  "hud.academy.terminal.installing": "安装中… %s%%"
+  "hud.academy.terminal.installing": "安装中… %s%%",
+  "ac.ui.setting_state": "%s：%s",
+  "ac.ui.preset_selected": "%s，已选择",
+  "ac.ui.skill_slot": "技能槽 %s：%s。按键：%s。确认后可选择或清空。",
+  "ac.ui.mode_previous": "上一个模式。当前模式：%s",
+  "ac.ui.mode_next": "下一个模式。当前模式：%s",
+  "ac.ui.info.energy": "能量",
+  "ac.ui.info.buffer": "缓存",
+  "ac.ui.info.liquid": "液体",
+  "ac.ui.info.capacity": "容量",
+  "ac.ui.info.information": "信息",
+  "ac.ui.info.mode": "模式"
 }

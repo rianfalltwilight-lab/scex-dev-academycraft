@@ -6,11 +6,14 @@ import com.mohistmc.academy.energy.api.block.IWirelessGenerator;
 import com.mohistmc.academy.world.AcademyBlockEntities;
 import com.mohistmc.academy.world.block.WindGenBase;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.items.IItemHandler;
+import java.util.function.BooleanSupplier;
 
 public class WindGenBaseBlockEntity extends AcademyContainerBlockEntity
         implements IFEnergyStorage, IWirelessGenerator {
@@ -22,6 +25,17 @@ public class WindGenBaseBlockEntity extends AcademyContainerBlockEntity
     private static final double MAX_GENERATION_RATE = 15.0;
     private static final int MAX_STORAGE = 20000;
     private float storedEnergy = 0.0f;
+    private final IItemHandler inputItems = MachineAutomationItems.chargingSlot(this, Direction.UP, () -> true);
+    private final IItemHandler outputItems = MachineAutomationItems.chargingSlot(this, Direction.DOWN, () -> true);
+    private final IItemHandler internalItems = MachineAutomationItems.chargingSlot(this, null, () -> true);
+
+    public IItemHandler getHandlerForSide(Direction side) {
+        return side == null ? internalItems : side == Direction.DOWN ? outputItems : inputItems;
+    }
+
+    public IItemHandler getProxyHandler(Direction side, BooleanSupplier validProxy) {
+        return MachineAutomationItems.chargingSlot(this, side, validProxy);
+    }
 
     public WindGenBaseBlockEntity(BlockPos p_155229_, BlockState p_155230_) {
         super(AcademyBlockEntities.WINDGEN_BASE.get(), p_155229_, p_155230_);

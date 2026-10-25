@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.mohistmc.academy.skill.AcademyDamageBoundaryContractTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-10-25T11:23:05.471Z" hostname="MONARCH" time="0.435">
+  <properties/>
+  <testcase name="legacyPvpOptionIsPublicDefaultTrueAndConsumed()" classname="com.mohistmc.academy.skill.AcademyDamageBoundaryContractTest" time="0.001"/>
+  <testcase name="academyDamageCannotBypassThePvpBoundary()" classname="com.mohistmc.academy.skill.AcademyDamageBoundaryContractTest" time="0.433"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

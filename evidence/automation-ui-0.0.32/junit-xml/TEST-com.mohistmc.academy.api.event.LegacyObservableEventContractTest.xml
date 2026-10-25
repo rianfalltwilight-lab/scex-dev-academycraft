@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.mohistmc.academy.api.event.LegacyObservableEventContractTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-25T11:23:01.785Z" hostname="MONARCH" time="0.008">
+  <properties/>
+  <testcase name="terminalEventsOnlyFollowSuccessfulStateChanges()" classname="com.mohistmc.academy.api.event.LegacyObservableEventContractTest" time="0.002"/>
+  <testcase name="cancellableTopologyIntentsAreObservedBeforeMutation()" classname="com.mohistmc.academy.api.event.LegacyObservableEventContractTest" time="0.002"/>
+  <testcase name="publicEventsRetainLegacyFieldsAndModernTransitionContext()" classname="com.mohistmc.academy.api.event.LegacyObservableEventContractTest" time="0.002"/>
+  <testcase name="matterHarvestCancellationPrecedesWorldAndInventoryCommit()" classname="com.mohistmc.academy.api.event.LegacyObservableEventContractTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

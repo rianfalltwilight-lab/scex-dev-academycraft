@@ -1,0 +1,721 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.2.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :createMinecraftArtifacts UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :generateLegacy112Assets UP-TO-DATE
+> Task :generateLegacyAdvancements UP-TO-DATE
+> Task :generateModMetadata UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileAuditTestJava UP-TO-DATE
+> Task :processAuditTestResources UP-TO-DATE
+> Task :auditTestClasses UP-TO-DATE
+> Task :auditTestJarJar NO-SOURCE
+> Task :verifyAuditPackageIsolation
+> Task :auditTestJar UP-TO-DATE
+> Task :jarJar NO-SOURCE
+> Task :jar
+> Task :compileTestJava
+> Task :processTestResources NO-SOURCE
+> Task :testClasses
+
+> Task :test
+
+TutorialResourceContractTest > lockedTutorialsCannotRenderBodyOrRecipePreviewsAndRefreshWhileOpen() PASSED
+
+TutorialResourceContractTest > tutorialMachinePreviewUsesSameImagRecipeManagerTypeAsMachineAndJei() PASSED
+
+TutorialResourceContractTest > tutorialActivationRetainsTheLegacyNotificationAndPersistentDeduplicationFlow() PASSED
+
+TutorialResourceContractTest > metalFormerTutorialCyclesAllIngredientCandidates() PASSED
+
+TutorialResourceContractTest > everyRegisteredTutorialHasCompleteEnglishAndChineseUtf8Content() PASSED
+
+TutorialResourceContractTest > windTutorialDocumentsTheFinal1122FifteenByFifteenClearanceRule() PASSED
+
+TutorialResourceContractTest > guiHasHeightAwareScaleAndRendersEveryParserType() PASSED
+
+TutorialResourceContractTest > terminalTutorialIncludesEveryLegacyInstallableApp() PASSED
+
+TutorialResourceContractTest > everyMarkdownImageAndKeyReferenceResolves() PASSED
+
+TutorialResourceContractTest > reloadHookInvalidatesBothTutorialCaches() PASSED
+
+BuildProvenanceContractTest > releaseMetadataPinsTheAuditedFinal112AndCurrentModernSnapshots() PASSED
+
+LegacyAdvancementResourceTest > everyLegacyNodeHasOfficialBilingualTitleAndDescription() PASSED
+
+LegacyAdvancementResourceTest > all56IdsAreUniqueValidReachableAndParentsResolve() PASSED
+
+LegacyObservableEventContractTest > terminalEventsOnlyFollowSuccessfulStateChanges() PASSED
+
+LegacyObservableEventContractTest > cancellableTopologyIntentsAreObservedBeforeMutation() PASSED
+
+LegacyObservableEventContractTest > publicEventsRetainLegacyFieldsAndModernTransitionContext() PASSED
+
+LegacyObservableEventContractTest > matterHarvestCancellationPrecedesWorldAndInventoryCommit() PASSED
+
+SkillExpMutationCoverageTest > onlyOwnerAwareServiceMayIncrementProficiency() PASSED
+
+SkillExpMutationCoverageTest > codecAndDataRemainEntityFree() PASSED
+
+ExternalEnergyConversionTest > preservesLegacyFourRfPerIfRatioWithoutPartialIfClaims() PASSED
+
+AbilityLoopLifecycleContractTest > staleChargingPacketsCannotOverwriteHudBeforeStateValidation() PASSED
+
+AbilityLoopLifecycleContractTest > legacyMagManipAndMeltdownerSoundsHaveBoundedLifecycles() PASSED
+
+AbilityLoopLifecycleContractTest > movementLoopIsSingleClientOwnedAndSessionBound() PASSED
+
+AbilityLoopLifecycleContractTest > mineDetectionUsesFinal112FiveTickRefreshAndBatchedMarkers() PASSED
+
+AbilityLoopLifecycleContractTest > chargingProtocolIsSafeUnderDuplicateReorderedDelayedAndLostPackets() PASSED
+
+AuditLanguageParityTest > threeLanguagesHaveSameKeysAndCompatiblePlaceholders() PASSED
+
+ChargePresentationStateTest > advancesBetweenPacketsAndAcceptsAuthoritativeCorrections() PASSED
+
+ChargePresentationStateTest > abortAndTimeoutClearSkillAndProgress() PASSED
+
+ChargePresentationStateTest > zeroMaximumIsSafeAndResetStopsProgress() PASSED
+
+ClientFatalPathContractTest > effectLifeAndReferencedTexturesAreSafe() PASSED
+
+ClientFatalPathContractTest > mediaClickUsesSnapshotBoundsIdentityAndAuthoritativeOwnership() PASSED
+
+ClientFatalPathContractTest > sessionResetIsLocalCompleteAndHookedToBothBoundaries() PASSED
+
+ClientRegistrationBusContractTest > everyClientRegistryHookLivesOnTheModBus() PASSED
+
+FreqTransmitterClientContractTest > openUsesCancelableRequestNonceAndWorldSelectionOnlyAfterServerState() PASSED
+
+FreqTransmitterClientContractTest > c2sPayloadCannotForgeCoordinatesAndServerOwnsRealClickRange() PASSED
+
+HudConfigContractTest > everyAdvertisedHudAndSoundSettingHasARuntimeConsumer() PASSED
+
+HudConfigContractTest > legacySettingsAppExposesDragEditorAndAllClientToggles() PASSED
+
+JadeCompatibilityContractTest > cpHudAvoidsJadeAndJadeRemainsOptional() PASSED
+
+JadeCompatibilityContractTest > everyDeveloperStructurePartSharesNameAndAuthoritativeEnergy() PASSED
+
+JadeCompatibilityContractTest > tutorialKeyTagIsResolvedBeforeUnderscoreItalicFormatting() PASSED
+
+JadeCompatibilityContractTest > windBaseAndMatrixProxiesResolveToTheirLogicalMachine() PASSED
+
+LegacyInputContractTest > onlyMappedActiveMouseSlotsSuppressVanillaInteractions() PASSED
+
+LegacyInputContractTest > official107DefaultsAndMouseEdgePathAreRestored() PASSED
+
+LegacyPresentationContractTest > meltdownerRaysAndSustainedSkillsConsumeTheirLegacyAudioVisuals() PASSED
+
+LegacyPresentationContractTest > teleporterCriticalUsesTheOfficialFormulaFamilyAndCasterOnlySync() PASSED
+
+LegacyPresentationContractTest > movementAndJetKeepTheirDistinctLegacyVisualIdentities() PASSED
+
+LegacyPresentationContractTest > plasmaUsesItsLegacyBodyAndTornadoInsteadOfAnItemRenderer() PASSED
+
+LegacyPresentationContractTest > teleporterAndMeltdownerUseOfficialCustomParticlesNotVanillaFallbacks() PASSED
+
+LegacyPresentationContractTest > bodyIntensifyUsesItsDescendingArcEntityInsteadOfGenericParticles() PASSED
+
+LegacyPresentationContractTest > projectileAndBeamRenderersUseOfficialResources() PASSED
+
+LegacyPresentationContractTest > thunderSkillsKeepTheirLegacyChargeAndArcPresentation() PASSED
+
+LegacyPresentationContractTest > railgunCoinAndItemChargeUseEveryOfficialArcBurstFrame() PASSED
+
+LegacyPresentationContractTest > vectorCuesHaveBothVisualLifetimeAndOfficialAudio() PASSED
+
+LegacyPresentationContractTest > markAndFlashingCuesReferenceEveryOfficialFrame() PASSED
+
+LegacyPresentationPhase4ContractTest > bloodDecalIsTrackedBoundedNonPersistentAndUsesOfficialSurfaces() PASSED
+
+LegacyPresentationPhase4ContractTest > replacementMeshesHaveHardParticleBudgets() PASSED
+
+LegacyPresentationPhase4ContractTest > worldPresentationIsClientOnlyAndLifecycleBounded() PASSED
+
+LegacyPresentationPhase4ContractTest > officialMarkAndBloodSequencesRemainComplete() PASSED
+
+LocalizationResourceContractTest > internalAndJeiKeysNeverLeakAsRawTranslationIds() PASSED
+
+LocalizationResourceContractTest > screensReuseExistingLocalizedItemAndBlockNames() PASSED
+
+MachineLoopSoundContractTest > bothLegacyMachineLoopsHaveWorkingAndLifecycleOwners() PASSED
+
+MediaResourceContractTest > legacyExternalMediaWorkspaceStreamingCoversAndEditableMetadataAreRestored() PASSED
+
+MediaResourceContractTest > allLegacyBuiltinTracksHaveIndependentStreamResources() PASSED
+
+MediaResourceContractTest > legacyTransportVolumeAndAuxHudAreImplementedWithoutGlobalAudioPause() PASSED
+
+ObjTextureUvContractTest > legacyObjModelsKeepTheirNativeUvAtlasDimensions() PASSED
+
+ObjTextureUvContractTest > advancedDeveloperMaterialHasOneResolvableDiffuseMapDirective() PASSED
+
+SkillRegistryIntegrityContractTest > postLegacyCategoriesUseTheirOfficialMohistArtwork() PASSED
+
+SkillRegistryIntegrityContractTest > registrationFailsFastForDuplicateIdsAndMissingActiveBehavior() PASSED
+
+SkillRegistryIntegrityContractTest > emptyExecuteEntrypointsAreRestrictedToChargingSkills() PASSED
+
+SoundResourceContractTest > dataTerminalUsesItsOriginalDedicatedSounds() PASSED
+
+SoundResourceContractTest > everyDeclaredAcademySoundHasAnOggResource() PASSED
+
+MatrixFacingTransformTest > dynamicOrbitOriginAndVerticesMatchActualBakedBlockRotationForEveryFacing() PASSED
+
+MatrixRenderContractTest > sideLoadedShieldModelAndBlockEntityRendererAreBothRegistered() PASSED
+
+MatrixRenderContractTest > convertedObjRetainsTheOfficial1122RootGroupsAndFaceBoundaries() PASSED
+
+MatrixRenderContractTest > staticAndDynamicModelsCannotRenderTheSamePlateGeometry() PASSED
+
+MatrixRenderContractTest > rendererMatchesFinal1122CoreAndThreePlateStateWithoutInitializationFlagCoupling() PASSED
+
+PhaseLiquidVisualMathTest > malformedDistancesFailInvisible() PASSED
+
+PhaseLiquidVisualMathTest > matchesLegacyCameraDistanceFade() PASSED
+
+DevLearningFeedbackContractTest > rejectionIsImmediateDetailedAndDoesNotPreSpendClientSession() PASSED
+
+DevLearningFeedbackContractTest > skillSelectionSessionAllowsNormalReadingTimeWithoutLosingOneShotAuthority() PASSED
+
+DevLearningFeedbackContractTest > energyIsLiveAndTinyAdvancedScreenDisablesInteraction() PASSED
+
+DevMachineLayoutTest > fitsBothDimensionsAtCommonAndTinySizes() PASSED
+
+DevMachineLayoutTest > compactSkillSidebarRegionsNeverOverlap() PASSED
+
+DevMachineLayoutTest > largeDeveloperEnergyValuesStayReadableInTheCompactSidebar() PASSED
+
+DevMachineLayoutTest > legacyDeveloperCanvasAndSidebarFitAtTheCommon427LogicalWidth() PASSED
+
+DevMachineLayoutTest > compactModeUsesBothWidthAndHeightConstraints() PASSED
+
+DevMachineLayoutTest > exhaustiveLogicalViewportRectanglesAreOrderedAndContained() PASSED
+
+DevMachineUiContractTest > skillTreeUsesTheOfficialLegacyNodeAndLearnButtonLayers() PASSED
+
+DevMachineUiContractTest > advancedMachineUsesTheLegacyHandInventoryResetFlow() PASSED
+
+DevMachineUiContractTest > wirelessReturnCommandRemainsCodecBoundAndHasNoDormantTextField() PASSED
+
+DevMachineUiContractTest > treeRestoresTheFinal112DeveloperCanvasAndAuthoritativeActions() PASSED
+
+DevMachineUiContractTest > bothMachinesUseTheirLiveMenuAndNonceBoundSkillTreeAction() PASSED
+
+DevMachineUiContractTest > powerAndSyncBarsUseTheExactPageDeveloperCoordinatesAndAuthoredTracks() PASSED
+
+LegacyMachineScreenLayoutContractTest > officialMachineLayersDoNotReceiveVanillaContainerCaptions() PASSED
+
+LegacyMachineScreenLayoutContractTest > wirelessNodeListPagesAndPasswordsAreNotTruncatedOrLeaked() PASSED
+
+LegacyMachineScreenLayoutContractTest > imagFusorUsesTheOfficial107ProgressLayerAndXmlCoordinates() PASSED
+
+LegacyMachineScreenLayoutContractTest > solarUsesTheOfficialWindbaseLayerRatherThanPhaseGeneratorArt() PASSED
+
+LegacyMachineScreenLayoutContractTest > matrixControlsLiveInASeparateSynchronizedPanelWithoutABlankWirelessPage() PASSED
+
+LegacyMachineScreenLayoutContractTest > nodeNamesRefreshFromThePublicMirrorWithoutReplacingUnsubmittedDrafts() PASSED
+
+LegacyMachineScreenLayoutContractTest > regularMachineOriginReservesTheLegacySideInformationPanel() PASSED
+
+LegacyMachineScreenLayoutContractTest > machineStatusPanelsUseAuthoritativeMenuData() PASSED
+
+LegacyMachineScreenLayoutContractTest > developerScreensHaveInteractiveCompactPagesAndExternalFullCanvasSidebars() PASSED
+
+LegacyMachineScreenLayoutContractTest > sidebarHighlightsTheVisiblePageRatherThanTheConstructorDefault() PASSED
+
+RegularMachineLayoutTest > developerSidebarCanvasAndMenuStayWithinTheFullLayout() PASSED
+
+RegularMachineLayoutTest > matrixSidebarAndWidePanelFitAtThreeHundredTwenty() PASSED
+
+RegularMachineLayoutTest > panelElementRenderAndHitTestShareTheShiftedOrigin() PASSED
+
+RegularMachineLayoutTest > commonGuiScaleWidthsKeepSidebarMachineAndInfoCardTogether() PASSED
+
+RegularMachineLayoutTest > narrowViewFallsBackToCenteredMachineWithoutPretendingInfoFits() PASSED
+
+RenderUtilsTextureSamplingContractTest > terminalAndAbilityIconsAlsoSampleTheirWholePng() PASSED
+
+RenderUtilsTextureSamplingContractTest > officialMachineTexturesHaveExplicitFullImageSamplingContract() PASSED
+
+RenderUtilsTextureSamplingContractTest > tutorialScalingUsesIntrinsicPngDimensionsInsteadOfDestinationSize() PASSED
+
+SkillSelectionUiContractTest > legacyTreesUseTheirHandAuthoredCanvasAndSingleParentEdge() PASSED
+
+SkillSelectionUiContractTest > learnedZeroCostActiveSkillsRemainAssignable() PASSED
+
+SlotArtworkAlignmentTest > playerInventoryItemsAreCenteredOnTheShippedArtwork() PASSED
+
+WirelessMachineUiContractTest > realClientGateCoversProtectedNodeMouseKeyboardAndServerFlow() PASSED
+
+WirelessMachineUiContractTest > emptyNodeResponseIsDistinctFromLoadingAndExplained() PASSED
+
+WirelessMachineUiContractTest > nodeMatrixConnectionUsesTheRelayAware107DiscoveryRule() PASSED
+
+WirelessMachineUiContractTest > remoteNodeAccessUsesTheLegacyPublicOrPasswordContract() PASSED
+
+WirelessMachineUiContractTest > regularMachineCompositionIncludesAllThreeLegacyLayers() PASSED
+
+WirelessMachineUiContractTest > matrixReadinessIsSharedByClientAndServerAuthority() PASSED
+
+WirelessMachineUiContractTest > jeiReservesTheLegacySidebarAndInformationCard() PASSED
+
+WirelessMachineUiContractTest > nodeNameOpeningSnapshotDoesNotDependOnTheClientBlockEntity() PASSED
+
+WirelessMachineUiContractTest > auxiliaryWirelessPageReplacesRatherThanOverlaysMachineWidgets() PASSED
+
+WirelessMachineUiContractTest > everyFormedMatrixPartForwardsInteractionToTheMainMachine() PASSED
+
+ExternalOggInspectorTest > malformedCaptureAndHostileDurationFailClosed() PASSED
+
+ExternalOggInspectorTest > readsVorbisIdentificationAndFinalGranuleWithoutDecodingTheTrack() PASSED
+
+LegacyAchievementCommandTest > resolvesExactLegacy107IdsToGeneratedAdvancementPaths() PASSED
+
+LegacyAimCommandTreeTest > commandMutationsRetainPermissionEventsSyncAndTargetBoundary() PASSED
+
+LegacyAimCommandTreeTest > playerDataSupportsSafeUnlearnAndCooldownClear() PASSED
+
+LegacyAimCommandTreeTest > registersLegacySelfAndTargetedCommandLibraries() PASSED
+
+DynamicSettlementSourceContractTest > abilityEffectsCannotBypassTheAtomicSettlementBoundary() PASSED
+
+DynamicSettlementSourceContractTest > everyExplicitDynamicEffectConsumesTheSharedRuleMatrix() PASSED
+
+DynamicSkillRulesTest > identityAndEndpointsAreStable() PASSED
+
+DynamicSkillRulesTest > hostileNumbersFailClosed() PASSED
+
+DynamicSkillRulesTest > legacyAndNamespacedDimensionAllowlistEntriesResolveExactly() PASSED
+
+LegacyAbilityRulesTest > skillDisableAndMultipliersAreParsed() PASSED
+
+LegacyAbilityRulesTest > malformedOrOtherSkillEntriesCannotPoisonDefaults() PASSED
+
+LegacyAbilityRulesTest > recoveryCurvesMatch107CpDataFormula() PASSED
+
+LegacyAbilityRulesTest > defaultsMatch107Config() PASSED
+
+RecipeSourceContractTest > restoresLegacyVanillaOreRefiningRecipesExactly() PASSED
+
+RecipeSourceContractTest > jeiIsOptionalAndClientIsolated() PASSED
+
+RecipeSourceContractTest > officialJarRecipeInventoryAndAllIdsAreMappedExactly() PASSED
+
+RecipeSourceContractTest > restoresLegacyCrossModOreDictionaryRefiningThroughCommonTags() PASSED
+
+RecipeSourceContractTest > restoresExactMachineRecipeInventory() PASSED
+
+RecipeSourceContractTest > imagFusorKeepsCurrentUpstreamAndRebuildDatapackCompatibility() PASSED
+
+EnergyBridgeParityContractTest > registersBothDirectionalBridgesAndTheirAuthoritativeBoundaries() PASSED
+
+EnergyBridgeParityContractTest > shipsExactLegacyTexturesRecipesLootAndTutorial() PASSED
+
+EnergyBoundaryTest > maliciousLimitsCannotPoisonTransferState() PASSED
+
+EnergyBoundaryTest > maliciousProviderValuesFailClosed() PASSED
+
+GameTestTemplateIsolationContractTest > emptyTemplateBoundsEveryRealTestFixture() PASSED
+
+ChargingHandshakeTest > lateAcceptedAckAfterFortyTicksIsCancelledWithItsEpoch() PASSED
+
+ChargingHandshakeTest > earlyReleaseAndNackHaveTerminalActions() PASSED
+
+ChargingHandshakeTest > staleGenerationCannotAffectNewRequestAndServerHasStartTimeout() PASSED
+
+FinalProtocolScopeTest > exactLocationSnapshotRejectsIndexShiftAndCoordinateOrNameMutation() PASSED
+
+FinalProtocolScopeTest > consentScopeRejectsPetAddRemoveOwnerAndRidingEdgeMutation() PASSED
+
+FlashingEpochStateTest > zeroIsResetOnlyAndNeverAStartEpoch() PASSED
+
+FlashingEpochStateTest > duplicateStartIsIdempotent() PASSED
+
+FlashingEpochStateTest > staleEndCannotCloseNewEpoch() PASSED
+
+FlashingHeldInputTest > lostKeyUpExpiresWithoutLateCommit() PASSED
+
+FlashingHeldInputTest > pressOnlyPreviewsAndSameKeyReleaseCommits() PASSED
+
+FlashingHeldInputTest > secondDirectionCannotStealHeldMarker() PASSED
+
+GuiChargingCancelProtocolTest > staleAckCannotCancelAReplacementSession() PASSED
+
+GuiChargingCancelProtocolTest > lateAcceptedAckForTombstoneMustAbortNotRelease() PASSED
+
+LocationTeleportChunkPlanTest > exactChunkBoundaryDoesNotLoadAnUnrelatedNeighbor() PASSED
+
+LocationTeleportChunkPlanTest > collisionBoxLoadsEveryIntersectedChunk() PASSED
+
+LocationTeleportChunkPlanTest > nonFiniteAndOversizedPlansFailClosedWithoutUnboundedIteration() PASSED
+
+LocationTeleportChunkPlanTest > aggregateMountGraphCannotExceedTheSharedChunkBudget() PASSED
+
+NetworkInputLimitsTest > requiredRejectsNullBlankAndOptionalAllowsAbsent() PASSED
+
+NetworkInputLimitsTest > exactLimitsPassAndOneCodeUnitOverFails() PASSED
+
+OneShotSessionLedgerTest > rejectsWrongOwnerNonceContextAndExpiredSession() PASSED
+
+OneShotSessionLedgerTest > validateDoesNotConsumeButCommitIsOneShot() PASSED
+
+OneShotSessionLedgerTest > staleCloseCannotRevokeReplacementScreen() PASSED
+
+OneShotSessionLedgerTest > clearExpiredDoesNotClearLiveReplacement() PASSED
+
+PayloadRateLimiterTest > boundsFloodAndReopensAtWindowBoundary() PASSED
+
+PayloadRateLimiterTest > validFirstPressIsImmediateAndSeparateFromFeedbackBudget() PASSED
+
+PayloadRateLimiterTest > boundsEntryAndNegativeFeedbackIndependentlyThenRecovers() PASSED
+
+PayloadRateLimiterTest > rejectsInvalidPolicyInsteadOfFailingOpen() PASSED
+
+PayloadRateLimiterTest > isolatesPlayersAndChannelsAndHandlesClockReset() PASSED
+
+ProtocolVersionContractTest > protocolNamesPayloadAndDataGeneration() PASSED
+
+RequestNodesOrderingTest > connectedNodeSurvivesDenseCandidateLimit() PASSED
+
+RequestNodesOrderingTest > availableNodesAreStableAndNearestFirst() PASSED
+
+SkillInputTokenTest > aReopenedSessionMayStartAtOneWithoutAcceptingAnOldToken() PASSED
+
+SkillInputTokenTest > onlyLatestAcceptedInputMayAdvanceTheStream() PASSED
+
+SkillInputTokenTest > forgedHighSequenceCannotBlockAValidLaterInput() PASSED
+
+SkillInputTokenTest > nonpositiveAndAbsentInputsCannotAuthorizeActions() PASSED
+
+SwitchPresetPolicyTest > rejectsMalformedUnauthorizedChargingAndSpam() PASSED
+
+SwitchPresetPolicyTest > duplicateAndChargingRejectionsShareTheBoundedSyncWindow() PASSED
+
+SwitchPresetPolicyTest > invalidFloodCannotAmplifyResponsesAndNormalRequestRecovers() PASSED
+
+TeleportTransactionTest > crossDimensionSuccessRestoresLinksOnlyAfterEveryMoveVerifies() PASSED
+
+TeleportTransactionTest > exceptionFromTeleportHookUsesSameRollbackPath() PASSED
+
+TeleportTransactionTest > cancellationRollsBackAlreadyCommittedEntitiesInReverseOrder() PASSED
+
+AbilityInterferenceRulesTest > clampsLegacyRangeAndSquaresPulseCost() PASSED
+
+AbilityInterferenceRulesTest > creativeAndWhitelistAreHardExemptions() PASSED
+
+AbilityInterferenceRulesTest > usesLegacyAxisAlignedCubeWithInclusiveBoundary() PASSED
+
+AbilityInterferenceRulesTest > guiUsesOfficial112TenBlockRangeSteps() PASSED
+
+AcademyDamageBoundaryContractTest > legacyPvpOptionIsPublicDefaultTrueAndConsumed() PASSED
+
+AcademyDamageBoundaryContractTest > academyDamageCannotBypassThePvpBoundary() PASSED
+
+BodyIntensifyLegacySourceContractTest > preservesTheObservableUnshuffledPreincrementBuffSequence() PASSED
+
+ChargingOutputTest > longRunHasNoDriftOrRepeatedMultiplication() PASSED
+
+ChargingOutputTest > allOldIntegerStepsAndAdjacentFloatBoundariesScaleExactlyOverTwoTicks() PASSED
+
+ChargingOutputTest > malformedProficiencyAndUnitChangesAreBounded() PASSED
+
+ChargingSettlementTest > successfulReleaseIsTheOnlyRewardingOutcome() PASSED
+
+ChargingSettlementTest > insufficientChargeOrFailedReleaseNeverRewards() PASSED
+
+ChargingSettlementTest > resourceAbortNeverAttemptsOrRewards() PASSED
+
+DevInductionContractTest > processStaticInductionStateIsClearedWhenTheServerStops() PASSED
+
+DevInductionContractTest > resetRestoresLegacyLevelThreeGateAndLifecycleEvents() PASSED
+
+DevInductionContractTest > survivalFactorCannotBypassTheDeveloperSession() PASSED
+
+DevInductionContractTest > factorIsLockedByExactSourceAndConsumedOnlyAtCompletion() PASSED
+
+DevLearningCadenceTest > legacySkillStimulationCurveIsExactForLevelsOneThroughFive() PASSED
+
+DevLearningCadenceTest > machineCadenceAndConsumptionMatchAcademyCraft107() PASSED
+
+DevLearningCadenceTest > initialAbilityInductionUsesTheLegacyLevelZeroFiveStimulations() PASSED
+
+ElectromasterRulesTest > legacyMetalConfigurationNamesMapToModernRegistryIds() PASSED
+
+ElectromasterRulesTest > mineDetectKeepsLegacyRangeCapAndAdvancedColorIndices() PASSED
+
+ElectromasterRulesTest > rejectedEnergyReceiveIsNotEffective() PASSED
+
+ElectromasterRulesTest > hostileChargingCommitIsBoundedBySimulation() PASSED
+
+ElectromasterRulesTest > bodyIntensifyOnlyConsumesThroughLegacyFortyTickWindow() PASSED
+
+ElectromasterRulesTest > thunderClapFadesDamageAndWalkSpeedLikeTheLegacyContexts() PASSED
+
+ElectromasterRulesTest > thunderClapKeepsExactLegacyChargeCurve() PASSED
+
+ElectromasterRulesTest > thunderBoltAoeIsTheLegacyEightBlockSphere() PASSED
+
+InductionFactorCategoryContractTest > eachRegisteredFactorMapsToItsMatchingAbilityCategory() PASSED
+
+InductionFactorCategoryContractTest > everyBundledLanguageNamesBothPostLegacyFactors() PASSED
+
+InductionFactorCategoryContractTest > inductionSelectionUsesTheFactorOwnedCategory() PASSED
+
+LegacyActiveSkillParityContractTest > dynamicOneShotsOnlySettleAfterAReportedCommit() PASSED
+
+LegacyActiveSkillParityContractTest > heldTeleporterContextsCannotRegressToOneShotEffects() PASSED
+
+LegacyActiveSkillParityContractTest > flashingKeepsTheLegacyAerialDestinationInsteadOfRequiringGround() PASSED
+
+LegacyActiveSkillParityContractTest > correctedHeldAndVectorRulesRemainExplicit() PASSED
+
+LegacyActiveSkillParityContractTest > bothReleasePathsHonorSkillOwnedCooldownSettlement() PASSED
+
+LegacyLevelDevelopmentContractTest > developerRunsASeparateServerAuthoritativeLevelAction() PASSED
+
+LegacyLevelDevelopmentContractTest > skillUseFillsIndependentGaugeAndHigherSkillsStayLocked() PASSED
+
+LegacyLevelDevelopmentContractTest > persistenceAndSyncCarryTheGaugeGeneration() PASSED
+
+LegacyLevelProgressTest > thresholdMatchesAcademyCraft107() PASSED
+
+LegacyLevelProgressTest > progressIsBoundedAndLevelFiveCannotAdvance() PASSED
+
+LegacyParityMathTest > legacyEndpointsRemainExact() PASSED
+
+LegacyParityMathTest > scatterCadenceMatchesTwentyThroughEighty() PASSED
+
+LegacyResourceProgressionTest > matchesThe107ResourceTablesExactly() PASSED
+
+LegacyResourceProgressionTest > consumeWithForceDepletesAndClampsInsteadOfRejecting() PASSED
+
+LegacyResourceProgressionTest > usageGrowthUsesThe107RatesAndBothCaps() PASSED
+
+LegacyResourceProgressionTest > genericCoursesUseThe107Bonuses() PASSED
+
+LegacyResourceProgressionTest > rebuiltV3TotalsMigrateWithoutTurningOldCourseBonusesIntoUsageGrowth() PASSED
+
+LegacySkillTreeContractTest > fourLegacyTreesRetainExact112ParentGraphThresholdsAndRegistrationOrder() PASSED
+
+MagManipLegacyBlockListContractTest > defaultLegacyMagneticBlocksRemainAccepted() PASSED
+
+MagManipLegacyFormulaTest > endpointsMatchAcademyCraft107() PASSED
+
+MeltdownerLegacySourceContractTest > radiationIsADeferredMarkAndOnlyWrapsLegacyMdDamageHelperSkills() PASSED
+
+MeltdownerLegacySourceContractTest > mineRaySeparatesContinuousFifteenBlockPresentationFromMiningRange() PASSED
+
+MeltdownerLegacySourceContractTest > shieldBarrageAndJetRetainTheirLegacyTargetAndTickOrdering() PASSED
+
+MeltdownerLegacySourceContractTest > electronBombRetainsCallbackTimingAndTwoStageRay() PASSED
+
+MeltdownerLegacySourceContractTest > coreRayKeepsFixedRadiusGenericTargetsAndLegacyReflectionOwnership() PASSED
+
+PerformanceCompatibilityContractTest > transientChargeBallsCannotSurviveRestartOrLiveForever() PASSED
+
+PerformanceCompatibilityContractTest > railgunTreatsUnknownLivingEntitiesGenericallyAndHonorsWalls() PASSED
+
+PerformanceCompatibilityContractTest > magManipAbortDropsTheCarrierAndSuccessOwnsItsFinalSound() PASSED
+
+PerformanceCompatibilityContractTest > serializationAndServerStopAreDefenceInDepthBoundaries() PASSED
+
+PerformanceCompatibilityContractTest > plasmaUsesTheBoundedVanillaExplosionAndNeverLoadsMissingChunks() PASSED
+
+PerformanceCompatibilityContractTest > magneticMovementRemainsHeldAtTheAnchorUntilReleaseOrExhaustion() PASSED
+
+PerformanceCompatibilityContractTest > everyLegacyTerrainSkillUsesTheGlobalDimensionAwareGate() PASSED
+
+PerformanceCompatibilityContractTest > arcGenWorldSideEffectsArePermissionCheckedAndRateBounded() PASSED
+
+PerformanceCompatibilityContractTest > electromasterMetalTargetsRemainConfigAndTagDriven() PASSED
+
+PerformanceCompatibilityContractTest > persistedRuntimeNumbersAndLocationsFailClosed() PASSED
+
+PerformanceCompatibilityContractTest > mineDetectFinal112PayloadIsBoundedAndOwnerOnly() PASSED
+
+PerformanceCompatibilityContractTest > jetKeepsLegacyEightTickVectorAcrossItsSixteenMovementUpdates() PASSED
+
+PerformanceCompatibilityContractTest > coinTossKeepsTheLegacyQteKinematicsAndRestartRefund() PASSED
+
+PerformanceCompatibilityContractTest > currentChargingKeepsTheLegacyExternalEnergyCompatibilityEdge() PASSED
+
+PlayerDataMigrationContractTest > codecsCarryVersionsAndCallIdempotentMigrationEntrypoints() PASSED
+
+TelekinesisRulesTest > overloadThinkingTradesOverloadForIncreasingCpRecovery() PASSED
+
+TelekinesisRulesTest > insulationIsStrongestAgainstElectromasterAndMeltdowner() PASSED
+
+TelekinesisRulesTest > paperDrillHasAnExactFullStackAndBoundedPulseContract() PASSED
+
+TeleporterLegacySourceContractTest > locationScreenUsesOfficialAssetsAndLegacyPreflightInformation() PASSED
+
+TeleporterLegacySourceContractTest > threateningIgnoresWallsForLivingTargetsWhileFleshDoesNot() PASSED
+
+TeleporterLegacySourceContractTest > shiftUsesGenericLegacyLivingSelectorAndCasterSoundOrigin() PASSED
+
+TeleporterLegacySourceContractTest > penetrateAndMarkKeepTheirExactLegacyScanners() PASSED
+
+TeleporterLegacySourceContractTest > flashingUsesOnePitchSafeBasisEverywhereAndCleansStaticSessions() PASSED
+
+VecmanipLegacySourceContractTest > groundShockRetainsPlayedRadiansFootprintAndSoundPitch() PASSED
+
+VecmanipLegacySourceContractTest > stormWingDoesNotEnableASecondVanillaFlightController() PASSED
+
+VecmanipLegacySourceContractTest > heldDefensesUseScreenRipplesWhileHitsUseOfficialWaveGeometry() PASSED
+
+VecmanipLegacySourceContractTest > directedBlastKeepsLegacyTargetSphereAndHalfOpenBlockCube() PASSED
+
+VecmanipLegacySourceContractTest > plasmaUsesTheLegacyLivingFamilyAndEntityEndpoint() PASSED
+
+VecmanipLegacySourceContractTest > vectorHandsAndGroundCameraUseTheLegacyTimelines() PASSED
+
+AeroBehaviorMathTest > ascendingAirCapsRawFallDamageMoreStronglyAtMastery() PASSED
+
+AeroBehaviorMathTest > defensiveAndCruisePoliciesHaveAuditableEndpoints() PASSED
+
+AeroBehaviorMathTest > volcanicBallDamageFallsWithLegacyAgeButRetainsMinimum() PASSED
+
+AeroBehaviorMathTest > airJetAndSeparatorProgressionStayBounded() PASSED
+
+AeroBehaviorMathTest > airCoolingUsesTheUpstreamProficiencyEndpoints() PASSED
+
+AerohandBehaviorSourceContractTest > allFourPassivesHaveServerAuthoritativeDamageAndTickBoundaries() PASSED
+
+AerohandBehaviorSourceContractTest > coolingMutatesOverloadRatherThanHealthOrFireResistance() PASSED
+
+AerohandBehaviorSourceContractTest > cruiseBombConsumesWaterAndRunsBoundedServerSessions() PASSED
+
+AerohandBehaviorSourceContractTest > separatorIsANonChargingDelayedPulseIncludingSelfSuffocation() PASSED
+
+AerohandBehaviorSourceContractTest > jetMovesCasterAndAirProjectilesAreRealEntities() PASSED
+
+PassiveSkillMathTest > teleportCriticalTiersMatchLegacyEndpoints() PASSED
+
+PassiveSkillMathTest > radiationUsesMaxCpProgressionAndClamps() PASSED
+
+PassiveSkillMathTest > vectorDeviationEndpointsAndClampingAreStable() PASSED
+
+VecDefenseLegacyMathTest > deviationEntityDebitDoesNotUseDifficultyButReflectionDoes() PASSED
+
+VecDefenseLegacyMathTest > deviationMatchesThe107EndpointTables() PASSED
+
+VecDefenseLegacyMathTest > reflectionMatchesThe107DamageAndUpkeepTables() PASSED
+
+VecDefenseLegacySourceContractTest > reflectionKeepsLegacyAttributionAndDirectDamageSource() PASSED
+
+VecDefenseLegacySourceContractTest > reflectedLegacyRaysKeepTheirSecondVisualSegment() PASSED
+
+VecDefenseLegacySourceContractTest > forcedLegacyDebitsCannotRegressToInsufficientCpEarlyReturns() PASSED
+
+TerminalAppResourceContractTest > legacyBuiltinAppsArePresentInTheAuthoritativePlayerData() PASSED
+
+TerminalAppResourceContractTest > tutorialLauncherUsesAllThreeWeightedLegacyMisakaCloudFrames() PASSED
+
+TerminalAppResourceContractTest > official112AboutVisualsAreRestoredWithoutThirdPartySolicitationMetadata() PASSED
+
+TutorialUnlocksTest > everyLegacyConditionalTutorialHasAServerSafeTrigger() PASSED
+
+CreativeInventoryContractTest > everyPlayerObtainableBlockHasExactlyOneMatchingBlockItem() PASSED
+
+CreativeInventoryContractTest > multiblockImplementationPartsHaveNeitherItemsNorItemModels() PASSED
+
+CreativeInventoryContractTest > creativeGeneratorHasOnlyTheItemRegistryAsItsStackSource() PASSED
+
+ExtraAcCompatibilityContractTest > allTwentyFiveAddonItemsHaveRegistryModelRecipeAndBilingualNames() PASSED
+
+ExtraAcCompatibilityContractTest > dynamicAddonModelsAndArmorSemanticsCannotRegressToStaticVanillaPlaceholders() PASSED
+
+ExtraAcCompatibilityContractTest > formerlyPassiveSustainedSkillsAreSelectableActiveEffects() PASSED
+
+ExtraAcCompatibilityContractTest > offenseArmourRestoresItsLegacyKnockbackResistanceLifecycle() PASSED
+
+ExtraAcCompatibilityContractTest > damagingRaysShareTheAuditedCollisionBoundary() PASSED
+
+ExtraAcCompatibilityContractTest > legacyToggleContextsOwnTerminationCooldownAndTransmissionStaysActive() PASSED
+
+ExtraAcCompatibilityContractTest > addonSkillTreesRetainAuditedLevelsPositionsAndParentEdges() PASSED
+
+ExtraItemTextureResourceContractTest > existingStatePredicatesRetainAllSixChargeAndTwoToggleAppearances() PASSED
+
+ExtraItemTextureResourceContractTest > electricaliburAndLaserRetainOriginalFirstAndThirdPersonTransforms() PASSED
+
+ExtraItemTextureResourceContractTest > allRegisteredExtraItemsAndStateModelsUseTheirOriginalSprites() PASSED
+
+ExtraItemTextureResourceContractTest > allOriginalPngsIncludingWatermanRemainByteIdenticalAndDecodable() PASSED
+
+ItemTextureResourceContractTest > phaseBucketUsesBucketSizedAnimatedFramesNotTheRawLiquidSheet() PASSED
+
+ItemTextureResourceContractTest > everyNonSquareItemTextureIsAValidAnimatedStripWithMetadata() PASSED
+
+ItemTextureResourceContractTest > everyInductionFactorModelUsesItsOwnCategoryTexture() PASSED
+
+ItemTextureResourceContractTest > phaseMatterUnitIsAnAnimatedOfficialShellComposite() PASSED
+
+LootTableResourceContractTest > everyPlayerFacingAcademyBlockHasItsRequiredLootContract() PASSED
+
+MachineMenuContractTest > matrixIsARealFourSlotAcademyContainer() PASSED
+
+MachineMenuContractTest > visibleDynamicStateUsesMenuDataAndNodeRepliesAreCorrelated() PASSED
+
+MachineMenuContractTest > machineRangesFollowTheActuallyAppendedSlots() PASSED
+
+MachineMenuContractTest > containerUsesCountAwareVanillaHelpersAndAllowsClearing() PASSED
+
+MachineMenuContractTest > validityIsBoundToIdentityRangeLoadAndPermission() PASSED
+
+MatterUnitLegacyContractTest > splitMatterUnitVariantsRetainTheLegacyStackLimit() PASSED
+
+MatterUnitLegacyContractTest > creativeHarvestDoesNotConsumeTheEmptyUnit() PASSED
+
+ProjectileItemLegacyContractTest > locationTeleportUsesBoundedNonblockingTemporaryChunkTickets() PASSED
+
+ProjectileItemLegacyContractTest > silbarnHasACompleteServerEntityAndClientRegistrationChain() PASSED
+
+ProjectileItemLegacyContractTest > magneticHookRestoresDamageAnchorRecoveryAndConsumption() PASSED
+
+ProjectileItemLegacyContractTest > locationTeleportRestoresTheLegacyFiveBlockLivingEntitySweep() PASSED
+
+WindGeneratorSourceContractTest > headUsesStructuralProxiesAndCachedClearanceWithoutEnergyCapability() PASSED
+
+WindGeneratorSourceContractTest > legacyStructureAndBandwidthBoundariesRemainExplicit() PASSED
+
+WindGeneratorSourceContractTest > hiddenStructurePartsIdentifyAsTheirLogicalMachine() PASSED
+
+ImagFusorOutputContractTest > productionUsesRecipeCountComponentsAndRemainingCapacity() PASSED
+
+MachineOwnershipTest > administratorCanManageOwnedAndUnownedMachines() PASSED
+
+MachineOwnershipTest > missingOwnerNeverMakesAnOrdinaryVisitorManager() PASSED
+
+MachineOwnershipTest > ownerCanManageButUnrelatedVisitorCannot() PASSED
+
+MachineStateSanitizerTest > clampsCorruptMachinePersistenceValues() PASSED
+
+BaseNodeMenuWordEncodingTest > roundTripsValuesAcrossTheSignedShortBoundary() PASSED
+
+WorldgenResourceContractTest > restoresAllOfficialBasicResourcesAndBiomeInjection() PASSED
+
+WorldgenResourceContractTest > inductionFactorsRemainObtainableFromLegacyStructureChests() PASSED
+
+WorldgenResourceContractTest > academyOresAndMachinesKeepLegacyPickaxeTiers() PASSED
+
+WorldgenResourceContractTest > mediaItemsRemainObtainableFromLegacyStructureChests() PASSED
+
+> Task :check
+> Task :assemble
+> Task :build
+
+[Incubating] Problems report is available at: file:///D:/Minecraft-Projects/academycraft-deep-audit-0.0.29-20261025/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.2.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 26s
+13 actionable tasks: 4 executed, 9 up-to-date

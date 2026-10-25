@@ -1,0 +1,37 @@
+{
+  "baseline": "4993aede05974ffe8f75994b2bcde7cdda92c6a2",
+  "changed": [
+    "README.md",
+    "gradle.properties",
+    "src/main/java/com/mohistmc/academy/AcademyCraft.java",
+    "src/main/java/com/mohistmc/academy/client/block/gui/MetalFomerGui.java",
+    "src/main/java/com/mohistmc/academy/client/gui/SettingsAppGui.java",
+    "src/main/java/com/mohistmc/academy/client/gui/SkillSlotGui.java",
+    "src/main/java/com/mohistmc/academy/world/block/entity/ImagFusorBlockEntity.java",
+    "src/main/java/com/mohistmc/academy/world/block/entity/MetalFomerBlockEntity.java",
+    "src/main/java/com/mohistmc/academy/world/block/entity/PhaseGenBlockEntity.java",
+    "src/main/java/com/mohistmc/academy/world/block/entity/SolarGenBlockEntity.java",
+    "src/main/java/com/mohistmc/academy/world/block/entity/WindGenBaseBlockEntity.java",
+    "src/main/java/com/mohistmc/academy/world/menu/ImagFusorMenu.java",
+    "src/main/java/com/mohistmc/academy/world/menu/PhaseGenMenu.java",
+    "src/main/resources/assets/academy/lang/en_us.json",
+    "src/main/resources/assets/academy/lang/ja_jp.json",
+    "src/main/resources/assets/academy/lang/zh_cn.json",
+    "src/main/resources/data/academy/recipe/extra_fuse_constraint_ingot.json",
+    "src/main/resources/data/academy/recipe/extra_fuse_imag_silicon.json",
+    "src/main/resources/data/academy/recipe/form_reinforced_iron_plate.json"
+  ],
+  "added": [
+    "src/auditTest/java/com/mohistmc/academy/regression/AutomationFluidFixtures.java",
+    "src/auditTest/java/com/mohistmc/academy/regression/AutomationFluidGameTests.java",
+    "src/auditTest/java/com/mohistmc/academy/regression/AutomationUiClientGate.java",
+    "src/auditTest/java/com/mohistmc/academy/regression/RecipeCacheReloadGameTests.java",
+    "src/auditTest/resources/data/academy_automation/structure/empty.nbt",
+    "src/main/java/com/mohistmc/academy/client/gui/AcademyActionButton.java",
+    "src/main/java/com/mohistmc/academy/world/block/entity/MachineAutomationItems.java",
+    "src/main/java/com/mohistmc/academy/world/block/entity/PhaseFluidContainers.java",
+    "src/main/resources/data/academy/tags/item/machine_inputs/iron_ingots.json",
+    "src/main/resources/data/academy/tags/item/machine_inputs/silicon_feedstock.json"
+  ],
+  "removed": []
+}

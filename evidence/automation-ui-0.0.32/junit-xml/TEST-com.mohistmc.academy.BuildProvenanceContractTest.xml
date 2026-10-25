@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.mohistmc.academy.BuildProvenanceContractTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-10-25T11:23:01.648Z" hostname="MONARCH" time="0.037">
+  <properties/>
+  <testcase name="releaseMetadataPinsTheAuditedFinal112AndCurrentModernSnapshots()" classname="com.mohistmc.academy.BuildProvenanceContractTest" time="0.037"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

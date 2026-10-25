@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.mohistmc.academy.terminal.TerminalAppResourceContractTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-25T11:23:06.119Z" hostname="MONARCH" time="0.023">
+  <properties/>
+  <testcase name="legacyBuiltinAppsArePresentInTheAuthoritativePlayerData()" classname="com.mohistmc.academy.terminal.TerminalAppResourceContractTest" time="0.012"/>
+  <testcase name="tutorialLauncherUsesAllThreeWeightedLegacyMisakaCloudFrames()" classname="com.mohistmc.academy.terminal.TerminalAppResourceContractTest" time="0.003"/>
+  <testcase name="official112AboutVisualsAreRestoredWithoutThirdPartySolicitationMetadata()" classname="com.mohistmc.academy.terminal.TerminalAppResourceContractTest" time="0.005"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

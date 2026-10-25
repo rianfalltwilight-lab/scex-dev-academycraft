@@ -105,7 +105,12 @@ class TutorialResourceContractTest {
         String jei = Files.readString(Path.of("src/main/java/com/mohistmc/academy/client/jei/AcademyJeiPlugin.java"));
         String token = "AcademyRecipeTypes.IMAG_FUSING.get()";
         assertTrue(views.contains("getAllRecipesFor(" + token + ")"));
-        assertTrue(machine.contains("getRecipeFor(" + token));
+        assertTrue(machine.contains("RecipeManager.CachedCheck<ImagFusorRecipeInput, ImagFusorRecipe> recipeCheck"),
+                "machine lookup must use the native cache for the Imag Fusor input/recipe pair");
+        assertTrue(machine.contains("RecipeManager.createCheck(" + token + ")"),
+                "machine cache must select the same RecipeType as tutorial and JEI");
+        assertTrue(machine.contains("recipeCheck.getRecipeFor(new ImagFusorRecipeInput(input), level)"),
+                "machine must query the typed cache against its current input and level");
         assertTrue(jei.contains("getAllRecipesFor(" + token + ")"));
         assertFalse(views.contains("ImagFusorRecipes.INSTANCE"), "tutorial must not use the removed hard-coded recipe singleton");
     }

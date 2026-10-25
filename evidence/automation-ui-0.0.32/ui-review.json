@@ -1,0 +1,84 @@
+{
+  "status": "IMPLEMENTED_PENDING_ROOT_BUILD_AND_RUNTIME",
+  "scope": [
+    "SettingsAppGui native setting/back/HUD-editor buttons with stable focus and scroll-to-focus",
+    "SkillSlotGui native preset/slot/dropdown buttons, modal traversal and keyboard clear",
+    "MetalFomerGui native mode arrow buttons with existing textures"
+  ],
+  "preserved": [
+    "Existing art, page functions and authoritative C2S packet paths",
+    "payload-v20-data-v4 protocol",
+    "No new slider or broad Screen rewrite"
+  ],
+  "api_review": {
+    "official_documentation": "https://docs.neoforged.net/docs/1.21.1/gui/screens/",
+    "actual_source": "build/moddev/artifacts/neoforge-21.1.248-sources.jar",
+    "classes": [
+      "Screen",
+      "AbstractButton",
+      "AbstractWidget",
+      "ContainerEventHandler",
+      "AbstractContainerScreen",
+      "NarrationElementOutput",
+      "NarrationThunk",
+      "Window",
+      "RenderFrameEvent"
+    ]
+  },
+  "probe": {
+    "class": "AutomationUiClientGate",
+    "property": "academy.automationUiClient=true",
+    "world": "AutomationUi32",
+    "result": "academy-automation-ui-client.txt",
+    "checkpoint": "academy-automation-ui-save-checkpoint.txt",
+    "languages": [
+      "en_us",
+      "zh_cn",
+      "ja_jp"
+    ],
+    "effective_scales": [
+      2,
+      3
+    ],
+    "framebuffer_requested": "1280x960",
+    "screenshot_pattern": "automation-ui-<lang>-scale<2|3>-<settings|slots|metal>.png",
+    "expected_screenshots": 18,
+    "input": "Programmatic native KeyboardHandler press/release and Screen mouse handlers; not human keyboard operation",
+    "narration": "Actual AbstractWidget native TITLE/USAGE text capture; audio not claimed",
+    "server_ack_checks": [
+      "Preset switch",
+      "Slot assignment",
+      "Slot clear",
+      "Mode Enter/Space/mouse results"
+    ],
+    "exit": "Reuse 0.0.31 normal-server-tick readiness checkpoint, 20 consecutive ready ticks, saveEverything flush, PASS only afterward"
+  },
+  "validation": {
+    "child_agent": "Read-only actual API/source review, JSON syntax and git diff whitespace check only",
+    "build_and_runtime": "Not run by this child; root owns unified validation"
+  },
+  "written_at": "2026-10-25T19:55:36.734792+09:00",
+  "independent_review_resolution": {
+    "finding": "Wheel can move a still-focused active row out of the viewport, allowing hidden Enter/Space activation.",
+    "fix": "Settings and skill dropdown clear focus whenever wheel scrolling moves its focused row outside the visible viewport; native Tab restores/reveals focus.",
+    "probe": "Actual settings wheel event followed by native Enter/Space verifies unchanged config, then Tab reacquires visible focus."
+  },
+  "follow_up_localization": {
+    "scope": "Six visible information-card labels: energy, buffer, liquid, capacity, information and metal-former mode.",
+    "preserved": "InfoArea geometry, colors and numeric formatting unchanged.",
+    "probe": "Each existing language/scale case verifies six independently expected localized labels and four production legend factory labels; stages and screenshot names unchanged.",
+    "runtime": "Pending root build-r3 and real runtime validation."
+  },
+  "japanese_information_label_visual_review": {
+    "reviewer": "player_sync31 child, read-only inspection of root client-r1 screenshots and actual runtime font assets",
+    "runtime_executor": "root; client-r1 result reports 85 PASS and normal save/exit, not executed independently by this child",
+    "screenshots": [
+      "client-r1-visual/automation-ui-ja_jp-scale2-metal.png",
+      "client-r1-visual/automation-ui-ja_jp-scale3-metal.png"
+    ],
+    "finding": "Japanese Energy label overlaps the value column; not merely tight spacing.",
+    "font_evidence": "Actual runtime assets index 17: unifont_jp lacks these Katakana; fallback unifont U+3001..U+30FF override forces glyph width 16. UnihexProvider advance = 16/2+1 = 9. Five characters advance 45; current 8/9 scale gives 40 GUI units against 36 between label/value origins.",
+    "fix": "InfoArea private drawLabel fits only long property keys and legend labels within 34 GUI units, reserving 2 GUI units. Existing value coordinates, numeric rendering, geometry, colors, and normal short-label size unchanged.",
+    "validation": "Local diff whitespace check only; root will rebuild and repeat runtime/screenshot review."
+  }
+}

@@ -131,6 +131,14 @@ public class AcademyCraft {
                 AcademyBlockEntities.IMAG_FUSOR.get(), (be, side) -> be.getFluidTank());
         event.registerBlockEntity(Capabilities.ItemHandler.BLOCK,
                 AcademyBlockEntities.IMAG_FUSOR.get(), (be, side) -> be.getHandlerForSide(side));
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK,
+                AcademyBlockEntities.PHASE_GEN.get(), (be, side) -> be.getHandlerForSide(side));
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK,
+                AcademyBlockEntities.SOLAR_GEN.get(), (be, side) -> be.getHandlerForSide(side));
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK,
+                AcademyBlockEntities.WINDGEN_BASE.get(), (be, side) -> be.getHandlerForSide(side));
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK,
+                AcademyBlockEntities.WIND_GEN_BASE_SUB.get(), (be, side) -> itemViewOfWindBase(be, side));
         event.registerItem(Capabilities.EnergyStorage.ITEM,
                 (stack, context) -> new com.mohistmc.academy.capability.AcademyEnergyItemStorage(stack),
                 AcademyItems.ENERGY_UNIT.get(), AcademyItems.DEVELOPER_PORTABLE.get(),
@@ -196,6 +204,18 @@ public class AcademyCraft {
                 !subEntity.isRemoved() && subEntity.getLevel() != null
                 && com.mohistmc.academy.world.block.LoadedMachineChunks.contains(subEntity.getLevel(), subEntity.getBlockPos().below())
                 && subEntity.getLevel().getBlockEntity(subEntity.getBlockPos().below()) == main);
+    }
+
+    private static net.neoforged.neoforge.items.IItemHandler itemViewOfWindBase(
+            com.mohistmc.academy.world.block.entity.WindGenBaseSubBlockEntity sub,
+            net.minecraft.core.Direction side) {
+        if (sub.isRemoved() || sub.getLevel() == null
+                || !com.mohistmc.academy.world.block.LoadedMachineChunks.contains(sub.getLevel(), sub.getBlockPos().below())) return null;
+        var main = sub.getLevel().getBlockEntity(sub.getBlockPos().below());
+        if (!(main instanceof com.mohistmc.academy.world.block.entity.WindGenBaseBlockEntity base)) return null;
+        return base.getProxyHandler(side, () -> !sub.isRemoved() && sub.getLevel() != null
+                && com.mohistmc.academy.world.block.LoadedMachineChunks.contains(sub.getLevel(), sub.getBlockPos().below())
+                && sub.getLevel().getBlockEntity(sub.getBlockPos().below()) == base);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {

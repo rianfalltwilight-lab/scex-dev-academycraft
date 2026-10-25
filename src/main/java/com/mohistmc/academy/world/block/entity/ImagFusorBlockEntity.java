@@ -5,7 +5,6 @@ import com.mohistmc.academy.crafting.ImagFusorRecipe;
 import com.mohistmc.academy.crafting.ImagFusorRecipeInput;
 import com.mohistmc.academy.energy.api.block.IWirelessReceiver;
 import com.mohistmc.academy.world.AcademyBlockEntities;
-import com.mohistmc.academy.world.AcademyItems;
 import com.mohistmc.academy.world.AcademyFluids;
 import com.mohistmc.academy.capability.EnergyItemHelper;
 import net.minecraft.core.BlockPos;
@@ -14,6 +13,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeManager;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
 import net.neoforged.neoforge.items.IItemHandler;
@@ -33,12 +33,14 @@ public class ImagFusorBlockEntity extends AcademyContainerBlockEntity implements
     public static final int EMPTY_UNIT_SLOT = 4;
 
     private static final int MAX_FLUID = 8000;
-    private static final int PHASE_LIQUID_PER_UNIT = 1000;
     private static final int PROCESSING_DURATION = 120;
     private static final double CONSUME_PER_TICK = 12;
     private static final double MAX_ENERGY = 2000;
 
     private int processingTime = 0;
+    private ImagFusorRecipe processingRecipe;
+    private final RecipeManager.CachedCheck<ImagFusorRecipeInput, ImagFusorRecipe> recipeCheck =
+            RecipeManager.createCheck(AcademyRecipeTypes.IMAG_FUSING.get());
     private double energy = 0;
     private final FluidTank tank = new FluidTank(MAX_FLUID,
             fs -> fs.getFluid() == AcademyFluids.PHASE_LIQUID.get()) {
@@ -66,9 +68,7 @@ public class ImagFusorBlockEntity extends AcademyContainerBlockEntity implements
         if (level == null) return 0;
         ItemStack input = getItems().get(INPUT_SLOT);
         if (input.isEmpty()) return 0;
-        return level.getRecipeManager()
-                .getRecipeFor(AcademyRecipeTypes.IMAG_FUSING.get(),
-                        new ImagFusorRecipeInput(input), level)
+        return recipeCheck.getRecipeFor(new ImagFusorRecipeInput(input), level)
                 .map(net.minecraft.world.item.crafting.RecipeHolder::value)
                 .map(ImagFusorRecipe::phaseLiquid)
                 .orElse(0);
@@ -109,24 +109,8 @@ public class ImagFusorBlockEntity extends AcademyContainerBlockEntity implements
     public void tick() {
         if (level == null || level.isClientSide) return;
 
-        ItemStack fluidInput = getItems().get(FLUID_INPUT_SLOT);
-        if (!fluidInput.isEmpty() && fluidInput.is(AcademyItems.MATTER_UNIT_PHASE_LIQUID.get())) {
-            ItemStack emptySlot = getItems().get(EMPTY_UNIT_SLOT);
-            boolean canReturnContainer = emptySlot.isEmpty()
-                    || (emptySlot.is(AcademyItems.MATTER_UNIT_NONE.get())
-                    && emptySlot.getCount() < emptySlot.getMaxStackSize());
-            if (canReturnContainer && tank.getFluidAmount() + PHASE_LIQUID_PER_UNIT <= MAX_FLUID) {
-                tank.fill(new FluidStack(AcademyFluids.PHASE_LIQUID.get(), PHASE_LIQUID_PER_UNIT),
-                        net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE);
-                fluidInput.shrink(1);
-                if (emptySlot.isEmpty()) {
-                    getItems().set(EMPTY_UNIT_SLOT, new ItemStack(AcademyItems.MATTER_UNIT_NONE.get()));
-                } else {
-                    emptySlot.grow(1);
-                }
-                markMachineChanged();
-            }
-        }
+        if (PhaseFluidContainers.emptyOne(getItems(), FLUID_INPUT_SLOT, EMPTY_UNIT_SLOT, tank))
+            markMachineChanged();
 
         ItemStack battery = getItems().get(ENERGY_INPUT_SLOT);
         if (EnergyItemHelper.isEnergyItem(battery) && energy < MAX_ENERGY) {
@@ -140,12 +124,16 @@ public class ImagFusorBlockEntity extends AcademyContainerBlockEntity implements
 
         if (input.isEmpty()) {
             processingTime = 0;
+            processingRecipe = null;
             return;
         }
 
-        ImagFusorRecipe recipe = level.getRecipeManager()
-                .getRecipeFor(AcademyRecipeTypes.IMAG_FUSING.get(), new ImagFusorRecipeInput(input), level)
+        ImagFusorRecipe recipe = recipeCheck.getRecipeFor(new ImagFusorRecipeInput(input), level)
                 .map(net.minecraft.world.item.crafting.RecipeHolder::value).orElse(null);
+        // CachedCheck resolves its last ID in the current RecipeManager and checks
+        // matches again. A changed input or datapack replacement starts a new job.
+        if (processingRecipe != null && processingRecipe != recipe) processingTime = 0;
+        processingRecipe = recipe;
         if (recipe == null) {
             processingTime = 0;
             return;
@@ -194,6 +182,9 @@ public class ImagFusorBlockEntity extends AcademyContainerBlockEntity implements
         else tank.setFluid(new FluidStack(AcademyFluids.PHASE_LIQUID.get(),
                 MachineStateSanitizer.clampAmount(tag.getInt("fluidAmount"), MAX_FLUID)));
         processingTime = MachineStateSanitizer.clampCounter(tag.getInt("processingTime"), PROCESSING_DURATION);
+        // Keep the legacy saved progress; the first tick binds it to a current
+        // matching recipe. Recipe objects are runtime-only and never persisted.
+        processingRecipe = null;
         energy = MachineStateSanitizer.clampFinite((float) tag.getDouble("energy"), (float) MAX_ENERGY);
     }
 
@@ -236,7 +227,7 @@ public class ImagFusorBlockEntity extends AcademyContainerBlockEntity implements
             case INPUT_SLOT -> level != null && level.getRecipeManager()
                     .getAllRecipesFor(AcademyRecipeTypes.IMAG_FUSING.get()).stream()
                     .anyMatch(holder -> holder.value().input().test(stack));
-            case FLUID_INPUT_SLOT -> stack.is(AcademyItems.MATTER_UNIT_PHASE_LIQUID.get());
+            case FLUID_INPUT_SLOT -> PhaseFluidContainers.isInput(stack);
             case ENERGY_INPUT_SLOT -> EnergyItemHelper.isEnergyItem(stack);
             default -> false;
         };
@@ -304,7 +295,7 @@ public class ImagFusorBlockEntity extends AcademyContainerBlockEntity implements
             return validIndex(slot) && isValidAutomationInput(slots[slot], stack);
         }
 
-        private boolean validIndex(int slot) { return slot >= 0 && slot < slots.length; }
+        private boolean validIndex(int slot) { return !isRemoved() && slot >= 0 && slot < slots.length; }
     }
 
     public static boolean canAcceptOutput(ItemStack existing, ItemStack result) {

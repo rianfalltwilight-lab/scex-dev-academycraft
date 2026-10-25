@@ -1,0 +1,9 @@
+{
+  "base_id": "academy-ssid23-small-20260908",
+  "manifest_sha256": "031019b874738c2aba2723c15b9e8b9e2ccefdd9d31f951909c9f44d505e033b",
+  "origin_manifest_sha256": "be1e23d5e3a7c2b11479a5f877315d8bfd6c68af6ff331ee10d37fe2ca0f8b04",
+  "mods": [
+    "AcademyCraft-neoforge-1.21.1-0.0.23-scex-wireless.jar"
+  ],
+  "immutable_payload_hardlinks": true
+}

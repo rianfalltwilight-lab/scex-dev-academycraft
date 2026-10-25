@@ -1,0 +1,30 @@
+{
+  "run": "MONARCH/gt-r2",
+  "tests": 473,
+  "failures": 1,
+  "exit_code": 1,
+  "failed_test": "pursuingshadowstopsatglasscollision",
+  "failure": "At 60 entity ticks, displacement 0.9557615984 did not satisfy >3 blocks.",
+  "observations": {
+    "entity_ticks": 60,
+    "owner_ticks": 61,
+    "damage": 0,
+    "cp": 4939,
+    "start_cp": 5000,
+    "intact_glass": "24/24",
+    "max_relative_z": 1.9149598258,
+    "glass_boundary": 5.4375
+  },
+  "compared_candidate_entry_changes": [
+    "BUILD-INFO.txt",
+    "META-INF/MANIFEST.MF",
+    "com/mohistmc/academy/client/gui/InfoArea.class"
+  ],
+  "first_run": "gt-r1 passed this same assertion; its main JAR differs only in InfoArea and build metadata.",
+  "assessment": "Natural AI navigation varies inside the fixed observation window. The exact goal/path cause is not established by available logs. This is not evidence of a glass collision or resource-settlement regression.",
+  "action": "One complete rerun in fresh gt-r3, using identical r3-tested JAR bytes and unchanged assertions/time limit. If repeated, investigate the fixture or add observations instead of repeatedly retrying.",
+  "reviewers": [
+    "root",
+    "machine_sync31"
+  ]
+}

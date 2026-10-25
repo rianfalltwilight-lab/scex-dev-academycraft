@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 /**
@@ -35,22 +36,22 @@ public final class InfoArea {
     public record HistElement(String label, int color, double frac, String desc) {}
 
     public static HistElement histEnergy(double energy, double max) {
-        return new HistElement("能量", 0xFF25C4FF, energy / max,
+        return new HistElement(Component.translatable("ac.ui.info.energy").getString(), 0xFF25C4FF, energy / max,
                 String.format("%.0f IF", energy));
     }
 
     public static HistElement histBuffer(double energy, double max) {
-        return new HistElement("缓存", 0xFF25F7FF, energy / max,
+        return new HistElement(Component.translatable("ac.ui.info.buffer").getString(), 0xFF25F7FF, energy / max,
                 String.format("%.0f IF", energy));
     }
 
     public static HistElement histPhaseLiquid(double amt, double max) {
-        return new HistElement("液体", 0xFF7680DE, amt / max,
+        return new HistElement(Component.translatable("ac.ui.info.liquid").getString(), 0xFF7680DE, amt / max,
                 String.format("%.0f mB", amt));
     }
 
     public static HistElement histCapacity(int amt, int max) {
-        return new HistElement("容量", 0xFFFF6C00,
+        return new HistElement(Component.translatable("ac.ui.info.capacity").getString(), 0xFFFF6C00,
                 max == 0 ? 0 : (double) amt / max, amt + "/" + max);
     }
 
@@ -144,7 +145,7 @@ public final class InfoArea {
     }
 
     public InfoArea seplineInfo() {
-        return sepline("信息");
+        return sepline(Component.translatable("ac.ui.info.information").getString());
     }
 
     public InfoArea property(String key, String value) {
@@ -177,7 +178,7 @@ public final class InfoArea {
                 drawSized(gg, sp.text, px + 3, ey, HEADER, SIZE_SEP);
             } else if (e instanceof Property p) {
                 // key 与图例标签(px+10)对齐，value 与图例数值(px+6+KEY_LENGTH)对齐
-                drawSized(gg, p.key, px + 10, ey, LABEL, SIZE_PROP);
+                drawLabel(gg, p.key, px + 10, ey);
                 if (p.value != null) {
                     drawSized(gg, p.value, px + 6 + KEY_LENGTH, ey, VALUE, SIZE_PROP);
                 }
@@ -213,6 +214,13 @@ public final class InfoArea {
         gg.pose().popPose();
     }
 
+    private static void drawLabel(GuiGraphics gg, String text, float x, float y) {
+        // Value starts 36 GUI units after the label; reserve two units between columns.
+        int width = font().width(text);
+        float size = width == 0 ? SIZE_PROP : Math.min(SIZE_PROP, (KEY_LENGTH - 6) * FONT_BASE / width);
+        drawSized(gg, text, x, y, LABEL, size);
+    }
+
     private void drawHist(GuiGraphics gg, int px, float pyf, Hist h) {
         int hx = px;
         int hy = Math.round(pyf);
@@ -238,7 +246,7 @@ public final class InfoArea {
 
     private void drawLegend(GuiGraphics gg, int px, int y, Legend l) {
         gg.fill(px + 3, y + 1, px + 9, y + 7, l.e.color());
-        drawSized(gg, l.e.label(), px + 10, y, LABEL, SIZE_PROP);
+        drawLabel(gg, l.e.label(), px + 10, y);
         drawSized(gg, l.e.desc(), px + 6 + KEY_LENGTH, y, VALUE, SIZE_PROP);
     }
 

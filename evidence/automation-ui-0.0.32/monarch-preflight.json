@@ -1,0 +1,37 @@
+{
+  "host": "MONARCH",
+  "run_root": "D:\\SCEX-Work\\01-Mods\\Other-Ports\\AcademyCraft\\0.0.32-20261025",
+  "reason": "Vicerach prelaunch guard rejected free RAM below 6 GiB; no remote test Java started",
+  "free_memory_bytes": 34310991872,
+  "session": 1,
+  "java_baseline": [
+    {
+      "pid": 82556,
+      "created": "2026-10-25T07:40:50.6413090Z",
+      "session": 1
+    },
+    {
+      "pid": 90264,
+      "created": "2026-10-25T09:03:42.2158750Z",
+      "session": 1
+    },
+    {
+      "pid": 82988,
+      "created": "2026-10-25T10:23:36.3131050Z",
+      "session": 1
+    }
+  ],
+  "created_utc": "2026-10-25T11:04:14.0371870Z",
+  "budget": {
+    "checked_at": "2026-10-25T20:04:13.95993+09:00",
+    "target": "D:\\SCEX-Work\\01-Mods\\Other-Ports\\AcademyCraft\\0.0.32-20261025",
+    "expected_gib": 2.5,
+    "required_destination_free_gib": 25.0,
+    "system_free_gib": 74.991,
+    "target_free_gib": 47.399,
+    "system_warning": false,
+    "pass": true,
+    "reasons": [],
+    "scope": "Preflight only; no files deleted, no process stopped, no OS quota or background monitoring."
+  }
+}

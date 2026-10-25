@@ -1,0 +1,44 @@
+{
+  "status": "PASS",
+  "run": "MONARCH/client-r2",
+  "reviewer": "root",
+  "method": "Viewed all six actual PNGs using view_image; not inferred from the client PASS report.",
+  "images": [
+    {
+      "file": "screenshots/automation-ui-ja_jp-scale2-metal.png",
+      "sha256": "2681d1ac510cddc692d352b741310f17f8f046ec53648ba4732773d6b0a9ba75",
+      "status": "PASS",
+      "observation": "Both mode arrows, inventory and localized information card are visible. The energy label ends before the numeric column; the previous Japanese overlap is resolved."
+    },
+    {
+      "file": "screenshots/automation-ui-ja_jp-scale2-settings.png",
+      "sha256": "b8f6fd97f737e95c319707a6866685fb9b5cc9b0e4b0d89dabf3e50334cef33c",
+      "status": "PASS",
+      "observation": "Localized rows and native focus border are visible. The lower unfocused row is clipped by the intended scroll viewport; the focused HUD row is fully visible."
+    },
+    {
+      "file": "screenshots/automation-ui-ja_jp-scale2-slots.png",
+      "sha256": "95988a50401719fa591311b63f37c9d9d36bea9b6f9581a87dfcc667cff7d543",
+      "status": "PASS",
+      "observation": "Preset, modal options, focused skill and tooltip are readable; native focus remains on the option and the tooltip fits the screen."
+    },
+    {
+      "file": "screenshots/automation-ui-ja_jp-scale3-metal.png",
+      "sha256": "c00816385766532c26d28f2abf67825df49d278ff07c7854485c33f79b4aad72",
+      "status": "PASS",
+      "observation": "Both mode arrows, inventory and localized information card are visible. The energy label ends before the numeric column; the previous Japanese overlap is resolved."
+    },
+    {
+      "file": "screenshots/automation-ui-ja_jp-scale3-settings.png",
+      "sha256": "6ac571b281a390b43dcedb87d913dad6f6b0e11e5e2240b4aeab99effa285ac6",
+      "status": "PASS",
+      "observation": "Localized rows and native focus border are visible. The lower unfocused row is clipped by the intended scroll viewport; the focused HUD row is fully visible."
+    },
+    {
+      "file": "screenshots/automation-ui-ja_jp-scale3-slots.png",
+      "sha256": "f1d1823ea3fa56e6642414466db3fd62968d08e66d78090bd151e88718125b4d",
+      "status": "PASS",
+      "observation": "Preset, modal options, focused skill and tooltip are readable; native focus remains on the option and the tooltip fits the screen."
+    }
+  ]
+}

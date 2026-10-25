@@ -1,7 +1,6 @@
 package com.mohistmc.academy.world.menu;
 
 import com.mohistmc.academy.crafting.AcademyRecipeTypes;
-import com.mohistmc.academy.world.AcademyItems;
 import com.mohistmc.academy.world.AcademyMenus;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
@@ -33,7 +32,7 @@ public class ImagFusorMenu extends AcademyMenu {
         addAcademySlot(new Slot(container, ImagFusorBlockEntity.FLUID_INPUT_SLOT, 15, 10) {
             @Override
             public boolean mayPlace(ItemStack item) {
-                return item.is(AcademyItems.MATTER_UNIT_PHASE_LIQUID.get());
+                return com.mohistmc.academy.world.block.entity.PhaseFluidContainers.isInput(item);
             }
         });
 

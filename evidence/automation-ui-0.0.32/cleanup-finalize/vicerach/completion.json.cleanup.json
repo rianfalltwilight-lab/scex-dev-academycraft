@@ -1,0 +1,24 @@
+{
+  "free_after": {
+    "D:\\": 140612317184
+  },
+  "targets": [
+    {
+      "path": "D:\\Minecraft-Validation\\runs\\academy-automation32-20261025",
+      "files": 19,
+      "logical_bytes": 56390870
+    }
+  ],
+  "schema_version": 1,
+  "finished_at": "2026-10-25T11:40:48.0714895Z",
+  "receipt_sha256": "F569C8E52A25076DECDCDDF47CE4D783DE023E0B46806877E61AFFD7AE88D07F",
+  "status": "CLEANED",
+  "logical_bytes": 56390870,
+  "checked_at": "2026-10-25T11:40:47.8420186Z",
+  "removed": [
+    "D:\\Minecraft-Validation\\runs\\academy-automation32-20261025"
+  ],
+  "free_before": {
+    "D:\\": 140555898880
+  }
+}

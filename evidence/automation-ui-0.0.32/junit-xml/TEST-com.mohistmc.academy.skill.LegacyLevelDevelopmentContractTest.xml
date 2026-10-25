@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.mohistmc.academy.skill.LegacyLevelDevelopmentContractTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-25T11:23:05.983Z" hostname="MONARCH" time="0.004">
+  <properties/>
+  <testcase name="developerRunsASeparateServerAuthoritativeLevelAction()" classname="com.mohistmc.academy.skill.LegacyLevelDevelopmentContractTest" time="0.002"/>
+  <testcase name="skillUseFillsIndependentGaugeAndHigherSkillsStayLocked()" classname="com.mohistmc.academy.skill.LegacyLevelDevelopmentContractTest" time="0.001"/>
+  <testcase name="persistenceAndSyncCarryTheGaugeGeneration()" classname="com.mohistmc.academy.skill.LegacyLevelDevelopmentContractTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

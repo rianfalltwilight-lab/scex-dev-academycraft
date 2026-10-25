@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.mohistmc.academy.client.FreqTransmitterClientContractTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-10-25T11:23:02.047Z" hostname="MONARCH" time="0.008">
+  <properties/>
+  <testcase name="openUsesCancelableRequestNonceAndWorldSelectionOnlyAfterServerState()" classname="com.mohistmc.academy.client.FreqTransmitterClientContractTest" time="0.004"/>
+  <testcase name="c2sPayloadCannotForgeCoordinatesAndServerOwnsRealClickRange()" classname="com.mohistmc.academy.client.FreqTransmitterClientContractTest" time="0.003"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

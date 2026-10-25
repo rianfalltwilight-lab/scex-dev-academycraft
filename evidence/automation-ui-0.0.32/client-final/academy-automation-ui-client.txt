@@ -1,0 +1,87 @@
+status=PASS
+Input source=programmatic Minecraft.KeyboardHandler.keyPress (GLFW press/release), plus Screen mouse events. Narration=actual native TITLE/USAGE output; audio and manual human input not tested.
+PASS locale=en_us requestedScale=2 actualScale=2.0 framebuffer=1280x960 gui=640x480
+PASS narration en_us-scale2 settings title=Show HUD: Enabled button usage=Press Enter to activate
+PASS en_us-scale2 wheel hides focused setting; Enter/Space cause no hidden change; Tab restores visible focus
+PASS screenshot=automation-ui-en_us-scale2-settings.png
+PASS narration en_us-scale2 skill-slot title=Skill slot 1: Empty slot. Key: Left Button. Activate to choose or clear. button usage=Press Enter to activate
+PASS narration en_us-scale2 skill-choice title=Railgun button usage=Press Enter to activate
+PASS screenshot=automation-ui-en_us-scale2-slots.png
+PASS narration en_us-scale2 skill-clear title=Clear button usage=Press Enter to activate
+PASS en_us-scale2 settings Enter/Space/mouse; skill preset server ACK, modal Tab containment, slot select/clear server ACK, Escape focus return
+PASS en_us-scale2 localized information-card labels=Energy,Buffer,Liquid,Capacity,Information,Mode
+PASS narration en_us-scale2 metal-next title=Next mode. Current mode: Plate Crushing button usage=Press Enter to activate
+PASS narration en_us-scale2 metal-previous title=Previous mode. Current mode: Incising button usage=Press Enter to activate
+PASS screenshot=automation-ui-en_us-scale2-metal.png
+PASS en_us-scale2 native mode buttons Enter -> INCISE, Space -> ETCH, mouse previous -> INCISE; real menu synchronized from server
+PASS locale=en_us requestedScale=3 actualScale=3.0 framebuffer=1280x960 gui=427x320
+PASS narration en_us-scale3 settings title=Show HUD: Enabled button usage=Press Enter to activate
+PASS en_us-scale3 wheel hides focused setting; Enter/Space cause no hidden change; Tab restores visible focus
+PASS screenshot=automation-ui-en_us-scale3-settings.png
+PASS narration en_us-scale3 skill-slot title=Skill slot 1: Empty slot. Key: Left Button. Activate to choose or clear. button usage=Press Enter to activate
+PASS narration en_us-scale3 skill-choice title=Railgun button usage=Press Enter to activate
+PASS screenshot=automation-ui-en_us-scale3-slots.png
+PASS narration en_us-scale3 skill-clear title=Clear button usage=Press Enter to activate
+PASS en_us-scale3 settings Enter/Space/mouse; skill preset server ACK, modal Tab containment, slot select/clear server ACK, Escape focus return
+PASS en_us-scale3 localized information-card labels=Energy,Buffer,Liquid,Capacity,Information,Mode
+PASS narration en_us-scale3 metal-next title=Next mode. Current mode: Plate Crushing button usage=Press Enter to activate
+PASS narration en_us-scale3 metal-previous title=Previous mode. Current mode: Incising button usage=Press Enter to activate
+PASS screenshot=automation-ui-en_us-scale3-metal.png
+PASS en_us-scale3 native mode buttons Enter -> INCISE, Space -> ETCH, mouse previous -> INCISE; real menu synchronized from server
+PASS locale=zh_cn requestedScale=2 actualScale=2.0 framebuffer=1280x960 gui=640x480
+PASS narration zh_cn-scale2 settings title=显示 HUD：已开启按钮 usage=按下Enter键激活
+PASS zh_cn-scale2 wheel hides focused setting; Enter/Space cause no hidden change; Tab restores visible focus
+PASS screenshot=automation-ui-zh_cn-scale2-settings.png
+PASS narration zh_cn-scale2 skill-slot title=技能槽 1：空槽位。按键：左键。确认后可选择或清空。按钮 usage=按下Enter键激活
+PASS narration zh_cn-scale2 skill-choice title=超电磁炮按钮 usage=按下Enter键激活
+PASS screenshot=automation-ui-zh_cn-scale2-slots.png
+PASS narration zh_cn-scale2 skill-clear title=清空按钮 usage=按下Enter键激活
+PASS zh_cn-scale2 settings Enter/Space/mouse; skill preset server ACK, modal Tab containment, slot select/clear server ACK, Escape focus return
+PASS zh_cn-scale2 localized information-card labels=能量,缓存,液体,容量,信息,模式
+PASS narration zh_cn-scale2 metal-next title=下一个模式。当前模式：冲压按钮 usage=按下Enter键激活
+PASS narration zh_cn-scale2 metal-previous title=上一个模式。当前模式：切割按钮 usage=按下Enter键激活
+PASS screenshot=automation-ui-zh_cn-scale2-metal.png
+PASS zh_cn-scale2 native mode buttons Enter -> INCISE, Space -> ETCH, mouse previous -> INCISE; real menu synchronized from server
+PASS locale=zh_cn requestedScale=3 actualScale=3.0 framebuffer=1280x960 gui=427x320
+PASS narration zh_cn-scale3 settings title=显示 HUD：已开启按钮 usage=按下Enter键激活
+PASS zh_cn-scale3 wheel hides focused setting; Enter/Space cause no hidden change; Tab restores visible focus
+PASS screenshot=automation-ui-zh_cn-scale3-settings.png
+PASS narration zh_cn-scale3 skill-slot title=技能槽 1：空槽位。按键：左键。确认后可选择或清空。按钮 usage=按下Enter键激活
+PASS narration zh_cn-scale3 skill-choice title=超电磁炮按钮 usage=按下Enter键激活
+PASS screenshot=automation-ui-zh_cn-scale3-slots.png
+PASS narration zh_cn-scale3 skill-clear title=清空按钮 usage=按下Enter键激活
+PASS zh_cn-scale3 settings Enter/Space/mouse; skill preset server ACK, modal Tab containment, slot select/clear server ACK, Escape focus return
+PASS zh_cn-scale3 localized information-card labels=能量,缓存,液体,容量,信息,模式
+PASS narration zh_cn-scale3 metal-next title=下一个模式。当前模式：冲压按钮 usage=按下Enter键激活
+PASS narration zh_cn-scale3 metal-previous title=上一个模式。当前模式：切割按钮 usage=按下Enter键激活
+PASS screenshot=automation-ui-zh_cn-scale3-metal.png
+PASS zh_cn-scale3 native mode buttons Enter -> INCISE, Space -> ETCH, mouse previous -> INCISE; real menu synchronized from server
+PASS locale=ja_jp requestedScale=2 actualScale=2.0 framebuffer=1280x960 gui=640x480
+PASS narration ja_jp-scale2 settings title=HUDを表示：有効ボタン usage=エンターキーを押して選択します
+PASS ja_jp-scale2 wheel hides focused setting; Enter/Space cause no hidden change; Tab restores visible focus
+PASS screenshot=automation-ui-ja_jp-scale2-settings.png
+PASS narration ja_jp-scale2 skill-slot title=スキルスロット 1：空きスロット。キー：左ボタン。決定で選択または解除。ボタン usage=エンターキーを押して選択します
+PASS narration ja_jp-scale2 skill-choice title=レールガンボタン usage=エンターキーを押して選択します
+PASS screenshot=automation-ui-ja_jp-scale2-slots.png
+PASS narration ja_jp-scale2 skill-clear title=解除ボタン usage=エンターキーを押して選択します
+PASS ja_jp-scale2 settings Enter/Space/mouse; skill preset server ACK, modal Tab containment, slot select/clear server ACK, Escape focus return
+PASS ja_jp-scale2 localized information-card labels=エネルギー,バッファ,液体,容量,情報,モード
+PASS narration ja_jp-scale2 metal-next title=次のモード。現在のモード：プレスボタン usage=エンターキーを押して選択します
+PASS narration ja_jp-scale2 metal-previous title=前のモード。現在のモード：切断ボタン usage=エンターキーを押して選択します
+PASS screenshot=automation-ui-ja_jp-scale2-metal.png
+PASS ja_jp-scale2 native mode buttons Enter -> INCISE, Space -> ETCH, mouse previous -> INCISE; real menu synchronized from server
+PASS locale=ja_jp requestedScale=3 actualScale=3.0 framebuffer=1280x960 gui=427x320
+PASS narration ja_jp-scale3 settings title=HUDを表示：有効ボタン usage=エンターキーを押して選択します
+PASS ja_jp-scale3 wheel hides focused setting; Enter/Space cause no hidden change; Tab restores visible focus
+PASS screenshot=automation-ui-ja_jp-scale3-settings.png
+PASS narration ja_jp-scale3 skill-slot title=スキルスロット 1：空きスロット。キー：左ボタン。決定で選択または解除。ボタン usage=エンターキーを押して選択します
+PASS narration ja_jp-scale3 skill-choice title=レールガンボタン usage=エンターキーを押して選択します
+PASS screenshot=automation-ui-ja_jp-scale3-slots.png
+PASS narration ja_jp-scale3 skill-clear title=解除ボタン usage=エンターキーを押して選択します
+PASS ja_jp-scale3 settings Enter/Space/mouse; skill preset server ACK, modal Tab containment, slot select/clear server ACK, Escape focus return
+PASS ja_jp-scale3 localized information-card labels=エネルギー,バッファ,液体,容量,情報,モード
+PASS narration ja_jp-scale3 metal-next title=次のモード。現在のモード：プレスボタン usage=エンターキーを押して選択します
+PASS narration ja_jp-scale3 metal-previous title=前のモード。現在のモード：切断ボタン usage=エンターキーを押して選択します
+PASS screenshot=automation-ui-ja_jp-scale3-metal.png
+PASS ja_jp-scale3 native mode buttons Enter -> INCISE, Space -> ETCH, mouse previous -> INCISE; real menu synchronized from server
+PASS native save checkpoint after 20 consecutive ready server ticks

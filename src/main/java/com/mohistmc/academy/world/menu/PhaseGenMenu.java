@@ -1,6 +1,5 @@
 package com.mohistmc.academy.world.menu;
 
-import com.mohistmc.academy.world.AcademyItems;
 import com.mohistmc.academy.world.AcademyMenus;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
@@ -27,7 +26,7 @@ public class PhaseGenMenu extends AcademyMenu {
         addAcademySlot(new Slot(container, 0, 47, 12) {
             @Override
             public boolean mayPlace(ItemStack item) {
-                return item.is(AcademyItems.MATTER_UNIT_PHASE_LIQUID.get());
+                return com.mohistmc.academy.world.block.entity.PhaseFluidContainers.isInput(item);
             }
         });
         addAcademySlot(new Slot(container, 1, 114, 51) {

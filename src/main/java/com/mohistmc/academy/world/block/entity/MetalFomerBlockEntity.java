@@ -15,6 +15,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.Containers;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -40,6 +41,8 @@ public class MetalFomerBlockEntity extends AcademyContainerBlockEntity implement
     private double energy = 0;
     private Mode mode = Mode.PLATE;
     private MetalFormingRecipe current;
+    private final RecipeManager.CachedCheck<MetalFormingRecipeInput, MetalFormingRecipe> recipeCheck =
+            RecipeManager.createCheck(AcademyRecipeTypes.METAL_FORMING.get());
     private net.minecraft.resources.ResourceLocation currentRecipeId;
     private int workCounter;
 
@@ -160,7 +163,7 @@ public class MetalFomerBlockEntity extends AcademyContainerBlockEntity implement
             }
         } else {
             if (++workCounter >= SEARCH_TICKS) {
-                var selected = level.getRecipeManager().getRecipeFor(AcademyRecipeTypes.METAL_FORMING.get(),
+                var selected = recipeCheck.getRecipeFor(
                         new MetalFormingRecipeInput(getItems().get(SLOT_IN), mode), level)
                         .orElse(null);
                 current = selected == null ? null : selected.value();
@@ -300,7 +303,7 @@ public class MetalFomerBlockEntity extends AcademyContainerBlockEntity implement
             return validIndex(slot) && MetalFomerBlockEntity.isSlotValid(MetalFomerBlockEntity.this.level, slots[slot], stack);
         }
 
-        private boolean validIndex(int slot) { return slot >= 0 && slot < slots.length; }
+        private boolean validIndex(int slot) { return !isRemoved() && slot >= 0 && slot < slots.length; }
     }
 
     /** 供 RegisterCapabilitiesEvent 按朝向返回物品栏能力 */

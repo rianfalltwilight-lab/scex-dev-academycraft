@@ -1,0 +1,72 @@
+{
+  "scope": "0.0.32 native machine recipe lookup and two configurable material tags",
+  "sources": {
+    "official_documentation": "https://docs.neoforged.net/docs/1.21.1/resources/server/recipes/",
+    "local_sources_jar": "build/moddev/artifacts/neoforge-21.1.248-sources.jar",
+    "reviewed_native_methods": [
+      "RecipeManager.createCheck: caches ResourceLocation, obtains the current level RecipeManager on every call",
+      "RecipeManager.getRecipeFor(type,input,level,lastId): resolves the ID in the current manager, verifies type, then calls matches before falling back to candidate scanning",
+      "MinecraftServer.reloadResources: rebuilds server resources and updates registry tags; same-thread invocation uses managedBlock"
+    ]
+  },
+  "production_changes": [
+    "ImagFusorBlockEntity and MetalFomerBlockEntity use per-instance RecipeManager.CachedCheck; no global cache, reload listener, lookup counters or custom cache framework was added.",
+    "Metal Former's existing 5-tick search cadence and current-recipe object check remain. Native matches continues to check mode, input count, ingredient and available output.",
+    "Imag Fusor tracks the current in-memory processing recipe. Changing to another matching recipe or replacing a same-ID recipe on reload resets the previous processing time before any new completion or debit.",
+    "Empty or unmatched inputs clear Fusor progress. Native cached lookup revalidates count and ingredient rather than treating an old ID as a successful match.",
+    "Legacy saved Fusor processingTime remains readable and resumes after first matching lookup; only the transient recipe object is cleared on load. No persistent field or recipe ID was renamed."
+  ],
+  "material_tags": {
+    "academy:machine_inputs/iron_ingots": {
+      "default_values": ["minecraft:iron_ingot"],
+      "consumers": ["academy:form_reinforced_iron_plate", "academy:extra_fuse_constraint_ingot"]
+    },
+    "academy:machine_inputs/silicon_feedstock": {
+      "default_values": ["minecraft:sand"],
+      "consumers": ["academy:extra_fuse_imag_silicon"]
+    },
+    "behavior": "Both are native data/academy/tags/item/machine_inputs/*.json tags with replace=false. Operators may append compatible materials or replace the accepted set using datapacks. Default material membership, recipe IDs, outputs, input counts, fluid amounts, durations, energy costs and 4 FE = 1 IF are unchanged."
+  },
+  "tests_added": {
+    "source": "src/auditTest/java/com/mohistmc/academy/regression/RecipeCacheReloadGameTests.java",
+    "namespace": "academy_automation",
+    "cases": [
+      {
+        "name": "nativeRecipeCacheRechecksModeAndCountWithoutRescanningCandidates",
+        "batch": "automation_recipe_checks",
+        "checks": "Two production Metal Former jobs use test-local counting recipes: expected first lookup scans two candidates, second lookup checks only its selected recipe. Additional jobs test insufficient count and switching to another mode. RecipeManager contents are restored in finally."
+      },
+      {
+        "name": "fusorRecipeChangesReplacementAndRemovalCannotInheritProgress",
+        "batch": "automation_recipe_checks",
+        "checks": "Production ticks at the 119/120 boundary cover valid input switching, same-ID recipe replacement with new input/fluid/output, and complete recipe removal. Exact input, output, fluid and energy conservation are asserted; manager contents are restored in finally."
+      },
+      {
+        "name": "realDatapackReloadUpdatesMaterialTagsAndInvalidatesActiveRecipes",
+        "batch": "automation_recipe_reload",
+        "checks": "An isolated actual server datapack appends material tags and replaces both active machine recipes, then uses replace=true tags and a neoforge:false condition to remove a warmed Fusor recipe. Reload completion is observed from subsequent server ticks; no join or same-thread managedBlock is used. Asynchronous restoration of original selected packs finishes before normal success or assertion failure, then the uniquely owned temporary pack is deleted. An emergency timeout listener sequences restoration after an outstanding reload. The original 28 Metal Former / 7 Fusor recipe inventory is checked after restoration."
+      }
+    ]
+  },
+  "prior_test_compatibility_review": {
+    "reviewed": [
+      "RecipeSourceContractTest: recipe inventory, schema and exact IDs",
+      "ExtraAcCompatibilityContractTest: retained fusor recipes and outputs",
+      "AcademyServerGameTests.recipeManagerLoadsAndMatchesAllAcademyMachineRecipes: native ingredient enumeration, count and output",
+      "ExtraRecipeExecutionGameTests: original input/output/fluid/energy execution",
+      "MachineInventorySyncGameTests: native inventory save/load and menu synchronization"
+    ],
+    "result": "No old assertion was weakened or changed. Existing machine ingredient tests resolve Ingredient through RecipeManager, so defaults remain identical when the new tags are loaded."
+  },
+  "local_validation": {
+    "resource_json_parse": "passed for all three modified recipes and both new tag files",
+    "targeted_git_diff_check": "passed",
+    "gradle": "not run by this subagent; parent coordinates the unified build",
+    "actual_game_tests": "pending parent-run isolated verification"
+  },
+  "limits": [
+    "CachedCheck reduces candidate matches after a successful lookup; it does not eliminate lookup calls or negative-result scans. The planned counting test makes no MSPT claim.",
+    "As in native CachedCheck, an already selected matching ID takes precedence over other overlapping matching recipes. Datapacks should avoid ambiguous overlapping recipes if they require a unique result.",
+    "The new transient identity protects active loaded jobs during input changes and resource reload. The existing legacy on-disk progress format is preserved rather than expanded into a serialized recipe snapshot."
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "status": "PREPARED_NOT_EXECUTED",
+  "version": "0.0.32-scex-automation-ui",
+  "targets": [
+    "D:\\SCEX-Work\\01-Mods\\Other-Ports\\AcademyCraft\\0.0.32-20261025",
+    "D:\\Minecraft-Validation\\runs\\academy-automation32-20261025"
+  ],
+  "final_runtime_host": "MONARCH",
+  "remote_runtime_status": "NOT_STARTED_RESOURCE_GUARD",
+  "remote_runtime_exit_code": null,
+  "final_exit_codes": [],
+  "tested_input_selection": "Read final-validation.artifact_entry_comparisons; do not hard-code r1 or r2 snapshot",
+  "retained_original_base": "VICERACH:D:\\Minecraft-Validation\\bases\\academy-ssid23-small-20260908",
+  "helper_sha256": {
+    "Remove-CompletedTestRun.ps1": "6ca0dff553eb223a5d14c68a7ca377a982e52f0d0b17e737d418dd2bfa65df98",
+    "Lab.Common.ps1": "07f34d8eec39a1a92aad65a571b7c67258e14693bf2b5ccab175d8ebf981a62c"
+  },
+  "verification": "PowerShell AST parse passed; helper copies match originals; no wrapper mode or deletion executed."
+}

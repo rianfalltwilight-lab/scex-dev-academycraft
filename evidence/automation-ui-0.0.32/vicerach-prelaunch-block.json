@@ -1,0 +1,12 @@
+﻿{
+    "host":  "VICERACH",
+    "status":  "NOT_STARTED_RESOURCE_GUARD",
+    "test_java_started":  false,
+    "required_free_bytes":  6442450944,
+    "observed_free_bytes":  6383583232,
+    "prepared_runs":  [
+                          "gt-r1",
+                          "client-r1"
+                      ],
+    "fallback_host":  "MONARCH"
+}

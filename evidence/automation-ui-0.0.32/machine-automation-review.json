@@ -1,0 +1,45 @@
+{
+  "version": "0.0.32",
+  "scope": "Machine sided item automation and standard phase-fluid containers",
+  "status": "implementation_ready_runtime_pending",
+  "runtime_owner": "root; this subagent has not run Gradle or runtime tests",
+  "api_references": [
+    "https://docs.neoforged.net/docs/1.21.1/inventories/capabilities/",
+    "build/moddev/artifacts/neoforge-21.1.248-sources.jar!/net/neoforged/neoforge/fluids/FluidUtil.java",
+    "build/moddev/artifacts/neoforge-21.1.248-sources.jar!/net/neoforged/neoforge/fluids/capability/templates/FluidHandlerItemStack.java",
+    "build/moddev/artifacts/neoforge-21.1.248-sources.jar!/net/neoforged/neoforge/items/VanillaInventoryCodeHooks.java",
+    "build/moddev/artifacts/neoforge-21.1.248-sources.jar!/net/neoforged/neoforge/capabilities/CapabilityHooks.java"
+  ],
+  "capability_coverage": {
+    "metal_former": "Existing sided item handlers retained; stale instances now reject after removal.",
+    "imag_fusor": "Existing top material/fluid, side energy, bottom output handlers retained; fluid input accepts standard phase containers; stale instances reject after removal.",
+    "phase_generator": "Top fluid container input; horizontal energy item input; bottom returned container and fully charged energy item extraction; null side combines these rules.",
+    "solar_generator": "Top/horizontal energy item input; bottom fully charged item extraction; original stack limit and energy conversion retained.",
+    "wind_generator_base": "Same charging rules as solar, with an upper proxy referencing the live base; removed proxy/base or unloaded base stops the old handler.",
+    "owner_restricted_machines": "Node, matrix, interferer, turbine fan and developer inventories receive no new identity-free automation access."
+  },
+  "container_transaction": {
+    "legacy": "Matter Unit consumes one item for exactly 1000 mB and returns one empty unit.",
+    "standard": "NeoForge tryEmptyContainer previews against the destination without changing input or tank; output availability is checked before execute; getResult supplies the actual replacement/remaining container.",
+    "output_merge": "Same item and identical components only, respecting stack capacity; blocked output leaves input and fluid untouched.",
+    "partial": "A partially drained container returns to the output slot with its remaining fluid and components.",
+    "consumable": "An empty returned stack consumes the input without requiring an empty-container output slot.",
+    "unchanged": "Existing tank sizes, production rates, save keys, registry IDs and 4 FE = 1 IF are preserved."
+  },
+  "new_gametest_count": 9,
+  "gametest_namespace": "academy_automation",
+  "gametest_batch": "automation_inventory",
+  "tests": [
+    "generatorFacesSimulationAndChargedOnlyExtraction",
+    "bucketsAndLegacyMatterUnitsConserveBothMachineTanks",
+    "blockedOutputsComponentsWrongFluidsAndInsufficientRoomDoNotConsume",
+    "standardPartialConsumableAndReplacementContainersConserveFluid",
+    "naturalHoppersFeedAndDrainPhaseGeneratorContainers",
+    "naturalHoppersFeedAndDrainImagFusorContainers",
+    "naturalHoppersChargeSolarBatteryAndExtractWhenFull",
+    "naturalHoppersChargeThroughWindUpperProxy",
+    "removedHandlersRejectAccessAndGeneratorContentsDropOnce"
+  ],
+  "test_fixture_boundary": "AutomationFluidFixtures is auditTest-only. It registers a probe data component and native NeoForge partial/consumable/swapping fluid handlers on three otherwise unused vanilla items, and is excluded from the delivery JAR. No third-party mod runtime result is implied.",
+  "static_review": "Compared production edits to released commit 4993aed with EOL differences ignored; git diff --check passed for the edited production paths. Actual compilation and GameTest acceptance remain pending root execution."
+}

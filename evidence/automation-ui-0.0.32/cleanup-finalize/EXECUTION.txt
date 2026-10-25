@@ -1,0 +1,69 @@
+Prepared only. No Inspect, Plan, Apply, deletion, transfer or process termination was executed by this subagent.
+
+Contract
+  Remove-CompletedTestRun.ps1 and Lab.Common.ps1 are exact copies of the existing skill helpers.
+  The wrapper seals a completion receipt and calls the original Plan/Apply contract.
+  Every cleanup scope contains exactly one hard-coded absolute target:
+    MONARCH: D:\SCEX-Work\01-Mods\Other-Ports\AcademyCraft\0.0.32-20261025
+    VICERACH: D:\Minecraft-Validation\runs\academy-automation32-20261025
+  Original VICERACH base D:\Minecraft-Validation\bases\academy-ssid23-small-20260908 stays intact.
+  Project source, tested snapshots, delivery files, retained evidence, shared caches and production paths are outside deletion.
+
+Do this only after all testing is finished, final evidence is sealed and test Java has exited.
+This prepared wrapper defaults to gt-r1/client-r1, but accepts explicit final run names.
+The final tested snapshot path and SHA256 come from final-validation.artifact_entry_comparisons;
+there is no hard-coded r1/r2 tested snapshot choice.
+
+1. MONARCH: capture and review actual Java/process identities and directory identity.
+   Set-Location D:\Minecraft-Projects\academycraft-deep-audit-0.0.29-20261025
+   $cleanupScript = '.\evidence\automation-ui-0.0.32\cleanup-finalize\Invoke-Academy32FinalCleanup.ps1'
+   $factsFile = 'D:\Minecraft-Projects\academycraft-deep-audit-0.0.29-20261025\evidence\automation-ui-0.0.32\cleanup-finalize\monarch-inspect.json'
+   & $cleanupScript -HostScope MONARCH -Mode Inspect | Set-Content -LiteralPath $factsFile -Encoding utf8
+   Read the inspect JSON. processes_referencing_run must be empty; review java_baseline against preflight and known non-test Java.
+   Recorded runtime PIDs are checked independently using PID plus exact process StartTime, even if included accidentally in the Java baseline.
+
+2. MONARCH: seal actual final receipts and produce the original helper's plan; no deletion.
+   & $cleanupScript -HostScope MONARCH -Mode Plan -ReviewedFactsPath $factsFile -FinalGameTestRun gt-r1 -FinalClientRun client-r1
+   Completion is stored under cleanup-finalize\monarch\completion.json.
+   The local copied base manifest/base receipt are retained outside the target. Original source base remains on VICERACH.
+   Final result.json aliases must match actual selected runtime receipts byte-for-byte.
+   External final release/probe snapshot JARs must match actual final runtime JARs and final-validation hashes.
+   Earlier attempt results, including failures/missing exits, are retained without changing their result values.
+
+3. Before deleting either target, prepare the small VICERACH receipt bundle outside its staging root.
+   Fixed destination: D:\Minecraft-Validation\receipts\academy-automation32-20261025
+   Copy unchanged:
+     cleanup-finalize\Invoke-Academy32FinalCleanup.ps1, Remove-CompletedTestRun.ps1, Lab.Common.ps1
+     final-validation.json
+     gametests-final\ (the retained final server evidence)
+     client-final\ (the retained final client evidence, including visual review and images)
+     monarch-preflight.json, preflight.json, vicerach-prelaunch-block.json
+     cleanup-finalize\monarch\completion.json -> monarch-completion.json
+   Do not copy large runtime worlds, copied bases or final JARs to VICERACH.
+   The final tested JARs/source remain in the MONARCH project outside its temporary run root.
+
+4. VICERACH: inspect, review and seal the staging cleanup plan.
+   $cleanupScript = 'D:\Minecraft-Validation\receipts\academy-automation32-20261025\Invoke-Academy32FinalCleanup.ps1'
+   $factsFile = 'D:\Minecraft-Validation\receipts\academy-automation32-20261025\vicerach-inspect.json'
+   & $cleanupScript -HostScope VICERACH -Mode Inspect | Set-Content -LiteralPath $factsFile -Encoding utf8
+   Review actual identities as above.
+   & $cleanupScript -HostScope VICERACH -Mode Plan -ReviewedFactsPath $factsFile -FinalGameTestRun gt-r1 -FinalClientRun client-r1
+   Any remote process.json/result.json blocks the NOT_STARTED claim and requires preserving/reviewing the staging.
+   Remote exit_codes refer only to the real MONARCH final result receipts. Remote runtime exit remains null.
+   Old staging JARs are hashed into unstarted-staging-identity.json; they need not equal the final tested JARs.
+   The remote original base manifest is the retained local rebuild input; final inputs remain recorded as MONARCH-owned.
+
+5. After reviewing each exact plan, execute its sealed receipt using the same wrapper on the corresponding host.
+   $cleanupScript = 'D:\Minecraft-Projects\academycraft-deep-audit-0.0.29-20261025\evidence\automation-ui-0.0.32\cleanup-finalize\Invoke-Academy32FinalCleanup.ps1'
+   & $cleanupScript -HostScope MONARCH -Mode Apply
+   # On VICERACH, with its own script path:
+   $cleanupScript = 'D:\Minecraft-Validation\receipts\academy-automation32-20261025\Invoke-Academy32FinalCleanup.ps1'
+   & $cleanupScript -HostScope VICERACH -Mode Apply
+   These commands are examples for root execution; this preparation task does not execute them.
+   Apply never refreshes receipt hashes, success flags or creation timestamps.
+   The original helper rechecks boundaries, ordinary directories/reparse points, input/evidence hashes,
+   current Java PID+creation identities, runner lease and active processes before native Remove-Item.
+   Its completion.json.cleanup.json records actual removal, logical bytes and disk free-space deltas.
+
+Prepared verification: PowerShell AST syntax parsing passed; both copied helper SHA256 values match the skill originals.
+No runtime success is asserted by this preparation package.

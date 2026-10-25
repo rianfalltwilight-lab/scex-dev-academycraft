@@ -1,0 +1,9 @@
+onboardAccessibility:false
+startedCleanly:true
+skipMultiplayerWarning:true
+maxFps:30
+renderDistance:4
+simulationDistance:5
+fullscreen:false
+guiScale:2
+lang:ja_jp

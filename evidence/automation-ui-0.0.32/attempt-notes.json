@@ -1,0 +1,8 @@
+{
+  "build_r1": "Compiled successfully; one outdated source-shape JUnit assertion failed. Exact failure XML retained.",
+  "build_r2": "342 JUnit passed. Candidate in tested-r1-artifacts.json was staged on Vicerach, but its prelaunch memory guard prevented any test Java from starting.",
+  "prepared_candidate_r1": "Superseded before runtime testing by the six visible information-card label translations found during final UI review. The legacy tested-r1 filename is a candidate snapshot label, not a claim of completed gameplay tests.",
+  "runtime_fallback": "Vicerach remained below the 6 GiB free-memory threshold. Monarch D-drive fallback passed the 2.5 GiB disk budget and uses the byte-verified same frozen base.",
+  "build_r3_and_runtime_r1": "342 JUnit, 473 GameTest and 85 client checks passed with normal exits. Subsequent image review found the Japanese energy label entering the numeric column. Candidate r2-tested is superseded; actual successful runtime receipts remain unchanged and the visual failure is separately retained.",
+  "build_r4_and_final_runtime": "342 JUnit PASS; client-r2 85 checks plus 18 visually reviewed screenshots PASS. gt-r2 failed the unchanged shadow-navigation displacement fixture once; a single fresh-world rerun gt-r3 with identical r3-tested bytes passed 473/473. All actual attempts and exits retained."
+}

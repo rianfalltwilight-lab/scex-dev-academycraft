@@ -1,0 +1,40 @@
+{
+  "status": "SOURCE_AND_RUNTIME_REVIEW_COMPLETE",
+  "baseline": "4993aede05974ffe8f75994b2bcde7cdda92c6a2",
+  "reviewers": [
+    "root",
+    "next_phase_review",
+    "machine_sync31",
+    "player_sync31"
+  ],
+  "verified_boundaries": [
+    "Root checked the actual NeoForge 21.1.248 FluidUtil implementation: simulated container emptying mutates only a one-item copy, returns replacement contents, and leaves destination fluid unchanged.",
+    "Root checked native MinecraftServer.reloadResources scheduling: off-thread invocation queues resource mutation and completion back onto the server executor; the test polls completion without joining its own server thread.",
+    "Independent UI review found and confirmed repair of stale offscreen focus after mouse wheel scroll; client gate exercises the production input path.",
+    "Read-only checks retained native protocol v20, persistent data v4, recipe/item registration identities and runtime version ranges."
+  ],
+  "junit_first_attempt": {
+    "tests": 342,
+    "failures": 1,
+    "cause": "Old tutorial/JEI source contract expected a direct getRecipeFor(type) string. Updated to verify the typed CachedCheck, its recipe type, and actual input/level query; tutorial and JEI type checks retained.",
+    "subsequent_build": "build-r2.log PASS"
+  },
+  "runtime_reports": [
+    "gametests-final/result.json",
+    "client-final/result.json",
+    "client-final/visual-review.json"
+  ],
+  "limits": [
+    "Scope is common settings/skill-slot/machine-mode interactions; it does not claim all terminal apps have been rebuilt.",
+    "gt-r2 had one natural shadow-navigation failure at the fixed 60-tick displacement assertion. Identical JARs passed all 473 checks in fresh gt-r3. The earlier failure and analysis remain retained; no navigation fix is claimed."
+  ],
+  "final_runtime": {
+    "junit": 342,
+    "gametests": 473,
+    "client_checks": 85,
+    "screenshots_reviewed": 18,
+    "server_run": "MONARCH/gt-r3",
+    "client_run": "MONARCH/client-r2",
+    "tested_snapshot": "build/automation-ui-0.0.32-r3-tested"
+  }
+}

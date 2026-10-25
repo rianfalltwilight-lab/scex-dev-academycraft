@@ -2,16 +2,17 @@ package com.mohistmc.academy.world.block.entity;
 
 import com.mohistmc.academy.energy.api.block.IWirelessGenerator;
 import com.mohistmc.academy.world.AcademyBlockEntities;
-import com.mohistmc.academy.world.AcademyItems;
 import com.mohistmc.academy.world.AcademyFluids;
 import com.mohistmc.academy.capability.EnergyItemHelper;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
+import net.neoforged.neoforge.items.IItemHandler;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
@@ -28,6 +29,10 @@ public class PhaseGenBlockEntity extends AcademyContainerBlockEntity implements 
     private static final int MAX_STORAGE = 6000;
 
     private float storedEnergy = 0;
+    private final IItemHandler topItems = itemView(new int[]{0}, true, false);
+    private final IItemHandler sideItems = itemView(new int[]{2}, true, false);
+    private final IItemHandler bottomItems = itemView(new int[]{1, 2}, false, true);
+    private final IItemHandler internalItems = itemView(new int[]{0, 1, 2}, true, true);
     private final FluidTank tank = new FluidTank(TANK_SIZE,
             fs -> fs.getFluid() == AcademyFluids.PHASE_LIQUID.get()) {
         @Override protected void onContentsChanged() { markMachineChanged(); }
@@ -67,23 +72,7 @@ public class PhaseGenBlockEntity extends AcademyContainerBlockEntity implements 
             }
         }
 
-        ItemStack input = getItems().get(0);
-        ItemStack output = getItems().get(1);
-
-        if (!input.isEmpty() && input.is(AcademyItems.MATTER_UNIT_PHASE_LIQUID.get())) {
-            boolean canOutput = output.isEmpty()
-                    || (output.is(AcademyItems.MATTER_UNIT_NONE.get())
-                    && output.getCount() < output.getMaxStackSize());
-
-            if (canOutput && tank.getFluidAmount() + PER_UNIT <= TANK_SIZE) {
-                tank.fill(new FluidStack(AcademyFluids.PHASE_LIQUID.get(), PER_UNIT),
-                        net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE);
-                input.shrink(1);
-                if (output.isEmpty()) getItems().set(1, new ItemStack(AcademyItems.MATTER_UNIT_NONE.get()));
-                else output.grow(1);
-                changed = true;
-            }
-        }
+        if (PhaseFluidContainers.emptyOne(getItems(), 0, 1, tank)) changed = true;
         ItemStack energyItem = getItems().get(2);
         if (EnergyItemHelper.isEnergyItem(energyItem) && storedEnergy >= 1) {
             int charged = EnergyItemHelper.receiveEnergy(energyItem, Math.min((int) storedEnergy, (int) MAX_BANDWIDTH), false);
@@ -122,6 +111,19 @@ public class PhaseGenBlockEntity extends AcademyContainerBlockEntity implements 
     public int getProgress() { return tank.getFluidAmount(); }
     public int getProcessTicks() { return TANK_SIZE; }
     public FluidTank getFluidTank() { return tank; }
+
+    public IItemHandler getHandlerForSide(Direction side) {
+        if (side == null) return internalItems;
+        return side == Direction.UP ? topItems : side == Direction.DOWN ? bottomItems : sideItems;
+    }
+
+    private IItemHandler itemView(int[] slots, boolean insert, boolean extract) {
+        return new MachineAutomationItems(this, slots,
+                (slot, stack) -> insert && (slot == 0 ? PhaseFluidContainers.isInput(stack)
+                        : slot == 2 && EnergyItemHelper.isEnergyItem(stack)),
+                (slot, stack) -> extract && (slot == 1 || slot == 2 && MachineAutomationItems.fullyCharged(stack)),
+                () -> true);
+    }
 
     /** 是否正在工作中 */
     public boolean isWorking() {

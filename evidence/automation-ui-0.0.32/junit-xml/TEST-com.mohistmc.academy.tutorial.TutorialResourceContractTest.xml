@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.mohistmc.academy.tutorial.TutorialResourceContractTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-25T11:23:06.143Z" hostname="MONARCH" time="0.037">
+  <properties/>
+  <testcase name="lockedTutorialsCannotRenderBodyOrRecipePreviewsAndRefreshWhileOpen()" classname="com.mohistmc.academy.tutorial.TutorialResourceContractTest" time="0.001"/>
+  <testcase name="tutorialMachinePreviewUsesSameImagRecipeManagerTypeAsMachineAndJei()" classname="com.mohistmc.academy.tutorial.TutorialResourceContractTest" time="0.001"/>
+  <testcase name="tutorialActivationRetainsTheLegacyNotificationAndPersistentDeduplicationFlow()" classname="com.mohistmc.academy.tutorial.TutorialResourceContractTest" time="0.001"/>
+  <testcase name="metalFormerTutorialCyclesAllIngredientCandidates()" classname="com.mohistmc.academy.tutorial.TutorialResourceContractTest" time="0.001"/>
+  <testcase name="everyRegisteredTutorialHasCompleteEnglishAndChineseUtf8Content()" classname="com.mohistmc.academy.tutorial.TutorialResourceContractTest" time="0.012"/>
+  <testcase name="windTutorialDocumentsTheFinal1122FifteenByFifteenClearanceRule()" classname="com.mohistmc.academy.tutorial.TutorialResourceContractTest" time="0.001"/>
+  <testcase name="guiHasHeightAwareScaleAndRendersEveryParserType()" classname="com.mohistmc.academy.tutorial.TutorialResourceContractTest" time="0.001"/>
+  <testcase name="terminalTutorialIncludesEveryLegacyInstallableApp()" classname="com.mohistmc.academy.tutorial.TutorialResourceContractTest" time="0.003"/>
+  <testcase name="everyMarkdownImageAndKeyReferenceResolves()" classname="com.mohistmc.academy.tutorial.TutorialResourceContractTest" time="0.012"/>
+  <testcase name="reloadHookInvalidatesBothTutorialCaches()" classname="com.mohistmc.academy.tutorial.TutorialResourceContractTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

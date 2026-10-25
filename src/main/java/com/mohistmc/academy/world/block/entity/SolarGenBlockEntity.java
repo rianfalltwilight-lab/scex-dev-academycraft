@@ -5,6 +5,7 @@ import com.mohistmc.academy.capability.IFEnergyStorage;
 import com.mohistmc.academy.energy.api.block.IWirelessGenerator;
 import com.mohistmc.academy.world.AcademyBlockEntities;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
@@ -12,6 +13,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.items.IItemHandler;
 
 /**
  * 太阳能发电机 —— 实现 IWirelessGenerator 接口以向 IF 能源网络供电。
@@ -25,6 +27,13 @@ public class SolarGenBlockEntity extends AcademyContainerBlockEntity
     private static final int MAX_STORAGE = 1000;
 
     private float storedEnergy = 0.0f;
+    private final IItemHandler inputItems = MachineAutomationItems.chargingSlot(this, Direction.UP, () -> true);
+    private final IItemHandler outputItems = MachineAutomationItems.chargingSlot(this, Direction.DOWN, () -> true);
+    private final IItemHandler internalItems = MachineAutomationItems.chargingSlot(this, null, () -> true);
+
+    public IItemHandler getHandlerForSide(Direction side) {
+        return side == null ? internalItems : side == Direction.DOWN ? outputItems : inputItems;
+    }
 
     public SolarGenBlockEntity(BlockPos pos, BlockState state) {
         super(AcademyBlockEntities.SOLAR_GEN.get(), pos, state);

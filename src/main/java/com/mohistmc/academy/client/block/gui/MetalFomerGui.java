@@ -2,6 +2,7 @@ package com.mohistmc.academy.client.block.gui;
 
 import com.mohistmc.academy.AcademyCraft;
 import com.mohistmc.academy.client.gui.AcademyBaseUI;
+import com.mohistmc.academy.client.gui.AcademyActionButton;
 import com.mohistmc.academy.client.gui.InfoArea;
 import com.mohistmc.academy.crafting.MetalFormerRecipes.Mode;
 import com.mohistmc.academy.network.MetalFormerActionMessage;
@@ -48,10 +49,42 @@ public class MetalFomerGui extends AcademyBaseUI<MetalFomerMenu> {
 
     /** 客户端平滑进度(插值过渡,避免逐格跳动) */
     private double smoothProgress = 0;
+    private AcademyActionButton previousMode, nextMode;
 
     public MetalFomerGui(MetalFomerMenu menu, Inventory inv, Component title) {
         super(menu, inv, title, WirelessState.WIFI);
         setRenderWireless(true);
+    }
+
+    @Override
+    protected void init() {
+        super.init();
+        previousMode = addWidget(new AcademyActionButton(leftPos + BTN_L_X, topPos + BTN_Y, BTN_SIZE, BTN_SIZE,
+                Component.empty(), () -> changeMode(-1)));
+        nextMode = addWidget(new AcademyActionButton(leftPos + BTN_R_X, topPos + BTN_Y, BTN_SIZE, BTN_SIZE,
+                Component.empty(), () -> changeMode(1)));
+        updateModeControls();
+    }
+
+    private void changeMode(int delta) {
+        if (!panelActive && menu.pos != null) MetalFormerActionMessage.send(menu.pos, delta);
+    }
+
+    private void updateModeControls() {
+        Component mode = Component.translatable("gui.academy.metal_former.mode." + menu.getMode().name().toLowerCase(Locale.ROOT));
+        previousMode.setMessage(Component.translatable("ac.ui.mode_previous", mode));
+        nextMode.setMessage(Component.translatable("ac.ui.mode_next", mode));
+        previousMode.active = nextMode.active = !panelActive;
+        previousMode.visible = nextMode.visible = !panelActive;
+        if (panelActive && (getFocused() == previousMode || getFocused() == nextMode)) clearFocus();
+    }
+
+    @Override
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        updateModeControls();
+        super.render(graphics, mouseX, mouseY, partialTick);
+        previousMode.render(graphics, mouseX, mouseY, partialTick);
+        nextMode.render(graphics, mouseX, mouseY, partialTick);
     }
 
     @Override
@@ -89,7 +122,7 @@ public class MetalFomerGui extends AcademyBaseUI<MetalFomerMenu> {
         InfoArea info = new InfoArea();
         info.histogram(InfoArea.histEnergy(menu.getEnergy(), (int) MetalFomerBlockEntity.MAX_ENERGY));
         Mode mode = menu.getMode();
-        info.property("模式", Component.translatable(
+        info.property(Component.translatable("ac.ui.info.mode").getString(), Component.translatable(
                 "gui.academy.metal_former.mode." + mode.name().toLowerCase(Locale.ROOT)).getString());
         info.draw(graphics, this.leftPos, this.topPos);
     }
@@ -134,17 +167,15 @@ public class MetalFomerGui extends AcademyBaseUI<MetalFomerMenu> {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        // 机器页（面板未激活）时响应模式切换按钮
-        if (!this.panelActive) {
-            if (isHoveringButton(this.leftPos + BTN_L_X, this.topPos + BTN_Y, BTN_SIZE, BTN_SIZE, mouseX, mouseY)) {
-                if (this.menu.pos != null) MetalFormerActionMessage.send(this.menu.pos, -1);
-                return true;
-            }
-            if (isHoveringButton(this.leftPos + BTN_R_X, this.topPos + BTN_Y, BTN_SIZE, BTN_SIZE, mouseX, mouseY)) {
-                if (this.menu.pos != null) MetalFormerActionMessage.send(this.menu.pos, 1);
-                return true;
-            }
-        }
-        return super.mouseClicked(mouseX, mouseY, button);
+        updateModeControls();
+        boolean handled = super.mouseClicked(mouseX, mouseY, button);
+        updateModeControls();
+        return handled;
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        updateModeControls();
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 }

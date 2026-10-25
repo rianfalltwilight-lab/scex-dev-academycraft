@@ -603,5 +603,16 @@
   "ac.skill_slot.select_clear": "左クリックで選択 / 右クリックで解除",
   "ac.skill_slot.empty": "空きスロット",
   "ac.skill_slot.select": "左クリックでスキルを選択",
-  "hud.academy.terminal.installing": "インストール中… %s%%"
+  "hud.academy.terminal.installing": "インストール中… %s%%",
+  "ac.ui.setting_state": "%s：%s",
+  "ac.ui.preset_selected": "%s、選択中",
+  "ac.ui.skill_slot": "スキルスロット %s：%s。キー：%s。決定で選択または解除。",
+  "ac.ui.mode_previous": "前のモード。現在のモード：%s",
+  "ac.ui.mode_next": "次のモード。現在のモード：%s",
+  "ac.ui.info.energy": "エネルギー",
+  "ac.ui.info.buffer": "バッファ",
+  "ac.ui.info.liquid": "液体",
+  "ac.ui.info.capacity": "容量",
+  "ac.ui.info.information": "情報",
+  "ac.ui.info.mode": "モード"
 }

@@ -1,0 +1,18 @@
+{
+  "status": "FAIL",
+  "run": "MONARCH/client-r1",
+  "behavior_checks": 85,
+  "behavior_and_normal_exit_passed": true,
+  "reason": "Japanese information-card energy label reaches the numeric column. Visual review requires a label-width correction before release.",
+  "images": [
+    {
+      "file": "client-r1-visual/automation-ui-ja_jp-scale2-metal.png",
+      "sha256": "45d3d9608b20d3fb7b6016e9f5c58c731281a02940d59d2e1bcd9c6f83a81021"
+    },
+    {
+      "file": "client-r1-visual/automation-ui-ja_jp-scale3-metal.png",
+      "sha256": "acbf5bbde6fbecdc46920d3bedf21d464e78ff5cc75c829fbdae45e20158e92e"
+    }
+  ],
+  "superseded": true
+}

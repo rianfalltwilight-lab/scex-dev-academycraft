@@ -603,5 +603,16 @@
   "ac.skill_slot.select_clear": "Left click to select / Right click to clear",
   "ac.skill_slot.empty": "Empty slot",
   "ac.skill_slot.select": "Left click to select a skill",
-  "hud.academy.terminal.installing": "Installing… %s%%"
+  "hud.academy.terminal.installing": "Installing… %s%%",
+  "ac.ui.setting_state": "%s: %s",
+  "ac.ui.preset_selected": "%s, selected",
+  "ac.ui.skill_slot": "Skill slot %s: %s. Key: %s. Activate to choose or clear.",
+  "ac.ui.mode_previous": "Previous mode. Current mode: %s",
+  "ac.ui.mode_next": "Next mode. Current mode: %s",
+  "ac.ui.info.energy": "Energy",
+  "ac.ui.info.buffer": "Buffer",
+  "ac.ui.info.liquid": "Liquid",
+  "ac.ui.info.capacity": "Capacity",
+  "ac.ui.info.information": "Information",
+  "ac.ui.info.mode": "Mode"
 }

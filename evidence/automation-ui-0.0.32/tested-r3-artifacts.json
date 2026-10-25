@@ -1,0 +1,12 @@
+[
+  {
+    "sha256": "56898b05247aaf4e8ee709189e555d7680a026c81140dfdd9deee2f06fee76cd",
+    "bytes": 311594,
+    "name": "AcademyCraft-neoforge-1.21.1-0.0.32-scex-automation-ui-audit-tests.jar"
+  },
+  {
+    "sha256": "7ba65300c14ee200d65a0966255b9e804bf49d52df62d6f9a4d904d6333450de",
+    "bytes": 27861689,
+    "name": "AcademyCraft-neoforge-1.21.1-0.0.32-scex-automation-ui.jar"
+  }
+]

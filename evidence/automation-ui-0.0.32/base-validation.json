@@ -1,0 +1,11 @@
+{
+  "verified": true,
+  "files": 10013,
+  "bytes": 978658916,
+  "manifest_sha256": "031019b874738c2aba2723c15b9e8b9e2ccefdd9d31f951909c9f44d505e033b",
+  "source_host": "VICERACH",
+  "source_root": "D:/Minecraft-Validation/bases/academy-ssid23-small-20260908",
+  "runtime_host": "MONARCH",
+  "base": "D:/SCEX-Work/01-Mods/Other-Ports/AcademyCraft/0.0.32-20261025/base",
+  "fallback_reason": "Vicerach prelaunch memory below 6 GiB; no test process started there"
+}

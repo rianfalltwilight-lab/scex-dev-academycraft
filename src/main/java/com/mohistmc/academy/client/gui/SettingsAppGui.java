@@ -7,6 +7,8 @@ import com.mohistmc.academy.skill.AcademyAttachments;
 import com.mohistmc.academy.skill.PlayerAbilityData;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.EnumMap;
+import java.util.Map;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
@@ -23,8 +25,8 @@ public class SettingsAppGui extends AcademyScreen {
     private static final int ROW_HEIGHT = 20;
 
     private int scrollOffset = 0;
-    private int hoveredRow = -1;
-    private boolean hoveredBack = false;
+    private AcademyActionButton backButton;
+    private final Map<SettingKey, AcademyActionButton> rowButtons = new EnumMap<>(SettingKey.class);
     private long lastSettingsRefresh = Long.MIN_VALUE;
 
     private final List<SettingRow> rows = new ArrayList<>();
@@ -38,6 +40,23 @@ public class SettingsAppGui extends AcademyScreen {
         super.init();
         centerGui(GUI_WIDTH, GUI_HEIGHT);
         buildRows();
+        rowButtons.clear();
+        backButton = addWidget(new AcademyActionButton(guiLeft + 6, guiTop + 5, 18, 18,
+                Component.translatable("gui.back"), () -> Minecraft.getInstance().setScreen(new DataTerminalGui())));
+        for (SettingRow row : rows) {
+            if (row.key == null) continue;
+            SettingKey key = row.key;
+            rowButtons.put(key, addWidget(new AcademyActionButton(guiLeft + 2, 0, GUI_WIDTH - 4, ROW_HEIGHT,
+                    row.label, () -> activate(key), () -> revealRow(key)) {
+                @Override public boolean isMouseOver(double x, double y) {
+                    return insideRows(x, y) && super.isMouseOver(x, y);
+                }
+                @Override public boolean mouseClicked(double x, double y, int button) {
+                    return insideRows(x, y) && super.mouseClicked(x, y, button);
+                }
+            }));
+        }
+        updateButtons();
     }
 
     private void buildRows() {
@@ -121,6 +140,7 @@ public class SettingsAppGui extends AcademyScreen {
             lastSettingsRefresh = minecraft.level.getGameTime() / 5;
             buildRows();
         }
+        updateButtons();
         super.render(graphics, mouseX, mouseY, partialTick);
         pushZ(graphics);
 
@@ -130,7 +150,8 @@ public class SettingsAppGui extends AcademyScreen {
 
         int backX = guiLeft + 6;
         int backY = guiTop + 5;
-        hoveredBack = drawBackButton(graphics, backX, backY, mouseX, mouseY);
+        drawBackButton(graphics, backX, backY, mouseX, mouseY);
+        backButton.render(graphics, mouseX, mouseY, partialTick);
 
         Component title = Component.translatable("item.academy.app_settings");
         int titleX = backX + 18 + 6;
@@ -141,7 +162,6 @@ public class SettingsAppGui extends AcademyScreen {
         graphics.pose().translate(0, -scrollOffset, 0);
 
         int adjustedMouseY = mouseY + scrollOffset;
-        hoveredRow = -1;
 
         int y = guiTop + TOP_BAR + 6;
         for (int i = 0; i < rows.size(); i++) {
@@ -160,7 +180,6 @@ public class SettingsAppGui extends AcademyScreen {
 
             boolean isHovered = insideRows(mouseX, mouseY)
                     && isHovered(guiLeft + 2, rowY, GUI_WIDTH - 4, ROW_HEIGHT, mouseX, adjustedMouseY);
-            if (isHovered && row.type != RowType.HEADER) hoveredRow = i;
 
             if (isHovered && row.type != RowType.HEADER) {
                 graphics.fill(guiLeft + 2, rowY, guiLeft + GUI_WIDTH - 2, rowY + ROW_HEIGHT, AcademyColors.HOVER);
@@ -169,8 +188,11 @@ public class SettingsAppGui extends AcademyScreen {
             if (row.type == RowType.HEADER) {
                 graphics.drawString(this.font, row.label, guiLeft + 8, rowY + 6, AcademyColors.TEXT_ACCENT);
             } else {
-                graphics.drawString(this.font, row.label, guiLeft + 10, rowY + 6, AcademyColors.TEXT);
                 int valW = this.font.width(row.value);
+                String label = row.label.getString();
+                int available = GUI_WIDTH - valW - 30;
+                if (font.width(label) > available) label = font.plainSubstrByWidth(label, available - font.width("…")) + "…";
+                graphics.drawString(this.font, label, guiLeft + 10, rowY + 6, AcademyColors.TEXT);
                 int valColor = row.type == RowType.STATUS || row.type == RowType.TOGGLE
                         ? (row.enabled ? AcademyColors.SUCCESS : AcademyColors.ERROR)
                         : row.type == RowType.ACTION ? AcademyColors.TEXT_ACCENT
@@ -180,46 +202,58 @@ public class SettingsAppGui extends AcademyScreen {
         }
 
         graphics.pose().popPose();
+        for (AcademyActionButton widget : rowButtons.values()) widget.render(graphics, mouseX, mouseY, partialTick);
         graphics.disableScissor();
         popZ(graphics);
     }
 
-    @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (hoveredBack && button == 0) {
-            Minecraft.getInstance().setScreen(new DataTerminalGui());
-            return true;
-        }
-        if (button == 0 && insideRows(mouseX, mouseY) && hoveredRow >= 0 && hoveredRow < rows.size()) {
-            SettingRow row = rows.get(hoveredRow);
-            if (row.key != null) {
-                switch (row.key) {
-                    case HEADS_OR_TAILS -> ACConfig.Client.HEADS_OR_TAILS.set(!ACConfig.Client.headsOrTails());
-                    case SHOW_HUD -> ACConfig.Client.SHOW_HUD.set(!ACConfig.Client.showHud());
-                    case SHOW_CP_BAR -> ACConfig.Client.SHOW_CP_BAR.set(!ACConfig.Client.showCpBar());
-                    case SHOW_CHARGING_HUD -> ACConfig.Client.SHOW_CHARGING_HUD.set(!ACConfig.Client.showChargingHud());
-                    case SHOW_KEY_HINTS -> ACConfig.Client.SHOW_KEY_HINTS.set(!ACConfig.Client.showKeyHints());
-                    case AUTO_AVOID_JADE -> ACConfig.Client.AUTO_AVOID_JADE.set(!ACConfig.Client.autoAvoidJade());
-                    case SKILL_SOUNDS -> ACConfig.Client.ENABLE_SKILL_SOUNDS.set(!ACConfig.Client.enableSkillSounds());
-                    case EDIT_HUD -> {
-                        Minecraft.getInstance().setScreen(new HudCustomizeGui());
-                        return true;
-                    }
-                    case PVP -> PacketDistributor.sendToServer(new SettingsConfigPacket(
-                            SettingsConfigPacket.PVP, !ACConfig.Server.pvpEnabled()));
-                    case DESTROY_BLOCKS -> {
-                        boolean current;
-                        try { current = ACConfig.Server.DESTROY_BLOCKS.get(); }
-                        catch (IllegalStateException unloaded) { current = true; }
-                        PacketDistributor.sendToServer(new SettingsConfigPacket(
-                                SettingsConfigPacket.DESTROY_BLOCKS, !current));
-                    }
-                }
-                buildRows();
-                return true;
+    private void activate(SettingKey key) {
+        switch (key) {
+            case HEADS_OR_TAILS -> ACConfig.Client.HEADS_OR_TAILS.set(!ACConfig.Client.headsOrTails());
+            case SHOW_HUD -> ACConfig.Client.SHOW_HUD.set(!ACConfig.Client.showHud());
+            case SHOW_CP_BAR -> ACConfig.Client.SHOW_CP_BAR.set(!ACConfig.Client.showCpBar());
+            case SHOW_CHARGING_HUD -> ACConfig.Client.SHOW_CHARGING_HUD.set(!ACConfig.Client.showChargingHud());
+            case SHOW_KEY_HINTS -> ACConfig.Client.SHOW_KEY_HINTS.set(!ACConfig.Client.showKeyHints());
+            case AUTO_AVOID_JADE -> ACConfig.Client.AUTO_AVOID_JADE.set(!ACConfig.Client.autoAvoidJade());
+            case SKILL_SOUNDS -> ACConfig.Client.ENABLE_SKILL_SOUNDS.set(!ACConfig.Client.enableSkillSounds());
+            case EDIT_HUD -> {
+                Minecraft.getInstance().setScreen(new HudCustomizeGui());
+                return;
+            }
+            case PVP -> PacketDistributor.sendToServer(new SettingsConfigPacket(
+                    SettingsConfigPacket.PVP, !ACConfig.Server.pvpEnabled()));
+            case DESTROY_BLOCKS -> {
+                boolean current;
+                try { current = ACConfig.Server.DESTROY_BLOCKS.get(); }
+                catch (IllegalStateException unloaded) { current = true; }
+                PacketDistributor.sendToServer(new SettingsConfigPacket(
+                        SettingsConfigPacket.DESTROY_BLOCKS, !current));
             }
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        buildRows();
+        updateButtons();
+    }
+
+    private void revealRow(SettingKey key) {
+        for (int i = 0; i < rows.size(); i++) {
+            if (rows.get(i).key != key) continue;
+            int y = guiTop + TOP_BAR + 6 + i * ROW_HEIGHT - scrollOffset;
+            if (y < guiTop + TOP_BAR + 1) scrollOffset -= guiTop + TOP_BAR + 1 - y;
+            else if (y + ROW_HEIGHT > guiTop + GUI_HEIGHT) scrollOffset += y + ROW_HEIGHT - guiTop - GUI_HEIGHT;
+            updateButtons();
+            return;
+        }
+    }
+
+    private void updateButtons() {
+        for (int i = 0; i < rows.size(); i++) {
+            SettingRow row = rows.get(i);
+            AcademyActionButton widget = rowButtons.get(row.key);
+            if (widget == null) continue;
+            widget.setY(guiTop + TOP_BAR + 6 + i * ROW_HEIGHT - scrollOffset);
+            widget.setMessage(row.type == RowType.TOGGLE
+                    ? Component.translatable("ac.ui.setting_state", row.label, row.value) : row.label);
+        }
     }
 
     @Override
@@ -228,6 +262,11 @@ public class SettingsAppGui extends AcademyScreen {
         int visibleHeight = GUI_HEIGHT - TOP_BAR - 1;
         int maxScroll = Math.max(0, contentHeight - visibleHeight);
         scrollOffset = (int) Math.clamp(scrollOffset - scrollY * 10, 0, maxScroll);
+        updateButtons();
+        if (getFocused() instanceof AcademyActionButton focused && focused != backButton
+                && (focused.getY() < guiTop + TOP_BAR + 1 || focused.getY() + ROW_HEIGHT > guiTop + GUI_HEIGHT)) {
+            clearFocus();
+        }
         return true;
     }
 

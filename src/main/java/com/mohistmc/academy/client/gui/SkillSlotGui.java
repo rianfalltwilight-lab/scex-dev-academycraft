@@ -44,6 +44,9 @@ public class SkillSlotGui extends AcademyScreen {
     private static final int COLOR_DROPDOWN_BG = 0xEE1a1a2e;
     private static final int COLOR_DROPDOWN_CLEAR = 0xFFe74c3c;
 
+    private final List<AcademyActionButton> presetButtons = new ArrayList<>();
+    private final List<AcademyActionButton> slotButtons = new ArrayList<>();
+    private final List<AcademyActionButton> dropdownButtons = new ArrayList<>();
     private int viewPreset;
     private int hoveredSlot = -1;
     private int hoveredTab = -1;
@@ -69,6 +72,26 @@ public class SkillSlotGui extends AcademyScreen {
             PlayerAbilityData data = mc.player.getData(AcademyAttachments.PLAYER_ABILITY);
             this.viewPreset = data.getCurrentPresetIndex();
         }
+        presetButtons.clear(); slotButtons.clear(); dropdownButtons.clear();
+        int tabWidth = PlayerAbilityData.PRESET_COUNT * TAB_WIDTH + (PlayerAbilityData.PRESET_COUNT - 1) * TAB_GAP;
+        for (int i = 0; i < PlayerAbilityData.PRESET_COUNT; i++) {
+            int index = i;
+            presetButtons.add(addWidget(new AcademyActionButton(guiLeft + (GUI_WIDTH - tabWidth) / 2 + i * (TAB_WIDTH + TAB_GAP),
+                    guiTop + 8, TAB_WIDTH, TAB_HEIGHT, Component.empty(), () -> {
+                viewPreset = index;
+                PacketDistributor.sendToServer(new SwitchPresetPacket(index));
+                updateControlMessages();
+            })));
+        }
+        int slotsWidth = SkillPreset.SLOT_COUNT * SLOT_SIZE + (SkillPreset.SLOT_COUNT - 1) * SLOT_GAP;
+        for (int i = 0; i < SkillPreset.SLOT_COUNT; i++) {
+            int index = i;
+            slotButtons.add(addWidget(new AcademyActionButton(guiLeft + (GUI_WIDTH - slotsWidth) / 2 + i * (SLOT_SIZE + SLOT_GAP),
+                    guiTop + 50, SLOT_SIZE, SLOT_SIZE, Component.empty(), () -> {
+                if (minecraft.player != null) openDropdown(index, minecraft);
+            })));
+        }
+        updateControlMessages();
     }
 
     @Override
@@ -86,6 +109,9 @@ public class SkillSlotGui extends AcademyScreen {
         drawTabs(graphics, mouseX, mouseY);
         drawSlots(graphics, mouseX, mouseY);
         drawHint(graphics);
+        updateControlMessages();
+        for (var widget : presetButtons) widget.render(graphics, mouseX, mouseY, partialTick);
+        for (var widget : slotButtons) widget.render(graphics, mouseX, mouseY, partialTick);
 
         if (dropdownSlot >= 0) {
             drawDropdown(graphics, mouseX, mouseY);
@@ -223,6 +249,10 @@ public class SkillSlotGui extends AcademyScreen {
                     dropdownX + DROPDOWN_WIDTH - 1, thumbY + thumbHeight, AcademyColors.TEXT_SECONDARY);
         }
 
+        graphics.enableScissor(dropdownX, dropdownY + DROPDOWN_PADDING,
+                dropdownX + DROPDOWN_WIDTH, dropdownY + DROPDOWN_PADDING + visibleRows * DROPDOWN_ITEM_HEIGHT);
+        for (var widget : dropdownButtons) widget.render(graphics, mouseX, mouseY, 0);
+        graphics.disableScissor();
         graphics.pose().popPose();
     }
 
@@ -311,44 +341,71 @@ public class SkillSlotGui extends AcademyScreen {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null) return super.mouseClicked(mouseX, mouseY, button);
-
-        if (dropdownSlot >= 0) {
-            if (hoveredDropdownItem >= 0 && hoveredDropdownItem < dropdownEntries.size()) {
-                DropdownEntry entry = dropdownEntries.get(hoveredDropdownItem);
-                if (entry.skillId() == null) {
-                    PacketDistributor.sendToServer(new SetSkillSlotPacket(viewPreset, dropdownSlot, ""));
-                } else {
-                    PacketDistributor.sendToServer(new SetSkillSlotPacket(viewPreset, dropdownSlot, entry.skillId()));
+        int previousDropdown = dropdownSlot;
+        if (previousDropdown < 0 && button == 1) {
+            for (int i = 0; i < slotButtons.size(); i++) {
+                if (slotButtons.get(i).isMouseOver(mouseX, mouseY)) {
+                    PacketDistributor.sendToServer(new SetSkillSlotPacket(viewPreset, i, ""));
+                    return true;
                 }
             }
-            dropdownSlot = -1;
+        }
+        boolean handled = super.mouseClicked(mouseX, mouseY, button);
+        if (previousDropdown >= 0) {
+            if (!handled) closeDropdown();
+            if (dropdownSlot < 0) setFocused(slotButtons.get(previousDropdown));
             return true;
         }
+        // ContainerEventHandler focuses the clicked slot after its callback; the popup owns focus now.
+        if (dropdownSlot >= 0) setFocused(dropdownButtons.getFirst());
+        return handled;
+    }
 
-        if (hoveredTab >= 0) {
-            viewPreset = hoveredTab;
-            // Keep the server-authoritative active preset in lockstep with the
-            // tab being edited; otherwise the UI edits one preset while hotkeys
-            // continue executing another.
-            PacketDistributor.sendToServer(new SwitchPresetPacket(viewPreset));
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (dropdownSlot >= 0 && keyCode == 256) {
+            closeDropdown();
             return true;
         }
+        return super.keyPressed(keyCode, scanCode, modifiers);
+    }
 
-        if (hoveredSlot >= 0) {
-            if (button == 1) {
-                PacketDistributor.sendToServer(new SetSkillSlotPacket(viewPreset, hoveredSlot, ""));
-                return true;
-            }
+    private void closeDropdown() {
+        int slot = dropdownSlot;
+        dropdownSlot = -1;
+        clearFocus();
+        for (var widget : dropdownButtons) removeWidget(widget);
+        dropdownButtons.clear();
+        presetButtons.forEach(widget -> widget.active = true);
+        slotButtons.forEach(widget -> widget.active = true);
+        if (slot >= 0) setFocused(slotButtons.get(slot));
+    }
 
-            if (button == 0) {
-                openDropdown(hoveredSlot, mc);
-                return true;
-            }
+    private void updateControlMessages() {
+        for (int i = 0; i < presetButtons.size(); i++) {
+            Component preset = Component.translatable("ac.skill_slot.preset", i + 1);
+            presetButtons.get(i).setMessage(i == viewPreset ? Component.translatable("ac.ui.preset_selected", preset) : preset);
         }
+        if (minecraft.player == null) return;
+        PlayerAbilityData data = minecraft.player.getData(AcademyAttachments.PLAYER_ABILITY);
+        for (int i = 0; i < slotButtons.size(); i++) {
+            String id = data.getPreset(viewPreset).getSlot(i);
+            Skill skill = id == null ? null : SkillRegistry.getSkill(data.getCurrentAbility(), id);
+            Component name = Component.translatable(skill == null ? "ac.skill_slot.empty" : skill.getTranslationKey());
+            slotButtons.get(i).setMessage(Component.translatable("ac.ui.skill_slot", i + 1, name,
+                    KeyInputHandler.getSkillKeys()[i].getTranslatedKeyMessage()));
+        }
+    }
 
-        return super.mouseClicked(mouseX, mouseY, button);
+    private void revealDropdownEntry(int index) {
+        if (index < dropdownScroll) dropdownScroll = index;
+        else if (index >= dropdownScroll + dropdownVisibleRows()) dropdownScroll = index - dropdownVisibleRows() + 1;
+        updateDropdownPositions();
+    }
+
+    private void updateDropdownPositions() {
+        for (int i = 0; i < dropdownButtons.size(); i++)
+            dropdownButtons.get(i).setY(dropdownY + DROPDOWN_PADDING + (i - dropdownScroll) * DROPDOWN_ITEM_HEIGHT);
     }
 
     private void openDropdown(int slotIndex, Minecraft mc) {
@@ -407,6 +464,30 @@ public class SkillSlotGui extends AcademyScreen {
         }
 
         dropdownSlot = slotIndex;
+        clearFocus();
+        presetButtons.forEach(widget -> widget.active = false);
+        slotButtons.forEach(widget -> widget.active = false);
+        for (int i = 0; i < dropdownEntries.size(); i++) {
+            int index = i;
+            DropdownEntry entry = dropdownEntries.get(i);
+            dropdownButtons.add(addWidget(new AcademyActionButton(dropdownX, dropdownY + DROPDOWN_PADDING + i * DROPDOWN_ITEM_HEIGHT,
+                    DROPDOWN_WIDTH, DROPDOWN_ITEM_HEIGHT, entry.displayName(), () -> {
+                PacketDistributor.sendToServer(new SetSkillSlotPacket(viewPreset, dropdownSlot, entry.skillId() == null ? "" : entry.skillId()));
+                closeDropdown();
+            }, () -> revealDropdownEntry(index)) {
+                @Override public boolean isMouseOver(double x, double y) {
+                    return insideDropdown(y) && super.isMouseOver(x, y);
+                }
+                @Override public boolean mouseClicked(double x, double y, int button) {
+                    return insideDropdown(y) && super.mouseClicked(x, y, button);
+                }
+                private boolean insideDropdown(double y) {
+                    return y >= dropdownY + DROPDOWN_PADDING
+                            && y < dropdownY + DROPDOWN_PADDING + dropdownVisibleRows() * DROPDOWN_ITEM_HEIGHT;
+                }
+            }));
+        }
+        setFocused(dropdownButtons.getFirst());
     }
 
     private int dropdownVisibleRows() {
@@ -420,6 +501,12 @@ public class SkillSlotGui extends AcademyScreen {
         if (dropdownSlot >= 0 && mouseX >= dropdownX && mouseX < dropdownX + DROPDOWN_WIDTH
                 && mouseY >= dropdownY && mouseY < dropdownY + dropdownHeight) {
             dropdownScroll = (int) Math.clamp(dropdownScroll - scrollY, 0, Math.max(0, dropdownEntries.size() - visibleRows));
+            updateDropdownPositions();
+            if (getFocused() instanceof AcademyActionButton focused
+                    && (focused.getY() < dropdownY + DROPDOWN_PADDING
+                    || focused.getY() + DROPDOWN_ITEM_HEIGHT > dropdownY + DROPDOWN_PADDING + visibleRows * DROPDOWN_ITEM_HEIGHT)) {
+                clearFocus();
+            }
             hoveredDropdownItem = -1;
             return true;
         }
