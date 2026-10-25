@@ -1,0 +1,22 @@
+{
+  "status": "FAILED_ATTEMPT_RETAINED",
+  "tests": 487,
+  "failures": 2,
+  "forced": false,
+  "exit_code": 2,
+  "input_snapshot": "build/combat-hud-0.0.33-r2-tested",
+  "failures_detail": [
+    {
+      "test": "actualwindburstonlyexplodesonsmashwithoutextrahealthdamage",
+      "cause": "Fixture changes alternate attacker from spectator to survival and immediately attacks. Native NeoForge game mode transition retains abilities.flying until later correction; vanilla Wind Burst rejects flying players. Mace smash damage itself still 27.",
+      "action": "Clear spectator flying only in this fixture; retain native attack, explosion, delta and damage assertions."
+    },
+    {
+      "test": "coldsavedlocationloadswithoutblockingthenpays",
+      "cause": "Unresolved from original combined assertion; existing production teleport code unchanged.",
+      "action": "Add one-shot completion observation of position, destination, CP, cooldown, alive, removed, resident chunk, tickets and test tick; preserve original assertions and production limits."
+    }
+  ],
+  "independent_review_correction": "Ordinary EntityMagHook item source restored to baseline; it was outside native skill-source scope.",
+  "validation_note": "No assertion thresholds lowered or tests omitted. Next full regression uses corrected reviewed candidate."
+}

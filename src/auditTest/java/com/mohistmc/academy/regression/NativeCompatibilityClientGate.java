@@ -194,8 +194,8 @@ public final class NativeCompatibilityClientGate {
                     "HUD positive fixtures expired before drawing");
             var charge = new TrackingGraphics(mc, event.getGuiGraphics().bufferSource());
             var install = new TrackingGraphics(mc, event.getGuiGraphics().bufferSource());
-            ChargingHudOverlay.onRenderGui(new RenderGuiEvent.Post(charge, event.getPartialTick()));
-            TerminalInstallProgress.onRenderGui(new RenderGuiEvent.Post(install, event.getPartialTick()));
+            ChargingHudOverlay.render(charge, event.getPartialTick());
+            TerminalInstallProgress.render(install, event.getPartialTick());
             if (step == 1) {
                 require(charge.fills == 0 && charge.text.isEmpty(), "F1 left charging HUD draw calls");
                 require(install.fills == 0 && install.text.isEmpty(), "F1 left installation HUD draw calls");

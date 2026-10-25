@@ -7,15 +7,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RenderGuiEvent;
 
 /** Literal 1.0.7 WaveEffectUI used while vector deviation/reflection is held. */
-@EventBusSubscriber(modid = AcademyCraft.MODID, value = Dist.CLIENT)
 public final class LegacyVectorWaveOverlay {
     private static final ResourceLocation GLOW_CIRCLE = ResourceLocation.fromNamespaceAndPath(
             AcademyCraft.MODID, "textures/effects/glow_circle.png");
@@ -25,8 +22,7 @@ public final class LegacyVectorWaveOverlay {
 
     private LegacyVectorWaveOverlay() {}
 
-    @SubscribeEvent
-    public static void render(RenderGuiEvent.Pre event) {
+    public static void render(GuiGraphics graphics, DeltaTracker partialTick) {
         Minecraft mc = Minecraft.getInstance();
         String skill = ChargingHudOverlay.isCharging("vec_reflection") ? "vec_reflection"
                 : ChargingHudOverlay.isCharging("vec_deviation") ? "vec_deviation" : "";
@@ -62,6 +58,9 @@ public final class LegacyVectorWaveOverlay {
                     averageSize * (.8f + mc.level.random.nextFloat() * .4f)));
         }
 
+        // F1 hides presentation without changing the existing ripple cadence or age.
+        if (mc.options.hideGui) return;
+
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         for (Ripple ripple : RIPPLES) {
@@ -73,7 +72,7 @@ public final class LegacyVectorWaveOverlay {
             int x = Math.round(ripple.x - size * .5f);
             int y = Math.round(ripple.y - size * .5f);
             RenderSystem.setShaderColor(1, 1, 1, Mth.clamp(maxAlpha * alpha, 0, 1));
-            event.getGuiGraphics().blit(GLOW_CIRCLE, x, y, drawSize, drawSize,
+            graphics.blit(GLOW_CIRCLE, x, y, drawSize, drawSize,
                     0, 0, 256, 256, 256, 256);
         }
         RenderSystem.setShaderColor(1, 1, 1, 1);

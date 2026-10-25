@@ -108,7 +108,7 @@ public class ArcGenEffect implements SkillEffect {
             if (result.isEntity && result.entity != null) {
                 // === 命中实体 ===
                 Entity target = result.entity;
-                ElectromasterDamageHelper.attack(player,target,player.damageSources().playerAttack(player),
+                ElectromasterDamageHelper.attack(player,target,com.mohistmc.academy.skill.SkillDamageSource.attack(player),
                         DynamicSkillRules.damage(getId(),damage));
 
                 expIncr = getExpIncr(exp, true);

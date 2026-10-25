@@ -1,0 +1,67 @@
+{
+  "status": "ISSUES",
+  "gui_scale": 3,
+  "image_count": 9,
+  "inspection": "All nine PNG files were opened individually with view_image and visually inspected.",
+  "images": [
+    {
+      "file": "screenshots/hud-layers-scale3-cancel-cp.png",
+      "sha256": "ac391fdb5462dde7000d4bb08f4bf468597b4162e90f4e72040fc904a2de1fe9",
+      "observation": "CP 条及数值均消失；通知、安装、蓄力、技能提示、媒体和快捷栏仍可见。通知正文清楚，无 CP 数值重叠。"
+    },
+    {
+      "file": "screenshots/hud-layers-scale3-cancel-hotbar.png",
+      "sha256": "07579d0faaddf01d7c56d94a492974cff0bbdd5de5ba66d97de11c03c4058389",
+      "observation": "快捷栏消失，而 CP、通知、安装条及「インストール中...19%」文字、蓄力、技能提示与媒体仍可见；通知覆盖 CP/OL 数字。未见屏幕边缘截字。"
+    },
+    {
+      "file": "screenshots/hud-layers-scale3-f1-hidden.png",
+      "sha256": "66ab0188221b02d21e96f9bf0ae1562fddc05911e8429e0229bed045d27b24d0",
+      "observation": "F1 后只剩世界画面；快捷栏、手持物和全部 Academy HUD/波纹均不可见，未见残留文字或遮罩。"
+    },
+    {
+      "file": "screenshots/hud-layers-scale3-f1-restored.png",
+      "sha256": "ce2a412e6ef5cbce2f6f7f70fbb4a26dab770599838a4696532f5cfee0b4c163",
+      "observation": "F1 恢复后 HUD、安装文字和蓄力提示重新可见；右上通知与 CP/OL 数字仍重叠，未见屏幕边缘截字。"
+    },
+    {
+      "file": "screenshots/hud-layers-scale3-hud-disabled.png",
+      "sha256": "156f13adbadc11bd1d4be5406f4697879aa4d2d1e7f84c67205dcdc3731e538c",
+      "observation": "CP、技能提示、媒体、通知和蓄力均隐藏；原版快捷栏、波纹、安装条及「インストール中...19%」文字保留，符合开关分工。未见文字越界。"
+    },
+    {
+      "file": "screenshots/hud-layers-scale3-individual-disabled.png",
+      "sha256": "8a10a85b93397101a9887c62ad4e583acd463a4fcebf2bc0a81daf5acb12b72e",
+      "observation": "CP、技能提示和蓄力隐藏；通知、媒体、安装条及文字、波纹和快捷栏保留，未见文字越过窗口边缘。"
+    },
+    {
+      "file": "screenshots/hud-layers-scale3-screen-closed.png",
+      "sha256": "792c65aa3f775bbf23aefe607ccf38e517f66da7b5724b29a7b4d4b21d73a420",
+      "observation": "设置界面关闭后 HUD、安装文字、蓄力和媒体恢复；右上通知继续覆盖 CP/OL 数字，未见屏幕边缘截字。"
+    },
+    {
+      "file": "screenshots/hud-layers-scale3-screen-open.png",
+      "sha256": "45f18cabb8556148d8a8500054e8bbe97f5a5bdba335147ae32cf14b00664c3d",
+      "observation": "设置界面打开后 Academy HUD、波纹、安装条、通知和媒体均隐藏；日语设置标签、键名和返回按钮均位于面板内，未见窗口溢出。"
+    },
+    {
+      "file": "screenshots/hud-layers-scale3-visible.png",
+      "sha256": "cbe7b4b8f6288a0137690a8d48a75f86fc60259fd64947b7f03167ef943c6b02",
+      "observation": "HUD、安装条、蓄力条、波纹、技能提示和媒体信息可见；未见窗口越界。右上通知框覆盖 CP/OL 数字，数值变暗且落入通知正文区域。"
+    }
+  ],
+  "issues": [
+    {
+      "id": "notification_cp_overlap",
+      "files": [
+        "screenshots/hud-layers-scale3-visible.png",
+        "screenshots/hud-layers-scale3-f1-restored.png",
+        "screenshots/hud-layers-scale3-cancel-hotbar.png",
+        "screenshots/hud-layers-scale3-screen-closed.png"
+      ],
+      "observation": "右上通知背景覆盖 CP/OL 数字，约 framebuffer x=1010..1240、y=185..235；数字变暗并与通知正文占用同一区域。截图本身不能确定其是否为本版本新引入。"
+    }
+  ],
+  "limit": "这些是程序 fixture 设置能力与展示状态、经原生客户端图层管线生成的单帧截图；审阅确认当前像素与布局，不代表自然用户操作、连续动画、完整存档生命周期或第三方整包兼容。F1/Screen 恢复场景会重设 fixture，不能单凭截图证明状态续播。未修改图像或生产代码。",
+  "correction": "以原始分辨率重新查看 cancel-hotbar 与 hud-disabled，确认安装文字及 19% 均存在，撤销首次审阅的缺字误判。只读像素核对显示两图文字区域均有 797 个青色文字像素，边界 x=504..776、y=405..428，与 f1-restored 相同。"
+}

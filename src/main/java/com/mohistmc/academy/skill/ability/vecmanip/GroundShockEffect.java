@@ -150,7 +150,7 @@ public class GroundShockEffect implements ChargingSkillEffect {
                         entity -> entity != player && entity.isAlive())) {
                     if (!visitedEntities.add(living)) continue;
                     energy[0] -= 1;
-                    AcademyDamageHelper.hurt(player, living, player.damageSources().playerAttack(player),
+                    AcademyDamageHelper.hurt(player, living, com.mohistmc.academy.skill.SkillDamageSource.attack(player),
                             DynamicSkillRules.damage(getId(), damage));
                     living.setDeltaMovement(living.getDeltaMovement().x, ySpeed, living.getDeltaMovement().z);
                     living.hurtMarked = true;

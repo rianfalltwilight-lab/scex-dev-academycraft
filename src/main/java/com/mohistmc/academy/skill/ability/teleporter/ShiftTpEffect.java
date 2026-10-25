@@ -131,7 +131,7 @@ public final class ShiftTpEffect implements ChargingSkillEffect {
                 new AABB(origin, placement.lineEnd).inflate(1), target -> target != player && target.isAlive()
                         && (target instanceof LivingEntity || target instanceof EnderDragonPart))) {
             if (target.getBoundingBox().clip(origin, placement.lineEnd).isEmpty()) continue;
-            AcademyDamageHelper.hurt(player, target, player.damageSources().playerAttack(player),
+            AcademyDamageHelper.hurt(player, target, com.mohistmc.academy.skill.SkillDamageSource.attack(player),
                     PassiveDamageHelper.teleporter(player, data, target, getId(), lerpf(15, 35, exp)).damage());
             attacked++;
         }

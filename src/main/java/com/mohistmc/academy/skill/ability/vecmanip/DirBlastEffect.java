@@ -134,7 +134,7 @@ public class DirBlastEffect implements ChargingSkillEffect {
         for (Entity e : level.getEntities(player, aoeArea,
                 candidate -> candidate != player && candidate.isAlive()
                         && candidate.position().distanceToSqr(finalPos) <= AOE_RANGE * AOE_RANGE)) {
-                AcademyDamageHelper.hurt(player,e,player.damageSources().playerAttack(player), DynamicSkillRules.damage(getId(),damage));
+                AcademyDamageHelper.hurt(player,e,com.mohistmc.academy.skill.SkillDamageSource.attack(player), DynamicSkillRules.damage(getId(),damage));
                 Vec3 delta = player.getEyePosition().subtract(e.getEyePosition()).normalize();
                 delta = new Vec3(delta.x, -0.4, delta.z).normalize();
                 // BlastwaveContext.knockback first lifted the entity by 0.1,

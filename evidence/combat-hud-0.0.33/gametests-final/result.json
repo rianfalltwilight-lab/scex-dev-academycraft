@@ -1,0 +1,14 @@
+{
+  "host": "VICERACH",
+  "exit_code": 0,
+  "forced": false,
+  "passed": true,
+  "expected_tests": 487,
+  "namespaces": "academy,academy_charging,academy_audit,academy_followup,academy_projectiles,academy_native_compat,academy_data_sync,academy_automation,academy_native_combat",
+  "expectation_met": true,
+  "basis": "Actual NeoForge GameTestServer; release JAR plus separate probe mod",
+  "expected_failures": 0,
+  "process_exited": true,
+  "failures": 0,
+  "tests": 487
+}

@@ -1,0 +1,12 @@
+{
+  "checked_at": "2026-10-25T21:34:27.7970979+09:00",
+  "target": "D:\\SCEX-Work\\01-Mods\\Other-Ports\\AcademyCraft\\0.0.33-20261025",
+  "expected_gib": 2.5,
+  "required_destination_free_gib": 25.0,
+  "system_free_gib": 74.691,
+  "target_free_gib": 40.587,
+  "system_warning": false,
+  "pass": true,
+  "reasons": [],
+  "scope": "Preflight only; no files deleted, no process stopped, no OS quota or background monitoring."
+}

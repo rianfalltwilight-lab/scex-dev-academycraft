@@ -92,7 +92,7 @@ public class BloodRetroEffect implements ChargingSkillEffect {
 
         Entity target = hit.getEntity();
         {
-            AcademyDamageHelper.hurt(player,target,player.damageSources().playerAttack(player), DynamicSkillRules.damage(getId(),damage));
+            AcademyDamageHelper.hurt(player,target,com.mohistmc.academy.skill.SkillDamageSource.attack(player), DynamicSkillRules.damage(getId(),damage));
             int splashes = 6 + level.random.nextInt(4);
             Vec3 lookOffset = player.getLookAngle().scale(.2);
             for (int i = 0; i < splashes; i++) {

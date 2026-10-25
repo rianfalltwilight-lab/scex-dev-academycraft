@@ -1,0 +1,12 @@
+[
+    {
+        "sha256":  "7af89345afeb22b981b705b532af3754b50bb682069a8c4e8a35e9083d49710a",
+        "name":  "AcademyCraft-neoforge-1.21.1-0.0.33-scex-combat-hud.jar",
+        "bytes":  27867072
+    },
+    {
+        "sha256":  "b3eb26ee4ba8674b94e13497dc865d48faedd6eb775e107a1523e2aa90b42709",
+        "name":  "AcademyCraft-neoforge-1.21.1-0.0.33-scex-combat-hud-audit-tests.jar",
+        "bytes":  364794
+    }
+]

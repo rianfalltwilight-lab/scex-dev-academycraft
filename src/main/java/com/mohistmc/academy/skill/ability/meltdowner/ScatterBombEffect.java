@@ -86,7 +86,7 @@ public final class ScatterBombEffect implements ChargingSkillEffect {
             if (!DynamicSkillRules.tryPay(data, getId(), cp, 0)) return false;
         }
         if (ticks == OVERHOLD_TICKS) {
-            AcademyDamageHelper.hurtSelf(player, player, player.damageSources().playerAttack(player), 6.0F);
+            AcademyDamageHelper.hurtSelf(player, player, com.mohistmc.academy.skill.SkillDamageSource.attack(player), 6.0F);
         }
         return true;
     }

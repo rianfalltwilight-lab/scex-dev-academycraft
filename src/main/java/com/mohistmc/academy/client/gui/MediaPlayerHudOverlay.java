@@ -1,36 +1,26 @@
 package com.mohistmc.academy.client.gui;
 
-import com.mohistmc.academy.AcademyCraft;
 import com.mohistmc.academy.client.MediaPlayerManager;
 import com.mohistmc.academy.config.ACConfig;
 import com.mohistmc.academy.terminal.MediaTrack;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.network.chat.Component;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
-import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 
 /** Restores the 145x36 bottom-right playback HUD from media_player_aux.xml. */
-@EventBusSubscriber(modid = AcademyCraft.MODID, value = Dist.CLIENT)
 public final class MediaPlayerHudOverlay {
     private static final int WIDTH = 145;
     private static final int HEIGHT = 36;
 
     private MediaPlayerHudOverlay() {}
 
-    @SubscribeEvent
-    public static void render(RenderGuiLayerEvent.Post event) {
-        if (!event.getName().equals(VanillaGuiLayers.HOTBAR)) return;
+    public static void render(GuiGraphics graphics, DeltaTracker partialTick) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.screen != null || !ACConfig.Client.showHud()
+        if (mc.player == null || mc.screen != null || mc.options.hideGui || !ACConfig.Client.showHud()
                 || !MediaPlayerManager.isPlaying()) return;
 
         MediaTrack track = MediaPlayerManager.getTrack(MediaPlayerManager.getCurrentTrack());
         if (track == null) return;
-        GuiGraphics graphics = event.getGuiGraphics();
         int x = mc.getWindow().getGuiScaledWidth() - WIDTH - 6;
         int y = mc.getWindow().getGuiScaledHeight() - HEIGHT - 6;
         String title = track.displayName().getString();

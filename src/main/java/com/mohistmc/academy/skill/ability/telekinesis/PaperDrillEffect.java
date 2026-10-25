@@ -113,7 +113,7 @@ public final class PaperDrillEffect implements ChargingSkillEffect {
                     return false;
                 }
                 DynamicSkillRules.addExp(player, data, getId(), 0.002F);
-                AcademyDamageHelper.hurt(player, target, player.damageSources().playerAttack(player), damage);
+                AcademyDamageHelper.hurt(player, target, com.mohistmc.academy.skill.SkillDamageSource.attack(player), damage);
             }
         }
         return true;

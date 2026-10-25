@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.mohistmc.academy.skill.TelekinesisRulesTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-25T12:56:27.562Z" hostname="MONARCH" time="0.002">
+  <properties/>
+  <testcase name="overloadThinkingTradesOverloadForIncreasingCpRecovery()" classname="com.mohistmc.academy.skill.TelekinesisRulesTest" time="0.001"/>
+  <testcase name="insulationIsStrongestAgainstElectromasterAndMeltdowner()" classname="com.mohistmc.academy.skill.TelekinesisRulesTest" time="0.001"/>
+  <testcase name="paperDrillHasAnExactFullStackAndBoundedPulseContract()" classname="com.mohistmc.academy.skill.TelekinesisRulesTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -47,7 +47,8 @@ class AerohandBehaviorSourceContractTest {
         assertTrue(separator.contains("implements DynamicOneShotSkillEffect"));
         assertTrue(separator.contains("getGameTime() + 5"));
         assertTrue(separator.contains("living == player"));
-        assertTrue(separator.contains("damageSources().drown()"));
+        assertTrue(separator.contains("SkillDamageSource.drowning(player, true)"));
+        assertTrue(separator.contains("SkillDamageSource.drowning(player, false)"));
         assertTrue(separator.contains("living.setAirSupply"));
         assertTrue(separator.contains("AcademyDamageHelper.hurtSelf"));
         assertTrue(boundary.contains("target == attacker"));
@@ -72,7 +73,7 @@ class AerohandBehaviorSourceContractTest {
         assertTrue(runtime.contains("AcceptedAbilityDamage"));
         assertTrue(runtime.contains("DamageTypes.FALL"));
         assertTrue(runtime.contains("DamageTypes.IN_WALL"));
-        assertTrue(runtime.contains("DamageTypes.DROWN"));
+        assertTrue(runtime.contains("DamageTypeTags.IS_DROWNING"));
         assertTrue(runtime.contains("PlayerTickEvent.Post"));
         assertTrue(runtime.contains("setAirSupply"));
         assertTrue(runtime.contains("NeoForgeMod.CREATIVE_FLIGHT"));

@@ -6,20 +6,16 @@ import com.mohistmc.academy.utils.RenderUtils;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
-import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 
 /**
  * 通知浮层 — 短暂显示系统消息（教程更新、能力解锁等）。
  */
 @OnlyIn(Dist.CLIENT)
-@EventBusSubscriber(modid = AcademyCraft.MODID, value = Dist.CLIENT)
 public class NotifyOverlay {
 
     private static final int MAX_NOTIFICATIONS = 3;
@@ -57,22 +53,23 @@ public class NotifyOverlay {
         }
     }
 
-    @SubscribeEvent
-    public static void onRenderOverlay(RenderGuiLayerEvent.Post event) {
-        if (!event.getName().equals(VanillaGuiLayers.HOTBAR)) return;
-
+    public static void render(GuiGraphics graphics, DeltaTracker partialTick) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.screen != null) return;
+        if (mc.player == null || mc.screen != null || mc.options.hideGui) return;
         if (!ACConfig.Client.showHud()) return;
 
-        GuiGraphics g = event.getGuiGraphics();
+        GuiGraphics g = graphics;
         int screenW = mc.getWindow().getGuiScaledWidth();
         long now = System.currentTimeMillis();
 
         synchronized (notifications) {
             notifications.removeIf(n -> now - n.time > DURATION_MS + FADE_MS);
 
-            int y = 50;
+            int notifW = 220;
+            int notifH = 50;
+            int x = screenW - notifW - 20;
+            int stackHeight = notifications.size() * (notifH + 4) - 4;
+            int y = CPBarOverlay.avoidNotificationOverlap(x, 50, notifW, stackHeight);
             for (int i = notifications.size() - 1; i >= 0; i--) {
                 Notification n = notifications.get(i);
                 long elapsed = now - n.time;
@@ -83,10 +80,6 @@ public class NotifyOverlay {
                     alpha = 1.0f - (float)(elapsed - DURATION_MS) / FADE_MS;
                 }
                 if (alpha <= 0) continue;
-
-                int notifW = 220;
-                int notifH = 50;
-                int x = screenW - notifW - 20;
 
                 int bgColor = (int)(alpha * 200) << 24 | 0x0A1A30;
                 g.fill(x, y, x + notifW, y + notifH, bgColor);

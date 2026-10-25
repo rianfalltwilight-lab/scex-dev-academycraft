@@ -1,0 +1,51 @@
+{
+  "status": "IMPLEMENTED_PENDING_ROOT_BUILD_AND_RUNTIME",
+  "baseline": "3423b53",
+  "authored_by": "player_sync31 child",
+  "written_at": "2026-10-25T21:01:33.487458+09:00",
+  "scope": "Eight existing HUD renderers plus ClientModListener native registration; old audit direct-call signatures adapted; new audit-only gate. No production test interface, language keys, art, geometry, numbers, network, or storage changes.",
+  "ids": [
+    "academy:vector_wave",
+    "academy:screen_mask",
+    "academy:cp_bar",
+    "academy:skill_hints",
+    "academy:media_player",
+    "academy:notifications",
+    "academy:charging",
+    "academy:terminal_install"
+  ],
+  "ordering": [
+    "vector_wave before minecraft:camera_overlays",
+    "minecraft:hotbar -> screen_mask -> cp_bar -> skill_hints -> media_player -> notifications -> minecraft:jump_meter",
+    "minecraft:saving_indicator -> charging -> terminal_install"
+  ],
+  "visibility": "Preserve existing screen/config policies; add explicit F1 hide guard to notification/media/wave. Wave cadence and age update before hide guard; terminal expiry remains before hide guard; Charging client tick retained.",
+  "api_evidence": {
+    "source_jar": "build/moddev/artifacts/neoforge-21.1.248-sources.jar",
+    "sha256": "1db8829259bf8fc5517f98e35237c59a9fb6ae250bbd17461a21b40e8da4bef5",
+    "sources": [
+      "RegisterGuiLayersEvent: mod bus registerBelow/registerAbove/wrapLayer",
+      "GuiLayerManager: flatten vanilla conditions; one native callback per uncanceled named layer",
+      "Gui: explicit vanilla hideGui wrappers do not transfer to new layers",
+      "RenderGuiLayerEvent: pre/post still fire while F1 hides vanilla content",
+      "PoseStack.java:69-70 clear() only checks poseStack.size() == 1; it does not mutate the stack"
+    ]
+  },
+  "probe": {
+    "class": "HudLayersClientGate",
+    "property": "academy.hudLayersClient=true",
+    "world": "HudLayers33",
+    "report": "academy-hud-layers-client.txt",
+    "checkpoint": "academy-hud-layers-save-checkpoint.txt",
+    "screenshots": "hud-layers-scale<2|3>-<visible|f1-hidden|f1-restored|cancel-cp|cancel-hotbar|hud-disabled|individual-disabled|screen-open|screen-closed>.png",
+    "expected_screenshots": 18,
+    "observations": "Audit MOD bus wrapper runs each original registered renderer once with a cloned native pose matrix and shared native buffer; counts calls/fills/text/blits, verifies native order, checks independent tracking PoseStack depth remains one with read-only clear(), and verifies the final pose matrix equals the initial matrix; real KeyboardHandler F1; independent per-layer cancellations; actual native disconnect after stable save checkpoint.",
+    "fixture_limits": "Programmatic input, integrated-server ability fixture, presentation APIs and audit-only reflection to seed a deterministic ripple. No human keyboard or audio verification claim."
+  },
+  "validation": {
+    "child": "Read actual API sources, baseline-normalized diff, existing relevant JUnit contracts, and whitespace checks; no Gradle/game run.",
+    "root": "Root reports the first build passed; the subsequent pose-depth probe assertion is pending root incremental build and runtime. No child runtime execution or passing runtime claim.",
+    "independent_review_followup": "next_phase_review identified that equal pose matrices alone do not prove balanced push/pop. Added the read-only depth assertion after checking the exact NeoForge 21.1.248 bundled PoseStack source; production code is unchanged."
+  },
+  "final_runtime_validation": "19 checks PASS; 18 current screenshots reviewed with scoped PASS and documented pre-existing selected-item/charging overlap."
+}

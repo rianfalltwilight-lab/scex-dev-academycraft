@@ -1,0 +1,122 @@
+[
+  {
+    "free_bytes": 32202719232,
+    "seconds": 2.4813438,
+    "rss_bytes": 170258432
+  },
+  {
+    "free_bytes": 32045928448,
+    "seconds": 4.962464,
+    "rss_bytes": 281767936
+  },
+  {
+    "free_bytes": 31582777344,
+    "seconds": 7.4388817,
+    "rss_bytes": 619020288
+  },
+  {
+    "free_bytes": 31532818432,
+    "seconds": 9.8742973,
+    "rss_bytes": 590905344
+  },
+  {
+    "free_bytes": 31510650880,
+    "seconds": 12.2953356,
+    "rss_bytes": 613330944
+  },
+  {
+    "free_bytes": 31506321408,
+    "seconds": 14.9758091,
+    "rss_bytes": 634224640
+  },
+  {
+    "free_bytes": 30981578752,
+    "seconds": 17.3634924,
+    "rss_bytes": 789037056
+  },
+  {
+    "free_bytes": 32153554944,
+    "seconds": 19.7816082,
+    "rss_bytes": 815001600
+  },
+  {
+    "free_bytes": 31975100416,
+    "seconds": 22.207635,
+    "rss_bytes": 846295040
+  },
+  {
+    "free_bytes": 31864832000,
+    "seconds": 24.7565412,
+    "rss_bytes": 914698240
+  },
+  {
+    "free_bytes": 31796985856,
+    "seconds": 27.260133,
+    "rss_bytes": 938856448
+  },
+  {
+    "free_bytes": 31654121472,
+    "seconds": 29.7361398,
+    "rss_bytes": 1013813248
+  },
+  {
+    "free_bytes": 31716343808,
+    "seconds": 32.2158509,
+    "rss_bytes": 1070919680
+  },
+  {
+    "free_bytes": 31521984512,
+    "seconds": 34.6813745,
+    "rss_bytes": 1046405120
+  },
+  {
+    "free_bytes": 31557480448,
+    "seconds": 37.0953403,
+    "rss_bytes": 1041870848
+  },
+  {
+    "free_bytes": 31379685376,
+    "seconds": 39.6290927,
+    "rss_bytes": 1057992704
+  },
+  {
+    "free_bytes": 32009838592,
+    "seconds": 42.035361,
+    "rss_bytes": 1091362816
+  },
+  {
+    "free_bytes": 31908294656,
+    "seconds": 44.4149485,
+    "rss_bytes": 1117646848
+  },
+  {
+    "free_bytes": 31823941632,
+    "seconds": 46.7458687,
+    "rss_bytes": 1114513408
+  },
+  {
+    "free_bytes": 31556198400,
+    "seconds": 49.0959551,
+    "rss_bytes": 1114484736
+  },
+  {
+    "free_bytes": 31363231744,
+    "seconds": 51.5378152,
+    "rss_bytes": 1108242432
+  },
+  {
+    "free_bytes": 31485833216,
+    "seconds": 53.9195215,
+    "rss_bytes": 1117458432
+  },
+  {
+    "free_bytes": 31322488832,
+    "seconds": 56.3147381,
+    "rss_bytes": 1107509248
+  },
+  {
+    "free_bytes": 31248805888,
+    "seconds": 58.8278076,
+    "rss_bytes": 1172017152
+  }
+]

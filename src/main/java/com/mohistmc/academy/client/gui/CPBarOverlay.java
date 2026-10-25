@@ -5,21 +5,17 @@ import com.mohistmc.academy.config.ACConfig;
 import com.mohistmc.academy.skill.AcademyAttachments;
 import com.mohistmc.academy.skill.PlayerAbilityData;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
-import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.fml.ModList;
 
 /**
  * CP 和 Overload 栏 HUD —— 坐标与渲染方式对齐 Return CPBar。
  */
 @OnlyIn(Dist.CLIENT)
-@EventBusSubscriber(modid = AcademyCraft.MODID, value = Dist.CLIENT)
 public class CPBarOverlay {
 
     private static boolean showNumbers;
@@ -61,10 +57,7 @@ public class CPBarOverlay {
             {1.0f, 0xf5 / 255f, 0x64 / 255f, 0x64 / 255f},
     };
 
-    @SubscribeEvent
-    public static void onRenderOverlay(RenderGuiLayerEvent.Post event) {
-        if (!event.getName().equals(VanillaGuiLayers.HOTBAR)) return;
-
+    public static void render(GuiGraphics graphics, DeltaTracker partialTick) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.screen != null || mc.options.hideGui) return;
         if (!ACConfig.Client.showHud() || !ACConfig.Client.showCpBar()) return;
@@ -73,20 +66,13 @@ public class CPBarOverlay {
         if (!data.hasAbility()) return;
         if (!data.isAbilityActive()) return;
 
-        GuiGraphics g = event.getGuiGraphics();
+        GuiGraphics g = graphics;
         int screenW = mc.getWindow().getGuiScaledWidth();
         int screenH = mc.getWindow().getGuiScaledHeight();
 
         float hudW = WIDTH * SCALE;
-        float hudX = screenW - hudW - MARGIN_RIGHT + ACConfig.Client.cpBarX();
-        // Jade's default tooltip occupies the upper centre/right on narrow windows.
-        // Keep both overlays readable without taking a compile/runtime dependency on Jade.
-        float configuredY = ACConfig.Client.cpBarY();
-        float hudY = ModList.get().isLoaded("jade") && ACConfig.Client.autoAvoidJade()
-                ? Math.max(configuredY, screenH - HEIGHT * SCALE - 44)
-                : configuredY;
-        hudX = Math.clamp(hudX, 0, Math.max(0, screenW - hudW));
-        hudY = Math.clamp(hudY, 0, Math.max(0, screenH - HEIGHT * SCALE));
+        HudPosition position = position(screenW, screenH);
+        float hudX = position.x(), hudY = position.y();
 
         g.pose().pushPose();
         g.pose().translate(hudX, hudY, 0);
@@ -113,6 +99,39 @@ public class CPBarOverlay {
             g.drawString(mc.font, cp, textX, textY, 0xFFFFFFFF, true);
             g.drawString(mc.font, ol, textX, textY + 10, 0xFFFFC0A0, true);
         }
+    }
+
+    private record HudPosition(float x, float y) {}
+
+    private static HudPosition position(int screenW, int screenH) {
+        float hudW = WIDTH * SCALE;
+        float hudX = screenW - hudW - MARGIN_RIGHT + ACConfig.Client.cpBarX();
+        // Jade's default tooltip occupies the upper centre/right on narrow windows.
+        // Keep both overlays readable without taking a compile/runtime dependency on Jade.
+        float configuredY = ACConfig.Client.cpBarY();
+        float hudY = ModList.get().isLoaded("jade") && ACConfig.Client.autoAvoidJade()
+                ? Math.max(configuredY, screenH - HEIGHT * SCALE - 44)
+                : configuredY;
+        hudX = Math.clamp(hudX, 0, Math.max(0, screenW - hudW));
+        hudY = Math.clamp(hudY, 0, Math.max(0, screenH - HEIGHT * SCALE));
+        return new HudPosition(hudX, hudY);
+    }
+
+    /** Keep transient notification cards clear of the visible bar and its held-key resource values. */
+    static int avoidNotificationOverlap(int x, int y, int width, int height) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null || !ACConfig.Client.showHud() || !ACConfig.Client.showCpBar()) return y;
+        PlayerAbilityData data = mc.player.getData(AcademyAttachments.PLAYER_ABILITY);
+        if (!data.hasAbility() || !data.isAbilityActive()) return y;
+        int screenH = mc.getWindow().getGuiScaledHeight();
+        HudPosition p = position(mc.getWindow().getGuiScaledWidth(), screenH);
+        int bottom = showNumbers ? Math.round(p.y() + HEIGHT * SCALE + 2) + 10 + mc.font.lineHeight
+                : (int) Math.ceil(p.y() + HEIGHT * SCALE);
+        if (x + width <= p.x() || x >= p.x() + WIDTH * SCALE || y + height <= p.y() || y >= bottom) return y;
+        int below = bottom + 4;
+        if (below + height <= screenH) return below;
+        int above = (int) p.y() - height - 4;
+        return above >= 0 ? above : y;
     }
 
     /** 正常模式：背景 + OL 条（背景 alpha 0.8，与 Return setColor(1,1,1,.8) 一致） */

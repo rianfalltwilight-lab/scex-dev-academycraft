@@ -1,0 +1,38 @@
+Compiled from "NotifyOverlay.java"
+class com.mohistmc.academy.client.gui.NotifyOverlay$Notification {
+  final java.lang.String title;
+
+  final java.lang.String content;
+
+  final net.minecraft.resources.ResourceLocation icon;
+
+  final long time;
+
+  com.mohistmc.academy.client.gui.NotifyOverlay$Notification(java.lang.String, java.lang.String, long);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: aload_2
+       3: aconst_null
+       4: lload_3
+       5: invokespecial #1                  // Method "<init>":(Ljava/lang/String;Ljava/lang/String;Lnet/minecraft/resources/ResourceLocation;J)V
+       8: return
+
+  com.mohistmc.academy.client.gui.NotifyOverlay$Notification(java.lang.String, java.lang.String, net.minecraft.resources.ResourceLocation, long);
+    Code:
+       0: aload_0
+       1: invokespecial #7                  // Method java/lang/Object."<init>":()V
+       4: aload_0
+       5: aload_1
+       6: putfield      #12                 // Field title:Ljava/lang/String;
+       9: aload_0
+      10: aload_2
+      11: putfield      #16                 // Field content:Ljava/lang/String;
+      14: aload_0
+      15: aload_3
+      16: putfield      #19                 // Field icon:Lnet/minecraft/resources/ResourceLocation;
+      19: aload_0
+      20: lload         4
+      22: putfield      #23                 // Field time:J
+      25: return
+}

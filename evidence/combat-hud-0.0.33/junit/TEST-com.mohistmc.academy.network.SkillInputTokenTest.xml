@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.mohistmc.academy.network.SkillInputTokenTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-25T12:56:27.162Z" hostname="MONARCH" time="0.003">
+  <properties/>
+  <testcase name="aReopenedSessionMayStartAtOneWithoutAcceptingAnOldToken()" classname="com.mohistmc.academy.network.SkillInputTokenTest" time="0.001"/>
+  <testcase name="onlyLatestAcceptedInputMayAdvanceTheStream()" classname="com.mohistmc.academy.network.SkillInputTokenTest" time="0.0"/>
+  <testcase name="forgedHighSequenceCannotBlockAValidLaterInput()" classname="com.mohistmc.academy.network.SkillInputTokenTest" time="0.0"/>
+  <testcase name="nonpositiveAndAbsentInputsCannotAuthorizeActions()" classname="com.mohistmc.academy.network.SkillInputTokenTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

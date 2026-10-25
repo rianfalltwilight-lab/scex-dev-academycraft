@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.mohistmc.academy.advancement.LegacyAdvancementResourceTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-10-25T12:56:24.798Z" hostname="MONARCH" time="0.063">
+  <properties/>
+  <testcase name="everyLegacyNodeHasOfficialBilingualTitleAndDescription()" classname="com.mohistmc.academy.advancement.LegacyAdvancementResourceTest" time="0.042"/>
+  <testcase name="all56IdsAreUniqueValidReachableAndParentsResolve()" classname="com.mohistmc.academy.advancement.LegacyAdvancementResourceTest" time="0.02"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

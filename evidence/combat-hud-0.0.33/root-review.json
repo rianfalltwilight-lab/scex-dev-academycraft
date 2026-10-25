@@ -1,0 +1,30 @@
+{
+  "baseline": "3423b53e0e65b47f7d47bdc30b6ec71d4cb63995",
+  "status": "VALIDATED",
+  "cross_reviews": {
+    "hud": "Independent review verified native wrappers call production renderers and per-layer cancellation; added actual PoseStack depth check.",
+    "combat_tests": "Real native damage paths and settlement assertions reviewed; corrected GameTest exception type, partial-fixture cleanup, and spectator flight setup for Wind Burst.",
+    "sources": "Native profiles and recursively expanded vanilla tags checked; actual GameTest tag comparisons passed. Ordinary MagHook source restored to original.",
+    "notification_stack": "Independent review confirmed single whole-stack displacement; no newly introduced card overlap or clipping in the identified H240 boundary examples. Insufficient vertical room retains original layout."
+  },
+  "production_boundaries": [
+    "No skill damage/cost number changes.",
+    "No generic helper source rewriting; incoming event source identity and nested context preserved.",
+    "Ordinary attacks and non-ability sources retain native path.",
+    "Plasma retains player_explosion type/direct/owner/position and block explosion rules.",
+    "No universal enchantment post-attack hook added.",
+    "Eight HUD art/setting policies preserved; native named registration and F1 repairs; notification stack avoids CP region only when available vertical space permits."
+  ],
+  "validation_repairs": [
+    "Cold asynchronous test waits 50ms per pending poll because GameTestServer omits inter-tick wait; production200tick deadline unchanged.",
+    "Old owner-obstacle test uses fixed date RNG for repeatable vanilla AI input, preserving all original thresholds.",
+    "Glass-pursuit fixture shifted inside forced template chunks to preserve normal entity ticking; original 60-tick/distance/damage/CP/glass assertions retained.",
+    "Client probe now disconnects ClientLevel before Minecraft.disconnect, matching native PauseScreen flow; first failed run and thread dump preserved.",
+    "Second client attempt paused on window focus loss; isolated runner now sets native pauseOnLostFocus:false. Same r7 JARs passed on client-r3; no production pause behavior changed."
+  ],
+  "private_destination": "https://github.com/rianfalltwilight-lab/scex-academycraft",
+  "server_result": "487/487 passed, VICERACH gt-r4, normal zero exit; JUnit342 passed.",
+  "server_client_comparison": "r5 server-tested and r7 client candidate differ only in CPBarOverlay, its new HudPosition record, NotifyOverlay and client-only HudLayersClientGate classes, plus BUILD-INFO/MANIFEST. Nested notification class byte-identical. Exact comparison in server-client-entry-comparison.json.",
+  "client_result": "19/19 passed, MONARCH client-r3 using r7-tested pair, native save and disconnect, normal zero exit; 18 screenshots under review.",
+  "final_client": "MONARCH client-r3: 19 PASS checks, normal save/zero exit, 18 screenshots independently reviewed; one documented pre-existing charging/item-name layout issue."
+}

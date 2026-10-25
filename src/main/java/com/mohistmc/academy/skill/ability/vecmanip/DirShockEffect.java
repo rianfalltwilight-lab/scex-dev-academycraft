@@ -94,7 +94,7 @@ public class DirShockEffect implements ChargingSkillEffect {
 
         if (hit != null) {
             Entity target = hit.getEntity();
-            AcademyDamageHelper.hurt(player,target,player.damageSources().playerAttack(player), DynamicSkillRules.damage(getId(),damage));
+            AcademyDamageHelper.hurt(player,target,com.mohistmc.academy.skill.SkillDamageSource.attack(player), DynamicSkillRules.damage(getId(),damage));
             knockback(player, target, exp);
             // The old context adds a second, small outward impulse even below
             // the 0.25 proficiency threshold.

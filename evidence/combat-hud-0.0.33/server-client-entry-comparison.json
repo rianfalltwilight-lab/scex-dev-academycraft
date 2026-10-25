@@ -1,0 +1,26 @@
+{
+  "comparisons": [
+    {
+      "name": "AcademyCraft-neoforge-1.21.1-0.0.33-scex-combat-hud.jar",
+      "changed": [
+        "BUILD-INFO.txt",
+        "META-INF/MANIFEST.MF",
+        "com/mohistmc/academy/client/gui/CPBarOverlay$HudPosition.class",
+        "com/mohistmc/academy/client/gui/CPBarOverlay.class",
+        "com/mohistmc/academy/client/gui/NotifyOverlay.class"
+      ],
+      "server_common_entries_identical": true
+    },
+    {
+      "name": "AcademyCraft-neoforge-1.21.1-0.0.33-scex-combat-hud-audit-tests.jar",
+      "changed": [
+        "com/mohistmc/academy/regression/HudLayersClientGate$DrawCount.class",
+        "com/mohistmc/academy/regression/HudLayersClientGate$Registration.class",
+        "com/mohistmc/academy/regression/HudLayersClientGate$TrackingGraphics.class",
+        "com/mohistmc/academy/regression/HudLayersClientGate.class"
+      ],
+      "server_common_entries_identical": true
+    }
+  ],
+  "notification_inner_instructions_identical": true
+}

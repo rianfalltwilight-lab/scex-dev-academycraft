@@ -75,7 +75,7 @@ public final class ThreateningTeleportEffect implements ChargingSkillEffect {
         if (targeted) {
             float damage = lerpf(3, 6, exp) * (one.is(AcademyItems.NEEDLE.get()) ? 1.5f : 1f);
             AcademyDamageHelper.hurt(player, target.entity,
-                    player.damageSources().source(net.minecraft.world.damagesource.DamageTypes.MAGIC, player),
+                    com.mohistmc.academy.skill.SkillDamageSource.magic(player),
                     PassiveDamageHelper.teleporter(player, data, target.entity, getId(), damage).damage());
         }
         if ((!targeted || player.getRandom().nextFloat() < .3f) && !spawnDrop(player, target.dropPosition, one)) {

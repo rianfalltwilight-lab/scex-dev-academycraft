@@ -1,0 +1,21 @@
+{
+  "status": "MONARCH_CLIENT_FALLBACK",
+  "reason": "VICERACH client preflight rejected below6GiB free RAM; no remote client Java/task started.",
+  "observed_vicerach_free_gib": [
+    5.498302459716797,
+    5.18
+  ],
+  "observed_monarch_free_gib": 27.676918029785156,
+  "client_root": "D:\\SCEX-Work\\01-Mods\\Other-Ports\\AcademyCraft\\0.0.33-20261025",
+  "budget": "monarch-disk-budget.json",
+  "preflight": "monarch-preflight.json",
+  "base": "LAN reuse of original frozen VICERACH base; no external downloads",
+  "limits": {
+    "heap_mib": 1536,
+    "cpu_workers": 2,
+    "admission_free_gib": 6,
+    "abort_free_gib": 2.5,
+    "abort_rss_gib": 3.5,
+    "timeout_seconds": 300
+  }
+}

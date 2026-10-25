@@ -1,0 +1,24 @@
+{
+  "targets": [
+    {
+      "files": 5314,
+      "logical_bytes": 594543967,
+      "path": "D:\\Minecraft-Validation\\runs\\academy-combathud33-20261025"
+    }
+  ],
+  "finished_at": "2026-10-25T13:06:30.8546997Z",
+  "free_before": {
+    "D:\\": 141460066304
+  },
+  "checked_at": "2026-10-25T13:06:28.0258428Z",
+  "schema_version": 1,
+  "status": "CLEANED",
+  "free_after": {
+    "D:\\": 142060605440
+  },
+  "receipt_sha256": "144ED813D2463314B9F5731FFB4C185BF8F7F6C5F6D69B0CCCB63CF9F629ACA5",
+  "logical_bytes": 594543967,
+  "removed": [
+    "D:\\Minecraft-Validation\\runs\\academy-combathud33-20261025"
+  ]
+}

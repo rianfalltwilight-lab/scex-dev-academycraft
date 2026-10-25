@@ -14,9 +14,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageType;
-import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -190,9 +188,8 @@ public final class PsychoProjectileEntity extends Projectile implements ItemSupp
     @Override protected void onHitEntity(EntityHitResult hit) {
         if (!(getOwner() instanceof ServerPlayer owner) || owner.level() != level() || !owner.isAlive()) return;
         float damage = kind == Kind.NEEDLE ? 4 + 4 * proficiency : (12 + 4 * proficiency) * (etched() ? 1.25F : 1);
-        var type = level().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE)
-                .getHolderOrThrow(kind == Kind.NEEDLE ? NEEDLE_DAMAGE : DamageTypes.THROWN);
-        AcademyDamageHelper.hurt(owner, hit.getEntity(), new DamageSource(type, this, owner),
+        var type = kind == Kind.NEEDLE ? NEEDLE_DAMAGE : com.mohistmc.academy.skill.SkillDamageSource.THROWN;
+        AcademyDamageHelper.hurt(owner, hit.getEntity(), com.mohistmc.academy.skill.SkillDamageSource.projectile(owner, this, type),
                 DynamicSkillRules.damage(skill(), damage));
     }
 

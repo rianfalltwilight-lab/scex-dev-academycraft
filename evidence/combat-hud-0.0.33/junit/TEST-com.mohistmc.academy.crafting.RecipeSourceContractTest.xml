@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.mohistmc.academy.crafting.RecipeSourceContractTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-25T12:56:27.051Z" hostname="MONARCH" time="0.038">
+  <properties/>
+  <testcase name="restoresLegacyVanillaOreRefiningRecipesExactly()" classname="com.mohistmc.academy.crafting.RecipeSourceContractTest" time="0.002"/>
+  <testcase name="jeiIsOptionalAndClientIsolated()" classname="com.mohistmc.academy.crafting.RecipeSourceContractTest" time="0.001"/>
+  <testcase name="officialJarRecipeInventoryAndAllIdsAreMappedExactly()" classname="com.mohistmc.academy.crafting.RecipeSourceContractTest" time="0.013"/>
+  <testcase name="restoresLegacyCrossModOreDictionaryRefiningThroughCommonTags()" classname="com.mohistmc.academy.crafting.RecipeSourceContractTest" time="0.002"/>
+  <testcase name="restoresExactMachineRecipeInventory()" classname="com.mohistmc.academy.crafting.RecipeSourceContractTest" time="0.019"/>
+  <testcase name="imagFusorKeepsCurrentUpstreamAndRebuildDatapackCompatibility()" classname="com.mohistmc.academy.crafting.RecipeSourceContractTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

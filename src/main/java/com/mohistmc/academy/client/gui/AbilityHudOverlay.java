@@ -13,20 +13,16 @@ import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
-import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 
 /**
  * 技能 HUD — 参照旧版 KeyHintUI，仅显示按键+图标+冷却遮罩。
  */
 @OnlyIn(Dist.CLIENT)
-@EventBusSubscriber(modid = AcademyCraft.MODID, value = Dist.CLIENT)
 public class AbilityHudOverlay {
 
     private static final ResourceLocation TEX_ICON_BACK =
@@ -36,10 +32,7 @@ public class AbilityHudOverlay {
     private static final int SLOT_SPACING = 6;
     private static final int MARGIN = 12;
 
-    @SubscribeEvent
-    public static void onRenderOverlay(RenderGuiLayerEvent.Post event) {
-        if (!event.getName().equals(VanillaGuiLayers.HOTBAR)) return;
-
+    public static void render(GuiGraphics graphics, DeltaTracker partialTick) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.screen != null || mc.options.hideGui) return;
         if (!ACConfig.Client.showHud() || !ACConfig.Client.showKeyHints()) return;
@@ -47,7 +40,7 @@ public class AbilityHudOverlay {
         PlayerAbilityData data = mc.player.getData(AcademyAttachments.PLAYER_ABILITY);
         if (!data.hasAbility() || !data.isAbilityActive()) return;
 
-        GuiGraphics g = event.getGuiGraphics();
+        GuiGraphics g = graphics;
         int screenW = mc.getWindow().getGuiScaledWidth();
         int screenH = mc.getWindow().getGuiScaledHeight();
 

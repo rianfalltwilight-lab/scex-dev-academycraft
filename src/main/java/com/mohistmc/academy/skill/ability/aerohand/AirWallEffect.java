@@ -93,7 +93,7 @@ public final class AirWallEffect implements DynamicOneShotSkillEffect {
                 double horizontal = Math.hypot(living.getX() - ring.centre.x,
                         living.getZ() - ring.centre.z);
                 if (horizontal < r - 0.4 || horizontal > r + 0.4) continue;
-                if (AcademyDamageHelper.hurt(owner, living, owner.damageSources().playerAttack(owner),
+                if (AcademyDamageHelper.hurt(owner, living, com.mohistmc.academy.skill.SkillDamageSource.attack(owner),
                         DynamicSkillRules.damage("air_wall", lerpf(10, 15, ring.proficiency)))) {
                     Vec3 away = new Vec3(living.getX() - ring.centre.x, 0,
                             living.getZ() - ring.centre.z);

@@ -4,20 +4,16 @@ import com.mohistmc.academy.AcademyCraft;
 import com.mohistmc.academy.skill.AcademyAttachments;
 import com.mohistmc.academy.skill.PlayerAbilityData;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
-import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 
 /**
  * 屏幕遮罩特效 —— 能力激活时屏幕染上淡蓝色，超载时染红色，平滑渐变过渡。
  */
 @OnlyIn(Dist.CLIENT)
-@EventBusSubscriber(modid = AcademyCraft.MODID, value = Dist.CLIENT)
 public class ScreenMaskOverlay {
 
     private static final ResourceLocation TEX_MASK =
@@ -36,10 +32,7 @@ public class ScreenMaskOverlay {
 
     public static void resetClientSession() { r = g = b = a = 0; lastFrame = 0; }
 
-    @SubscribeEvent
-    public static void onRender(RenderGuiLayerEvent.Post event) {
-        if (!event.getName().equals(VanillaGuiLayers.HOTBAR)) return;
-
+    public static void render(GuiGraphics graphics, DeltaTracker partialTick) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.screen != null || mc.options.hideGui) return;
 
@@ -84,7 +77,7 @@ public class ScreenMaskOverlay {
             return;
         }
 
-        GuiGraphics gg = event.getGuiGraphics();
+        GuiGraphics gg = graphics;
         int w = mc.getWindow().getGuiScaledWidth();
         int h = mc.getWindow().getGuiScaledHeight();
         // 与 Return BackgroundMask 一致：setShaderColor 调制 + 开启混合保留纹理 alpha

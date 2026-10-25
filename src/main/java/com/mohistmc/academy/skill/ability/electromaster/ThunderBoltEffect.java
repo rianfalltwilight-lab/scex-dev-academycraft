@@ -83,7 +83,7 @@ public class ThunderBoltEffect implements SkillEffect {
         }
 
         if (hitEntity && targetEntity != null && targetEntity.isAlive()) {
-            ElectromasterDamageHelper.attack(player,targetEntity,player.damageSources().playerAttack(player),
+            ElectromasterDamageHelper.attack(player,targetEntity,com.mohistmc.academy.skill.SkillDamageSource.attack(player),
                     DynamicSkillRules.damage(getId(),damage));
 
             if (proficiency > 0.2 && level.random.nextDouble() < 0.8 && targetEntity instanceof LivingEntity living) {
@@ -101,7 +101,7 @@ public class ThunderBoltEffect implements SkillEffect {
                                 e.getX()-impactPoint.x,e.getY()-impactPoint.y,e.getZ()-impactPoint.z));
 
         for (Entity e : aoes) {
-            ElectromasterDamageHelper.attack(player,e,player.damageSources().playerAttack(player),
+            ElectromasterDamageHelper.attack(player,e,com.mohistmc.academy.skill.SkillDamageSource.attack(player),
                     DynamicSkillRules.damage(getId(),aoeDamage));
 
             // Preserve the actual 1.0.7 branch: it checked and slowed ad.target

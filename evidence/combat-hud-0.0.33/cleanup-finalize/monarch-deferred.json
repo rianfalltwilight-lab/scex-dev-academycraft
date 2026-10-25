@@ -1,0 +1,10 @@
+{
+  "host": "MONARCH",
+  "status": "DEFERRED_OTHER_TEST_PROCESS",
+  "reason": "Original preflight Java baseline is preserved. Other project tests are active; cleanup guard was not bypassed and no other process was stopped. Retry original Plan/Apply when this host is idle.",
+  "command_prefix": "\"D:\\SCEX-Work\\04-Media-Tools\\Shared-Runtime\\temurin21\\jdk-21.0.12.1+1\\bin\\java.exe\" @\"D:/SCEX-Work/01-Mods/SI-SlashBlade/si-slashblade-integration/20261025-modernization/control/launch-input-emi-local-r4/java.args\"",
+  "blocking_pid": 90944,
+  "blocking_created": "2026-10-25T13:07:15.0026330Z",
+  "own_client_runs_exited": true,
+  "run_root": "D:\\SCEX-Work\\01-Mods\\Other-Ports\\AcademyCraft\\0.0.33-20261025"
+}

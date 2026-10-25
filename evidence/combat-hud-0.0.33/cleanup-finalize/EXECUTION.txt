@@ -1,0 +1,83 @@
+Prepared only. Neither wrapper was executed; no remote connection or deletion by this subagent.
+
+Actual mixed workflow
+  VICERACH GameTest final: gt-r4, 487 tests (use its actual successful receipt).
+  MONARCH client final: use the actual successful final run ID; earlier visual/save attempts remain history.
+  VICERACH client-r1/r2/r3 are staged only: no process.json/result.json/dispatch.json and no scheduled task.
+  Their status remains NOT_STARTED_RESOURCE_GUARD and runtime_exit_code remains null.
+  Successful exit_codes refer only to VICERACH GameTest and the real external MONARCH client, with host recorded.
+
+Exact disposable scopes
+  VICERACH: D:\Minecraft-Validation\runs\academy-combathud33-20261025
+  MONARCH:  D:\SCEX-Work\01-Mods\Other-Ports\AcademyCraft\0.0.33-20261025
+  Original VICERACH base D:\Minecraft-Validation\bases\academy-ssid23-small-20260908 is preserved.
+  Source, final tested snapshots, deliveries, shared dependencies and retained receipts remain outside deletion.
+  Lab.Common.ps1 and Remove-CompletedTestRun.ps1 remain byte-for-byte original skill helpers.
+
+Evidence required before either Plan
+  Project evidence root: D:\Minecraft-Projects\academycraft-deep-audit-0.0.29-20261025\evidence\combat-hud-0.0.33
+  final-validation.json: PASS, gametests.host=VICERACH, client.host=MONARCH, normal zero exits,
+    client native save and visual review PASS, both server-tested and client-tested artifact paths and SHA256.
+  Each artifact_entry_comparisons entry uses tested/tested_sha256 for the actual client input (expected r7-tested; r6 was never started),
+    and server_tested/server_tested_sha256 for the actual GameTest input (r5-tested).
+    server_common_entries_identical must be true for VICERACH; runtime_entries_identical must be true for MONARCH.
+    server_changed_client_only_entries retains the exact client-only delta audited by finalizer.
+  The finalizer permits only CPBarOverlay.class/CPBarOverlay$HudPosition.class/NotifyOverlay.class
+    and metadata in the main JAR, and the exact four changed HudLayersClientGate classes in the probe.
+    NotifyOverlay$Notification.class is byte-identical between r5 and final r7; no exception is allowed.
+    Cleanup relies on the final PASS proof without claiming whole-JAR server/client equality or repeating GameTests.
+  gametests-final and client-final: result.json, process.json, derived-launch.json, memory-samples.json,
+    artifacts.json, stdout.log, stderr.log, latest.log.
+  client-final additionally: academy-hud-layers-client.txt, academy-hud-layers-save-checkpoint.txt,
+    visual-review.json and all referenced images with relative paths unchanged.
+  latest.log aliases come from actual run/logs/latest.log.
+  artifacts.json records actual runtime JAR hashes; runner scripts do not create it themselves.
+  No client dispatch.json is required: the local fallback was launched directly, and remote dispatch never started.
+  Retain original preflight.json, monarch-preflight.json, monarch-disk-budget.json and client-fallback.json.
+  Do not refresh baseline_java to admit a surviving test or newly unknown Java process.
+
+MONARCH: prepare the local completion and deletion plan
+  Run from the original project evidence location, using the actual final client ID:
+    $localCleanup = 'D:\Minecraft-Projects\academycraft-deep-audit-0.0.29-20261025\evidence\combat-hud-0.0.33\cleanup-finalize\Invoke-Academy33MonarchCleanup.ps1'
+    & $localCleanup -Mode Plan -FinalClientRun $finalClientRun
+  This seals cleanup-finalize\monarch\completion.json and calls the original helper without -Apply.
+  Set $finalClientRun to the actual successful run ID before Plan (do not reuse a failed earlier run).
+  Inputs retain all four host-specific tested files: server main/probe r5 and client main/probe r7 from project
+  build/ (outside deletion), plus base-manifest.json copied from the local disposable base. Paths are taken
+  from final-validation, not hard-coded snapshot folder names. The original base remains on VICERACH.
+  The local actual client JARs/result/process/launch identities must match the retained final evidence.
+  All local client attempt results/logs/screenshots are retained with original values under monarch\attempts.
+
+VICERACH: upload this small bundle outside the remote disposable root
+  Fixed retained directory: D:\Minecraft-Validation\receipts\academy-combathud33-20261025
+  Copy Invoke-Academy33FinalCleanup.ps1, Lab.Common.ps1, Remove-CompletedTestRun.ps1 to that directory.
+  Copy final-validation.json, preflight.json, monarch-preflight.json, client-fallback.json,
+    gametests-final/ and client-final/ with all required evidence and reviewed images.
+  No large JAR, copied base or test world needs to be sent back: final source/tested inputs remain on MONARCH.
+  The original remote base manifest is a local hashed input; MONARCH source/tested paths and hashes are retained
+  in final-validation and the completion receipt. The remote actual GameTest JAR names/hashes are checked
+  against server_tested/server_tested_sha256, with server_common_entries_identical required. External MONARCH
+  client artifacts.json is checked separately against tested/tested_sha256; these hashes may differ.
+
+  Run on VICERACH with actual final IDs:
+    $remoteCleanup = 'D:\Minecraft-Validation\receipts\academy-combathud33-20261025\Invoke-Academy33FinalCleanup.ps1'
+    & $remoteCleanup -Mode Plan -FinalGameTestRun gt-r4 -FinalClientRun $finalClientRun
+  It refuses any remote client process/result/dispatch or scheduled task, and records each staging file identity
+  in unstarted-client-staging.json without asserting a remote client success. Old staged JARs need not match
+  final tested JARs. Remote GameTest failures and all earlier results remain unchanged under attempts/.
+  There is no Tasks mode now: the actual remote dispatch created no task, and neither wrapper removes tasks.
+
+After reviewing each sealed completion receipt and exact helper plan, execute on its own host:
+    & $localCleanup -Mode Apply
+    & $remoteCleanup -Mode Apply
+  These are examples only, not commands already executed by this subagent.
+  Both wrappers hold their host's D:\Minecraft-Validation\control\client-window.lock, the same lock as its runner.
+  Every actual runtime PID+StartTime must have exited. Current Java must match that host's original
+  preflight.baseline_java; unknown Java and processes referring to the disposable target block cleanup.
+  No process is killed. The unchanged helper checks its own lease/mutex, exact target boundaries and creation
+  timestamp, reparse points, retained hashes and process state immediately before native Remove-Item.
+  Plan refuses to overwrite an already sealed completion receipt; Apply never refreshes its evidence hashes.
+
+Finally retain both completion.json and completion.json.cleanup.json outputs on MONARCH.
+Keep remote receipts and the original base. Do not remove a failing scene still needed for investigation.
+Prepared validation: both wrappers passed PowerShell AST parsing; original helper SHA256 matches were confirmed.

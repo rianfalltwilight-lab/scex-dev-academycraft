@@ -1,0 +1,75 @@
+{
+  "status": "ISSUES",
+  "reviewer": "player_sync31",
+  "run": "MONARCH client-r3, r7 JAR; run identity and pauseOnLostFocus:false supplied by root",
+  "method": "本次重新逐张调用view_image(detail=original)查看当前9张PNG，未沿用旧图结论；每图1280x960、GUI scale2。",
+  "image_count": 9,
+  "scope_behavior_status": "PASS",
+  "notification_cp_status": "PASS: 所有同时显示CP和通知的截图中，通知卡均位于CP/OL读数下方，旧遮挡已消除。",
+  "visible_issues": [
+    {
+      "id": "preexisting_creative_item_name_charge_hint_overlap",
+      "file": "screenshots/hud-layers-scale2-visible.png",
+      "observation": "首帧底部原生选中物品名称与蓄力提示短时叠字，随后截图中的蓄力提示清晰。",
+      "classification": "既有布局边界；本轮未改这两个位置，不是通知避让回归。",
+      "source_evidence": "实际21.1.248 sources.jar Gui.java:789-791令创造模式选中物品名称位于H-45；ChargingHudOverlay.java:67/105令蓄力提示位于H-47。两项Charging坐标已与3423b53逐句比对未变。"
+    }
+  ],
+  "limit": "程序化夹具、程序输入与同步展示多个短暂HUD生成的真实客户端截图；这次仅独立审阅scale2九图。静态图不代表人手操作、连续动画、声音/旁白或全部窗口尺寸验收。报告明确保留一处既有短时叠字，不将行为门禁通过表述为全画面无布局边界。",
+  "images": [
+    {
+      "file": "screenshots/hud-layers-scale2-visible.png",
+      "sha256": "4ac31d777afdc47a896cacb8125ce340d182fd307a5bada7b215d007e6f2dd52",
+      "status": "ISSUES",
+      "observation": "CP/OL读数完整可见，通知卡位于其下方且有间隔；各HUD、波纹、遮罩均可见，无窗口截断。首帧底部原生选中物品名称与蓄力提示短时叠字，属既有坐标边界。"
+    },
+    {
+      "file": "screenshots/hud-layers-scale2-f1-hidden.png",
+      "sha256": "f0cfd508df14b81398c4ac585301ceb3b0a064a5a54d554374b6f895b303a46c",
+      "status": "PASS",
+      "observation": "仅世界画面可见；八个模组HUD内容、波纹和遮罩均隐藏，原生快捷栏/手持物也隐藏，没有残留HUD。"
+    },
+    {
+      "file": "screenshots/hud-layers-scale2-f1-restored.png",
+      "sha256": "461c67e100a7c3452f1135ebcda89fd40a26167de567b169d0c4e49507324e19",
+      "status": "PASS",
+      "observation": "F1恢复后CP、通知、安装、蓄力、技能提示、媒体、波纹及快捷栏恢复；CP/OL与通知卡分开，底部蓄力提示此时清晰。"
+    },
+    {
+      "file": "screenshots/hud-layers-scale2-cancel-cp.png",
+      "sha256": "eb81dd68a17a6d96ff08c009328f18a11bc9304d1b48cbf688a25033653090a6",
+      "status": "PASS",
+      "observation": "仅CP条与CP/OL读数消失，通知、安装、蓄力、技能提示、媒体、波纹和原生快捷栏继续显示；通知保留预留位置。"
+    },
+    {
+      "file": "screenshots/hud-layers-scale2-cancel-hotbar.png",
+      "sha256": "463e391dd01c372d62de3be733715eeb0bcb20e6f46581e728ae6043c627045e",
+      "status": "PASS",
+      "observation": "原生快捷栏消失，模组HUD和手持物仍在；CP/OL读数与通知卡之间留有清楚间隔，底部蓄力文字清晰。"
+    },
+    {
+      "file": "screenshots/hud-layers-scale2-hud-disabled.png",
+      "sha256": "d2e77ca60cf00e4a1ce9fa2d13a3950f9919e0a740d4541093ed921c721edf98",
+      "status": "PASS",
+      "observation": "总HUD关闭后CP、技能提示、媒体、通知和蓄力消失；安装进度、矢量波纹、遮罩与原生快捷栏按当前hidden语义保留。"
+    },
+    {
+      "file": "screenshots/hud-layers-scale2-individual-disabled.png",
+      "sha256": "40add514f1113afad40d4d74ba6c23e3fbeac1c1e9f206e86c56fb01544ade66",
+      "status": "PASS",
+      "observation": "CP、技能提示和蓄力单独关闭；通知回到较高的原始区域，媒体、安装进度、波纹及快捷栏继续显示。右上原生移动教学toast完整，无边缘截断。"
+    },
+    {
+      "file": "screenshots/hud-layers-scale2-screen-open.png",
+      "sha256": "79872f44162f1a920b4b095b4f6e7bd3ff792bfb151df7c7fd7be66a96e61920",
+      "status": "PASS",
+      "observation": "设置面板打开后模组HUD、安装进度和波纹均不可见；日文设置面板完整居中，标签/键名分列且无溢出；背景世界、手持物和快捷栏处于原生界面模糊背景。"
+    },
+    {
+      "file": "screenshots/hud-layers-scale2-screen-closed.png",
+      "sha256": "f3be09b72edc3c1419ff094075b176a60f20e516ca244c5cf1d8d7feba16ca08",
+      "status": "PASS",
+      "observation": "关闭设置后HUD与波纹恢复，面板及背景模糊消失；CP/OL读数和通知卡不重叠，底部蓄力提示清晰。"
+    }
+  ]
+}

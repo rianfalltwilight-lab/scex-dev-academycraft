@@ -158,7 +158,7 @@ public final class PlasmaOrbEntity extends Entity implements ItemSupplier {
         float damage = entityData.get(DAMAGE);
         for (Entity entity : level.getEntities(this, getBoundingBox().inflate(10),
                 entity -> entity.isAlive() && entity.distanceToSqr(this) <= 100)) {
-            AcademyDamageHelper.hurt(player, entity, player.damageSources().explosion(player, player), damage);
+            AcademyDamageHelper.hurt(player, entity, com.mohistmc.academy.skill.SkillDamageSource.explosion(player), damage);
             entity.invulnerableTime = -1;
         }
 
@@ -175,7 +175,7 @@ public final class PlasmaOrbEntity extends Entity implements ItemSupplier {
         }
         if (resident) {
             boolean mayBreak = DynamicSkillRules.destroysBlocks(level, "plasma_cannon");
-            level.explode(player, player.damageSources().explosion(player, player),
+            level.explode(player, com.mohistmc.academy.skill.SkillDamageSource.explosion(player),
                     new ProtectedBlast(level, player), destination, radius, false,
                     mayBreak ? Level.ExplosionInteraction.BLOCK : Level.ExplosionInteraction.NONE);
         } else {

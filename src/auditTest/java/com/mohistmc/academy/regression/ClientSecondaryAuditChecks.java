@@ -151,16 +151,14 @@ final class ClientSecondaryAuditChecks {
             com.mohistmc.academy.config.ACConfig.Client.SHOW_KEY_HINTS.set(true);
             mc.options.hideGui = false;
             var graphics = new OverlayGraphics(mc, buffers);
-            var event = new net.neoforged.neoforge.client.event.RenderGuiLayerEvent.Post(
-                    graphics, mc.getTimer(), net.neoforged.neoforge.client.gui.VanillaGuiLayers.HOTBAR, null);
-            com.mohistmc.academy.client.gui.AbilityHudOverlay.onRenderOverlay(event);
+            com.mohistmc.academy.client.gui.AbilityHudOverlay.render(graphics, mc.getTimer());
             require(graphics.icons == 4 && graphics.iconBottom <= mc.getWindow().getGuiScaledHeight(),
                     "four-slot HUD exceeds bottom edge after maximum downward offset");
             for (String name : List.of("a", "r", "g", "b")) {
                 Field field = com.mohistmc.academy.client.gui.ScreenMaskOverlay.class.getDeclaredField(name);
                 field.setAccessible(true); field.setDouble(null, .2);
             }
-            com.mohistmc.academy.client.gui.ScreenMaskOverlay.onRender(event);
+            com.mohistmc.academy.client.gui.ScreenMaskOverlay.render(graphics, mc.getTimer());
             require(graphics.maskFullSource, "screen mask cropped/repeated texture instead of sampling full 512x288");
             graphics.flush();
             evidence.add("PASS actual HUD render: four icons remain inside bottom edge; screen mask maps full 512x288 source to current GUI dimensions");

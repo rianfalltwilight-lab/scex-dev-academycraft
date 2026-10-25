@@ -1,0 +1,262 @@
+{
+  "version": "0.0.33",
+  "baseline": "3423b53",
+  "status": "IMPLEMENTED_STATIC_REVIEW_COMPLETE_RUNTIME_PENDING_ROOT",
+  "runtime_executed_by_this_agent": false,
+  "scope": {
+    "new_skill_damage_profiles": [
+      "academy:ability",
+      "academy:ability_magic",
+      "academy:ability_thrown",
+      "academy:ability_drowning"
+    ],
+    "retained_piercing_projectile_ids": [
+      "academy:psycho_needle",
+      "academy:air_blade",
+      "academy:cruise_bomb"
+    ],
+    "retained_native_explosion": "minecraft:player_explosion for both PlasmaOrb direct skill damage and actual explosion",
+    "explicit_factory_call_count": 34,
+    "production_callsite_files": [
+      {
+        "path": "src/main/java/com/mohistmc/academy/skill/passive/PassiveDamageHelper.java",
+        "factories": [
+          "attack"
+        ]
+      },
+      {
+        "path": "src/main/java/com/mohistmc/academy/skill/passive/PassiveSkillEventHandler.java",
+        "factories": [
+          "attack",
+          "attack"
+        ]
+      },
+      {
+        "path": "src/main/java/com/mohistmc/academy/skill/ability/aerohand/AeroPassiveRuntime.java",
+        "factories": [
+          "attack"
+        ]
+      },
+      {
+        "path": "src/main/java/com/mohistmc/academy/skill/ability/aerohand/AeroSeparatorEffect.java",
+        "factories": [
+          "drowning",
+          "drowning"
+        ]
+      },
+      {
+        "path": "src/main/java/com/mohistmc/academy/skill/ability/aerohand/AirWallEffect.java",
+        "factories": [
+          "attack"
+        ]
+      },
+      {
+        "path": "src/main/java/com/mohistmc/academy/skill/ability/aerohand/StormCoreEffect.java",
+        "factories": [
+          "attack",
+          "attack"
+        ]
+      },
+      {
+        "path": "src/main/java/com/mohistmc/academy/skill/ability/electromaster/ArcGenEffect.java",
+        "factories": [
+          "attack"
+        ]
+      },
+      {
+        "path": "src/main/java/com/mohistmc/academy/skill/ability/electromaster/RailgunEffect.java",
+        "factories": [
+          "attack"
+        ]
+      },
+      {
+        "path": "src/main/java/com/mohistmc/academy/skill/ability/electromaster/ThunderBoltEffect.java",
+        "factories": [
+          "attack",
+          "attack"
+        ]
+      },
+      {
+        "path": "src/main/java/com/mohistmc/academy/skill/ability/electromaster/ThunderClapEffect.java",
+        "factories": [
+          "attack"
+        ]
+      },
+      {
+        "path": "src/main/java/com/mohistmc/academy/skill/ability/meltdowner/MeltdownerEffect.java",
+        "factories": [
+          "attack",
+          "attack"
+        ]
+      },
+      {
+        "path": "src/main/java/com/mohistmc/academy/skill/ability/meltdowner/ScatterBombEffect.java",
+        "factories": [
+          "attack"
+        ]
+      },
+      {
+        "path": "src/main/java/com/mohistmc/academy/skill/ability/telekinesis/PaperDrillEffect.java",
+        "factories": [
+          "attack"
+        ]
+      },
+      {
+        "path": "src/main/java/com/mohistmc/academy/skill/ability/telekinesis/PsychoSlamEffect.java",
+        "factories": [
+          "attack",
+          "attack"
+        ]
+      },
+      {
+        "path": "src/main/java/com/mohistmc/academy/skill/ability/telekinesis/TelekinesisPassiveHandler.java",
+        "factories": [
+          "attack"
+        ]
+      },
+      {
+        "path": "src/main/java/com/mohistmc/academy/skill/ability/teleporter/FleshRippingEffect.java",
+        "factories": [
+          "magic"
+        ]
+      },
+      {
+        "path": "src/main/java/com/mohistmc/academy/skill/ability/teleporter/ShiftTpEffect.java",
+        "factories": [
+          "attack"
+        ]
+      },
+      {
+        "path": "src/main/java/com/mohistmc/academy/skill/ability/teleporter/ThreateningTeleportEffect.java",
+        "factories": [
+          "magic"
+        ]
+      },
+      {
+        "path": "src/main/java/com/mohistmc/academy/skill/ability/vecmanip/BloodRetroEffect.java",
+        "factories": [
+          "attack"
+        ]
+      },
+      {
+        "path": "src/main/java/com/mohistmc/academy/skill/ability/vecmanip/DirBlastEffect.java",
+        "factories": [
+          "attack"
+        ]
+      },
+      {
+        "path": "src/main/java/com/mohistmc/academy/skill/ability/vecmanip/DirShockEffect.java",
+        "factories": [
+          "attack"
+        ]
+      },
+      {
+        "path": "src/main/java/com/mohistmc/academy/skill/ability/vecmanip/GroundShockEffect.java",
+        "factories": [
+          "attack"
+        ]
+      },
+      {
+        "path": "src/main/java/com/mohistmc/academy/world/entity/AeroProjectileEntity.java",
+        "factories": [
+          "projectile"
+        ]
+      },
+      {
+        "path": "src/main/java/com/mohistmc/academy/world/entity/CruiseBombEntity.java",
+        "factories": [
+          "projectile"
+        ]
+      },
+      {
+        "path": "src/main/java/com/mohistmc/academy/world/entity/MagManipBlockEntity.java",
+        "factories": [
+          "attack"
+        ]
+      },
+      {
+        "path": "src/main/java/com/mohistmc/academy/world/entity/PsychoProjectileEntity.java",
+        "factories": [
+          "projectile"
+        ]
+      },
+      {
+        "path": "src/main/java/com/mohistmc/academy/entity/PlasmaOrbEntity.java",
+        "factories": [
+          "explosion",
+          "explosion"
+        ]
+      }
+    ]
+  },
+  "native_api_evidence": {
+    "local_sources": "build/moddev/artifacts/neoforge-21.1.248-sources.jar",
+    "official_documentation": "https://docs.neoforged.net/docs/1.21.1/resources/server/damagetypes/",
+    "reviewed_native_classes": [
+      "DamageSource",
+      "DamageSources",
+      "DamageTypes",
+      "DamageTypeTagsProvider",
+      "CombatRules",
+      "ServerPlayer",
+      "LivingEntity",
+      "EnchantmentHelper",
+      "Enchantments"
+    ]
+  },
+  "changes": [
+    "Explicit ability source factories replace native source construction at production ability entrypoints; no implicit conversion in AcademyDamageHelper.",
+    "Four new profiles preserve all vanilla prototype properties except message_id; matching vanilla damage tags include transitive bypasses_shield via bypasses_armor.",
+    "SkillDamageSource retains direct/owner/position and returns null weapon item to exclude held Breach armour-effectiveness values.",
+    "Death messages identify skill profile and real credited caster, without borrowing an unrelated custom-named held item; all 16 keys exist in en_us/zh_cn/ja_jp.",
+    "AeroSeparator enemy drowning carries caster owner; its self drowning remains ownerless. Native PvP/team and native kill credit now see hostile caster.",
+    "Airflow tests IS_DROWNING tag so native drowning and the new vacuum profile share the existing mitigation and resource curve.",
+    "PlasmaOrb keeps original explosion type, direct/owner/position, explosion formula, block permission calculator and ability boundary for both damage paths."
+  ],
+  "invariants": {
+    "unchanged_from_baseline_ignoring_line_endings": [
+      "src/main/java/com/mohistmc/academy/skill/AcademyDamageHelper.java",
+      "src/main/java/com/mohistmc/academy/skill/AcceptedAbilityDamage.java",
+      "src/main/java/com/mohistmc/academy/mixin/CommonHooksAbilityDeathMixin.java",
+      "src/main/java/com/mohistmc/academy/mixin/LivingEntityAbilityBoundaryMixin.java"
+    ],
+    "ordinary_item_hurtNonAbility": "unchanged",
+    "damage_numbers_and_existing_piercing_tags": "unchanged",
+    "no_new_global_post_attack_hook": true,
+    "held_axe_shield_disable": "preserved via original direct entity"
+  },
+  "limitations": [
+    "Does not claim all held-item behaviour is isolated: original direct-entity axe shield disabling remains.",
+    "Does not add global victim Thorns or attacker weapon post-attack callbacks to skills; no prior skill callback contract established.",
+    "Existing plain projectile damage_type message_id/registration is unchanged; owned SkillDamageSource instances supply new translated death messages."
+  ],
+  "new_gametests": {
+    "path": "src/auditTest/java/com/mohistmc/academy/regression/SkillDamageSourceGameTests.java",
+    "namespace": "academy_native_combat",
+    "count": 6,
+    "methods": [
+      "loadedSkillProfilesPreserveAllNativeDamageTags",
+      "skillSourcesKeepDirectOwnerPositionAndHonestDeathMessages",
+      "explicitSourcesPreservePublicIdentityAcrossNestedOrdinaryDamage",
+      "realDirectedShockDoesNotBorrowHeldBreach",
+      "airflowMitigatesBothNativeAndAbilityDrowning",
+      "realVacuumPulseHonorsPvpTeamSelfDamageAndKillCredit"
+    ],
+    "pvp_batch": "native_skill_pvp",
+    "other_batch": "native_skill_sources",
+    "unmodified_real_player_fixture": "RecheckPlayers.connect with production connection ticks and test completion cleanup"
+  },
+  "adjacent_junit_update": "AerohandBehaviorSourceContractTest now expects explicit self/hostile drowning factories and IS_DROWNING, retaining delayed-pulse and self-damage assertions.",
+  "static_checks": [
+    "All changed damage JSON parses.",
+    "16 death keys per language have matching placeholders.",
+    "Native prototype tags crosschecked against cached 21.1.248 DamageTypeTagsProvider source.",
+    "Helper, accepted damage boundary and two required mixins are byte-normalized identical to release baseline."
+  ],
+  "validation": "Root must build and run existing plus 6 new SkillDamageSourceGameTests; no runtime PASS asserted here.",
+  "explicit_factory_call_count": 34,
+  "root_review": {
+    "ordinary_item_boundary": "EntityMagHook retains baseline playerAttack source; its preexisting helper boundary is unchanged.",
+    "cross_review": "next_phase_review verified native type properties/tags and projectile direct/owner/position; MagHook overreach reverted before final candidate."
+  }
+}

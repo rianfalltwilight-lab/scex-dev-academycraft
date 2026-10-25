@@ -1,0 +1,68 @@
+{
+  "status": "PASS",
+  "reviewer": "next_phase_review",
+  "candidate": "r7 JAR; MONARCH client-r3",
+  "scale": 3,
+  "resolution": [
+    1280,
+    960
+  ],
+  "method": "九张本轮 PNG 分别调用 view_image(detail=original) 逐张原尺寸复核；随后计算文件 SHA-256，未沿用首轮截图或观察。",
+  "images": [
+    {
+      "file": "screenshots/hud-layers-scale3-visible.png",
+      "sha256": "f01a6aab96b0edd26e9a0a693791fc57d1e7443d0ef71ba98f4c79ffc7df15f5",
+      "status": "PASS",
+      "observation": "CP/OL 数字完整显示在通知面板上方，两者不再遮挡；通知两行文字、安装中 18% 日语文字、技能提示、蓄力条、媒体与原版快捷栏均可见，文字和窗口未越界。"
+    },
+    {
+      "file": "screenshots/hud-layers-scale3-f1-hidden.png",
+      "sha256": "0f533c1082518bee626ab62678ba4ac2826fc3c5fc277fed696277b52ea0835a",
+      "status": "PASS",
+      "observation": "画面仅保留世界；CP、通知、技能提示、蓄力、媒体、安装条、波纹和原版快捷栏/手持物均不可见，未见残留文字。"
+    },
+    {
+      "file": "screenshots/hud-layers-scale3-f1-restored.png",
+      "sha256": "06caed5c4ce7c17605c897b710b9974b7e340ed82614829c0e02e3fe36c350e9",
+      "status": "PASS",
+      "observation": "F1 恢复后 CP/OL、通知、安装文字与进度条、技能提示、蓄力、媒体及原版快捷栏恢复显示；通知与 CP/OL 保持间隔，波纹可见。"
+    },
+    {
+      "file": "screenshots/hud-layers-scale3-cancel-cp.png",
+      "sha256": "c99ef517f0733f20571f03b4c4ab4af0f020903e4fcc6e0d8ef785fd7fce6e77",
+      "status": "PASS",
+      "observation": "CP 条及 CP/OL 数字均隐藏；通知、安装文字与进度条、技能提示、蓄力、媒体、波纹及原版快捷栏仍显示，通知文字完整。"
+    },
+    {
+      "file": "screenshots/hud-layers-scale3-cancel-hotbar.png",
+      "sha256": "56037a0377806dacdd43643892a9700e54ac4404c9557e0c3e9a32cf537378d1",
+      "status": "PASS",
+      "observation": "原版快捷栏隐藏，手持物与各模组 HUD 仍显示；CP/OL 与通知分离，日语安装中 19% 文字清晰可见，蓄力和媒体文字未越界。"
+    },
+    {
+      "file": "screenshots/hud-layers-scale3-hud-disabled.png",
+      "sha256": "7f28846ed6d89964fa1a8590b3d69eab9fceaa712be5753e7248261898600334",
+      "status": "PASS",
+      "observation": "总 HUD 开关关闭后 CP、通知、技能提示、蓄力与媒体均隐藏；日语安装中 20% 及进度条、波纹、世界效果和原版快捷栏仍可见，未见缺字或窗口越界。"
+    },
+    {
+      "file": "screenshots/hud-layers-scale3-individual-disabled.png",
+      "sha256": "b9367b9cb470e8a77ae53f2102f684adca7ab1ad6477e8d9bc7aab07404cfcc5",
+      "status": "PASS",
+      "observation": "CP、技能提示和蓄力分开关关闭后对应元素隐藏；通知、日语安装中 18% 与进度条、媒体、波纹及原版快捷栏仍可见，通知位于上方且文字完整。"
+    },
+    {
+      "file": "screenshots/hud-layers-scale3-screen-open.png",
+      "sha256": "39f72390cc0923e1b970886014e4f709ffae834e7da40de7093ad6c379c9999a",
+      "status": "PASS",
+      "observation": "设置窗口完整位于画面内，日语行标签与右侧按键文字均在各自行内；模组 HUD、安装条和波纹隐藏，窗口背景模糊正常，未见 HUD 文字穿透窗口。"
+    },
+    {
+      "file": "screenshots/hud-layers-scale3-screen-closed.png",
+      "sha256": "985637cad6de0cc26bf2184e1d918fe6a5e50c8efe1e2ff5c28e94516ec9e01e",
+      "status": "PASS",
+      "observation": "关闭设置后 CP/OL、通知、安装文字与进度条、技能提示、蓄力、媒体、波纹及原版快捷栏重新显示；通知不遮 CP/OL，窗口与文字未越界。"
+    }
+  ],
+  "limit": "这些是真实客户端中由程序 fixture 设置状态、通过原生输入和图层分发生成的截图；本报告只确认所列截图的显示结果，不等同于物理键鼠人工操作、所有分辨率或完整第三方模组组合验收。"
+}

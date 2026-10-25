@@ -47,27 +47,29 @@ public final class LiquidShadowMovementGameTests {
 
     private static void pursue(GameTestHelper helper, boolean wall, boolean shortCp) {
         var level = helper.getLevel();
-        var origin = helper.absolutePos(BlockPos.ZERO);
+        // Keep the whole pursuit platform, including its north end at z=-2, inside
+        // the template's forced chunks even when the template starts on a chunk edge.
+        var fixtureOffset = new BlockPos(16, 0, 16);
+        var origin = helper.absolutePos(fixtureOffset);
         for (int x = 0; x < 6; x++) for (int z = -2; z < 9; z++) {
-            helper.setBlock(new BlockPos(x, 1, z), Blocks.STONE);
-            for (int y = 2; y < 6; y++) helper.setBlock(new BlockPos(x, y, z), Blocks.AIR);
+            helper.setBlock(fixtureOffset.offset(x, 1, z), Blocks.STONE);
+            for (int y = 2; y < 6; y++) helper.setBlock(fixtureOffset.offset(x, y, z), Blocks.AIR);
         }
         if (wall) {
             // Keep the pursuit on its raised platform: otherwise vanilla navigation can
             // walk off either edge and pass below the elevated glass without crossing it.
             for (int z = -2; z < 9; z++) for (int y = 2; y < 6; y++) {
-                helper.setBlock(new BlockPos(-1, y, z), Blocks.STONE);
-                helper.setBlock(new BlockPos(6, y, z), Blocks.STONE);
+                helper.setBlock(fixtureOffset.offset(-1, y, z), Blocks.STONE);
+                helper.setBlock(fixtureOffset.offset(6, y, z), Blocks.STONE);
             }
             for (int x = 0; x < 6; x++) for (int y = 2; y < 6; y++) {
-                helper.setBlock(new BlockPos(x, y, -2), Blocks.STONE);
-                helper.setBlock(new BlockPos(x, y, 5), Blocks.GLASS_PANE);
+                helper.setBlock(fixtureOffset.offset(x, y, -2), Blocks.STONE);
+                helper.setBlock(fixtureOffset.offset(x, y, 5), Blocks.GLASS_PANE);
             }
         }
         var player = FakePlayerFactory.get(level, new GameProfile(UUID.randomUUID(), "[ShadowMotion]"));
         player.setGameMode(GameType.SURVIVAL);
-        // The summoned shadow starts 1.6 blocks behind its owner; keep that position
-        // inside the template's forced chunks even when its north edge is a chunk boundary.
+        // The summoned shadow starts 1.6 blocks behind its owner on the shifted platform.
         player.setPos(origin.getX() + 2.5, origin.getY() + 2, origin.getZ() + 2.5);
         player.setYRot(0); player.setXRot(0);
         PlayerAbilityData data = player.getData(AcademyAttachments.PLAYER_ABILITY);
@@ -112,7 +114,7 @@ public final class LiquidShadowMovementGameTests {
                         data.getCurrentCp(), startCp);
                 int intactGlass = 0;
                 if (wall) for (int x = 0; x < 6; x++) for (int y = 2; y < 6; y++) {
-                    BlockPos pos = helper.absolutePos(new BlockPos(x, y, 5));
+                    BlockPos pos = helper.absolutePos(fixtureOffset.offset(x, y, 5));
                     var state = level.getBlockState(pos);
                     if (state.is(Blocks.GLASS_PANE) && !state.getCollisionShape(level, pos).isEmpty()) intactGlass++;
                 }

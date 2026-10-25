@@ -189,7 +189,7 @@ public final class AeroPassiveRuntime {
                     return;
                 }
                 com.mohistmc.academy.skill.AcademyDamageHelper.hurt(player, living,
-                        player.damageSources().playerAttack(player), DynamicSkillRules.damage(
+                        com.mohistmc.academy.skill.SkillDamageSource.attack(player), DynamicSkillRules.damage(
                                 OFFENSE_ARMOUR, 8F + 4F * data.getProficiency(OFFENSE_ARMOUR)));
                 DynamicSkillRules.addExp(player, data, OFFENSE_ARMOUR, 0.002F);
             }
@@ -223,7 +223,7 @@ public final class AeroPassiveRuntime {
             return;
         }
         if ((event.getSource().is(net.minecraft.world.damagesource.DamageTypes.IN_WALL)
-                || event.getSource().is(net.minecraft.world.damagesource.DamageTypes.DROWN))
+                || event.getSource().is(DamageTypeTags.IS_DROWNING))
                 && passive(player, data, AIRFLOW)) {
             // The released add-on accidentally keyed this curve to Ascending Air; preserve the played result.
             float p = data.getProficiency(ASCENDING_AIR);

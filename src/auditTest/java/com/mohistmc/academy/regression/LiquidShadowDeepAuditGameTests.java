@@ -36,6 +36,8 @@ public final class LiquidShadowDeepAuditGameTests {
     public static void ownerAttackNavigatesAroundObstacleAndPays(GameTestHelper h) {
         ServerPlayer p = owner(h);
         LiquidShadowEntity shadow = summon(h, p);
+        // Reproduce the vanilla goal/repath randomness; keep natural motion and the 75-tick deadline.
+        shadow.getRandom().setSeed(20261025L);
         Villager target = target(h, p.position().add(0, 0, 7));
         Vec3 start = shadow.position();
         // The target is reachable around the east end, but not through this solid pane wall.
@@ -66,6 +68,12 @@ public final class LiquidShadowDeepAuditGameTests {
                         h.getLevel().isPositionEntityTicking(target.blockPosition()),
                         h.getLevel().getBlockState(shadow.blockPosition().below()),
                         shadow.getNavigation().getPath());
+                var path = shadow.getNavigation().getPath();
+                com.mojang.logging.LogUtils.getLogger().info(
+                        "SHADOW_OBSTACLE_DETAIL seed=20261025 onGround={} motion={} nextNode={} nodeCount={} end={} canReach={}",
+                        shadow.onGround(), shadow.getDeltaMovement(), path == null ? -1 : path.getNextNodeIndex(),
+                        path == null ? 0 : path.getNodeCount(), path == null ? null : path.getEndNode(),
+                        path != null && path.canReach());
             }
         });
         h.runAfterDelay(75, () -> {

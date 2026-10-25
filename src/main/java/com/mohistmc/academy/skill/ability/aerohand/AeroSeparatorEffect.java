@@ -52,8 +52,8 @@ public final class AeroSeparatorEffect implements DynamicOneShotSkillEffect {
         int affected = 0;
         for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, area, LivingEntity::isAlive)) {
             boolean hurt = living == player
-                    ? AcademyDamageHelper.hurtSelf(player, living, level.damageSources().drown(), damage)
-                    : AcademyDamageHelper.hurt(player, living, level.damageSources().drown(), damage);
+                    ? AcademyDamageHelper.hurtSelf(player, living, com.mohistmc.academy.skill.SkillDamageSource.drowning(player, true), damage)
+                    : AcademyDamageHelper.hurt(player, living, com.mohistmc.academy.skill.SkillDamageSource.drowning(player, false), damage);
             if (hurt) {
                 living.setAirSupply(Math.min(living.getAirSupply(), 0));
                 affected++;

@@ -1,0 +1,24 @@
+{
+  "status": "FAILED_ATTEMPT_RETAINED",
+  "tests": 487,
+  "failures": 1,
+  "exit_code": 1,
+  "forced": false,
+  "input_snapshot": "build/combat-hud-0.0.33-r4-tested",
+  "passed_repairs": {
+    "cold_teleport": "Completed at testTick35: exact destination, CP2343.1455/8000, cooldown true, loaded true, tickets0.",
+    "owner_obstacle": "Fixed seed20261025 scene passed original75tick/damage/resource assertions."
+  },
+  "glass_fixture_failure": {
+    "origin_z": 2771568,
+    "entity_ticks": 6,
+    "owner_ticks": 60,
+    "start_relative_z": 0.9,
+    "end_relative_z": -0.0708955111913383,
+    "intact_glass": "24/24",
+    "damage": 0,
+    "cp": 4940
+  },
+  "cause": "North interior reaches negative template-relative Z before the wall at Z=-2. When template origin lies exactly on a chunk boundary, the moving entity leaves the forced template chunks and ceases ticking.",
+  "fix": "Translate the entire pursuit fixture by (+16,0,+16) within the existing64x16x64 template. Keep all relative geometry, natural AI,60tick assertions, skill damage and costs."
+}

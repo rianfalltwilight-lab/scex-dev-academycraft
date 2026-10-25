@@ -85,7 +85,7 @@ public final class StormCoreEffect implements DynamicOneShotSkillEffect {
                 float distance = (float) Math.sqrt(living.distanceToSqr(core.position));
                 float power = Math.max(1 - distance / 10F, 0.2F);
                 if (core.age < 80) {
-                    AcademyDamageHelper.hurt(owner, living, owner.damageSources().playerAttack(owner),
+                    AcademyDamageHelper.hurt(owner, living, com.mohistmc.academy.skill.SkillDamageSource.attack(owner),
                             DynamicSkillRules.damage("storm_core", power));
                     Vec3 pull = core.position.subtract(living.position());
                     if (pull.lengthSqr() > 1.0e-6) {
@@ -94,7 +94,7 @@ public final class StormCoreEffect implements DynamicOneShotSkillEffect {
                         living.hurtMarked = true;
                     }
                 } else {
-                    AcademyDamageHelper.hurt(owner, living, owner.damageSources().playerAttack(owner),
+                    AcademyDamageHelper.hurt(owner, living, com.mohistmc.academy.skill.SkillDamageSource.attack(owner),
                             DynamicSkillRules.damage("storm_core", lerpf(80, 120, core.proficiency) * power));
                 }
             }

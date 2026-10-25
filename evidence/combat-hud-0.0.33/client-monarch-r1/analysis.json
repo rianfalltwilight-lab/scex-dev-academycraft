@@ -1,0 +1,9 @@
+{
+  "status": "FAILED_ATTEMPT_RETAINED",
+  "forced": true,
+  "exit_code": -1,
+  "native_save_checkpoint": "PASS before shutdown wait",
+  "issue": "Probe invoked Minecraft.disconnect without ClientLevel.disconnect, leaving local transport open while teardown waited for integrated server. Thread dump confirms both loops.",
+  "fix": "Use exact vanilla PauseScreen sequence: ClientLevel.disconnect, Minecraft.disconnect(saving screen), title screen; preserve all actual cleanup assertions.",
+  "visual_issue": "Notifications overlap CP/OL values. Move intersecting cards below actual CP bounds. Initial missing-installation-text report was retracted after original-pixel review; no Terminal rendering change."
+}

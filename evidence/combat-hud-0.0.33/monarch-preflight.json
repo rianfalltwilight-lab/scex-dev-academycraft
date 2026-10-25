@@ -1,0 +1,27 @@
+{
+  "desktop_session": 1,
+  "baseline_java": [
+    {
+      "created": "2026-10-25T09:03:42.2158750Z",
+      "pid": 90264
+    },
+    {
+      "created": "2026-10-25T10:23:36.3131050Z",
+      "pid": 82988
+    },
+    {
+      "created": "2026-10-25T11:26:37.2714470Z",
+      "pid": 89992
+    }
+  ],
+  "manifest_sha256": "031019b874738c2aba2723c15b9e8b9e2ccefdd9d31f951909c9f44d505e033b",
+  "root": "D:\\SCEX-Work\\01-Mods\\Other-Ports\\AcademyCraft\\0.0.33-20261025",
+  "free_memory_bytes": 32199561216,
+  "basis": "VICERACH completed all487 GameTests; client not started because free memory fell below6GiB; MONARCH interactive fallback with disk budget passed and27GiB free RAM",
+  "original_base_host": "VICERACH",
+  "original_base": "D:\\Minecraft-Validation\\bases\\academy-ssid23-small-20260908",
+  "host": "MONARCH",
+  "created_at": "2026-10-25T21:35:10.7969199+09:00",
+  "status": "PASS",
+  "expected_additional_gib": 2.5
+}

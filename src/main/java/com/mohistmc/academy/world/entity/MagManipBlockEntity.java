@@ -146,7 +146,7 @@ public final class MagManipBlockEntity extends Entity {
         if(!entityData.get(THROWN)){if(age>1200)recoverMaterial();else hold(p);return;}
         if(!loadedMovement(getDeltaMovement())){setDeltaMovement(Vec3.ZERO);recoverMaterial();return;}
         Vec3 before=position();move(MoverType.SELF,getDeltaMovement());setDeltaMovement(getDeltaMovement().scale(.99).add(0,-.04,0));AABB sweep=getBoundingBox().expandTowards(position().subtract(before)).inflate(.25);
-        for(Entity target:level().getEntities(p,sweep,e->e.isAlive()&&e!=p&&e.isPickable())){com.mohistmc.academy.skill.AcademyDamageHelper.hurt(p,target,p.damageSources().playerAttack(p),damage);if(!land(sl,p))recoverMaterial();return;}
+        for(Entity target:level().getEntities(p,sweep,e->e.isAlive()&&e!=p&&e.isPickable())){com.mohistmc.academy.skill.AcademyDamageHelper.hurt(p,target,com.mohistmc.academy.skill.SkillDamageSource.attack(p),damage);if(!land(sl,p))recoverMaterial();return;}
         if(horizontalCollision||verticalCollision||onGround()||age>400){if(!land(sl,p))recoverMaterial();}
     }
     @Override public boolean shouldBeSaved(){return true;}

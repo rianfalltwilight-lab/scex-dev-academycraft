@@ -1,0 +1,26 @@
+{
+  "status": "FAILED_ATTEMPT_RETAINED",
+  "tests": 487,
+  "failures": 2,
+  "forced": false,
+  "exit_code": 2,
+  "input_snapshot": "build/combat-hud-0.0.33-r3-tested",
+  "new_native_combat_scenarios": "All 14 passed, including corrected Wind Burst fixture.",
+  "cold_teleport_observation": {
+    "test_tick": 201,
+    "cp": 8000,
+    "cooldown": false,
+    "destination_loaded": false,
+    "remaining_tickets": 0,
+    "player_alive": true,
+    "player_removed": false,
+    "result": "Production 200-tick deadline canceled normally before asynchronous destination generation finished."
+  },
+  "cold_teleport_fix": "Audit-only 50ms park while pending restores normal wall-clock budget to the accelerated GameTest loop. Production deadline, loading path and all assertions remain unchanged; independent timeout test remains.",
+  "shadow_observation": "At tick75/entity74 the shadow had passed around the east obstacle (x11.83,z7.77) but not reached stationary target(x4.5,z10.5), so paid-hit assertion failed. Original threshold retained; diagnostic review pending.",
+  "native_api_basis": [
+    "GameTestServer.waitUntilNextTick runs all tasks without the normal inter-tick wait.",
+    "TeleportChunkRequests uses actual server tick deadline plus200 and cancels before chunk residency check."
+  ],
+  "shadow_fixture_adjustment": "Fix only this obstacle scene entity RNG to 20261025 before its first tick. Seed chosen from task date, not searched for a passing result. Keep 75-tick, >=20 damage, path-around and CP assertions; add native path node/motion observations. No production navigation change or claim to fix all stochastic navigation."
+}

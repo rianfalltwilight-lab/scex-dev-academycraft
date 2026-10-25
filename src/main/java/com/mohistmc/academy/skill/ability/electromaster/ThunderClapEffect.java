@@ -101,7 +101,7 @@ public class ThunderClapEffect implements ChargingSkillEffect {
                 double dist = targetPos.distanceTo(e.position());
                 if (dist <= range) {
                     float faded = ElectromasterRules.thunderClapDamageAtDistance(damage, dist, range);
-                    AcademyDamageHelper.hurt(player,e,player.damageSources().playerAttack(player),
+                    AcademyDamageHelper.hurt(player,e,com.mohistmc.academy.skill.SkillDamageSource.attack(player),
                             DynamicSkillRules.damage(getId(),faded));
                 }
             }

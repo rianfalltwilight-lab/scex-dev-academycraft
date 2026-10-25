@@ -12,9 +12,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageType;
-import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
@@ -213,9 +211,8 @@ public final class AeroProjectileEntity extends Projectile {
             case AIR_BLADE -> (12 + 6 * p) * (1 - .25F * ratio);
             case BOMBER_LANCE -> 48 + 24 * p;
         };
-        var type = level().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE)
-                .getHolderOrThrow(kind == Kind.AIR_BLADE ? BLADE_DAMAGE : DamageTypes.THROWN);
-        if (AcademyDamageHelper.hurt(owner, hit.getEntity(), new DamageSource(type, this, owner),
+        var type = kind == Kind.AIR_BLADE ? BLADE_DAMAGE : com.mohistmc.academy.skill.SkillDamageSource.THROWN;
+        if (AcademyDamageHelper.hurt(owner, hit.getEntity(), com.mohistmc.academy.skill.SkillDamageSource.projectile(owner, this, type),
                 DynamicSkillRules.damage(skill(), damage)) && kind != Kind.AIR_BLADE) {
             double impulse = (kind == Kind.BOMBER_LANCE ? 10 + 5 * p : 3 + 3 * p)
                     / Math.max(.01F, hit.getEntity().getBbHeight());

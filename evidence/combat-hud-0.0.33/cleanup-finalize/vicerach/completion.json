@@ -1,0 +1,730 @@
+{
+  "protected_roots": [
+    "D:\\Minecraft-Projects",
+    "D:\\Minecraft-Validation\\bases",
+    "D:\\Minecraft-Validation\\receipts",
+    "D:\\Minecraft-Validation\\control",
+    "D:\\Minecraft-Validation\\inputs",
+    "D:\\Minecraft-Validation\\cache",
+    "C:\\Users\\4090\\.gradle"
+  ],
+  "pending_checks": [],
+  "attempt_history": [
+    {
+      "result": null,
+      "run": "client-r1",
+      "host": "VICERACH",
+      "status": "NOT_STARTED_RESOURCE_GUARD",
+      "final": false
+    },
+    {
+      "result": null,
+      "run": "client-r2",
+      "host": "VICERACH",
+      "status": "NOT_STARTED_RESOURCE_GUARD",
+      "final": false
+    },
+    {
+      "result": null,
+      "run": "client-r3",
+      "host": "VICERACH",
+      "status": "NOT_STARTED_RESOURCE_GUARD",
+      "final": false
+    },
+    {
+      "result": {
+        "host": "VICERACH",
+        "exit_code": 2,
+        "forced": false,
+        "process_exited": true,
+        "expectation_met": false,
+        "passed": false,
+        "basis": "Actual NeoForge GameTestServer; release JAR plus separate probe mod",
+        "tests": 487,
+        "expected_failures": 0,
+        "failures": 2,
+        "expected_tests": 487,
+        "namespaces": "academy,academy_charging,academy_audit,academy_followup,academy_projectiles,academy_native_compat,academy_data_sync,academy_automation,academy_native_combat"
+      },
+      "run": "gt-r1",
+      "host": "VICERACH",
+      "status": "ACTUAL_RUN",
+      "final": false
+    },
+    {
+      "result": {
+        "failures": 2,
+        "process_exited": true,
+        "forced": false,
+        "passed": false,
+        "expectation_met": false,
+        "tests": 487,
+        "expected_tests": 487,
+        "exit_code": 2,
+        "namespaces": "academy,academy_charging,academy_audit,academy_followup,academy_projectiles,academy_native_compat,academy_data_sync,academy_automation,academy_native_combat",
+        "expected_failures": 0,
+        "basis": "Actual NeoForge GameTestServer; release JAR plus separate probe mod",
+        "host": "VICERACH"
+      },
+      "run": "gt-r2",
+      "host": "VICERACH",
+      "status": "ACTUAL_RUN",
+      "final": false
+    },
+    {
+      "result": {
+        "exit_code": 1,
+        "failures": 1,
+        "tests": 487,
+        "expected_tests": 487,
+        "basis": "Actual NeoForge GameTestServer; release JAR plus separate probe mod",
+        "expected_failures": 0,
+        "namespaces": "academy,academy_charging,academy_audit,academy_followup,academy_projectiles,academy_native_compat,academy_data_sync,academy_automation,academy_native_combat",
+        "process_exited": true,
+        "expectation_met": false,
+        "passed": false,
+        "forced": false,
+        "host": "VICERACH"
+      },
+      "run": "gt-r3",
+      "host": "VICERACH",
+      "status": "ACTUAL_RUN",
+      "final": false
+    },
+    {
+      "result": {
+        "host": "VICERACH",
+        "exit_code": 0,
+        "forced": false,
+        "passed": true,
+        "expected_tests": 487,
+        "namespaces": "academy,academy_charging,academy_audit,academy_followup,academy_projectiles,academy_native_compat,academy_data_sync,academy_automation,academy_native_combat",
+        "expectation_met": true,
+        "basis": "Actual NeoForge GameTestServer; release JAR plus separate probe mod",
+        "expected_failures": 0,
+        "process_exited": true,
+        "failures": 0,
+        "tests": 487
+      },
+      "run": "gt-r4",
+      "host": "VICERACH",
+      "status": "ACTUAL_RUN",
+      "final": true
+    },
+    {
+      "result": {
+        "process_exited": true,
+        "saved_after_stop": true,
+        "forced": false,
+        "exit_code": 0,
+        "close_reason": null,
+        "host": "MONARCH",
+        "visual_review": "pending",
+        "passed": true
+      },
+      "run": "client-r3",
+      "host": "MONARCH",
+      "status": "EXTERNAL_FINAL_ACCEPTANCE",
+      "final": true
+    }
+  ],
+  "java_baseline": [
+    {
+      "created": "2026-10-22T01:37:32.9106130Z",
+      "pid": 45576,
+      "name": "java.exe",
+      "working_set_bytes": 7689658368
+    },
+    {
+      "created": "2026-10-24T15:11:54.9303780Z",
+      "pid": 37876,
+      "name": "java.exe",
+      "working_set_bytes": 1997680640
+    },
+    {
+      "created": "2026-10-25T07:36:39.0961470Z",
+      "pid": 38776,
+      "name": "java.exe",
+      "working_set_bytes": 3966283776
+    }
+  ],
+  "evidence": [
+    {
+      "sha256": "618223C7C5F8E68997BA48037C77FE19374F5917FBDB24801FFCD8A86A50B621",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\client-r1\\artifacts.json"
+    },
+    {
+      "sha256": "25A7AAA96132D9ED3497D7828F5E530A64361E2A02F5CBEF6DFCF12F00B387BA",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\client-r2\\artifacts.json"
+    },
+    {
+      "sha256": "8F72579223754FFABCCE2F9FA8B7F861ABD4069B15EF0BDCB3B85B466C385884",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\client-r3\\artifacts.json"
+    },
+    {
+      "sha256": "005250E4A5242789EB699E4FEC49FB3534ED99A44FA16A4F022C93F3E85ABD66",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\gt-r1\\artifacts.json"
+    },
+    {
+      "sha256": "58FC891CF16823BD1395D338309C4CB917AED58740D37D26C109676F08818CC7",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\gt-r1\\derived-launch.json"
+    },
+    {
+      "sha256": "77A335EF1598657B60D6E299F9E3625627D946C4E5762E3483AEC38B622773FF",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\gt-r1\\logs\\debug.log"
+    },
+    {
+      "sha256": "77A335EF1598657B60D6E299F9E3625627D946C4E5762E3483AEC38B622773FF",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\gt-r1\\logs\\latest.log"
+    },
+    {
+      "sha256": "D19D97DBF56AAC37945AD2952881B6CBBAD4D120FF424C06392578620B92DE81",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\gt-r1\\memory-samples.json"
+    },
+    {
+      "sha256": "2378CDBA6589451A23054077E7655F291E820D93372B664FC4211C7C8BFE5F32",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\gt-r1\\process.json"
+    },
+    {
+      "sha256": "ACCA60780FB1A2254DDA2EAD3DF8DA52E03DEF30F5330522C359C77CCFFCC897",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\gt-r1\\result.json"
+    },
+    {
+      "sha256": "B83B38EEAFDCB3FECAE4CE4740A3EB38E69581A6E4C525E7CE8B794808267E81",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\gt-r1\\server.classpath"
+    },
+    {
+      "sha256": "954FF74BFC077A1C9279480FFFEE8EC5741B4E617B1119AFB0259C8604BFA340",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\gt-r1\\server.programargs"
+    },
+    {
+      "sha256": "A751FCC54B55BDDD5A7326443CC2601491C0FC78FB858390498F0BBB59C30827",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\gt-r1\\server.vmargs"
+    },
+    {
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\gt-r1\\stderr.log"
+    },
+    {
+      "sha256": "D4FF0D43EE904308A64C96135FA72927F1762236B776914E75212FD611E988D3",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\gt-r1\\stdout.log"
+    },
+    {
+      "sha256": "618223C7C5F8E68997BA48037C77FE19374F5917FBDB24801FFCD8A86A50B621",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\gt-r2\\artifacts.json"
+    },
+    {
+      "sha256": "DD72D96CAFFBD497D005618651A63FF7DA8A81013478B3206FB617FD346B32BD",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\gt-r2\\derived-launch.json"
+    },
+    {
+      "sha256": "7DCEA8A0C5E50F5B86C025E2649AE0D7EDCFB66CDCAA564E31647F228EEC9513",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\gt-r2\\logs\\debug.log"
+    },
+    {
+      "sha256": "7DCEA8A0C5E50F5B86C025E2649AE0D7EDCFB66CDCAA564E31647F228EEC9513",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\gt-r2\\logs\\latest.log"
+    },
+    {
+      "sha256": "D323425B8DE480C9F699F42886DC55EA12ED19D284F6218D971E7A8BE876253A",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\gt-r2\\memory-samples.json"
+    },
+    {
+      "sha256": "ED9F50056FE7B1D89A888E8D1C4E6273ABDAB743F94488467BF234E818449520",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\gt-r2\\process.json"
+    },
+    {
+      "sha256": "D50877685F3959D97486BE028EE14C02C67D1355930C474777BD69D88CB6E06D",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\gt-r2\\result.json"
+    },
+    {
+      "sha256": "B83B38EEAFDCB3FECAE4CE4740A3EB38E69581A6E4C525E7CE8B794808267E81",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\gt-r2\\server.classpath"
+    },
+    {
+      "sha256": "954FF74BFC077A1C9279480FFFEE8EC5741B4E617B1119AFB0259C8604BFA340",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\gt-r2\\server.programargs"
+    },
+    {
+      "sha256": "6F3AA78EE7D4FDAAF52C944570B2BFC7BBD5FF69E32790CF1B2411617A24C33B",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\gt-r2\\server.vmargs"
+    },
+    {
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\gt-r2\\stderr.log"
+    },
+    {
+      "sha256": "AABDF17EEE31A018EDAF8E0CD0F8E7FF69868D7B1FC947BE37AAE2ACC9C5F056",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\gt-r2\\stdout.log"
+    },
+    {
+      "sha256": "25A7AAA96132D9ED3497D7828F5E530A64361E2A02F5CBEF6DFCF12F00B387BA",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\gt-r3\\artifacts.json"
+    },
+    {
+      "sha256": "35738B94942AE377EC580AD7AD86C33FB98B9E08AB732F627649B92E019AAC03",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\gt-r3\\derived-launch.json"
+    },
+    {
+      "sha256": "D484136D675902DBA3CE25C7F6150555928A6B9E4A8989E7DCA088ECA021D06B",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\gt-r3\\logs\\debug.log"
+    },
+    {
+      "sha256": "D484136D675902DBA3CE25C7F6150555928A6B9E4A8989E7DCA088ECA021D06B",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\gt-r3\\logs\\latest.log"
+    },
+    {
+      "sha256": "52ADB456FC12CD4D91CD10D1685591F2352A57D183B277EF85F882CAC9A86DFD",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\gt-r3\\memory-samples.json"
+    },
+    {
+      "sha256": "9648B643F1350FB58A805FAB6996843442F131D9A9BB1C369E23905CBBEE1D70",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\gt-r3\\process.json"
+    },
+    {
+      "sha256": "A651C93703A4D6323F0E3F94ED41E764C301D6D09D70DE6FCC9DA413A044E630",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\gt-r3\\result.json"
+    },
+    {
+      "sha256": "B83B38EEAFDCB3FECAE4CE4740A3EB38E69581A6E4C525E7CE8B794808267E81",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\gt-r3\\server.classpath"
+    },
+    {
+      "sha256": "954FF74BFC077A1C9279480FFFEE8EC5741B4E617B1119AFB0259C8604BFA340",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\gt-r3\\server.programargs"
+    },
+    {
+      "sha256": "EFABDA0831C02B120ECDA8B00A041E9DD471EE3F94026007E66B3684606B0391",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\gt-r3\\server.vmargs"
+    },
+    {
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\gt-r3\\stderr.log"
+    },
+    {
+      "sha256": "654575EDB14D4748DDEF4A9F4CBAFE4CC6691B10FF529B79A3003FA9DFDF2FA6",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\gt-r3\\stdout.log"
+    },
+    {
+      "sha256": "8F72579223754FFABCCE2F9FA8B7F861ABD4069B15EF0BDCB3B85B466C385884",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\gt-r4\\artifacts.json"
+    },
+    {
+      "sha256": "F005BC1CAE5A84C33A5FB1A20B094537E04EFDA2323C7DC5E1C0480C029DC56A",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\gt-r4\\derived-launch.json"
+    },
+    {
+      "sha256": "72234107931609C72F7660A0428A2867C4EC9F9CC483222A3419F2FB2BF34946",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\gt-r4\\logs\\debug.log"
+    },
+    {
+      "sha256": "72234107931609C72F7660A0428A2867C4EC9F9CC483222A3419F2FB2BF34946",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\gt-r4\\logs\\latest.log"
+    },
+    {
+      "sha256": "17EBF2942692A6B7B01F79C9F078A8265FD66138036ECC95BF4AB0A8A8329D9C",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\gt-r4\\memory-samples.json"
+    },
+    {
+      "sha256": "56FF41432CC609DF9B9121835B301B9463175FF23780342C072BCB0F64094B16",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\gt-r4\\process.json"
+    },
+    {
+      "sha256": "AAA8CDC2EB2516BEF37375985E2F3CBCDBF427FD5D5E0203ABC10EDB63AE814F",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\gt-r4\\result.json"
+    },
+    {
+      "sha256": "B83B38EEAFDCB3FECAE4CE4740A3EB38E69581A6E4C525E7CE8B794808267E81",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\gt-r4\\server.classpath"
+    },
+    {
+      "sha256": "954FF74BFC077A1C9279480FFFEE8EC5741B4E617B1119AFB0259C8604BFA340",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\gt-r4\\server.programargs"
+    },
+    {
+      "sha256": "9B8DE7B29D8520BA924863163AF8185B2050EF38E8B52FA966E774E9141A1D54",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\gt-r4\\server.vmargs"
+    },
+    {
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\gt-r4\\stderr.log"
+    },
+    {
+      "sha256": "40E943F44C07F8246F9BBFA29A89CB84C94745C1AC092626DDA0EF21A24F0535",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\attempts\\gt-r4\\stdout.log"
+    },
+    {
+      "sha256": "81D4F0404427125B2086D03CAAFAD50583F636F66214790355D47D9FD8951C61",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\client-fallback.json"
+    },
+    {
+      "sha256": "19A2EDA0833E820DE4FC818ED5BFFCA34F6EBBCB1F5CF9F076B3879B62353076",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\client-final\\academy-hud-layers-client.txt"
+    },
+    {
+      "sha256": "DC46C8A7047B0B7912211F0C9C54575C29CF90C21ECF6D02038BE66F2853414B",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\client-final\\academy-hud-layers-save-checkpoint.txt"
+    },
+    {
+      "sha256": "AA7AE2E0B9B56597B6A4FD63EF41E7265AF719219C9FD6AA925D4C1F7C418FD1",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\client-final\\artifacts.json"
+    },
+    {
+      "sha256": "499D2F4CB79F9888F6BBC107196E5E12F1C585F56AD28BEA4B92BF1FC6B0C7A5",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\client-final\\derived-launch.json"
+    },
+    {
+      "sha256": "04DBE32FE9F2907AC7EDF703967EFCCC5327702B0269862CF31E160FCD1351CB",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\client-final\\latest.log"
+    },
+    {
+      "sha256": "33E01834EBCEAE9CBDDC69835A844696825C3907F9B5EBD12703E5A7E7FB31F3",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\client-final\\memory-samples.json"
+    },
+    {
+      "sha256": "5B34DC3D21E4F40554E34BA17E8DE87C0805A90094E54776867DEBFC5C226A2A",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\client-final\\process.json"
+    },
+    {
+      "sha256": "EA4EC9166DD18382E86688C3205B2FEAE1F1086F91C7364CC7798D2F1238EA2D",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\client-final\\result.json"
+    },
+    {
+      "sha256": "EB81DD68A17A6D96FF08C009328F18A11BC9304D1B48CBF688A25033653090A6",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\client-final\\screenshots\\hud-layers-scale2-cancel-cp.png"
+    },
+    {
+      "sha256": "463E391DD01C372D62DE3BE733715EEB0BCB20E6F46581E728AE6043C627045E",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\client-final\\screenshots\\hud-layers-scale2-cancel-hotbar.png"
+    },
+    {
+      "sha256": "F0CFD508DF14B81398C4AC585301CEB3B0A064A5A54D554374B6F895B303A46C",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\client-final\\screenshots\\hud-layers-scale2-f1-hidden.png"
+    },
+    {
+      "sha256": "461C67E100A7C3452F1135EBCDA89FD40A26167DE567B169D0C4E49507324E19",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\client-final\\screenshots\\hud-layers-scale2-f1-restored.png"
+    },
+    {
+      "sha256": "D2E77CA60CF00E4A1CE9FA2D13A3950F9919E0A740D4541093ED921C721EDF98",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\client-final\\screenshots\\hud-layers-scale2-hud-disabled.png"
+    },
+    {
+      "sha256": "40ADD514F1113AFAD40D4D74BA6C23E3FBEAC1C1E9F206E86C56FB01544ADE66",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\client-final\\screenshots\\hud-layers-scale2-individual-disabled.png"
+    },
+    {
+      "sha256": "F3BE09B72EDC3C1419FF094075B176A60F20E516CA244C5CF1D8D7FEBA16CA08",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\client-final\\screenshots\\hud-layers-scale2-screen-closed.png"
+    },
+    {
+      "sha256": "79872F44162F1A920B4B095B4F6E7BD3FF792BFB151DF7C7FD7BE66A96E61920",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\client-final\\screenshots\\hud-layers-scale2-screen-open.png"
+    },
+    {
+      "sha256": "4AC31D777AFDC47A896CACB8125CE340D182FD307A5BADA7B215D007E6F2DD52",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\client-final\\screenshots\\hud-layers-scale2-visible.png"
+    },
+    {
+      "sha256": "C99EF517F0733F20571F03B4C4AB4AF0F020903E4FCC6E0D8EF785FD7FCE6E77",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\client-final\\screenshots\\hud-layers-scale3-cancel-cp.png"
+    },
+    {
+      "sha256": "56037A0377806DACDD43643892A9700E54AC4404C9557E0C3E9A32CF537378D1",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\client-final\\screenshots\\hud-layers-scale3-cancel-hotbar.png"
+    },
+    {
+      "sha256": "0F533C1082518BEE626AB62678BA4AC2826FC3C5FC277FED696277B52EA0835A",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\client-final\\screenshots\\hud-layers-scale3-f1-hidden.png"
+    },
+    {
+      "sha256": "06CAED5C4CE7C17605C897B710B9974B7E340ED82614829C0E02E3FE36C350E9",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\client-final\\screenshots\\hud-layers-scale3-f1-restored.png"
+    },
+    {
+      "sha256": "7F28846ED6D89964FA1A8590B3D69EAB9FCEAA712BE5753E7248261898600334",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\client-final\\screenshots\\hud-layers-scale3-hud-disabled.png"
+    },
+    {
+      "sha256": "B9367B9CB470E8A77AE53F2102F684ADCA7AB1AD6477E8D9BC7AAB07404CFCC5",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\client-final\\screenshots\\hud-layers-scale3-individual-disabled.png"
+    },
+    {
+      "sha256": "985637CAD6DE0CC26BF2184E1D918FE6A5E50C8EFE1E2FF5C28E94516EC9E01E",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\client-final\\screenshots\\hud-layers-scale3-screen-closed.png"
+    },
+    {
+      "sha256": "39F72390CC0923E1B970886014E4F709FFAE834E7DA40DE7093AD6C379C9999A",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\client-final\\screenshots\\hud-layers-scale3-screen-open.png"
+    },
+    {
+      "sha256": "F01A6AAB96B0EDD26E9A0A693791FC57D1E7443D0EF71BA98F4C79FFC7DF15F5",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\client-final\\screenshots\\hud-layers-scale3-visible.png"
+    },
+    {
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\client-final\\stderr.log"
+    },
+    {
+      "sha256": "D9C21ADE2751FB6C34A6387B429C3D0A82334A429A3A5F7D4EFAF653408D605F",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\client-final\\stdout.log"
+    },
+    {
+      "sha256": "272DD3C45EAF078D316D99196E5EBA355FAE7AC769809684564FE7E06CEBD7C0",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\client-final\\visual-review-scale2.json"
+    },
+    {
+      "sha256": "844BEB7244F81A60ECEDE8A5339421C8D447E865330A3B79BB44479125AA6C39",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\client-final\\visual-review-scale3.json"
+    },
+    {
+      "sha256": "74CDDB551CC52531C6D50317F40F4FE246427C120546B9781EDA45571475125E",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\client-final\\visual-review.json"
+    },
+    {
+      "sha256": "4CC2FAE8A9C05392D440D121D6C31E6DD6B6FDF321D096D2701B626F2F66D9C4",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\final-validation.json"
+    },
+    {
+      "sha256": "8F72579223754FFABCCE2F9FA8B7F861ABD4069B15EF0BDCB3B85B466C385884",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\gametests-final\\artifacts.json"
+    },
+    {
+      "sha256": "F005BC1CAE5A84C33A5FB1A20B094537E04EFDA2323C7DC5E1C0480C029DC56A",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\gametests-final\\derived-launch.json"
+    },
+    {
+      "sha256": "72234107931609C72F7660A0428A2867C4EC9F9CC483222A3419F2FB2BF34946",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\gametests-final\\latest.log"
+    },
+    {
+      "sha256": "17EBF2942692A6B7B01F79C9F078A8265FD66138036ECC95BF4AB0A8A8329D9C",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\gametests-final\\memory-samples.json"
+    },
+    {
+      "sha256": "56FF41432CC609DF9B9121835B301B9463175FF23780342C072BCB0F64094B16",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\gametests-final\\process.json"
+    },
+    {
+      "sha256": "AAA8CDC2EB2516BEF37375985E2F3CBCDBF427FD5D5E0203ABC10EDB63AE814F",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\gametests-final\\result.json"
+    },
+    {
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\gametests-final\\stderr.log"
+    },
+    {
+      "sha256": "40E943F44C07F8246F9BBFA29A89CB84C94745C1AC092626DDA0EF21A24F0535",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\gametests-final\\stdout.log"
+    },
+    {
+      "sha256": "DDBFE443C21E221C4355058D810961D3D585F459F9714E2D3A5D44A406D76C47",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\Invoke-Academy33FinalCleanup.ps1"
+    },
+    {
+      "sha256": "07F34D8EEC39A1A92AAD65A571B7C67258E14693BF2B5CCAB175D8EBF981A62C",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\Lab.Common.ps1"
+    },
+    {
+      "sha256": "2D86D0454732701A1FF710260B90C9B0157BF3A58ADA96B1277C1B0EB9C4B134",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\monarch-preflight.json"
+    },
+    {
+      "sha256": "A43F00BC6FB3426AE8091797EF51EA08752C4A4EF0DE8353EF519C4B2A23B12B",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\preflight.json"
+    },
+    {
+      "sha256": "6CA0DFF553EB223A5D14C68A7CA377A982E52F0D0B17E737D418DD2BFA65DF98",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\Remove-CompletedTestRun.ps1"
+    },
+    {
+      "sha256": "FC3AEA43B849123438806AA4D52E74DA3E1C43A1CD3581E15C9735B2C65669E7",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\unstarted-client-staging.json"
+    }
+  ],
+  "run_root": "D:\\Minecraft-Validation\\runs\\academy-combathud33-20261025",
+  "final_runs": [
+    "gt-r4",
+    "client-r3"
+  ],
+  "schema_version": 1,
+  "status": "COMPLETE",
+  "final_artifacts": [
+    {
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\build\\libs\\AcademyCraft-neoforge-1.21.1-0.0.33-scex-combat-hud.jar",
+      "bytes": 27869232,
+      "sha256": "52a500a8a55ba185a33deec0d60556c11e83591071ac4df7b2f4f564b7833370"
+    },
+    {
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\build\\libs\\AcademyCraft-neoforge-1.21.1-0.0.33-scex-combat-hud-audit-tests.jar",
+      "bytes": 365823,
+      "sha256": "218d04976c14360a0e1084e62b2346f1af9acd3c5f6081f29de10ec4bf95e338"
+    },
+    {
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\build\\distributions\\AcademyCraft-neoforge-1.21.1-0.0.33-scex-combat-hud-sources.zip",
+      "bytes": 27211313,
+      "sha256": "c8c0d500a217a0a3b07d81710cb1df516abe44991093732acb998e88548e1109"
+    }
+  ],
+  "host": "VICERACH",
+  "base_origin": {
+    "preserved": true,
+    "host": "VICERACH",
+    "manifest_sha256": "031019b874738c2aba2723c15b9e8b9e2ccefdd9d31f951909c9f44d505e033b",
+    "path": "D:\\Minecraft-Validation\\bases\\academy-ssid23-small-20260908"
+  },
+  "inputs": [
+    {
+      "sha256": "031019B874738C2ABA2723C15B9E8B9E2CCEFDD9D31F951909C9F44D505E033B",
+      "path": "D:\\Minecraft-Validation\\bases\\academy-ssid23-small-20260908\\manifest.json"
+    }
+  ],
+  "cleanup_targets": [
+    {
+      "kind": "disposable-test-copy",
+      "created_utc": "2026-10-25T12:07:49.9532597Z",
+      "path": "D:\\Minecraft-Validation\\runs\\academy-combathud33-20261025"
+    }
+  ],
+  "ports": [],
+  "exit_sources": [
+    {
+      "run": "gt-r4",
+      "host": "VICERACH",
+      "sha256": "AAA8CDC2EB2516BEF37375985E2F3CBCDBF427FD5D5E0203ABC10EDB63AE814F",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\gametests-final\\result.json"
+    },
+    {
+      "run": "client-r3",
+      "host": "MONARCH",
+      "sha256": "EA4EC9166DD18382E86688C3205B2FEAE1F1086F91C7364CC7798D2F1238EA2D",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-combathud33-20261025\\client-final\\result.json"
+    }
+  ],
+  "complete": true,
+  "exit_codes": [
+    0,
+    0
+  ],
+  "basis": "Actual VICERACH GameTest and external MONARCH client completed with normal zero exits; MONARCH client save and visual review passed. Server receipts/JARs match server_tested_sha256; client receipts match tested_sha256. Final validation verifies unchanged server-common entries and records the exact client-only differences; entire server/client JAR equality is not claimed. All VICERACH client-r1/r2/r3 directories are NOT_STARTED_RESOURCE_GUARD staging with no process/result/dispatch, no runtime exit is invented for them. Original failed GameTest attempts are retained unchanged. Original base, shared dependencies, MONARCH source/both tested snapshots/deliverables and retained evidence are outside deletion.",
+  "remote_client_staging": [
+    {
+      "process_result_dispatch_absent": true,
+      "runtime_exit_code": null,
+      "files": [
+        {
+          "sha256": "618223C7C5F8E68997BA48037C77FE19374F5917FBDB24801FFCD8A86A50B621",
+          "relative_path": "artifacts.json",
+          "bytes": 429
+        },
+        {
+          "sha256": "B3EB26EE4BA8674B94E13497DC865D48FAEDD6EB775E107A1523E2AA90B42709",
+          "relative_path": "mods\\AcademyCraft-neoforge-1.21.1-0.0.33-scex-combat-hud-audit-tests.jar",
+          "bytes": 364794
+        },
+        {
+          "sha256": "7AF89345AFEB22B981B705B532AF3754B50BB682069A8C4E8A35E9083D49710A",
+          "relative_path": "mods\\AcademyCraft-neoforge-1.21.1-0.0.33-scex-combat-hud.jar",
+          "bytes": 27867072
+        }
+      ],
+      "run": "client-r1",
+      "test_java_started": false,
+      "status": "NOT_STARTED_RESOURCE_GUARD",
+      "host": "VICERACH"
+    },
+    {
+      "process_result_dispatch_absent": true,
+      "runtime_exit_code": null,
+      "files": [
+        {
+          "sha256": "25A7AAA96132D9ED3497D7828F5E530A64361E2A02F5CBEF6DFCF12F00B387BA",
+          "relative_path": "artifacts.json",
+          "bytes": 429
+        },
+        {
+          "sha256": "79AAAAD4A43C862167AB2E6B5E6526AE1B406B0A411256C60FB2D66614DE73C4",
+          "relative_path": "mods\\AcademyCraft-neoforge-1.21.1-0.0.33-scex-combat-hud-audit-tests.jar",
+          "bytes": 365281
+        },
+        {
+          "sha256": "27E7F44B4C2DF6CE721D2CB855C3F40D540D6D6356317A24E7EA4B13F4635D41",
+          "relative_path": "mods\\AcademyCraft-neoforge-1.21.1-0.0.33-scex-combat-hud.jar",
+          "bytes": 27867071
+        }
+      ],
+      "run": "client-r2",
+      "test_java_started": false,
+      "status": "NOT_STARTED_RESOURCE_GUARD",
+      "host": "VICERACH"
+    },
+    {
+      "process_result_dispatch_absent": true,
+      "runtime_exit_code": null,
+      "files": [
+        {
+          "sha256": "8F72579223754FFABCCE2F9FA8B7F861ABD4069B15EF0BDCB3B85B466C385884",
+          "relative_path": "artifacts.json",
+          "bytes": 429
+        },
+        {
+          "sha256": "79AAAAD4A43C862167AB2E6B5E6526AE1B406B0A411256C60FB2D66614DE73C4",
+          "relative_path": "mods\\AcademyCraft-neoforge-1.21.1-0.0.33-scex-combat-hud-audit-tests.jar",
+          "bytes": 365281
+        },
+        {
+          "sha256": "E0A7F6ADF9B91A9CB4DA960A2194D7A10E7D22DC73E319E5A852EBF2437AADE0",
+          "relative_path": "mods\\AcademyCraft-neoforge-1.21.1-0.0.33-scex-combat-hud.jar",
+          "bytes": 27867123
+        }
+      ],
+      "run": "client-r3",
+      "test_java_started": false,
+      "status": "NOT_STARTED_RESOURCE_GUARD",
+      "host": "VICERACH"
+    }
+  ],
+  "final_inputs_host": "MONARCH",
+  "temporary_container": "D:\\Minecraft-Validation\\runs",
+  "final_inputs": [
+    {
+      "tested": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\build\\combat-hud-0.0.33-r7-tested\\AcademyCraft-neoforge-1.21.1-0.0.33-scex-combat-hud.jar",
+      "tested_sha256": "eaa7b631f34651228149054a6e3ea23597d317eb188d28dc803bee81124589a8",
+      "final": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\build\\libs\\AcademyCraft-neoforge-1.21.1-0.0.33-scex-combat-hud.jar",
+      "final_sha256": "52a500a8a55ba185a33deec0d60556c11e83591071ac4df7b2f4f564b7833370",
+      "changed_entries": [
+        "BUILD-INFO.txt",
+        "META-INF/MANIFEST.MF"
+      ],
+      "runtime_entries_identical": true,
+      "server_tested": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\build\\combat-hud-0.0.33-r5-tested\\AcademyCraft-neoforge-1.21.1-0.0.33-scex-combat-hud.jar",
+      "server_tested_sha256": "e0a7f6adf9b91a9cb4da960a2194d7a10e7d22dc73e319e5a852ebf2437aade0",
+      "server_common_entries_identical": true,
+      "server_changed_client_only_entries": [
+        "BUILD-INFO.txt",
+        "META-INF/MANIFEST.MF",
+        "com/mohistmc/academy/client/gui/CPBarOverlay$HudPosition.class",
+        "com/mohistmc/academy/client/gui/CPBarOverlay.class",
+        "com/mohistmc/academy/client/gui/NotifyOverlay.class"
+      ]
+    },
+    {
+      "tested": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\build\\combat-hud-0.0.33-r7-tested\\AcademyCraft-neoforge-1.21.1-0.0.33-scex-combat-hud-audit-tests.jar",
+      "tested_sha256": "218d04976c14360a0e1084e62b2346f1af9acd3c5f6081f29de10ec4bf95e338",
+      "final": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\build\\libs\\AcademyCraft-neoforge-1.21.1-0.0.33-scex-combat-hud-audit-tests.jar",
+      "final_sha256": "218d04976c14360a0e1084e62b2346f1af9acd3c5f6081f29de10ec4bf95e338",
+      "changed_entries": [],
+      "runtime_entries_identical": true,
+      "server_tested": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\build\\combat-hud-0.0.33-r5-tested\\AcademyCraft-neoforge-1.21.1-0.0.33-scex-combat-hud-audit-tests.jar",
+      "server_tested_sha256": "79aaaad4a43c862167ab2e6b5e6526ae1b406b0a411256c60fb2d66614de73c4",
+      "server_common_entries_identical": true,
+      "server_changed_client_only_entries": [
+        "com/mohistmc/academy/regression/HudLayersClientGate$DrawCount.class",
+        "com/mohistmc/academy/regression/HudLayersClientGate$Registration.class",
+        "com/mohistmc/academy/regression/HudLayersClientGate$TrackingGraphics.class",
+        "com/mohistmc/academy/regression/HudLayersClientGate.class"
+      ]
+    }
+  ],
+  "run_id": "academy-combathud33-20261025"
+}

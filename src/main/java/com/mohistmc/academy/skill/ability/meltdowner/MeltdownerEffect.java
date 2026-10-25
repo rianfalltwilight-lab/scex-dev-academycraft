@@ -77,7 +77,7 @@ public final class MeltdownerEffect implements ChargingSkillEffect {
     reflected(level,player,reflector,reflectedDamage,hit);break;
    }
    if(hit.add(target.getId()))com.mohistmc.academy.skill.AcademyDamageHelper.hurt(player,target,
-           player.damageSources().playerAttack(player),damage);
+           com.mohistmc.academy.skill.SkillDamageSource.attack(player),damage);
   }
 
   double visualLength=Math.min(30,stopDistance);
@@ -125,7 +125,7 @@ public final class MeltdownerEffect implements ChargingSkillEffect {
   for(LivingEntity target:level.getEntitiesOfClass(LivingEntity.class,new AABB(start,end).inflate(1),
           target->target!=reflector&&target.isAlive())){var intercept=target.getBoundingBox().inflate(.3).clip(start,end);if(intercept.isPresent()&&start.distanceToSqr(intercept.get())<best){best=start.distanceToSqr(intercept.get());nearest=target;}}
   if(nearest!=null&&hit.add(nearest.getId()))com.mohistmc.academy.skill.AcademyDamageHelper.hurt(attacker,nearest,
-          attacker.damageSources().playerAttack(attacker),damage);
+          com.mohistmc.academy.skill.SkillDamageSource.attack(attacker),damage);
   // MDContextC.c_reflected in 1.0.7 rendered a separate ten-block ray
   // from the reflection point, even when it did not acquire a living target.
   double distance=attacker.getEyePosition().distanceTo(reflector.getEyePosition());

@@ -273,7 +273,7 @@ public final class TelekinesisPassiveHandler {
             return false;
         }
         boolean accepted = com.mohistmc.academy.skill.AcademyDamageHelper.hurt(player, victim,
-                player.damageSources().playerAttack(player), DynamicSkillRules.damage("liquid_shadow", rawDamage));
+                com.mohistmc.academy.skill.SkillDamageSource.attack(player), DynamicSkillRules.damage("liquid_shadow", rawDamage));
         if (accepted) AbilityMutationService.addSkillExp(player, data, "liquid_shadow", rawDamage * .0001F);
         return accepted;
     }

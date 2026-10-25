@@ -235,7 +235,7 @@ public final class PassiveSkillEventHandler {
         REFLECTING_DAMAGE.set(true);
         try {
             return AcademyDamageHelper.hurt(reflector, target,
-                    reflector.damageSources().playerAttack(reflector), amount);
+                    com.mohistmc.academy.skill.SkillDamageSource.attack(reflector), amount);
         } finally {
             REFLECTING_DAMAGE.remove();
         }
@@ -273,7 +273,7 @@ public final class PassiveSkillEventHandler {
                 REFLECTING_DAMAGE.set(true);
                 try {
                     AcademyDamageHelper.hurt(player, source,
-                            player.damageSources().playerAttack(player), reflected);
+                            com.mohistmc.academy.skill.SkillDamageSource.attack(player), reflected);
                 } finally {
                     REFLECTING_DAMAGE.remove();
                 }

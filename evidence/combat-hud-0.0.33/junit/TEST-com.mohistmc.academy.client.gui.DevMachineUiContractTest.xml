@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.mohistmc.academy.client.gui.DevMachineUiContractTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-25T12:56:26.916Z" hostname="MONARCH" time="0.005">
+  <properties/>
+  <testcase name="skillTreeUsesTheOfficialLegacyNodeAndLearnButtonLayers()" classname="com.mohistmc.academy.client.gui.DevMachineUiContractTest" time="0.001"/>
+  <testcase name="advancedMachineUsesTheLegacyHandInventoryResetFlow()" classname="com.mohistmc.academy.client.gui.DevMachineUiContractTest" time="0.001"/>
+  <testcase name="wirelessReturnCommandRemainsCodecBoundAndHasNoDormantTextField()" classname="com.mohistmc.academy.client.gui.DevMachineUiContractTest" time="0.0"/>
+  <testcase name="treeRestoresTheFinal112DeveloperCanvasAndAuthoritativeActions()" classname="com.mohistmc.academy.client.gui.DevMachineUiContractTest" time="0.001"/>
+  <testcase name="bothMachinesUseTheirLiveMenuAndNonceBoundSkillTreeAction()" classname="com.mohistmc.academy.client.gui.DevMachineUiContractTest" time="0.002"/>
+  <testcase name="powerAndSyncBarsUseTheExactPageDeveloperCoordinatesAndAuthoredTracks()" classname="com.mohistmc.academy.client.gui.DevMachineUiContractTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

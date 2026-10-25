@@ -1,0 +1,10 @@
+{
+  "exit_code": -1,
+  "saved_after_stop": true,
+  "close_reason": "resource-or-timeout",
+  "passed": false,
+  "visual_review": "pending",
+  "process_exited": true,
+  "host": "MONARCH",
+  "forced": true
+}

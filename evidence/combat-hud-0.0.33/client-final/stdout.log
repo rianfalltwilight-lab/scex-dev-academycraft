@@ -1,0 +1,97 @@
+WARN StatusConsoleListener Advanced terminal features are not available in this environment
+[21:59:36] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: ModLauncher running: args [--launchTarget, forgeclientdev, --version, 21.1.248, --assetIndex, 17, --assetsDir, D:/SCEX-Work/01-Mods/Other-Ports/AcademyCraft/0.0.33-20261025/base/assets, --gameDir, ., --fml.fmlVersion, 4.0.43, --fml.mcVersion, 1.21.1, --fml.neoForgeVersion, 21.1.248, --fml.neoFormVersion, 20240808.144430, --username, CodexVicerach, --width, 1280, --height, 720]
+[21:59:36] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: JVM identified as Eclipse Adoptium OpenJDK 64-Bit Server VM 21.0.12.1+1-LTS
+[21:59:36] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: ModLauncher 11.0.5+main.901c6ea8 starting: java version 21.0.12.1 by Eclipse Adoptium; OS Windows 10 arch amd64 version 10.0
+[21:59:37] [main/INFO] [ne.ne.fm.lo.ImmediateWindowHandler/]: Loading ImmediateWindowProvider fmlearlywindow
+[21:59:37] [main/INFO] [EARLYDISPLAY/]: Trying GL version 4.6
+[21:59:37] [main/INFO] [EARLYDISPLAY/]: Requested GL version 4.6 got version 4.6
+[21:59:37] [main/INFO] [mixin/]: SpongePowered MIXIN Subsystem Version=0.8.7 Source=union:/D:/SCEX-Work/01-Mods/Other-Ports/AcademyCraft/0.0.33-20261025/base/payload/0c79ee9f6920/sponge-mixin-0.15.2+mixin.0.8.7.jar%23138!/ Service=ModLauncher Env=CLIENT
+[21:59:38] [pool-2-thread-1/INFO] [EARLYDISPLAY/]: GL info: NVIDIA GeForce RTX 3080 Laptop GPU/PCIe/SSE2 GL version 4.6.0 NVIDIA 546.33, NVIDIA Corporation
+[21:59:38] [main/INFO] [ne.ne.fm.lo.mo.lo.JarInJarDependencyLocator/]: Found 2 dependencies adding them to mods collection
+[21:59:38] [main/INFO] [ne.ne.fm.lo.mo.ModDiscoverer/]: 
+     Mod List:
+		Name Version (Mod Id)
+
+		AcademyCraft 0.0.33-scex-combat-hud (academy)
+		AcademyCraft isolated audit probes 1 (academy_audit)
+		Minecraft 1.21.1 (minecraft)
+		NeoForge 21.1.248 (neoforge)
+[21:59:39] [main/INFO] [mixin/]: Compatibility level set to JAVA_21
+[21:59:39] [main/INFO] [cp.mo.mo.LaunchServiceHandler/MODLAUNCHER]: Launching target 'forgeclientdev' with arguments [--version, 21.1.248, --gameDir, ., --assetsDir, D:\SCEX-Work\01-Mods\Other-Ports\AcademyCraft\0.0.33-20261025\base\assets, --assetIndex, 17, --username, CodexVicerach, --width, 1280, --height, 720]
+[21:59:42] [pool-5-thread-1/INFO] [MixinExtras|Service/]: Initializing MixinExtras via com.llamalad7.mixinextras.service.MixinExtrasServiceImpl(version=0.5.3).
+[21:59:43] [Datafixer Bootstrap/INFO] [mojang/DataFixerBuilder]: 229 Datafixer optimizations took 1016 milliseconds
+[21:59:53] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, location] and [teleport, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[21:59:53] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, location] and [teleport, targets] with inputs: [0.1 -0.5 .9, 0 0 0]
+[21:59:53] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, destination] and [teleport, targets] with inputs: [Player, 0123, @e, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[21:59:53] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, targets] and [teleport, destination] with inputs: [Player, 0123, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[21:59:53] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, targets, location] and [teleport, targets, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[21:59:54] [Render thread/WARN] [minecraft/VanillaPackResourcesBuilder]: Assets URL 'union:/D:/SCEX-Work/01-Mods/Other-Ports/AcademyCraft/0.0.33-20261025/base/payload/9bd223709713/neoforge-21.1.248.jar%23190!/assets/.mcassetsroot' uses unexpected schema
+[21:59:54] [Render thread/WARN] [minecraft/VanillaPackResourcesBuilder]: Assets URL 'union:/D:/SCEX-Work/01-Mods/Other-Ports/AcademyCraft/0.0.33-20261025/base/payload/9bd223709713/neoforge-21.1.248.jar%23190!/data/.mcassetsroot' uses unexpected schema
+[21:59:54] [Render thread/INFO] [mojang/YggdrasilAuthenticationService]: Environment: Environment[sessionHost=https://sessionserver.mojang.com, servicesHost=https://api.minecraftservices.com, name=PROD]
+[21:59:54] [Render thread/INFO] [minecraft/Minecraft]: Setting user: CodexVicerach
+[21:59:54] [Render thread/INFO] [minecraft/Minecraft]: Backend library: LWJGL version 3.3.3+5
+[21:59:55] [modloading-worker-0/INFO] [ne.ne.ne.co.NeoForgeMod/NEOFORGE-MOD]: NeoForge mod loading, version 21.1.248, for MC 1.21.1
+[21:59:56] [Render thread/INFO] [ne.ne.ne.ga.GameTestHooks/]: Enabled Gametest Namespaces: []
+[21:59:57] [Render thread/INFO] [minecraft/ReloadableResourceManager]: Reloading ResourceManager: vanilla, mod_resources, mod/neoforge, mod/academy, mod/academy_audit
+[21:59:57] [Worker-Main-1/INFO] [co.mo.ac.te.AppRegistry/]: AcademyCraft AppRegistry initialized with 6 apps
+[21:59:57] [Worker-Main-1/INFO] [co.mo.ac.te.MediaTrackRegistry/]: AcademyCraft MediaTrackRegistry initialized with 3 tracks
+[21:59:57] [Worker-Main-1/INFO] [co.mo.ac.AcademyCraft/]: AcademyCraft Skill Registry initialized with 64 skills
+[21:59:57] [Worker-Main-1/INFO] [minecraft/UnihexProvider]: Found unifont_all_no_pua-15.1.05.hex, loading
+[21:59:58] [Worker-Main-1/INFO] [minecraft/UnihexProvider]: Found unifont_jp_patch-15.1.05.hex, loading
+[22:00:03] [Render thread/WARN] [minecraft/SoundEngine]: Missing sound for event: minecraft:item.goat_horn.play
+[22:00:03] [Render thread/WARN] [minecraft/SoundEngine]: Missing sound for event: minecraft:entity.goat.screaming.horn_break
+[22:00:04] [Render thread/INFO] [mojang/Library]: OpenAL initialized on device OpenAL Soft on 扬声器 (Realtek(R) Audio)
+[22:00:04] [Render thread/INFO] [minecraft/SoundEngine]: Sound engine started
+[22:00:05] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 2048x1024x4 minecraft:textures/atlas/blocks.png-atlas
+[22:00:05] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 256x256x4 minecraft:textures/atlas/signs.png-atlas
+[22:00:05] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 512x512x4 minecraft:textures/atlas/shield_patterns.png-atlas
+[22:00:05] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 512x512x4 minecraft:textures/atlas/banner_patterns.png-atlas
+[22:00:05] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 1024x1024x4 minecraft:textures/atlas/armor_trims.png-atlas
+[22:00:05] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 128x64x4 minecraft:textures/atlas/decorated_pot.png-atlas
+[22:00:05] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 256x256x4 minecraft:textures/atlas/chest.png-atlas
+[22:00:05] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 512x256x4 minecraft:textures/atlas/shulker_boxes.png-atlas
+[22:00:05] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 512x256x4 minecraft:textures/atlas/beds.png-atlas
+[22:00:05] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 2048x1024x0 minecraft:textures/atlas/particles.png-atlas
+[22:00:05] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 512x256x0 minecraft:textures/atlas/paintings.png-atlas
+[22:00:05] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 256x128x0 minecraft:textures/atlas/mob_effects.png-atlas
+[22:00:05] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 64x64x0 minecraft:textures/atlas/map_decorations.png-atlas
+[22:00:05] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 1024x512x0 minecraft:textures/atlas/gui.png-atlas
+[22:00:05] [Render thread/WARN] [minecraft/ShaderInstance]: Shader rendertype_entity_translucent_emissive could not find sampler named Sampler2 in the specified shader program.
+[22:00:05] [Render thread/INFO] [ne.ne.ne.cl.en.an.js.AnimationLoader/]: Loaded 0 entity animations
+[22:00:09] [Render thread/INFO] [minecraft/RecipeManager]: Loaded 1402 recipes
+[22:00:10] [Render thread/INFO] [minecraft/AdvancementTree]: Loaded 1455 advancements
+[22:00:11] [Server thread/INFO] [minecraft/IntegratedServer]: Starting integrated minecraft server version 1.21.1
+[22:00:11] [Server thread/INFO] [minecraft/MinecraftServer]: Generating keypair
+[22:00:13] [Server thread/INFO] [minecraft/MinecraftServer]: Preparing start region for dimension minecraft:overworld
+[22:00:13] [progressListener/INFO] [minecraft/LoggerChunkProgressListener]: スポーン地点を準備中：2%
+[22:00:13] [Server thread/INFO] [ne.ne.ne.se.pe.PermissionAPI/]: Successfully initialized permission handler neoforge:default_handler
+[22:00:13] [Server thread/INFO] [co.mo.ac.li.ServerListener/]: HELLO from server starting
+[22:00:13] [progressListener/INFO] [minecraft/LoggerChunkProgressListener]: Time elapsed: 490 ms
+[22:00:13] [Server thread/INFO] [minecraft/IntegratedServer]: Changing view distance to 4, from 10
+[22:00:13] [Server thread/INFO] [minecraft/IntegratedServer]: Changing simulation distance to 5, from 0
+[22:00:14] [Server thread/INFO] [minecraft/PlayerList]: CodexVicerach[local:E:96b03867] logged in with entity id 1 at (-6.5, -60.0, -6.5)
+[22:00:14] [Server thread/INFO] [minecraft/MinecraftServer]: CodexVicerachがゲームに参加しました
+[22:00:15] [Render thread/INFO] [minecraft/AdvancementTree]: Loaded 2 advancements
+[22:00:30] [Server thread/INFO] [co.mo.ac.re.HudLayersClientGate/]: HUD_LAYERS_SAVE_READINESS serverTick=346 settleTicks=1 holders=1225 generationRefs=0 notSaveReady=0 queuedTasks=0 lightWork=false stableTicks=1
+[22:00:31] [Server thread/INFO] [co.mo.ac.re.HudLayersClientGate/]: HUD_LAYERS_SAVE_READINESS serverTick=365 settleTicks=20 holders=1225 generationRefs=0 notSaveReady=0 queuedTasks=0 lightWork=false stableTicks=20
+[22:00:31] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[Native HUD layers isolated]'/minecraft:overworld
+[22:00:31] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[Native HUD layers isolated]'/minecraft:the_nether
+[22:00:31] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[Native HUD layers isolated]'/minecraft:the_end
+[22:00:31] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (HudLayers33): All chunks are saved
+[22:00:31] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[22:00:31] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[22:00:31] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage: All dimensions are saved
+[22:00:31] [Server thread/INFO] [minecraft/ServerGamePacketListenerImpl]: CodexVicerach lost connection: 切断されました
+[22:00:31] [Server thread/INFO] [minecraft/MinecraftServer]: CodexVicerachがゲームを退出しました
+[22:00:31] [Server thread/INFO] [minecraft/ServerCommonPacketListenerImpl]: Stopping singleplayer server as player logged out
+[22:00:31] [Server thread/INFO] [minecraft/MinecraftServer]: Stopping server
+[22:00:31] [Server thread/INFO] [minecraft/MinecraftServer]: Saving players
+[22:00:31] [Server thread/INFO] [minecraft/MinecraftServer]: Saving worlds
+[22:00:32] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[Native HUD layers isolated]'/minecraft:overworld
+[22:00:33] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[Native HUD layers isolated]'/minecraft:the_nether
+[22:00:33] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[Native HUD layers isolated]'/minecraft:the_end
+[22:00:33] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (HudLayers33): All chunks are saved
+[22:00:33] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[22:00:33] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[22:00:33] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage: All dimensions are saved
+[22:00:33] [Render thread/INFO] [minecraft/Minecraft]: Stopping!

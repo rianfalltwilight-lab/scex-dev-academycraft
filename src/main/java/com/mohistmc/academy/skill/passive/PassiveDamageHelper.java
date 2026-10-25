@@ -19,7 +19,7 @@ public final class PassiveDamageHelper {
     public static boolean meltdownerAttack(ServerPlayer player, PlayerAbilityData data, Entity target,
                                            String skillId, float damage) {
         boolean hurt = AcademyDamageHelper.hurt(player, target,
-                player.damageSources().playerAttack(player), DynamicSkillRules.damage(skillId, damage));
+                com.mohistmc.academy.skill.SkillDamageSource.attack(player), DynamicSkillRules.damage(skillId, damage));
         RadiationIntensifyRuntime.mark(player, data, target);
         return hurt;
     }

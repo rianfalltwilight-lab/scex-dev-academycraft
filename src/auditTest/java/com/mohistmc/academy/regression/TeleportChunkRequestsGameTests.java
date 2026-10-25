@@ -82,8 +82,21 @@ public final class TeleportChunkRequestsGameTests {
                     "Cold cast must return before loading, movement and resource payment");
             h.assertTrue(tickets(h.getLevel(), chunk) == 1, "Pending cast has no actual residency ticket");
         } catch (RuntimeException | Error failure) { session.close(); throw failure; }
+        boolean[] completionObserved = {false};
         h.succeedWhen(() -> {
+            // GameTestServer skips the normal inter-tick wait. Give asynchronous chunk work
+            // a normal wall-clock budget without changing the production 200-tick deadline.
+            if (TeleportChunkRequests.isPending(p.getUUID()))
+                java.util.concurrent.locks.LockSupport.parkNanos(50_000_000L);
             h.assertTrue(!TeleportChunkRequests.isPending(p.getUUID()), "Cold destination still loading");
+            if (!completionObserved[0]) {
+                completionObserved[0] = true;
+                com.mojang.logging.LogUtils.getLogger().info(
+                        "COLD_TELEPORT_COMPLETE position={} destination={} cp={}/{} cooldown={} alive={} removed={} loaded={} tickets={} testTick={}",
+                        p.position(), dest, d.getCurrentCp(), cp, d.isOnCooldown("location_teleport"),
+                        p.isAlive(), p.isRemoved(), h.getLevel().getChunkSource().getChunkNow(chunk.x(), chunk.z()) != null,
+                        tickets(h.getLevel(), chunk), h.getTick());
+            }
             try {
                 h.assertTrue(p.position().distanceToSqr(dest) < .01 && d.getCurrentCp() < cp && d.isOnCooldown("location_teleport"),
                         "Ready cast did not commit movement/payment/cooldown");

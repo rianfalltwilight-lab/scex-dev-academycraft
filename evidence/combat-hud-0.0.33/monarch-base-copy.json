@@ -1,0 +1,14 @@
+{
+  "original_host": "VICERACH",
+  "status": "COPIED",
+  "payload_files": 10013,
+  "total_bytes": 980795971.0,
+  "total_files": 10015,
+  "copy_path": "D:\\SCEX-Work\\01-Mods\\Other-Ports\\AcademyCraft\\0.0.33-20261025/base",
+  "payload_bytes": 978658916.0,
+  "metadata_files": [
+    "manifest.json",
+    "base-receipt.json"
+  ],
+  "manifest_sha256": "031019b874738c2aba2723c15b9e8b9e2ccefdd9d31f951909c9f44d505e033b"
+}

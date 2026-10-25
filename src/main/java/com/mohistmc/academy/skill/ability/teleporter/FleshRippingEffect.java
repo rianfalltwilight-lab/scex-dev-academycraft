@@ -82,7 +82,7 @@ public final class FleshRippingEffect implements ChargingSkillEffect {
         ServerLevel level = player.serverLevel();
         Entity target = marked.entity;
         AcademyDamageHelper.hurt(player, target,
-                player.damageSources().source(net.minecraft.world.damagesource.DamageTypes.MAGIC, player),
+                com.mohistmc.academy.skill.SkillDamageSource.magic(player),
                 PassiveDamageHelper.teleporter(player, data, target, getId(), lerpf(5, 12, exp)).damage());
         int splashes = 5 + level.random.nextInt(2);
         for (int i = 0; i < splashes; i++) {

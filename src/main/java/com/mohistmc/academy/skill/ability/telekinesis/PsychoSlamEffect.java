@@ -90,7 +90,7 @@ public final class PsychoSlamEffect implements DynamicOneShotSkillEffect {
             if (age <= 0) continue;
             if (age < 30) {
                 if (age == 1) {
-                    AcademyDamageHelper.hurt(owner, target, owner.damageSources().playerAttack(owner),
+                    AcademyDamageHelper.hurt(owner, target, com.mohistmc.academy.skill.SkillDamageSource.attack(owner),
                             DynamicSkillRules.damage("psycho_slam", 15 + 5 * slam.proficiency()));
                     if (ACTIVE.get(slam.target()) != slam || !owner.isAlive() || !target.isAlive()
                             || owner.level() != level || target.level() != level) continue;
@@ -105,7 +105,7 @@ public final class PsychoSlamEffect implements DynamicOneShotSkillEffect {
             if (!ACTIVE.remove(slam.target(), slam)) continue;
             target.setDeltaMovement(0, -2, 0);
             target.hurtMarked = true;
-            AcademyDamageHelper.hurt(owner, target, owner.damageSources().playerAttack(owner),
+            AcademyDamageHelper.hurt(owner, target, com.mohistmc.academy.skill.SkillDamageSource.attack(owner),
                     DynamicSkillRules.damage("psycho_slam", 2 * (15 + 5 * slam.proficiency())));
             EffectHelper.psychoBurst(level, target.getX(), target.getY(), target.getZ(), 24, 0.6);
         }

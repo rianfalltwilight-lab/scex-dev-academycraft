@@ -212,7 +212,7 @@ public class RailgunEffect implements ChargingSkillEffect {
                 reflectDamage(reflector);
                 break;
             }
-            AcademyDamageHelper.hurt(player,target,player.damageSources().playerAttack(player), DynamicSkillRules.damage(getId(),attenuated));
+            AcademyDamageHelper.hurt(player,target,com.mohistmc.academy.skill.SkillDamageSource.attack(player), DynamicSkillRules.damage(getId(),attenuated));
             EffectHelper.glowBurst(level, target.getX(), target.getEyeY(), target.getZ(),
                     3, 0.3f, 0x88FFCC44, 10, 0.2f);
         }

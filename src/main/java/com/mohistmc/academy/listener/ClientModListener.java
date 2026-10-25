@@ -2,6 +2,9 @@ package com.mohistmc.academy.listener;
 
 import com.mohistmc.academy.AcademyCraft;
 import com.mohistmc.academy.client.KeyInputHandler;
+import com.mohistmc.academy.client.ChargingHudOverlay;
+import com.mohistmc.academy.client.TerminalInstallProgress;
+import com.mohistmc.academy.client.gui.*;
 import com.mohistmc.academy.client.block.entity.model.CatEngineModel;
 import com.mohistmc.academy.client.block.entity.render.CatEngineRender;
 import com.mohistmc.academy.client.block.entity.render.MatrixRender;
@@ -43,12 +46,36 @@ import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
+import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 
 /** Client registration events belong to the mod bus, not the runtime game bus. */
 @EventBusSubscriber(modid = AcademyCraft.MODID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
 public final class ClientModListener {
     private ClientModListener() {}
+
+    public static final ResourceLocation HUD_VECTOR_WAVE = ResourceLocation.fromNamespaceAndPath(AcademyCraft.MODID, "vector_wave");
+    public static final ResourceLocation HUD_SCREEN_MASK = ResourceLocation.fromNamespaceAndPath(AcademyCraft.MODID, "screen_mask");
+    public static final ResourceLocation HUD_CP_BAR = ResourceLocation.fromNamespaceAndPath(AcademyCraft.MODID, "cp_bar");
+    public static final ResourceLocation HUD_SKILL_HINTS = ResourceLocation.fromNamespaceAndPath(AcademyCraft.MODID, "skill_hints");
+    public static final ResourceLocation HUD_MEDIA_PLAYER = ResourceLocation.fromNamespaceAndPath(AcademyCraft.MODID, "media_player");
+    public static final ResourceLocation HUD_NOTIFICATIONS = ResourceLocation.fromNamespaceAndPath(AcademyCraft.MODID, "notifications");
+    public static final ResourceLocation HUD_CHARGING = ResourceLocation.fromNamespaceAndPath(AcademyCraft.MODID, "charging");
+    public static final ResourceLocation HUD_TERMINAL_INSTALL = ResourceLocation.fromNamespaceAndPath(AcademyCraft.MODID, "terminal_install");
+
+    @SubscribeEvent
+    public static void registerGuiLayers(RegisterGuiLayersEvent event) {
+        event.registerBelow(VanillaGuiLayers.CAMERA_OVERLAYS, HUD_VECTOR_WAVE, LegacyVectorWaveOverlay::render);
+        // Full-screen tint stays beneath our readable resource and notification overlays.
+        event.registerAbove(VanillaGuiLayers.HOTBAR, HUD_SCREEN_MASK, ScreenMaskOverlay::render);
+        event.registerAbove(HUD_SCREEN_MASK, HUD_CP_BAR, CPBarOverlay::render);
+        event.registerAbove(HUD_CP_BAR, HUD_SKILL_HINTS, AbilityHudOverlay::render);
+        event.registerAbove(HUD_SKILL_HINTS, HUD_MEDIA_PLAYER, MediaPlayerHudOverlay::render);
+        event.registerAbove(HUD_MEDIA_PLAYER, HUD_NOTIFICATIONS, NotifyOverlay::render);
+        event.registerAbove(VanillaGuiLayers.SAVING_INDICATOR, HUD_CHARGING, ChargingHudOverlay::render);
+        event.registerAbove(HUD_CHARGING, HUD_TERMINAL_INSTALL, TerminalInstallProgress::render);
+    }
 
     @SubscribeEvent
     public static void clientSetup(FMLClientSetupEvent event) {

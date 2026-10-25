@@ -1,15 +1,10 @@
 package com.mohistmc.academy.client;
 
-import com.mohistmc.academy.AcademyCraft;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RenderGuiEvent;
 
-@EventBusSubscriber(modid = AcademyCraft.MODID, value = Dist.CLIENT)
 public class TerminalInstallProgress {
     private static boolean installing = false;
     private static long startTime = 0;
@@ -26,8 +21,7 @@ public class TerminalInstallProgress {
 
     public static void resetClientSession() { installing = false; startTime = 0; }
 
-    @SubscribeEvent
-    public static void onRenderGui(RenderGuiEvent.Post event) {
+    public static void render(GuiGraphics graphics, DeltaTracker partialTick) {
         if (!installing) return;
 
         long elapsed = System.currentTimeMillis() - startTime;
@@ -43,7 +37,6 @@ public class TerminalInstallProgress {
 
         int screenWidth = mc.getWindow().getGuiScaledWidth();
         int screenHeight = mc.getWindow().getGuiScaledHeight();
-        GuiGraphics graphics = event.getGuiGraphics();
 
         int barWidth = 200;
         int barHeight = 20;

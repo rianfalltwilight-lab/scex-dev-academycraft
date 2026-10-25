@@ -1,0 +1,268 @@
+{
+  "status": "PASS",
+  "version": "0.0.33-scex-combat-hud",
+  "baseline_commit": "3423b53e0e65b47f7d47bdc30b6ec71d4cb63995",
+  "source_tree_sha256": "6012ee1c25cee295986c3a56c54669cb68e4d28d6027f0991501176f9a8268f8",
+  "source_file_count": 1917,
+  "junit": {
+    "tests": 342,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "xml_files": 103
+  },
+  "gametests": {
+    "host": "VICERACH",
+    "exit_code": 0,
+    "forced": false,
+    "passed": true,
+    "expected_tests": 487,
+    "namespaces": "academy,academy_charging,academy_audit,academy_followup,academy_projectiles,academy_native_compat,academy_data_sync,academy_automation,academy_native_combat",
+    "expectation_met": true,
+    "basis": "Actual NeoForge GameTestServer; release JAR plus separate probe mod",
+    "expected_failures": 0,
+    "process_exited": true,
+    "failures": 0,
+    "tests": 487
+  },
+  "client": {
+    "process_exited": true,
+    "saved_after_stop": true,
+    "forced": false,
+    "exit_code": 0,
+    "close_reason": null,
+    "host": "MONARCH",
+    "visual_review": "pending",
+    "passed": true
+  },
+  "client_behavior_checks": [
+    "PASS scale2-visible native order, calls, draw suppression and pose balance: {academy:vector_wave=calls=1/fills=0/text=0/blits=1/minFillY=2147483647/textBottom=0, academy:screen_mask=calls=1/fills=0/text=0/blits=1/minFillY=2147483647/textBottom=0, academy:cp_bar=calls=1/fills=0/text=2/blits=3/minFillY=2147483647/textBottom=80, academy:skill_hints=calls=1/fills=5/text=1/blits=1/minFillY=231/textBottom=244, academy:media_player=calls=1/fills=2/text=2/blits=0/minFillY=465/textBottom=474, academy:notifications=calls=1/fills=5/text=2/blits=0/minFillY=84/textBottom=117, academy:charging=calls=1/fills=6/text=2/blits=1/minFillY=420/textBottom=442, academy:terminal_install=calls=1/fills=2/text=1/blits=0/minFillY=230/textBottom=224}",
+    "PASS scale2-f1-hidden native order, calls, draw suppression and pose balance: {academy:vector_wave=calls=1/fills=0/text=0/blits=0/minFillY=2147483647/textBottom=0, academy:screen_mask=calls=1/fills=0/text=0/blits=0/minFillY=2147483647/textBottom=0, academy:cp_bar=calls=1/fills=0/text=0/blits=0/minFillY=2147483647/textBottom=0, academy:skill_hints=calls=1/fills=0/text=0/blits=0/minFillY=2147483647/textBottom=0, academy:media_player=calls=1/fills=0/text=0/blits=0/minFillY=2147483647/textBottom=0, academy:notifications=calls=1/fills=0/text=0/blits=0/minFillY=2147483647/textBottom=0, academy:charging=calls=1/fills=0/text=0/blits=0/minFillY=2147483647/textBottom=0, academy:terminal_install=calls=1/fills=0/text=0/blits=0/minFillY=2147483647/textBottom=0}",
+    "PASS scale2-f1-restored native order, calls, draw suppression and pose balance: {academy:vector_wave=calls=1/fills=0/text=0/blits=1/minFillY=2147483647/textBottom=0, academy:screen_mask=calls=1/fills=0/text=0/blits=1/minFillY=2147483647/textBottom=0, academy:cp_bar=calls=1/fills=0/text=2/blits=3/minFillY=2147483647/textBottom=80, academy:skill_hints=calls=1/fills=5/text=1/blits=1/minFillY=231/textBottom=244, academy:media_player=calls=1/fills=2/text=2/blits=0/minFillY=465/textBottom=474, academy:notifications=calls=1/fills=5/text=2/blits=0/minFillY=84/textBottom=117, academy:charging=calls=1/fills=6/text=2/blits=1/minFillY=420/textBottom=442, academy:terminal_install=calls=1/fills=2/text=1/blits=0/minFillY=230/textBottom=224}",
+    "PASS scale2-cancel-cp native order, calls, draw suppression and pose balance: {academy:vector_wave=calls=1/fills=0/text=0/blits=1/minFillY=2147483647/textBottom=0, academy:screen_mask=calls=1/fills=0/text=0/blits=1/minFillY=2147483647/textBottom=0, academy:skill_hints=calls=1/fills=5/text=1/blits=1/minFillY=231/textBottom=244, academy:media_player=calls=1/fills=2/text=2/blits=0/minFillY=465/textBottom=474, academy:notifications=calls=1/fills=5/text=2/blits=0/minFillY=84/textBottom=117, academy:charging=calls=1/fills=6/text=2/blits=1/minFillY=420/textBottom=442, academy:terminal_install=calls=1/fills=2/text=1/blits=0/minFillY=230/textBottom=224}",
+    "PASS scale2-cancel-hotbar native order, calls, draw suppression and pose balance: {academy:vector_wave=calls=1/fills=0/text=0/blits=1/minFillY=2147483647/textBottom=0, academy:screen_mask=calls=1/fills=0/text=0/blits=1/minFillY=2147483647/textBottom=0, academy:cp_bar=calls=1/fills=0/text=2/blits=3/minFillY=2147483647/textBottom=80, academy:skill_hints=calls=1/fills=5/text=1/blits=1/minFillY=231/textBottom=244, academy:media_player=calls=1/fills=2/text=2/blits=0/minFillY=465/textBottom=474, academy:notifications=calls=1/fills=5/text=2/blits=0/minFillY=84/textBottom=117, academy:charging=calls=1/fills=6/text=2/blits=1/minFillY=420/textBottom=442, academy:terminal_install=calls=1/fills=2/text=1/blits=0/minFillY=230/textBottom=224}",
+    "PASS scale2-hud-disabled native order, calls, draw suppression and pose balance: {academy:vector_wave=calls=1/fills=0/text=0/blits=3/minFillY=2147483647/textBottom=0, academy:screen_mask=calls=1/fills=0/text=0/blits=1/minFillY=2147483647/textBottom=0, academy:cp_bar=calls=1/fills=0/text=0/blits=0/minFillY=2147483647/textBottom=0, academy:skill_hints=calls=1/fills=0/text=0/blits=0/minFillY=2147483647/textBottom=0, academy:media_player=calls=1/fills=0/text=0/blits=0/minFillY=2147483647/textBottom=0, academy:notifications=calls=1/fills=0/text=0/blits=0/minFillY=2147483647/textBottom=0, academy:charging=calls=1/fills=0/text=0/blits=0/minFillY=2147483647/textBottom=0, academy:terminal_install=calls=1/fills=2/text=1/blits=0/minFillY=230/textBottom=224}",
+    "PASS scale2-individual-disabled native order, calls, draw suppression and pose balance: {academy:vector_wave=calls=1/fills=0/text=0/blits=1/minFillY=2147483647/textBottom=0, academy:screen_mask=calls=1/fills=0/text=0/blits=1/minFillY=2147483647/textBottom=0, academy:cp_bar=calls=1/fills=0/text=0/blits=0/minFillY=2147483647/textBottom=0, academy:skill_hints=calls=1/fills=0/text=0/blits=0/minFillY=2147483647/textBottom=0, academy:media_player=calls=1/fills=2/text=2/blits=0/minFillY=465/textBottom=474, academy:notifications=calls=1/fills=5/text=2/blits=0/minFillY=50/textBottom=83, academy:charging=calls=1/fills=0/text=0/blits=0/minFillY=2147483647/textBottom=0, academy:terminal_install=calls=1/fills=2/text=1/blits=0/minFillY=230/textBottom=224}",
+    "PASS scale2-screen-open native order, calls, draw suppression and pose balance: {academy:vector_wave=calls=1/fills=0/text=0/blits=0/minFillY=2147483647/textBottom=0, academy:screen_mask=calls=1/fills=0/text=0/blits=0/minFillY=2147483647/textBottom=0, academy:cp_bar=calls=1/fills=0/text=0/blits=0/minFillY=2147483647/textBottom=0, academy:skill_hints=calls=1/fills=0/text=0/blits=0/minFillY=2147483647/textBottom=0, academy:media_player=calls=1/fills=0/text=0/blits=0/minFillY=2147483647/textBottom=0, academy:notifications=calls=1/fills=0/text=0/blits=0/minFillY=2147483647/textBottom=0, academy:charging=calls=1/fills=0/text=0/blits=0/minFillY=2147483647/textBottom=0, academy:terminal_install=calls=1/fills=0/text=0/blits=0/minFillY=2147483647/textBottom=0}",
+    "PASS scale2-screen-closed native order, calls, draw suppression and pose balance: {academy:vector_wave=calls=1/fills=0/text=0/blits=1/minFillY=2147483647/textBottom=0, academy:screen_mask=calls=1/fills=0/text=0/blits=1/minFillY=2147483647/textBottom=0, academy:cp_bar=calls=1/fills=0/text=2/blits=3/minFillY=2147483647/textBottom=80, academy:skill_hints=calls=1/fills=5/text=1/blits=1/minFillY=231/textBottom=244, academy:media_player=calls=1/fills=2/text=2/blits=0/minFillY=465/textBottom=474, academy:notifications=calls=1/fills=5/text=2/blits=0/minFillY=84/textBottom=117, academy:charging=calls=1/fills=6/text=2/blits=1/minFillY=420/textBottom=442, academy:terminal_install=calls=1/fills=2/text=1/blits=0/minFillY=230/textBottom=224}",
+    "PASS scale3-visible native order, calls, draw suppression and pose balance: {academy:vector_wave=calls=1/fills=0/text=0/blits=2/minFillY=2147483647/textBottom=0, academy:screen_mask=calls=1/fills=0/text=0/blits=1/minFillY=2147483647/textBottom=0, academy:cp_bar=calls=1/fills=0/text=2/blits=3/minFillY=2147483647/textBottom=80, academy:skill_hints=calls=1/fills=5/text=1/blits=1/minFillY=151/textBottom=164, academy:media_player=calls=1/fills=2/text=2/blits=0/minFillY=305/textBottom=314, academy:notifications=calls=1/fills=5/text=2/blits=0/minFillY=84/textBottom=117, academy:charging=calls=1/fills=6/text=2/blits=1/minFillY=260/textBottom=282, academy:terminal_install=calls=1/fills=2/text=1/blits=0/minFillY=150/textBottom=144}",
+    "PASS scale3-f1-hidden native order, calls, draw suppression and pose balance: {academy:vector_wave=calls=1/fills=0/text=0/blits=0/minFillY=2147483647/textBottom=0, academy:screen_mask=calls=1/fills=0/text=0/blits=0/minFillY=2147483647/textBottom=0, academy:cp_bar=calls=1/fills=0/text=0/blits=0/minFillY=2147483647/textBottom=0, academy:skill_hints=calls=1/fills=0/text=0/blits=0/minFillY=2147483647/textBottom=0, academy:media_player=calls=1/fills=0/text=0/blits=0/minFillY=2147483647/textBottom=0, academy:notifications=calls=1/fills=0/text=0/blits=0/minFillY=2147483647/textBottom=0, academy:charging=calls=1/fills=0/text=0/blits=0/minFillY=2147483647/textBottom=0, academy:terminal_install=calls=1/fills=0/text=0/blits=0/minFillY=2147483647/textBottom=0}",
+    "PASS scale3-f1-restored native order, calls, draw suppression and pose balance: {academy:vector_wave=calls=1/fills=0/text=0/blits=1/minFillY=2147483647/textBottom=0, academy:screen_mask=calls=1/fills=0/text=0/blits=1/minFillY=2147483647/textBottom=0, academy:cp_bar=calls=1/fills=0/text=2/blits=3/minFillY=2147483647/textBottom=80, academy:skill_hints=calls=1/fills=5/text=1/blits=1/minFillY=151/textBottom=164, academy:media_player=calls=1/fills=2/text=2/blits=0/minFillY=305/textBottom=314, academy:notifications=calls=1/fills=5/text=2/blits=0/minFillY=84/textBottom=117, academy:charging=calls=1/fills=6/text=2/blits=1/minFillY=260/textBottom=282, academy:terminal_install=calls=1/fills=2/text=1/blits=0/minFillY=150/textBottom=144}",
+    "PASS scale3-cancel-cp native order, calls, draw suppression and pose balance: {academy:vector_wave=calls=1/fills=0/text=0/blits=4/minFillY=2147483647/textBottom=0, academy:screen_mask=calls=1/fills=0/text=0/blits=1/minFillY=2147483647/textBottom=0, academy:skill_hints=calls=1/fills=5/text=1/blits=1/minFillY=151/textBottom=164, academy:media_player=calls=1/fills=2/text=2/blits=0/minFillY=305/textBottom=314, academy:notifications=calls=1/fills=5/text=2/blits=0/minFillY=84/textBottom=117, academy:charging=calls=1/fills=6/text=2/blits=1/minFillY=260/textBottom=282, academy:terminal_install=calls=1/fills=2/text=1/blits=0/minFillY=150/textBottom=144}",
+    "PASS scale3-cancel-hotbar native order, calls, draw suppression and pose balance: {academy:vector_wave=calls=1/fills=0/text=0/blits=1/minFillY=2147483647/textBottom=0, academy:screen_mask=calls=1/fills=0/text=0/blits=1/minFillY=2147483647/textBottom=0, academy:cp_bar=calls=1/fills=0/text=2/blits=3/minFillY=2147483647/textBottom=80, academy:skill_hints=calls=1/fills=5/text=1/blits=1/minFillY=151/textBottom=164, academy:media_player=calls=1/fills=2/text=2/blits=0/minFillY=305/textBottom=314, academy:notifications=calls=1/fills=5/text=2/blits=0/minFillY=84/textBottom=117, academy:charging=calls=1/fills=6/text=2/blits=1/minFillY=260/textBottom=282, academy:terminal_install=calls=1/fills=2/text=1/blits=0/minFillY=150/textBottom=144}",
+    "PASS scale3-hud-disabled native order, calls, draw suppression and pose balance: {academy:vector_wave=calls=1/fills=0/text=0/blits=2/minFillY=2147483647/textBottom=0, academy:screen_mask=calls=1/fills=0/text=0/blits=1/minFillY=2147483647/textBottom=0, academy:cp_bar=calls=1/fills=0/text=0/blits=0/minFillY=2147483647/textBottom=0, academy:skill_hints=calls=1/fills=0/text=0/blits=0/minFillY=2147483647/textBottom=0, academy:media_player=calls=1/fills=0/text=0/blits=0/minFillY=2147483647/textBottom=0, academy:notifications=calls=1/fills=0/text=0/blits=0/minFillY=2147483647/textBottom=0, academy:charging=calls=1/fills=0/text=0/blits=0/minFillY=2147483647/textBottom=0, academy:terminal_install=calls=1/fills=2/text=1/blits=0/minFillY=150/textBottom=144}",
+    "PASS scale3-individual-disabled native order, calls, draw suppression and pose balance: {academy:vector_wave=calls=1/fills=0/text=0/blits=2/minFillY=2147483647/textBottom=0, academy:screen_mask=calls=1/fills=0/text=0/blits=1/minFillY=2147483647/textBottom=0, academy:cp_bar=calls=1/fills=0/text=0/blits=0/minFillY=2147483647/textBottom=0, academy:skill_hints=calls=1/fills=0/text=0/blits=0/minFillY=2147483647/textBottom=0, academy:media_player=calls=1/fills=2/text=2/blits=0/minFillY=305/textBottom=314, academy:notifications=calls=1/fills=5/text=2/blits=0/minFillY=50/textBottom=83, academy:charging=calls=1/fills=0/text=0/blits=0/minFillY=2147483647/textBottom=0, academy:terminal_install=calls=1/fills=2/text=1/blits=0/minFillY=150/textBottom=144}",
+    "PASS scale3-screen-open native order, calls, draw suppression and pose balance: {academy:vector_wave=calls=1/fills=0/text=0/blits=0/minFillY=2147483647/textBottom=0, academy:screen_mask=calls=1/fills=0/text=0/blits=0/minFillY=2147483647/textBottom=0, academy:cp_bar=calls=1/fills=0/text=0/blits=0/minFillY=2147483647/textBottom=0, academy:skill_hints=calls=1/fills=0/text=0/blits=0/minFillY=2147483647/textBottom=0, academy:media_player=calls=1/fills=0/text=0/blits=0/minFillY=2147483647/textBottom=0, academy:notifications=calls=1/fills=0/text=0/blits=0/minFillY=2147483647/textBottom=0, academy:charging=calls=1/fills=0/text=0/blits=0/minFillY=2147483647/textBottom=0, academy:terminal_install=calls=1/fills=0/text=0/blits=0/minFillY=2147483647/textBottom=0}",
+    "PASS scale3-screen-closed native order, calls, draw suppression and pose balance: {academy:vector_wave=calls=1/fills=0/text=0/blits=2/minFillY=2147483647/textBottom=0, academy:screen_mask=calls=1/fills=0/text=0/blits=1/minFillY=2147483647/textBottom=0, academy:cp_bar=calls=1/fills=0/text=2/blits=3/minFillY=2147483647/textBottom=80, academy:skill_hints=calls=1/fills=5/text=1/blits=1/minFillY=151/textBottom=164, academy:media_player=calls=1/fills=2/text=2/blits=0/minFillY=305/textBottom=314, academy:notifications=calls=1/fills=5/text=2/blits=0/minFillY=84/textBottom=117, academy:charging=calls=1/fills=6/text=2/blits=1/minFillY=260/textBottom=282, academy:terminal_install=calls=1/fills=2/text=1/blits=0/minFillY=150/textBottom=144}",
+    "PASS native save checkpoint and real disconnect: charge/install/media/notifications/ripples/mask/numeric hint reset; client world released"
+  ],
+  "measurements": [
+    "[2510月2026 21:30:36.713] [Server thread/INFO] [com.mohistmc.academy.regression.NativeCombatGameTests/]: NATIVE_COMBAT_MACE density=0 raw=27.0 hp=73.0 durability=1 fall=0.0",
+    "[2510月2026 21:30:36.715] [Server thread/INFO] [com.mohistmc.academy.regression.NativeCombatGameTests/]: NATIVE_COMBAT_MACE density=3 raw=33.75 hp=66.25 durability=1 fall=0.0",
+    "[2510月2026 21:30:43.261] [Server thread/INFO] [com.mohistmc.academy.regression.NativeCombatGameTests/]: NATIVE_COMBAT_WIND_BURST explosions=1 inheritedSpectatorFlight=true nativeImpulse=(0.0, 1.75, 0.0) attackerMotion=(0.0, 1.7599999997764826, 0.0) hp=73.0",
+    "[2510月2026 21:30:43.552] [Server thread/INFO] [com.mohistmc.academy.regression.NativeCombatGameTests/]: NATIVE_COMBAT_ARROW raw=4 ifCost=720 hp=97.44 arrows=1",
+    "[2510月2026 21:30:44.286] [Server thread/INFO] [com.mohistmc.academy.regression.NativeCombatGameTests/]: NATIVE_COMBAT_SHIELD frontIfCost=0 rearIfCost=54 rearCpCost=80.0 hp=99.808",
+    "[2510月2026 21:30:44.587] [Server thread/INFO] [com.mohistmc.academy.regression.NativeCombatGameTests/]: NATIVE_COMBAT_MITIGATION plain=4.656 breach=6.0 protection=4 resistance=1 absorptionRemaining=0.8711679",
+    "[2510月2026 21:30:44.874] [Server thread/INFO] [com.mohistmc.academy.regression.NativeCombatGameTests/]: NATIVE_COMBAT_TRIDENT raw=8 cpCost=160.0 overloadCost=4.0 hp=99.4",
+    "[2510月2026 21:31:47.958] [Server thread/INFO] [com.mohistmc.academy.regression.NativeCombatGameTests/]: NATIVE_COMBAT_THORNS raw=2.1190143 cpCost=42.38037 ifCost=29 abilityContext=false",
+    "[2510月2026 21:31:52.697] [Server thread/INFO] [com.mohistmc.academy.regression.NativeCombatGameTests/]: NATIVE_COMBAT_WIND_CHARGE raw=1 explosions=1 ifCost=180 hp=99.36"
+  ],
+  "native_save_checkpoint": "status=PASS\nserverTick=346 settleTicks=1 holders=1225 generationRefs=0 notSaveReady=0 queuedTasks=0 lightWork=false stableTicks=1\nserverTick=365 settleTicks=20 holders=1225 generationRefs=0 notSaveReady=0 queuedTasks=0 lightWork=false stableTicks=20\nnativeSaveEverythingCompleted=true flush=true\n",
+  "visual_review": {
+    "status": "PASS",
+    "scope": "Release-scoped layer dispatch, F1/config/cancellation/screen transitions and CP notification readability. This is not a claim that all historic HUD layouts are overlap-free.",
+    "candidate": "r7 JAR; MONARCH client-r3",
+    "images": [
+      {
+        "file": "screenshots/hud-layers-scale2-visible.png",
+        "sha256": "4ac31d777afdc47a896cacb8125ce340d182fd307a5bada7b215d007e6f2dd52",
+        "status": "ISSUES",
+        "observation": "CP/OL读数完整可见，通知卡位于其下方且有间隔；各HUD、波纹、遮罩均可见，无窗口截断。首帧底部原生选中物品名称与蓄力提示短时叠字，属既有坐标边界。"
+      },
+      {
+        "file": "screenshots/hud-layers-scale2-f1-hidden.png",
+        "sha256": "f0cfd508df14b81398c4ac585301ceb3b0a064a5a54d554374b6f895b303a46c",
+        "status": "PASS",
+        "observation": "仅世界画面可见；八个模组HUD内容、波纹和遮罩均隐藏，原生快捷栏/手持物也隐藏，没有残留HUD。"
+      },
+      {
+        "file": "screenshots/hud-layers-scale2-f1-restored.png",
+        "sha256": "461c67e100a7c3452f1135ebcda89fd40a26167de567b169d0c4e49507324e19",
+        "status": "PASS",
+        "observation": "F1恢复后CP、通知、安装、蓄力、技能提示、媒体、波纹及快捷栏恢复；CP/OL与通知卡分开，底部蓄力提示此时清晰。"
+      },
+      {
+        "file": "screenshots/hud-layers-scale2-cancel-cp.png",
+        "sha256": "eb81dd68a17a6d96ff08c009328f18a11bc9304d1b48cbf688a25033653090a6",
+        "status": "PASS",
+        "observation": "仅CP条与CP/OL读数消失，通知、安装、蓄力、技能提示、媒体、波纹和原生快捷栏继续显示；通知保留预留位置。"
+      },
+      {
+        "file": "screenshots/hud-layers-scale2-cancel-hotbar.png",
+        "sha256": "463e391dd01c372d62de3be733715eeb0bcb20e6f46581e728ae6043c627045e",
+        "status": "PASS",
+        "observation": "原生快捷栏消失，模组HUD和手持物仍在；CP/OL读数与通知卡之间留有清楚间隔，底部蓄力文字清晰。"
+      },
+      {
+        "file": "screenshots/hud-layers-scale2-hud-disabled.png",
+        "sha256": "d2e77ca60cf00e4a1ce9fa2d13a3950f9919e0a740d4541093ed921c721edf98",
+        "status": "PASS",
+        "observation": "总HUD关闭后CP、技能提示、媒体、通知和蓄力消失；安装进度、矢量波纹、遮罩与原生快捷栏按当前hidden语义保留。"
+      },
+      {
+        "file": "screenshots/hud-layers-scale2-individual-disabled.png",
+        "sha256": "40add514f1113afad40d4d74ba6c23e3fbeac1c1e9f206e86c56fb01544ade66",
+        "status": "PASS",
+        "observation": "CP、技能提示和蓄力单独关闭；通知回到较高的原始区域，媒体、安装进度、波纹及快捷栏继续显示。右上原生移动教学toast完整，无边缘截断。"
+      },
+      {
+        "file": "screenshots/hud-layers-scale2-screen-open.png",
+        "sha256": "79872f44162f1a920b4b095b4f6e7bd3ff792bfb151df7c7fd7be66a96e61920",
+        "status": "PASS",
+        "observation": "设置面板打开后模组HUD、安装进度和波纹均不可见；日文设置面板完整居中，标签/键名分列且无溢出；背景世界、手持物和快捷栏处于原生界面模糊背景。"
+      },
+      {
+        "file": "screenshots/hud-layers-scale2-screen-closed.png",
+        "sha256": "f3be09b72edc3c1419ff094075b176a60f20e516ca244c5cf1d8d7feba16ca08",
+        "status": "PASS",
+        "observation": "关闭设置后HUD与波纹恢复，面板及背景模糊消失；CP/OL读数和通知卡不重叠，底部蓄力提示清晰。"
+      },
+      {
+        "file": "screenshots/hud-layers-scale3-visible.png",
+        "sha256": "f01a6aab96b0edd26e9a0a693791fc57d1e7443d0ef71ba98f4c79ffc7df15f5",
+        "status": "PASS",
+        "observation": "CP/OL 数字完整显示在通知面板上方，两者不再遮挡；通知两行文字、安装中 18% 日语文字、技能提示、蓄力条、媒体与原版快捷栏均可见，文字和窗口未越界。"
+      },
+      {
+        "file": "screenshots/hud-layers-scale3-f1-hidden.png",
+        "sha256": "0f533c1082518bee626ab62678ba4ac2826fc3c5fc277fed696277b52ea0835a",
+        "status": "PASS",
+        "observation": "画面仅保留世界；CP、通知、技能提示、蓄力、媒体、安装条、波纹和原版快捷栏/手持物均不可见，未见残留文字。"
+      },
+      {
+        "file": "screenshots/hud-layers-scale3-f1-restored.png",
+        "sha256": "06caed5c4ce7c17605c897b710b9974b7e340ed82614829c0e02e3fe36c350e9",
+        "status": "PASS",
+        "observation": "F1 恢复后 CP/OL、通知、安装文字与进度条、技能提示、蓄力、媒体及原版快捷栏恢复显示；通知与 CP/OL 保持间隔，波纹可见。"
+      },
+      {
+        "file": "screenshots/hud-layers-scale3-cancel-cp.png",
+        "sha256": "c99ef517f0733f20571f03b4c4ab4af0f020903e4fcc6e0d8ef785fd7fce6e77",
+        "status": "PASS",
+        "observation": "CP 条及 CP/OL 数字均隐藏；通知、安装文字与进度条、技能提示、蓄力、媒体、波纹及原版快捷栏仍显示，通知文字完整。"
+      },
+      {
+        "file": "screenshots/hud-layers-scale3-cancel-hotbar.png",
+        "sha256": "56037a0377806dacdd43643892a9700e54ac4404c9557e0c3e9a32cf537378d1",
+        "status": "PASS",
+        "observation": "原版快捷栏隐藏，手持物与各模组 HUD 仍显示；CP/OL 与通知分离，日语安装中 19% 文字清晰可见，蓄力和媒体文字未越界。"
+      },
+      {
+        "file": "screenshots/hud-layers-scale3-hud-disabled.png",
+        "sha256": "7f28846ed6d89964fa1a8590b3d69eab9fceaa712be5753e7248261898600334",
+        "status": "PASS",
+        "observation": "总 HUD 开关关闭后 CP、通知、技能提示、蓄力与媒体均隐藏；日语安装中 20% 及进度条、波纹、世界效果和原版快捷栏仍可见，未见缺字或窗口越界。"
+      },
+      {
+        "file": "screenshots/hud-layers-scale3-individual-disabled.png",
+        "sha256": "b9367b9cb470e8a77ae53f2102f684adca7ab1ad6477e8d9bc7aab07404cfcc5",
+        "status": "PASS",
+        "observation": "CP、技能提示和蓄力分开关关闭后对应元素隐藏；通知、日语安装中 18% 与进度条、媒体、波纹及原版快捷栏仍可见，通知位于上方且文字完整。"
+      },
+      {
+        "file": "screenshots/hud-layers-scale3-screen-open.png",
+        "sha256": "39f72390cc0923e1b970886014e4f709ffae834e7da40de7093ad6c379c9999a",
+        "status": "PASS",
+        "observation": "设置窗口完整位于画面内，日语行标签与右侧按键文字均在各自行内；模组 HUD、安装条和波纹隐藏，窗口背景模糊正常，未见 HUD 文字穿透窗口。"
+      },
+      {
+        "file": "screenshots/hud-layers-scale3-screen-closed.png",
+        "sha256": "985637cad6de0cc26bf2184e1d918fe6a5e50c8efe1e2ff5c28e94516ec9e01e",
+        "status": "PASS",
+        "observation": "关闭设置后 CP/OL、通知、安装文字与进度条、技能提示、蓄力、媒体、波纹及原版快捷栏重新显示；通知不遮 CP/OL，窗口与文字未越界。"
+      }
+    ],
+    "individual_reviews": [
+      {
+        "file": "visual-review-scale2.json",
+        "sha256": "272dd3c45eaf078d316d99196e5eba355fae7ac769809684564fe7e06cebd7c0",
+        "status": "ISSUES"
+      },
+      {
+        "file": "visual-review-scale3.json",
+        "sha256": "844beb7244f81a60ecede8a5339421c8d447e865330a3b79bb44479125aa6c39",
+        "status": "PASS"
+      }
+    ],
+    "known_nonblocking_issues": [
+      "Scale2 visible first frame: native selected item name briefly overlaps the unchanged charging hint. Preserved as ISSUES in the independent scale2 review and documented in release notes.",
+      "Insufficient vertical space retains original notification placement."
+    ]
+  },
+  "artifact_entry_comparisons": [
+    {
+      "tested": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\build\\combat-hud-0.0.33-r7-tested\\AcademyCraft-neoforge-1.21.1-0.0.33-scex-combat-hud.jar",
+      "tested_sha256": "eaa7b631f34651228149054a6e3ea23597d317eb188d28dc803bee81124589a8",
+      "final": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\build\\libs\\AcademyCraft-neoforge-1.21.1-0.0.33-scex-combat-hud.jar",
+      "final_sha256": "52a500a8a55ba185a33deec0d60556c11e83591071ac4df7b2f4f564b7833370",
+      "changed_entries": [
+        "BUILD-INFO.txt",
+        "META-INF/MANIFEST.MF"
+      ],
+      "runtime_entries_identical": true,
+      "server_tested": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\build\\combat-hud-0.0.33-r5-tested\\AcademyCraft-neoforge-1.21.1-0.0.33-scex-combat-hud.jar",
+      "server_tested_sha256": "e0a7f6adf9b91a9cb4da960a2194d7a10e7d22dc73e319e5a852ebf2437aade0",
+      "server_common_entries_identical": true,
+      "server_changed_client_only_entries": [
+        "BUILD-INFO.txt",
+        "META-INF/MANIFEST.MF",
+        "com/mohistmc/academy/client/gui/CPBarOverlay$HudPosition.class",
+        "com/mohistmc/academy/client/gui/CPBarOverlay.class",
+        "com/mohistmc/academy/client/gui/NotifyOverlay.class"
+      ]
+    },
+    {
+      "tested": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\build\\combat-hud-0.0.33-r7-tested\\AcademyCraft-neoforge-1.21.1-0.0.33-scex-combat-hud-audit-tests.jar",
+      "tested_sha256": "218d04976c14360a0e1084e62b2346f1af9acd3c5f6081f29de10ec4bf95e338",
+      "final": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\build\\libs\\AcademyCraft-neoforge-1.21.1-0.0.33-scex-combat-hud-audit-tests.jar",
+      "final_sha256": "218d04976c14360a0e1084e62b2346f1af9acd3c5f6081f29de10ec4bf95e338",
+      "changed_entries": [],
+      "runtime_entries_identical": true,
+      "server_tested": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\build\\combat-hud-0.0.33-r5-tested\\AcademyCraft-neoforge-1.21.1-0.0.33-scex-combat-hud-audit-tests.jar",
+      "server_tested_sha256": "79aaaad4a43c862167ab2e6b5e6526ae1b406b0a411256c60fb2d66614de73c4",
+      "server_common_entries_identical": true,
+      "server_changed_client_only_entries": [
+        "com/mohistmc/academy/regression/HudLayersClientGate$DrawCount.class",
+        "com/mohistmc/academy/regression/HudLayersClientGate$Registration.class",
+        "com/mohistmc/academy/regression/HudLayersClientGate$TrackingGraphics.class",
+        "com/mohistmc/academy/regression/HudLayersClientGate.class"
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\build\\libs\\AcademyCraft-neoforge-1.21.1-0.0.33-scex-combat-hud.jar",
+      "bytes": 27869232,
+      "sha256": "52a500a8a55ba185a33deec0d60556c11e83591071ac4df7b2f4f564b7833370"
+    },
+    {
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\build\\libs\\AcademyCraft-neoforge-1.21.1-0.0.33-scex-combat-hud-audit-tests.jar",
+      "bytes": 365823,
+      "sha256": "218d04976c14360a0e1084e62b2346f1af9acd3c5f6081f29de10ec4bf95e338"
+    },
+    {
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\build\\distributions\\AcademyCraft-neoforge-1.21.1-0.0.33-scex-combat-hud-sources.zip",
+      "bytes": 27211313,
+      "sha256": "c8c0d500a217a0a3b07d81710cb1df516abe44991093732acb998e88548e1109"
+    }
+  ],
+  "limits": [
+    "NeoForge 21.1.248 / Java 21 isolated runtime; not a complete third-party pack matrix.",
+    "Server GameTests used r5; final client tested r7. Exact JAR entry comparison proves changes after server validation are limited to the listed client HUD and client probe classes plus metadata.",
+    "Client input is programmatically driven through native keyboard and layer dispatch; not physical keyboard or human usability testing.",
+    "The runner visual_review=pending field is resolved by the separate image-hash-bound visual-review.json.",
+    "Combat checks cover the specified vanilla fixtures, not every third-party event handler.",
+    "Known pre-existing layout boundary: scale2 first frame shows temporary selected-item-name/charging-hint text overlap; current charging coordinates unchanged. Notification displacement requires sufficient space.",
+    "Private GitHub archival release only; no production deployment."
+  ]
+}

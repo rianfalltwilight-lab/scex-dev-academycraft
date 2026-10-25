@@ -1,0 +1,30 @@
+{
+  "version": "0.0.33-scex-combat-hud",
+  "baseline_commit": "3423b53e0e65b47f7d47bdc30b6ec71d4cb63995",
+  "baseline_source_tree_sha256": "37fa5b8b31ef16544627704779572e78dbd999c4b58ec4fa67e4ffdc8e139838",
+  "baseline_source_file_count": 1896,
+  "baseline_verified_before_edits": true,
+  "original_plan": "建议以 **0.0.29 为基线，分批完成“原生兼容修复 → 数据与同步现代化 → 机器和界面整合”**。现有代码已经使用了不少 1.21.1 原生机制，重点应放在它们之间的兼容和衔接。\n\n这次重新检查了源码和实际使用的 Minecraft／NeoForge API。下面的新问题属于**源码审计发现，尚未通过新增游戏场景复现**；上一轮的 342 项 JUnit、430 项 GameTest 可以作为后续回归基线。\n\n**自审补出了几处优先修复的问题：**\n\n- **飞行能力可能干扰其他模组。** 技能直接修改 `mayfly`，退出时强制关闭飞行，可能中断其他来源通过原生属性授予的飞行。应使用独立的属性修饰符，退出时只移除自己的效果，并重新判断玩家是否仍有飞行权限。[对应源码](D:/Minecraft-Projects/academycraft-deep-audit-0.0.29-20261025/src/main/java/com/mohistmc/academy/skill/ability/aerohand/AeroPassiveRuntime.java:257)\n- **共振装甲的原版附魔入口不完整。** 材质定义了附魔能力，但物品自身的附魔资格和标签没有完整接上。需要恢复附魔台、铁砧兼容，同时保留原来的不损耗设计；其他明确禁止附魔的装甲保持原规则。[对应源码](D:/Minecraft-Projects/academycraft-deep-audit-0.0.29-20261025/src/main/java/com/mohistmc/academy/world/item/ResonanceArmorItem.java:14)\n- **部分 HUD 在 F1 隐藏界面后仍会绘制。** 充能条、终端安装进度缺少隐藏界面判断。[对应源码](D:/Minecraft-Projects/academycraft-deep-audit-0.0.29-20261025/src/main/java/com/mohistmc/academy/client/ChargingHudOverlay.java:52)\n- **语言覆盖统计漏掉了硬编码文本。** 部分设置和技能槽界面仍直接写中文，甚至根据中文字符串判断显示状态。需要改为翻译组件和独立状态值。此前“三种语言键齐全”不能代表全部界面都已本地化。[对应源码](D:/Minecraft-Projects/academycraft-deep-audit-0.0.29-20261025/src/main/java/com/mohistmc/academy/client/gui/SettingsAppGui.java:46)\n\n具体现代化方案如下：\n\n| 方向 | 改造内容 | 验收重点 |\n|---|---|---|\n| **装备与能力属性** | 飞行、适合用属性表达的移动增益采用固定 ID 的独立修饰符；补齐共振装甲附魔资格和装备标签。保留喷射、冲刺等技能自己的运动逻辑。 | 与外部飞行能力、速度药水同时使用；死亡、换维度、退出技能后正确清理；真实附魔台和铁砧操作。 |\n| **物品数据组件** | 电量、绑定目标等持久数据改为有类型的 `DataComponentType`。激光枪的临时挖掘进度移入服务端动作状态，绑定玩家、物品和维度。 | 老物品空电、半电、满电迁移；保存重进、复制和拆分；切换物品或维度不能继承错误进度。 |\n| **玩家数据同步** | 将 CP、过载、冷却等频繁变化的数据，与技能配置、预设、教程等低频数据分开。替换目前每秒发送完整能力资料的路径。 | 登录和重连数据完整；技能资源显示及时；玩家静止且数据未变时不重复发送完整资料；实际记录包数和字节数。 |\n| **原版战斗兼容** | 在已有原生伤害流程上补齐技能 `DamageType` 和标签分类，明确护甲、盾牌、抗性及击杀归属。保留现有技能伤害和穿透规则。 | 重锤及其附魔、箭与三叉戟、风弹、盾牌方向、保护附魔、吸收、荆棘、PVP 和死亡消息。 |\n| **机器与自动化** | 为适合自动化的槽位补齐分面 `IItemHandler`；支持标准流体容器；配方查找使用原生缓存。将机器库存同步与世界外观同步分开。 | 漏斗输入输出、空桶返还、模拟操作不修改库存；两名玩家同时开界面；配方重载、区块卸载后状态正确。 |\n| **界面与数据包** | 保留现有美术，逐步接入原生控件、焦点、键盘和旁白；HUD 使用具名图层。材料分类等适合配置的内容使用标签和数据包。 | F1、不同 GUI 缩放、中英日语言、Tab 和键盘操作；数据包重载生效，默认玩法不变。 |\n\n其中，物品组件和附魔改造直接对应 1.21.1 的原生体系：[Data Components](https://docs.neoforged.net/docs/1.21.1/items/datacomponents/)、[数据驱动附魔](https://docs.neoforged.net/docs/1.21.1/resources/server/enchantments/)。技能伤害分类依据 [Damage Types](https://docs.neoforged.net/docs/1.21.1/resources/server/damagetypes/)，机器自动化依据 [Capabilities](https://docs.neoforged.net/docs/1.21.1/inventories/capabilities/)。\n\n有几项实现边界需要明确：\n\n- **旧存档迁移必须覆盖两种电量格式。** 当前既有用耐久值存电量的物品，也有用自定义 NBT 存电量的物品。迁移时保留无关数据，继续保持 **4 FE = 1 IF**。目前没有证据证明存在“经验修补刷电”漏洞。\n- **保留已经合适的原生实现。** 现有菜单、配方、FE、流体能力和无线网络继续复用。开发机界面目前没有物品槽交互，可以保留 Screen。\n- **保留必要的战斗注入点。** 当前两个关键 Mixin 涉及伤害接受顺序和死亡取消，不能仅为减少 Mixin 就换成时机不同的事件。\n- **严格使用 1.21.1 可用 API。** `EntityRenderState` 等后续版本机制不应混入。实际构建的 NeoForge 21.1.248 已有附件同步 API，但完整同步仍需要设计更新频率和接收范围；最低版本应按实际使用的 API 决定。\n\n建议拆成三个发布批次，版本号暂按后续顺序安排：\n\n1. **0.0.30：原生兼容修复。** 处理飞行、共振装甲附魔、F1 和硬编码文本，补上对应游戏验收。\n2. **0.0.31：物品数据与同步。** 完成旧电量迁移、临时动作状态隔离、玩家同步拆分和机器库存同步收敛。网络格式变化时升级协议版本。\n3. **0.0.32：自动化与交互。** 完成流体容器、漏斗、配方缓存、原生控件及数据包扩展，再根据测量结果决定是否继续优化。\n\n各批次保持注册 ID、旧存档、现有技能数值和 Extra 能力范围。新增游戏验证优先在 Vicerach 进行，按改动范围补测；性能收益用实际网络流量、配方查询次数和运行数据说明。**第一批应先解决已经找到的原生兼容缺口。**",
+  "selected_scope": [
+    "Complete remaining native combat compatibility: explicit skill damage source profiles, held Breach isolation, attacker attribution and bounded real vanilla weapon/defense matrix.",
+    "Register eight existing HUDs as individually named native layers, preserve rendering and lifecycle, and verify real layer behavior/F1 at GUI scales 2/3."
+  ],
+  "preserved": [
+    "Skill values and established armor penetration semantics",
+    "Existing projectile damage type IDs and native tags",
+    "Item and block registry IDs, persistent data v4 and payload protocol v20",
+    "Existing accepted-damage and death-cancellation Mixin timing",
+    "Public AcademyDamageHelper source identity and ordinary item/weapon paths"
+  ],
+  "excluded": [
+    "Whole terminal UI rewrite",
+    "Global new skill post-attack enchantment or Thorns callbacks",
+    "Production deployment and player updater publication",
+    "Speculative performance redesigns"
+  ],
+  "test_host_preference": "VICERACH; current measured capacity and existing 1536MiB/2-worker serial runner limits",
+  "status": "VALIDATED",
+  "server_result": "487/487 passed, VICERACH gt-r4, normal zero exit; JUnit342 passed.",
+  "client_runtime": "MONARCH D-drive fallback after VICERACH free RAM fell below6GiB; see client-fallback.json.",
+  "final_client": "MONARCH client-r3: 19 PASS checks, normal save/zero exit, 18 screenshots independently reviewed; one documented pre-existing charging/item-name layout issue."
+}

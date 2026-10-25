@@ -13,7 +13,6 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -138,8 +137,7 @@ public final class CruiseBombEntity extends Projectile {
         if(hit.getEntity() instanceof Projectile projectile) {
             if(projectile.getOwner()!=owner)projectile.discard();
         } else {
-            var type=level().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DAMAGE);
-            AcademyDamageHelper.hurt(owner,hit.getEntity(),new DamageSource(type,this,owner),DynamicSkillRules.damage("cruise_bomb",
+            AcademyDamageHelper.hurt(owner,hit.getEntity(),com.mohistmc.academy.skill.SkillDamageSource.projectile(owner,this,DAMAGE),DynamicSkillRules.damage("cruise_bomb",
                     com.mohistmc.academy.skill.ability.aerohand.AeroBehaviorMath.cruiseBombDamage(proficiency())));
         }
     }

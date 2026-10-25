@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "reviewer": "machine_sync31",
+  "source_files": 1917,
+  "source_tree_sha256": "6012ee1c25cee295986c3a56c54669cb68e4d28d6027f0991501176f9a8268f8",
+  "checks": [
+    "Inventory and source ZIP path sets identical; all raw source bytes match.",
+    "Publication uses separate index based on exact 3423b53e0e65b47f7d47bdc30b6ec71d4cb63995, never old HEAD/current index/git-add-all.",
+    "hash-object --no-filters and commit-blob rehash retain exact source identity.",
+    "No removed source files would remain from baseline.",
+    "finalize-validation.py is release evidence, excluded from source ZIP inventory."
+  ]
+}

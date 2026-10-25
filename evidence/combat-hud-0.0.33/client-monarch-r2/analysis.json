@@ -1,0 +1,6 @@
+{
+  "status": "FAIL",
+  "reason": "All native layer callbacks occurred but no HUD drew; log shows integrated server immediately saving and pausing. Isolated launcher omitted pauseOnLostFocus:false. Retry same r7 JARs with explicit native option; no application code or assertions changed.",
+  "exit_code": 0,
+  "forced": false
+}
