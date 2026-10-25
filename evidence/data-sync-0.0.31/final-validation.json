@@ -1,0 +1,111 @@
+{
+  "status": "PASS",
+  "version": "0.0.31-scex-data-sync",
+  "baseline_commit": "887a8d4d2a5b8e836caac831d18c438c3300fe37",
+  "source_tree_sha256": "9a7058ab10362dc1e7d3b5344550a4ac8221c2f640dd4dbdc860853670ad5b93",
+  "source_file_count": 1885,
+  "junit": {
+    "failures": 0,
+    "suites": 103,
+    "tests": 342,
+    "skipped": 0,
+    "errors": 0
+  },
+  "gametests": {
+    "failures": 0,
+    "exit_code": 0,
+    "basis": "Actual NeoForge GameTestServer; release JAR plus separate probe mod",
+    "expected_failures": 0,
+    "expected_tests": 461,
+    "host": "VICERACH",
+    "expectation_met": true,
+    "forced": false,
+    "passed": true,
+    "tests": 461,
+    "process_exited": true,
+    "namespaces": "academy,academy_charging,academy_audit,academy_followup,academy_projectiles,academy_native_compat,academy_data_sync"
+  },
+  "client": {
+    "close_reason": null,
+    "forced": false,
+    "host": "VICERACH",
+    "passed": true,
+    "saved_after_stop": true,
+    "process_exited": true,
+    "exit_code": 0,
+    "visual_review": "pending"
+  },
+  "client_behavior_checks": [
+    "PASS player sync phase=0 full state delivered to real client full=1, profile=0, runtime=0, payloadBytes=6264",
+    "PASS player sync phase=1 60 idle ticks emitted zero ability payloads full=0, profile=0, runtime=0, payloadBytes=0",
+    "PASS player sync phase=2 paid resources and cooldown delivered without profile collections full=0, profile=0, runtime=9, payloadBytes=1057",
+    "PASS player sync phase=3 profile, presets and proficiency remain complete full=0, profile=1, runtime=1, payloadBytes=6399",
+    "PASS player sync phase=4 empty cooldown delta clears previous state full=0, profile=0, runtime=1, payloadBytes=68",
+    "PASS player sync phase=5 actual Nether transfer full synchronization full=1, profile=0, runtime=0, payloadBytes=6346",
+    "PASS player sync phase=6 actual Overworld return full synchronization full=1, profile=0, runtime=0, payloadBytes=6346",
+    "PASS player sync phase=7 actual lethal damage and native respawn full synchronization full=1, profile=0, runtime=0, payloadBytes=6346",
+    "PASS machine native menu/world packet phase=0: metal slot=0, menuMode=PLATE, worldMode=PLATE",
+    "PASS machine native menu/world packet phase=1: metal slot=32, menuMode=PLATE, worldMode=PLATE",
+    "PASS machine native menu/world packet phase=2: metal slot=32, menuMode=INCISE, worldMode=INCISE",
+    "PASS machine native menu/world packet phase=3: matrix slots=0,0,0,0, menuMaterials=false, worldMaterials=false",
+    "PASS machine native menu/world packet phase=4: matrix slots=1,1,1,1, menuMaterials=true, worldMaterials=true",
+    "PASS machine native menu/world packet phase=5: matrix slots=0,1,1,1, menuMaterials=false, worldMaterials=false"
+  ],
+  "measurements": [
+    "[2510月2026 19:35:20.565] [Server thread/INFO] [com.mohistmc.academy.regression.AbilityDataSyncGameTests/]: DATA_SYNC_ACTIVE_PASS ticks=60 full=0, profile=0, runtime=12, payloadBytes=894 legacySameProfileThreeSnapshotsBytes=18672 transportFramingExcluded=true",
+    "[2510月2026 19:35:20.587] [Server thread/INFO] [com.mohistmc.academy.regression.AbilityDataSyncGameTests/]: DATA_SYNC_IDLE_PASS ticks=45 full=0, profile=0, runtime=0, payloadBytes=0",
+    "[2510月2026 19:35:25.375] [Server thread/INFO] [com.mohistmc.academy.regression.MachineInventorySyncGameTests/]: [academy_data_sync:machine] persistence machines=15 slots=27 tracking_inventory_tags=0",
+    "[2510月2026 19:35:25.377] [Server thread/INFO] [com.mohistmc.academy.regression.MachineInventorySyncGameTests/]: [academy_data_sync:machine] matrix_encoded_body_bytes=157 baseline_0_0_30_inventory_body_bytes=2287 saved_component_bytes_preserved=true",
+    "[2510月2026 19:35:25.459] [Server thread/INFO] [com.mohistmc.academy.regression.MachineInventorySyncGameTests/]: [academy_data_sync:machine] two_viewers changed_slot_packets=2 encoded_slot_body_bytes=18 idle_slot_packets=0 observer_slot_packets=0 closed_viewer_slot_packets=0",
+    "MEASURE activeClientTicks=40 legacyTwoFullPayloadBytes=12420 actual=full=0, profile=0, runtime=9, payloadBytes=1057 excludesTransportFraming=true"
+  ],
+  "native_save_checkpoint": "status=PASS\nserverTick=176 settleTicks=1 holders=2017 generationRefs=7935 notSaveReady=979 queuedTasks=2 lightWork=false stableTicks=0\nserverTick=195 settleTicks=20 holders=2017 generationRefs=7935 notSaveReady=979 queuedTasks=1 lightWork=false stableTicks=0\nserverTick=215 settleTicks=40 holders=2020 generationRefs=5643 notSaveReady=868 queuedTasks=5 lightWork=false stableTicks=0\nserverTick=235 settleTicks=60 holders=1225 generationRefs=0 notSaveReady=0 queuedTasks=0 lightWork=false stableTicks=7\nserverTick=248 settleTicks=73 holders=1225 generationRefs=0 notSaveReady=0 queuedTasks=0 lightWork=false stableTicks=20\nnativeSaveEverythingCompleted=true flush=true\n",
+  "artifact_entry_comparisons": [
+    {
+      "tested": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\build\\data-sync-0.0.31-r4-tested\\AcademyCraft-neoforge-1.21.1-0.0.31-scex-data-sync.jar",
+      "tested_sha256": "d166193173e133e33aeb7854a6bef8971601816c8870cc8c991a9fc2f11d5458",
+      "final": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\build\\libs\\AcademyCraft-neoforge-1.21.1-0.0.31-scex-data-sync.jar",
+      "final_sha256": "3e1bf184f2f28b33d742d8dda36ce0db1089b2725f10e8351cfc39f187586141",
+      "changed_entries": [
+        "BUILD-INFO.txt",
+        "META-INF/MANIFEST.MF"
+      ],
+      "runtime_entries_identical": true
+    },
+    {
+      "tested": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\build\\data-sync-0.0.31-r4-tested\\AcademyCraft-neoforge-1.21.1-0.0.31-scex-data-sync-audit-tests.jar",
+      "tested_sha256": "443dca9ed91fb19ac68dda2494d13c4ea4ee6b5cfaa081c3a9b17bf6371dfaa0",
+      "final": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\build\\libs\\AcademyCraft-neoforge-1.21.1-0.0.31-scex-data-sync-audit-tests.jar",
+      "final_sha256": "443dca9ed91fb19ac68dda2494d13c4ea4ee6b5cfaa081c3a9b17bf6371dfaa0",
+      "changed_entries": [],
+      "runtime_entries_identical": true
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\build\\libs\\AcademyCraft-neoforge-1.21.1-0.0.31-scex-data-sync.jar",
+      "bytes": 27845408,
+      "sha256": "3e1bf184f2f28b33d742d8dda36ce0db1089b2725f10e8351cfc39f187586141"
+    },
+    {
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\build\\libs\\AcademyCraft-neoforge-1.21.1-0.0.31-scex-data-sync-audit-tests.jar",
+      "bytes": 267141,
+      "sha256": "443dca9ed91fb19ac68dda2494d13c4ea4ee6b5cfaa081c3a9b17bf6371dfaa0"
+    },
+    {
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\build\\distributions\\AcademyCraft-neoforge-1.21.1-0.0.31-scex-data-sync-sources.zip",
+      "bytes": 27150804,
+      "sha256": "8d8d3035d77360e88a9d4025105634c59516a6f71ca46fcb470d8e1edd627912"
+    }
+  ],
+  "review": "Root source review; independent player/machine lifecycle reviews; all final runtime assertions and normal-save/exit receipts verified.",
+  "limits": [
+    "NeoForge 21.1.248 / Java 21 isolated runtime, not a full third-party pack matrix.",
+    "Existing ownerAttackNavigatesAroundObstacleAndPays failed once in gt-r3; unchanged assertions passed in gt-r1, gt-r2 and final gt-r4. Exact cause of that intermittent path outcome is unresolved; diagnostics retained in shadow-fixture-review.json.",
+    "Existing 22 historical aliases and 10 optional compatibility cases remain excluded.",
+    "Wire metrics are actual payload counts and production-codec bytes, excluding TCP framing/compression; baseline bytes reconstruct the same profile in the old format.",
+    "Two-viewer server tests use real players with embedded connections; one actual desktop client validates receiving behavior.",
+    "The inherited runner visual_review=pending field belongs to its older screenshot workflow; this run validates data flow and native menus, with no appearance changes or screenshot review claim.",
+    "GitHub archival release only; no production deployment."
+  ]
+}

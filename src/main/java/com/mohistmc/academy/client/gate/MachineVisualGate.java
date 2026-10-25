@@ -1001,7 +1001,7 @@ public final class MachineVisualGate {
             throw new IllegalStateException("production wind-head placement did not persist its owner");
         }
         ItemStack battery = new ItemStack(AcademyItems.ENERGY_UNIT.get());
-        battery.setDamageValue(EnergyUnit.MAX_ENERGY);
+        com.mohistmc.academy.capability.EnergyItemHelper.setEnergy(battery, 0);
         base.getItems().set(0, battery);
         base.setChanged();
         if (main.refreshFanState(level, windMainPos, mainState.getValue(WindGenMain.FACING))
@@ -1517,7 +1517,7 @@ public final class MachineVisualGate {
                     || !(level.getBlockEntity(windBasePos) instanceof WindGenBaseBlockEntity base)
                     || !main.isStructureComplete() || !main.isFanInstalled() || !main.isWorking()
                     || base.getItems().getFirst().getCount() != 1
-                    || base.getItems().getFirst().getDamageValue() >= EnergyUnit.MAX_ENERGY) {
+                    || com.mohistmc.academy.capability.EnergyItemHelper.getEnergy(base.getItems().getFirst()) <= 0) {
                 throw new IllegalStateException("wind turbine did not produce energy in the real client world");
             }
             serverAssertionComplete = true;

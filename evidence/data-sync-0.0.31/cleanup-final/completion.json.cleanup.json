@@ -1,0 +1,24 @@
+{
+  "free_after": {
+    "D:\\": 142933184512
+  },
+  "receipt_sha256": "4FE273A809B7AB02F95B33EF08AD35E8814011F2241036E6A3111D5F22DC1300",
+  "removed": [
+    "D:\\Minecraft-Validation\\runs\\academy-datasync31-20261025"
+  ],
+  "checked_at": "2026-10-25T10:39:59.8181520Z",
+  "finished_at": "2026-10-25T10:40:01.0742278Z",
+  "schema_version": 1,
+  "logical_bytes": 595629321,
+  "free_before": {
+    "D:\\": 142332231680
+  },
+  "targets": [
+    {
+      "logical_bytes": 595629321,
+      "files": 4907,
+      "path": "D:\\Minecraft-Validation\\runs\\academy-datasync31-20261025"
+    }
+  ],
+  "status": "CLEANED"
+}

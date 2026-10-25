@@ -86,12 +86,13 @@ public class AcademyCraft {
     public static final String MODID = "academy";
     /** Strict and mandatory on both peers: NeoForge rejects any unequal protocol before play payloads. */
     /** Payload layout generation; bump whenever any play payload or synced data schema changes. */
-    public static final String NETWORK_PROTOCOL = "academy-1.21.1-payload-v19-data-v4";
+    public static final String NETWORK_PROTOCOL = "academy-1.21.1-payload-v20-data-v4";
     private static final Logger LOGGER = LogUtils.getLogger();
 
     public AcademyCraft(IEventBus modEventBus, ModContainer modContainer) {
 
         AcademyMenus.MENUS.register(modEventBus);
+        com.mohistmc.academy.world.item.AcademyDataComponents.TYPES.register(modEventBus);
         AcademyItems.ITEMS.register(modEventBus);
         AcademyItems.TABS.register(modEventBus);
         AcademyBlocks.BLOCKS.register(modEventBus);
@@ -253,6 +254,12 @@ public class AcademyCraft {
                 SyncAbilityDataPacket.STREAM_CODEC,
                 SyncAbilityDataPacket::handle
         );
+        registrar.playToClient(com.mohistmc.academy.network.SyncAbilityProfilePacket.TYPE,
+                com.mohistmc.academy.network.SyncAbilityProfilePacket.STREAM_CODEC,
+                com.mohistmc.academy.network.SyncAbilityProfilePacket::handle);
+        registrar.playToClient(com.mohistmc.academy.network.SyncAbilityRuntimePacket.TYPE,
+                com.mohistmc.academy.network.SyncAbilityRuntimePacket.STREAM_CODEC,
+                com.mohistmc.academy.network.SyncAbilityRuntimePacket::handle);
         registrar.playToClient(
                 OpenDevGuiPacket.TYPE,
                 OpenDevGuiPacket.STREAM_CODEC,

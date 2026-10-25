@@ -85,7 +85,6 @@ public final class PassiveSkillEventHandler {
             VecDefenseRuntime.stop(player.getUUID());
         }
         player.setData(AcademyAttachments.PLAYER_ABILITY, data);
-        if (player.tickCount % 20 == 0) data.syncTo(player);
     }
 
     private static boolean marked(Entity entity) {

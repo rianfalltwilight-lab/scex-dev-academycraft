@@ -1,7 +1,6 @@
 package com.mohistmc.academy.client.block.entity.render;
 
 import com.mohistmc.academy.AcademyCraft;
-import com.mohistmc.academy.world.AcademyItems;
 import com.mohistmc.academy.world.block.Matrix;
 import com.mohistmc.academy.world.block.entity.MatrixBlockEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -83,16 +82,11 @@ public final class MatrixRender implements BlockEntityRenderer<MatrixBlockEntity
     }
 
     private static boolean hasThreeConstraintPlates(MatrixBlockEntity matrix) {
-        var items = matrix.getItems();
         // RenderMatrix in the final 1.12.2 source only exposes the three
         // orbiting plates when all three plates and a valid core are present.
         // This deliberately does not depend on the one-shot initialized flag:
         // the renderer follows the installed materials, as the original did.
-        return items.size() >= 4
-                && matrix.initializationCoreLevel() >= 0
-                && items.get(MatrixBlockEntity.PLATE_SLOT_0).is(AcademyItems.CONSTRAINT_PLATE.get())
-                && items.get(MatrixBlockEntity.PLATE_SLOT_1).is(AcademyItems.CONSTRAINT_PLATE.get())
-                && items.get(MatrixBlockEntity.PLATE_SLOT_2).is(AcademyItems.CONSTRAINT_PLATE.get());
+        return matrix.hasInitializationMaterials();
     }
 
     private static List<BakedQuad> collectQuads(BakedModel model) {

@@ -1,0 +1,451 @@
+{
+  "schema_version": 1,
+  "run_id": "academy-datasync31-20261025",
+  "run_root": "D:\\Minecraft-Validation\\runs\\academy-datasync31-20261025",
+  "temporary_container": "D:\\Minecraft-Validation\\runs",
+  "complete": true,
+  "status": "COMPLETE",
+  "pending_checks": [],
+  "exit_codes": [
+    0,
+    0
+  ],
+  "final_runs": [
+    "gt-r4",
+    "client-r3"
+  ],
+  "attempt_history": [
+    {
+      "role": "superseded-attempt",
+      "run": "client-r1",
+      "result_missing": false,
+      "archive": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\history\\client-r1",
+      "result": {
+        "exit_code": 0,
+        "visual_review": "pending",
+        "saved_after_stop": true,
+        "close_reason": null,
+        "forced": false,
+        "passed": false,
+        "process_exited": true,
+        "host": "VICERACH"
+      }
+    },
+    {
+      "role": "superseded-attempt",
+      "run": "client-r2",
+      "result_missing": false,
+      "archive": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\history\\client-r2",
+      "result": {
+        "passed": false,
+        "exit_code": -1,
+        "host": "VICERACH",
+        "close_reason": "resource-or-timeout",
+        "process_exited": true,
+        "saved_after_stop": false,
+        "visual_review": "pending",
+        "forced": true
+      }
+    },
+    {
+      "role": "final-acceptance",
+      "run": "client-r3",
+      "result_missing": false,
+      "archive": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\client-final",
+      "result": {
+        "close_reason": null,
+        "forced": false,
+        "host": "VICERACH",
+        "passed": true,
+        "saved_after_stop": true,
+        "process_exited": true,
+        "exit_code": 0,
+        "visual_review": "pending"
+      }
+    },
+    {
+      "role": "superseded-attempt",
+      "run": "gt-r1",
+      "result_missing": false,
+      "archive": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\history\\gt-r1",
+      "result": {
+        "expected_failures": 0,
+        "host": "VICERACH",
+        "exit_code": 2,
+        "passed": false,
+        "expected_tests": 461,
+        "process_exited": true,
+        "expectation_met": false,
+        "tests": 461,
+        "basis": "Actual NeoForge GameTestServer; release JAR plus separate probe mod",
+        "namespaces": "academy,academy_charging,academy_audit,academy_followup,academy_projectiles,academy_native_compat,academy_data_sync",
+        "failures": 2,
+        "forced": false
+      }
+    },
+    {
+      "role": "superseded-attempt",
+      "run": "gt-r2",
+      "result_missing": false,
+      "archive": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\history\\gt-r2",
+      "result": {
+        "namespaces": "academy,academy_charging,academy_audit,academy_followup,academy_projectiles,academy_native_compat,academy_data_sync",
+        "expected_tests": 461,
+        "basis": "Actual NeoForge GameTestServer; release JAR plus separate probe mod",
+        "forced": false,
+        "process_exited": true,
+        "host": "VICERACH",
+        "tests": 461,
+        "failures": 1,
+        "expectation_met": false,
+        "expected_failures": 0,
+        "passed": false,
+        "exit_code": 1
+      }
+    },
+    {
+      "role": "superseded-attempt",
+      "run": "gt-r3",
+      "result_missing": false,
+      "archive": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\history\\gt-r3",
+      "result": {
+        "basis": "Actual NeoForge GameTestServer; release JAR plus separate probe mod",
+        "expected_failures": 0,
+        "exit_code": 2,
+        "tests": 461,
+        "process_exited": true,
+        "namespaces": "academy,academy_charging,academy_audit,academy_followup,academy_projectiles,academy_native_compat,academy_data_sync",
+        "passed": false,
+        "expectation_met": false,
+        "failures": 2,
+        "host": "VICERACH",
+        "forced": false,
+        "expected_tests": 461
+      }
+    },
+    {
+      "role": "final-acceptance",
+      "run": "gt-r4",
+      "result_missing": false,
+      "archive": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\gametests-final",
+      "result": {
+        "failures": 0,
+        "exit_code": 0,
+        "basis": "Actual NeoForge GameTestServer; release JAR plus separate probe mod",
+        "expected_failures": 0,
+        "expected_tests": 461,
+        "host": "VICERACH",
+        "expectation_met": true,
+        "forced": false,
+        "passed": true,
+        "tests": 461,
+        "process_exited": true,
+        "namespaces": "academy,academy_charging,academy_audit,academy_followup,academy_projectiles,academy_native_compat,academy_data_sync"
+      }
+    }
+  ],
+  "basis": "Final selected GameTest and client runs passed with normal zero exits, final client saved after stop, and sealed final-validation.json is PASS. Historical failures/missing exits remain recorded verbatim in attempt_history and retained files. Exact final tested inputs and all bounded execution evidence are retained outside the disposable run; authoritative source/deliverables/evidence remain on Monarch.",
+  "inputs": [
+    {
+      "sha256": "031019b874738c2aba2723c15b9e8b9e2ccefdd9d31f951909c9f44d505e033b",
+      "path": "D:\\Minecraft-Validation\\bases\\academy-ssid23-small-20260908\\manifest.json"
+    },
+    {
+      "sha256": "D166193173E133E33AEB7854A6BEF8971601816C8870CC8C991A9FC2F11D5458",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\tested-inputs\\AcademyCraft-neoforge-1.21.1-0.0.31-scex-data-sync.jar"
+    },
+    {
+      "sha256": "443DCA9ED91FB19AC68DDA2494D13C4EA4EE6B5CFAA081C3A9B17BF6371DFAA0",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\tested-inputs\\AcademyCraft-neoforge-1.21.1-0.0.31-scex-data-sync-audit-tests.jar"
+    }
+  ],
+  "evidence": [
+    {
+      "sha256": "98C0AE8F4300F4D0787131ACC2C8AAF8131C0FD8A3DF9152019AB95930CFF0A1",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\final-validation.json"
+    },
+    {
+      "sha256": "3F8F7006E5595750D781FD42EE5095225F8C48C9BC3B78783DEA5654E85795A7",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\reviewed-facts.json"
+    },
+    {
+      "sha256": "5A0EB2E14A706BA57455D57F295DDFB1A330E530A6D87B146DB6BF4CDF52F80C",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\history\\client-r1\\result.json"
+    },
+    {
+      "sha256": "5F52DE53D58A419CA0393B7DA8F7C5577BF6A8E31D95066FD2C18C463F6435B4",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\history\\client-r1\\process.json"
+    },
+    {
+      "sha256": "0976FE2590AFF87BCF275D3DCA9D398FB8503DFEDF6AB9FD78D78F9F39D07878",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\history\\client-r1\\artifacts.json"
+    },
+    {
+      "sha256": "7D4C02AF6EEBB9322E414B540EA8661E495A1804F61F8FEDEDAAA13847530E15",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\history\\client-r1\\derived-launch.json"
+    },
+    {
+      "sha256": "2F8CD6BE434421D90802C523643689E5909BAD7860A1A555F6808D5F5E8D0084",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\history\\client-r1\\memory-samples.json"
+    },
+    {
+      "sha256": "39948CDEF9DD0359F34BB1681587F46F2C3E86393CC0714F2A0120C7796A4C56",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\history\\client-r1\\academy-data-sync-client.txt"
+    },
+    {
+      "sha256": "DFF93E2829E864CCB8DA7B4BF1505456E652A6EF18183206BEE1940F4C35101E",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\history\\client-r1\\logs\\latest.log"
+    },
+    {
+      "sha256": "00FD3100B93CEF5186992B0F9C5872629679CE709C74DC245A7CEC1364BD302D",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\history\\client-r1\\stdout.log"
+    },
+    {
+      "sha256": "5757686C2FA27E49812F1128268745E0B267508E7FF82F029FEE0A60CC8D367E",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\history\\client-r1\\stderr.log"
+    },
+    {
+      "sha256": "4B66B79FF555E70F503E6356860BB10B3FE77FF440672ADB1A014B37DAE01DA8",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\history\\client-r2\\result.json"
+    },
+    {
+      "sha256": "588A90DFCD8BD48F1F3B6EAD339D96BFA837E47E407F0A4142853474CE410440",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\history\\client-r2\\process.json"
+    },
+    {
+      "sha256": "EF50FEBDFE90C6F88A0E95749AAD78FF95214582CDB2A8B854F2CDC4B0C4E813",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\history\\client-r2\\artifacts.json"
+    },
+    {
+      "sha256": "8A86D0E12035ABA50E1E05FD32AF063BED35D6431E4873A54050684F3C692CF5",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\history\\client-r2\\derived-launch.json"
+    },
+    {
+      "sha256": "B905D9A0EF659002102E027661C363315EDD103DE88F53521480ECE753A1B6AB",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\history\\client-r2\\memory-samples.json"
+    },
+    {
+      "sha256": "8F18219E8C7F082DEA0D42081DAA21ED8A8EB73E28F8BF6929901FC464342957",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\history\\client-r2\\academy-data-sync-client.txt"
+    },
+    {
+      "sha256": "AF43527BE28016C4EF6A39DF40A22E6B4BF778A57CA7F10DF2A57662738CA4FC",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\history\\client-r2\\shutdown-threads.txt"
+    },
+    {
+      "sha256": "5AFD365B8D9D2DA85AB13C33E1C5E2BC8610EB2B9EC1112D1F0DC106E2C5E08B",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\history\\client-r2\\stop-request.txt"
+    },
+    {
+      "sha256": "E01F21B5EA0EB579D6430C6AF0C7B09FAE59C23DB68E6DA335F74CCA9D25FA7A",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\history\\client-r2\\logs\\latest.log"
+    },
+    {
+      "sha256": "9EB73E0F77A5D4FAD6D94BEE2100E1CCC2ADF6F28DEEFEC05CBFD6E87C63B9C9",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\history\\client-r2\\stdout.log"
+    },
+    {
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\history\\client-r2\\stderr.log"
+    },
+    {
+      "sha256": "ADD5D221883C2BD6B3266FCD5276904EAADD994280EDC6750C306A4BF8C96371",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\client-final\\result.json"
+    },
+    {
+      "sha256": "45B783D85ECA5E447E4A76BFA36789E79AE6ACB8C2D33FD060DB95F5F206CDFE",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\client-final\\process.json"
+    },
+    {
+      "sha256": "3CCE466B9D44D1D9FB6A5034465C16779817D4619587EBCD18F2EFADB368CE88",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\client-final\\artifacts.json"
+    },
+    {
+      "sha256": "021CB0FB6789BF0C674A27D53DEADF9E1ECBB9B82DEAC112DF8915D0CB8E1E69",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\client-final\\derived-launch.json"
+    },
+    {
+      "sha256": "E552C2A5DBA462F6699253294A43608F50C217BE83B6302CD0F698C2748EA7BE",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\client-final\\memory-samples.json"
+    },
+    {
+      "sha256": "004AD4EDF34743CF50C54A83FAC6890A6BAEFB677CF4EF0421266CA87A292E7D",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\client-final\\academy-data-sync-client.txt"
+    },
+    {
+      "sha256": "279C30E5B178EF9B545ABBDA38C3F090EA7F4B97C2D257E10C4EB670B5053BFC",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\client-final\\academy-data-sync-save-checkpoint.txt"
+    },
+    {
+      "sha256": "DFD6EE1CEE0F97C2E63E746E1230A2C518477D15DE30F5DF8456A44F0EE3EB5E",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\client-final\\logs\\latest.log"
+    },
+    {
+      "sha256": "CA805AD1C79330E2B42A28E7C5A9788E4053F935D68DE0CA131E72DB6EAD4B0F",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\client-final\\stdout.log"
+    },
+    {
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\client-final\\stderr.log"
+    },
+    {
+      "sha256": "9A7A558FC42DD918AB211580667A35F9AFBEA3D9E48326D277A16291727AE0F9",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\history\\gt-r1\\result.json"
+    },
+    {
+      "sha256": "8A33AC0E38E1BB400B27B841FE39C21DE9DDE42A5082260BECD52EFCDE3E5E75",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\history\\gt-r1\\process.json"
+    },
+    {
+      "sha256": "0976FE2590AFF87BCF275D3DCA9D398FB8503DFEDF6AB9FD78D78F9F39D07878",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\history\\gt-r1\\artifacts.json"
+    },
+    {
+      "sha256": "890D5CD219E95A11DAE7C02A7CC26F7B689BCB8F730CE3F1792987F2001E0F81",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\history\\gt-r1\\derived-launch.json"
+    },
+    {
+      "sha256": "0E80C01F03B2934F3FA94084E7599709B93762F1BB264BED4363C7EFED4C128C",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\history\\gt-r1\\memory-samples.json"
+    },
+    {
+      "sha256": "FF3BF6AEA362355CC6BA8BA517A518012AB7C98E3F775B2F1503E2F615D547EA",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\history\\gt-r1\\logs\\latest.log"
+    },
+    {
+      "sha256": "926535732397B9C5EC6FAE1BFD4F5AF37B83FB7EE90264B4327EF52A086B6F5B",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\history\\gt-r1\\stdout.log"
+    },
+    {
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\history\\gt-r1\\stderr.log"
+    },
+    {
+      "sha256": "28C67A2861DA5A05ECBFDE52FBE37514C17B71D42189D10541349D95ED8DF5EC",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\history\\gt-r2\\result.json"
+    },
+    {
+      "sha256": "A84F0E0D6127D0640994EE993146A9BBD212F0F5FC9552F6CFCA2BCC0A7EE0F1",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\history\\gt-r2\\process.json"
+    },
+    {
+      "sha256": "EF50FEBDFE90C6F88A0E95749AAD78FF95214582CDB2A8B854F2CDC4B0C4E813",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\history\\gt-r2\\artifacts.json"
+    },
+    {
+      "sha256": "C04D4BB8DCAC86DBF56D2EFDA8B7FAE16581A0B4556A2B394BA5EE50E673FB6D",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\history\\gt-r2\\derived-launch.json"
+    },
+    {
+      "sha256": "C87C4DC2C260CBE5709465F97528A5B51762EAA150F00426A087F90A0A85B9AA",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\history\\gt-r2\\memory-samples.json"
+    },
+    {
+      "sha256": "F37CBD312BF3C0191EE80C95E5E5BECA05A89CB7DC7C91CB57A1A29EB047E744",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\history\\gt-r2\\logs\\latest.log"
+    },
+    {
+      "sha256": "53B210D5187160D83071718F8180C6FFEA84765E898F501685EED4EBF73B492A",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\history\\gt-r2\\stdout.log"
+    },
+    {
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\history\\gt-r2\\stderr.log"
+    },
+    {
+      "sha256": "C4B8B2633B95C0EFC2B79ADB2BD3283D737A2E73D53C673CF6A4E7560D67EB2A",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\history\\gt-r3\\result.json"
+    },
+    {
+      "sha256": "0B425E679AA8DC0F367FC819DADFDBDAB810E532A1ECBD474E5D553DC0D34408",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\history\\gt-r3\\process.json"
+    },
+    {
+      "sha256": "B725D33AC16730D9667AF6983435373A3D97B08169328F49722B7AE3E95E89FF",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\history\\gt-r3\\artifacts.json"
+    },
+    {
+      "sha256": "9D871C113A8094F32DC1F508F2E8F4C4A1D936608AE5281DD3CE0988094EA5AD",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\history\\gt-r3\\derived-launch.json"
+    },
+    {
+      "sha256": "0B68CEE66E707901C26C1FDEBF22BD41C447E5FAA380B6EAAE56B3BF1E43FD01",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\history\\gt-r3\\memory-samples.json"
+    },
+    {
+      "sha256": "4CC7D3C0A343152765AF16D4A4680FD8FE720C8D828B03FE0E43D5C5DF147015",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\history\\gt-r3\\logs\\latest.log"
+    },
+    {
+      "sha256": "88DD31F498307A8BD8CC86D7A6F5EE5091367512A0C3C70773FEE5A30EF9802D",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\history\\gt-r3\\stdout.log"
+    },
+    {
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\history\\gt-r3\\stderr.log"
+    },
+    {
+      "sha256": "5B0D7D2F325E0F8E64124183DD9F1DB9EE82878EAD893ABCBE4C40D1529D079C",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\gametests-final\\result.json"
+    },
+    {
+      "sha256": "643F481B72C539108F5493DB78AEB35043C91D5C90E25F0BB4392525D522B31F",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\gametests-final\\process.json"
+    },
+    {
+      "sha256": "3CCE466B9D44D1D9FB6A5034465C16779817D4619587EBCD18F2EFADB368CE88",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\gametests-final\\artifacts.json"
+    },
+    {
+      "sha256": "8B1BD41B5C2CDD8AC61F802C6E449FDA0FACFA16D137E523CD605BC39670DAE2",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\gametests-final\\derived-launch.json"
+    },
+    {
+      "sha256": "E78E51F2BF0745C84CF0F758E580758EBEAF91B163C25AB490FE7189B093605A",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\gametests-final\\memory-samples.json"
+    },
+    {
+      "sha256": "16554244BD3D377BBC6001452633217E541EDA5A6F58D5E655D325B9B1184A29",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\gametests-final\\logs\\latest.log"
+    },
+    {
+      "sha256": "A5A3B10E919680D0E5A17608A663DFB0339D031FFEE5506C042E475D2E574A28",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\gametests-final\\stdout.log"
+    },
+    {
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "D:\\Minecraft-Validation\\receipts\\academy-datasync31-20261025\\gametests-final\\stderr.log"
+    }
+  ],
+  "java_baseline": [
+    {
+      "pid": 45576,
+      "created": "2026-10-22T01:37:32.9106130Z"
+    },
+    {
+      "pid": 37876,
+      "created": "2026-10-24T15:11:54.9303780Z"
+    },
+    {
+      "pid": 38776,
+      "created": "2026-10-25T07:36:39.0961470Z"
+    }
+  ],
+  "ports": [],
+  "protected_roots": [
+    "D:\\Minecraft-Validation\\bases",
+    "D:\\Minecraft-Validation\\control",
+    "D:\\Minecraft-Validation\\receipts",
+    "D:\\Minecraft-Validation\\inputs",
+    "D:\\Minecraft-Validation\\cache",
+    "D:\\Minecraft-Projects",
+    "C:\\Users\\4090\\.gradle"
+  ],
+  "cleanup_targets": [
+    {
+      "kind": "disposable-test-copy",
+      "path": "D:\\Minecraft-Validation\\runs\\academy-datasync31-20261025",
+      "created_utc": "2026-10-25T09:55:35.0785639Z"
+    }
+  ]
+}

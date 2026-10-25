@@ -1,0 +1,106 @@
+{
+  "version": "0.0.31-scex-data-sync",
+  "review_scope": "Read-only review of natural Liquid Shadow GameTest navigation, followed by the explicitly authorized evidence record. No production AI changes and no extra test runs were performed for this review.",
+  "sources_jar": "D:/Minecraft-Projects/academycraft-deep-audit-0.0.29-20261025/build/moddev/artifacts/neoforge-21.1.248-sources.jar",
+  "glass_fixture": {
+    "test_source": "src/main/java/com/mohistmc/academy/gametest/LiquidShadowMovementGameTests.java",
+    "confirmed_zero_tick_cause": {
+      "run": "gt-r3",
+      "test": "pursuingShadowStopsAtGlassCollision",
+      "origin": [13867049, -60, -3076368],
+      "origin_z_modulo_16": 0,
+      "old_owner_relative_position": [2.5, 2.0, 1.5],
+      "old_shadow_relative_position": [2.5, 2.1, -0.1],
+      "observed_entity_ticks": 0,
+      "observed_movement": 0,
+      "observed_intact_glass_blocks": 24,
+      "explanation": "Production summon places the shadow 1.6 blocks behind its owner. At this chunk-aligned test origin, relative z=-0.1 puts the shadow's block position in the north-adjacent chunk outside the template's forced chunks. The native test runner clears forced chunks between batches; the isolated fixture's fake owner does not supply a real player ticking ticket. The stationary entity therefore did not exercise collision at all.",
+      "native_source_evidence": [
+        "StructureUtils.forceLoadChunks forces only boundingBox.intersectingChunks().",
+        "GameTestRunner clears forced chunks between test batches.",
+        "GameTestServer.startTests chooses a random test-grid origin; --spawnPos only sets the world default player spawn and does not choose the test-grid origin."
+      ]
+    },
+    "minimal_spawn_fix": "Set the fixture owner relative z to 2.5, leaving the summoned shadow at z=0.9 inside the template and its target at z=7.5 on the existing floor. The movement, collision, damage and charge thresholds were retained.",
+    "other_bounded_fixture_changes": [
+      "Give open, glass and short-CP natural pursuit cases separate batches.",
+      "Close the glass scenario's side and back exits with stone and restrict glass to the floor corridor, preventing legitimate routes around or below an elevated wall from being mistaken for crossing its collision shape.",
+      "Record relative positions and bounding boxes and assert all 24 glass blocks retain a nonempty collision shape."
+    ],
+    "earlier_r2_boundary": "The prior open-sided elevated fixture permitted a route around/below the wall. The r2 log recorded movement but not relative positions, so the exact r2 route is not proven; this is distinct from the confirmed r3 zero-tick cause.",
+    "r4_observation": {
+      "entity_ticks": 60,
+      "owner_ticks": 60,
+      "movement": 5.3109703510299315,
+      "damage": 0.0,
+      "remaining_cp": 4940.0,
+      "intact_glass_blocks": 24,
+      "relative_bounding_box_max_z": 5.4375,
+      "original_collision_limit": "origin.z + 5.4375 + 0.001",
+      "open_positive_control_damage": 40.13205,
+      "result": "Original collision, upkeep and damage assertions passed. The no-wall positive control also naturally pursued and damaged its target."
+    }
+  },
+  "obstacle_navigation": {
+    "test_source": "src/auditTest/java/com/mohistmc/academy/regression/LiquidShadowDeepAuditGameTests.java",
+    "test": "ownerAttackNavigatesAroundObstacleAndPays",
+    "existing_fixture_geometry": {
+      "owner_relative_position": [4.5, 24.0, 3.5],
+      "shadow_relative_start": [4.5, 24.1, 1.9],
+      "target_relative_position": [4.5, 24.0, 10.5],
+      "stone_floor": "x and z -2 through 19 at y=23",
+      "glass_wall": "x=0 through 6, y=24 through 27, z=7",
+      "intended_east_route": "Around x=7.5, within the floor and template's forced X/Z chunks. Both ends of the wall are open; the east route is shorter from the initial position."
+    },
+    "r3_observation": {
+      "log": "evidence/data-sync-0.0.31/gt-r3/latest.log",
+      "origin": [13867256, -60, -3079098],
+      "relative_start": [4.5, 24.1, 1.9],
+      "relative_end": [8.735239232, 24.0, -0.0782020674],
+      "relative_farthest_x": 11.40728518,
+      "damage": 0.0,
+      "final_navigation_path": null,
+      "failed_assertion": "Net distance from start > 5 and farthestX > origin.x + 6.5",
+      "already_passed_assertions": [
+        "The entity was the registered LIQUID_SHADOW and AI was enabled.",
+        "shadow.getTarget() was the exact test-owned villager."
+      ]
+    },
+    "reviewed_exclusions_and_limits": [
+      "This is not the glass fixture's demonstrated zero-tick case: substantial movement occurred, start and target are within forced chunks, and r3's slightly negative final relative z still lies in the same forced chunk because origin.z modulo 16 is 6. Intermediate ticking and intermediate positions were not logged in r3.",
+      "The final target identity assertion excludes a residual mock player being the final selected target. It does not reconstruct every intermediate AI state.",
+      "FollowupGameTests.player registers its pass/fail/timeout cleanup listener before login. Cleanup removes only the exact current player instance and releases its EmbeddedChannel. This test additionally discards its target and closes the shadow owner in finally. No leaked player belonging to this fixture was demonstrated.",
+      "The case ran in defaultBatch:2 alongside other tests. The native grid spaces 64-block templates by 5 X blocks and 6 Z blocks. Its initial actors and intended east route lie well inside its own X/Z area. No direct neighboring-test block or entity interference is recorded; the log does not identify every neighbor's full write footprint.",
+      "Native path target positions and path waypoint movement use integer/double coordinates. Reviewed distance calculations subtract integer coordinates before converting relative distances to float. Large random world coordinates alone do not establish a precision defect."
+    ],
+    "remaining_unproven_cause": {
+      "status": "Intermittent boundary of an existing natural-AI navigation test; the exact cause of the one r3 failure remains unproven.",
+      "source_supported_timing_risk": "The summoned shadow starts 0.1 block above the floor. GroundPathNavigation.canUpdatePath requires onGround, liquid or passenger state; MeleeAttackGoal.canUse stamps a 20-game-tick retry window before creating its initial path. RandomStrollGoal has no attack-target exclusion and may compete during a failed initial-path window, while later melee path refreshes for a stationary target include a 5-percent random trigger. These native timing/randomness paths can change a bounded 75-tick observation, but r3 lacks intermediate goal/path records to establish that they caused its failure.",
+      "not_claimed": [
+        "The intermittent navigation failure has been rooted out.",
+        "There is a proven production AI regression.",
+        "A fixed near-zero grid origin is required or would fix the cause."
+      ]
+    },
+    "r4_original_assertions": {
+      "log": "evidence/data-sync-0.0.31/gametests-final/latest.log",
+      "changes_since_r3": "Read-only periodic position, ticking, floor and path logging in this case; no navigation commands, AI edits, relaxed thresholds or extended deadline.",
+      "observations": [
+        "At owner tick 15/entity tick 14 the shadow was on the floor at relative (4.5,24,1.9), with no path.",
+        "At tick 30 the shadow was at relative (7.0458,24,5.4523), with a 10-node path.",
+        "At tick 45 it was at relative (6.7196,24,10.4305), beyond the wall.",
+        "At ticks 60 and 75 it was at relative (7.6682,24,10.6378).",
+        "All five observations reported shadow and target entity-ticking=true and stone beneath the shadow; the target remained at relative (4.5,24,10.5)."
+      ],
+      "result": "The original exact target, natural movement/east bypass, paid damage, CP ledger and fixed-goal-count assertions passed. Earlier r1 and r2 runs also passed this case; r3 remains preserved as one unexplained failure."
+    }
+  },
+  "final_full_suite": {
+    "host": "VICERACH",
+    "result_file": "evidence/data-sync-0.0.31/gametests-final/result.json",
+    "tests": 461,
+    "failures": 0,
+    "exit_code": 0,
+    "forced": false
+  }
+}

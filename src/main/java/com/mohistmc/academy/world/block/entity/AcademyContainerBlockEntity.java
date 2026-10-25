@@ -10,7 +10,6 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.Containers;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -68,8 +67,6 @@ public abstract class AcademyContainerBlockEntity extends BlockEntity {
     public void setItems(NonNullList<ItemStack> items) {
         this.items = items;
         setChanged();
-        if (level != null)
-            level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), Block.UPDATE_ALL);
     }
 
     public abstract int getContainerSize();
@@ -111,9 +108,9 @@ public abstract class AcademyContainerBlockEntity extends BlockEntity {
 
     @Override
     public CompoundTag getUpdateTag(HolderLookup.Provider p_329179_) {
-        CompoundTag tag = new CompoundTag();
-        serializeContentItems(tag, p_329179_);
-        return tag;
+        // Inventories belong to the native menu slot stream. Subclasses add
+        // only the state required by world rendering to this tracking packet.
+        return new CompoundTag();
     }
 
 

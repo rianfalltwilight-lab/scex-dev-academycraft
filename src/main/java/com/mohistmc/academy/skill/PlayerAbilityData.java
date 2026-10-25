@@ -72,6 +72,9 @@ public class PlayerAbilityData {
 
     // ==================== 开发者模式 ====================
     private boolean devMode = false;
+    /** Delivery snapshots belong to this attachment instance and are never saved or copied on death. */
+    private final com.mohistmc.academy.network.AbilitySyncState synchronization =
+            new com.mohistmc.academy.network.AbilitySyncState();
 
     public PlayerAbilityData() {
         for (int i = 0; i < PRESET_COUNT; i++) {
@@ -681,9 +684,18 @@ public class PlayerAbilityData {
         // Synchronisation must never replace the server-authoritative attachment.
         // Long-lived skill sessions and persistent-only fields retain this identity.
         if (player instanceof ServerPlayer serverPlayer) {
-            LearnSkillPacket.syncToClient(serverPlayer, authoritativeView());
+            synchronization.changed(serverPlayer, authoritativeView(), true);
         }
     }
+
+    public void syncFullTo(ServerPlayer player) { synchronization.full(player, this); }
+
+    public void syncPeriodicTo(ServerPlayer player, boolean profileDue) {
+        synchronization.changed(player, this, profileDue);
+    }
+
+    /** Used only for a bounded rejected UI request whose predicted state needs correction. */
+    public void resendRuntimeTo(ServerPlayer player) { synchronization.resendRuntime(player, this); }
 
     /** The attachment itself is the authority; synchronisation returns no replacement object. */
     PlayerAbilityData authoritativeView() { return this; }
@@ -703,6 +715,8 @@ public class PlayerAbilityData {
         tag.putFloat("usage_max_cp", usageMaxCp);
         tag.putFloat("usage_max_overload", usageMaxOverload);
         tag.putFloat("cp_regen", cpRegenRate);
+        tag.putInt("cp_recovery_delay", cpRecoveryDelay);
+        tag.putInt("overload_recovery_delay", overloadRecoveryDelay);
 
         ListTag learnedList = new ListTag();
         for (String skillId : learnedSkills) {
@@ -780,6 +794,73 @@ public class PlayerAbilityData {
         tag.put("teleport_locations", locations);
 
         return tag;
+    }
+
+    private static final Set<String> RUNTIME_SYNC_KEYS = Set.of("cp", "max_cp", "overload", "max_overload",
+            "usage_max_cp", "usage_max_overload", "cp_regen", "cp_recovery_delay", "overload_recovery_delay",
+            "level_progress_exp", "proficiency", "current_preset", "ability_active", "cooldowns");
+
+    /** Low-frequency configuration. Runtime changes never dirty this snapshot. */
+    public CompoundTag toProfileSyncTag() {
+        CompoundTag tag = toSyncTag();
+        RUNTIME_SYNC_KEYS.forEach(tag::remove);
+        return tag;
+    }
+
+    /** Small runtime snapshot; the sender transmits only changed top-level fields. */
+    public CompoundTag toRuntimeSyncTag() {
+        sanitizeResources();
+        CompoundTag tag = new CompoundTag();
+        tag.putFloat("cp", currentCp);
+        tag.putFloat("max_cp", maxCp);
+        tag.putFloat("overload", currentOverload);
+        tag.putFloat("max_overload", maxOverload);
+        tag.putFloat("usage_max_cp", usageMaxCp);
+        tag.putFloat("usage_max_overload", usageMaxOverload);
+        tag.putFloat("cp_regen", cpRegenRate);
+        tag.putInt("cp_recovery_delay", cpRecoveryDelay);
+        tag.putInt("overload_recovery_delay", overloadRecoveryDelay);
+        tag.putFloat("level_progress_exp", levelProgressExp);
+        tag.putInt("current_preset", currentPreset);
+        tag.putBoolean("ability_active", abilityActive);
+        CompoundTag proficiency = new CompoundTag();
+        skillProficiency.forEach(proficiency::putFloat);
+        tag.put("proficiency", proficiency);
+        CompoundTag remainingCooldowns = new CompoundTag();
+        cooldowns.forEach(remainingCooldowns::putInt);
+        tag.put("cooldowns", remainingCooldowns);
+        return tag;
+    }
+
+    /** Applies an authoritative runtime delta without replacing configuration or persistent-only fields. */
+    public void applyRuntimeSyncTag(CompoundTag tag) {
+        if (tag.contains("usage_max_cp") || tag.contains("usage_max_overload"))
+            setUsageResourceGrowth(tag.contains("usage_max_cp") ? tag.getFloat("usage_max_cp") : usageMaxCp,
+                    tag.contains("usage_max_overload") ? tag.getFloat("usage_max_overload") : usageMaxOverload);
+        if (tag.contains("cp")) setCurrentCp(tag.getFloat("cp"));
+        if (tag.contains("overload")) setCurrentOverload(tag.getFloat("overload"));
+        if (tag.contains("cp_recovery_delay")) cpRecoveryDelay = Math.clamp(tag.getInt("cp_recovery_delay"), 0, 1200);
+        if (tag.contains("overload_recovery_delay")) overloadRecoveryDelay = Math.clamp(tag.getInt("overload_recovery_delay"), 0, 1200);
+        if (tag.contains("level_progress_exp")) setLevelProgressExp(tag.getFloat("level_progress_exp"));
+        if (tag.contains("current_preset")) setCurrentPreset(tag.getInt("current_preset"));
+        if (tag.contains("ability_active")) setAbilityActive(tag.getBoolean("ability_active"));
+        if (tag.contains("proficiency")) {
+            skillProficiency.clear();
+            CompoundTag values = tag.getCompound("proficiency");
+            for (String key : values.getAllKeys()) setProficiency(key, values.getFloat(key));
+        }
+        if (tag.contains("cooldowns")) {
+            cooldowns.clear();
+            CompoundTag values = tag.getCompound("cooldowns");
+            for (String key : values.getAllKeys()) setCooldown(key, values.getInt(key));
+        }
+    }
+
+    public PlayerAbilityData withProfileSyncTag(CompoundTag profile) {
+        CompoundTag combined = profile.copy();
+        CompoundTag runtime = toRuntimeSyncTag();
+        for (String key : runtime.getAllKeys()) combined.put(key, runtime.get(key));
+        return fromSyncTag(combined);
     }
 
     public static PlayerAbilityData fromSyncTag(CompoundTag tag) {
@@ -887,6 +968,7 @@ public class PlayerAbilityData {
             }
         }
 
+        data.setRecoveryDelays(tag.getInt("cp_recovery_delay"), tag.getInt("overload_recovery_delay"));
         data.sanitizeResources();
         return data;
     }

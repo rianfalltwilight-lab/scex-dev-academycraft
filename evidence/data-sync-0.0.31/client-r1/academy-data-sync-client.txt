@@ -1,0 +1,10 @@
+status=FAIL
+PASS player sync phase=0 full state delivered to real client full=1, profile=0, runtime=0, payloadBytes=6264
+PASS player sync phase=1 60 idle ticks emitted zero ability payloads full=0, profile=0, runtime=0, payloadBytes=0
+MEASURE activeClientTicks=40 legacyTwoFullPayloadBytes=12420 actual=full=0, profile=0, runtime=9, payloadBytes=1057 excludesTransportFraming=true
+PASS player sync phase=2 paid resources and cooldown delivered without profile collections full=0, profile=0, runtime=9, payloadBytes=1057
+PASS player sync phase=3 profile, presets and proficiency remain complete full=0, profile=1, runtime=1, payloadBytes=6399
+PASS player sync phase=4 empty cooldown delta clears previous state full=0, profile=0, runtime=1, payloadBytes=68
+PASS player sync phase=5 actual Nether transfer full synchronization full=1, profile=0, runtime=0, payloadBytes=6346
+PASS player sync phase=6 actual Overworld return full synchronization full=1, profile=0, runtime=0, payloadBytes=6346
+FAIL java.lang.IllegalStateException: client phase did not converge: 7

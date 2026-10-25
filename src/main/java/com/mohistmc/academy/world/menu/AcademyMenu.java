@@ -151,7 +151,7 @@ public abstract class AcademyMenu extends AbstractContainerMenu {
     @Override
     public void slotsChanged(Container p_38868_) {
         AcademyContainerBlockEntity blockEntity = container.getBlockEntity(this);
-        if (blockEntity != null) {
+        if (blockEntity != null && !inv.player.level().isClientSide()) {
             blockEntity.setItems(container.items);
         }
         super.slotsChanged(p_38868_);
@@ -235,6 +235,7 @@ public abstract class AcademyMenu extends AbstractContainerMenu {
         }
 
         public void saveItems() {
+            if (menu.inv.player.level().isClientSide()) return;
             AcademyContainerBlockEntity blockEntity = getBlockEntity(this.menu);
             if (blockEntity != null) {
                 blockEntity.setItems(items);
@@ -242,6 +243,9 @@ public abstract class AcademyMenu extends AbstractContainerMenu {
         }
 
         public void reloadItems() {
+            // The client receives a separate inventory through vanilla menu
+            // packets; world-render updates must never overwrite that view.
+            if (menu.inv.player.level().isClientSide()) return;
             AcademyContainerBlockEntity blockEntity = getBlockEntity(this.menu);
             if (blockEntity != null) {
                 items = blockEntity.getItems();
@@ -278,6 +282,7 @@ public abstract class AcademyMenu extends AbstractContainerMenu {
 
         @Override
         public void setChanged() {
+            if (menu.inv.player.level().isClientSide()) return;
             AcademyContainerBlockEntity blockEntity = getBlockEntity(this.menu);
             if (blockEntity != null) {
                 blockEntity.setChanged();
@@ -286,6 +291,7 @@ public abstract class AcademyMenu extends AbstractContainerMenu {
 
         @Override
         public boolean stillValid(Player p_18946_) {
+            if (p_18946_.level().isClientSide()) return true;
             boolean loaded = menu.pos != null && com.mohistmc.academy.world.block.LoadedMachineChunks.contains(p_18946_.level(), menu.pos);
             BlockEntity current = !loaded ? null
                     : p_18946_.level().getBlockEntity(menu.pos);

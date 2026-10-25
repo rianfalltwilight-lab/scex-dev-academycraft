@@ -403,6 +403,6 @@ public record LearnSkillPacket(String skillId, int typeOrdinal, Optional<BlockPo
     }
 
     public static void syncToClient(ServerPlayer player, PlayerAbilityData data) {
-        SafePayloadSender.send(player, new SyncAbilityDataPacket(data.toSyncTag()));
+        data.syncFullTo(player);
     }
 }

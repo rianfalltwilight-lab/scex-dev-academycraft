@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.mohistmc.academy.client.ClientFatalPathContractTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-25T10:33:25.111Z" hostname="MONARCH" time="0.003">
+  <properties/>
+  <testcase name="effectLifeAndReferencedTexturesAreSafe()" classname="com.mohistmc.academy.client.ClientFatalPathContractTest" time="0.002"/>
+  <testcase name="mediaClickUsesSnapshotBoundsIdentityAndAuthoritativeOwnership()" classname="com.mohistmc.academy.client.ClientFatalPathContractTest" time="0.001"/>
+  <testcase name="sessionResetIsLocalCompleteAndHookedToBothBoundaries()" classname="com.mohistmc.academy.client.ClientFatalPathContractTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

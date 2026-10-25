@@ -1,0 +1,7 @@
+status=PASS
+serverTick=176 settleTicks=1 holders=2017 generationRefs=7935 notSaveReady=979 queuedTasks=2 lightWork=false stableTicks=0
+serverTick=195 settleTicks=20 holders=2017 generationRefs=7935 notSaveReady=979 queuedTasks=1 lightWork=false stableTicks=0
+serverTick=215 settleTicks=40 holders=2020 generationRefs=5643 notSaveReady=868 queuedTasks=5 lightWork=false stableTicks=0
+serverTick=235 settleTicks=60 holders=1225 generationRefs=0 notSaveReady=0 queuedTasks=0 lightWork=false stableTicks=7
+serverTick=248 settleTicks=73 holders=1225 generationRefs=0 notSaveReady=0 queuedTasks=0 lightWork=false stableTicks=20
+nativeSaveEverythingCompleted=true flush=true

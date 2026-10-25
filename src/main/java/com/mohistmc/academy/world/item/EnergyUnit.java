@@ -3,26 +3,21 @@ package com.mohistmc.academy.world.item;
 import com.mohistmc.academy.capability.IEnergyItem;
 import java.util.List;
 import net.minecraft.network.chat.Component;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.component.Unbreakable;
 
 public class EnergyUnit extends AcademyItem implements IEnergyItem {
 
     public static final int MAX_ENERGY = 10000;
 
     public EnergyUnit() {
-        // Keep legacy DAMAGE energy readable while excluding vanilla repair and Mending.
-        super(new Properties().durability(MAX_ENERGY).setNoRepair()
-                .component(DataComponents.DAMAGE, MAX_ENERGY)
-                .component(DataComponents.UNBREAKABLE, new Unbreakable(false)));
+        super(new Properties().stacksTo(1).setNoRepair());
     }
 
     @Override
     public int getEnergyStored(ItemStack stack) {
-        return stack.getMaxDamage() - stack.getDamageValue();
+        return ExtraItemData.energy(stack, MAX_ENERGY);
     }
 
     @Override
@@ -32,8 +27,7 @@ public class EnergyUnit extends AcademyItem implements IEnergyItem {
 
     @Override
     public void setEnergy(ItemStack stack, int energy) {
-        int newDamage = getMaxEnergyStored(stack) - Math.clamp(energy, 0, getMaxEnergyStored(stack));
-        stack.setDamageValue(newDamage);
+        ExtraItemData.setEnergy(stack, energy, MAX_ENERGY);
     }
 
     @Override

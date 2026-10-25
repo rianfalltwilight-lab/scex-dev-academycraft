@@ -1,0 +1,40 @@
+状态：仅准备和 PowerShell AST 语法检查；本包尚未在 Vicerach 执行。
+
+唯一允许删除的目录：
+D:\Minecraft-Validation\runs\academy-datasync31-20261025
+
+准备：
+1. 将整个 cleanup-prep 文件夹复制到 Vicerach：
+   D:\Minecraft-Validation\receipts\academy-datasync31-20261025\cleanup-prep
+2. 将本机封存的 evidence/data-sync-0.0.31/final-validation.json 原字节复制到：
+   D:\Minecraft-Validation\receipts\academy-datasync31-20261025\final-validation.json
+   核对两端 SHA-256 一致。原本机源码、最终 JAR、源码 ZIP 和证据继续保留。
+3. 使用 Vicerach 已确认的 PowerShell 7：
+   C:\Users\4090\.cache\codex-runtimes\codex-primary-runtime\dependencies\native\powershell\pwsh.exe
+
+在 Vicerach 使用下列命令（均从脚本文件调用，避免把完整目标路径嵌入其他长期进程的命令行）：
+
+$archive = 'D:\Minecraft-Validation\receipts\academy-datasync31-20261025'
+$tool = Join-Path $archive 'cleanup-prep\Invoke-Academy31Cleanup.ps1'
+& $tool -Mode Inspect | Set-Content -LiteralPath (Join-Path $archive 'inspected-facts.json') -Encoding utf8
+
+先核对 Inspect 输出：主机、run_root、目录创建时间；processes_referencing_run 应为空。
+java_baseline 是仍存在的其他 Java 进程身份，用于保留现有服务。脚本没有停止进程功能。
+
+& $tool -Mode Plan -ReviewedFactsPath (Join-Path $archive 'inspected-facts.json') -FinalGameTestRun gt-r4 -FinalClientRun client-r3
+
+Plan 不删除：它保留本轮各次运行的小体积日志/结果及两件最终受测 JAR（约 28 MB），
+然后生成 completion.json，调用原清理器默认计划模式。若已有归档文件不同则报错，不覆盖。
+completion.exit_codes 只取 gt-r4/client-r3 的真实零退出；早期失败、强制退出及未知退出原样
+进入 attempt_history 和 history 文件，不改写成成功。缺最终通过、保存或进程退出证据会拒绝。
+
+复核 completion.json 与计划后，再执行：
+& $tool -Mode Apply
+
+Apply 复用既有 completion.json，不重新采集目录身份或改写退出码。除逐文件哈希、目录创建
+身份、精确边界、重解析点、运行进程检查外，还取得测试 runner 使用的 client-window.lock。
+只有登记根目录会由原 Remove-CompletedTestRun.ps1 使用 PowerShell Remove-Item 删除。
+
+保留：bases、inputs、cache、control、receipts、源码工程、共享 Gradle 缓存、所有其他进程。
+Apply 成功后的 completion.json.cleanup.json 才是实际清理回执；preparation.json 不是完成凭据。
+将 completion.json、completion.json.cleanup.json、必要 history 证据收回本机证据目录。

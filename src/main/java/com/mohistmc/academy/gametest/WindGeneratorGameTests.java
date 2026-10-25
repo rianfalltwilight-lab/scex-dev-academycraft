@@ -115,7 +115,7 @@ public final class WindGeneratorGameTests {
         // Exercise the same player-first menu ranges used by a real shift-click.
         player.setPos(basePos.getX() + 0.5, basePos.getY() + 0.5, basePos.getZ() + 1.5);
         ItemStack battery = new ItemStack(AcademyItems.ENERGY_UNIT.get());
-        battery.setDamageValue(EnergyUnit.MAX_ENERGY);
+        com.mohistmc.academy.capability.EnergyItemHelper.setEnergy(battery, 0);
         player.getInventory().setItem(9, battery);
         FriendlyByteBuf baseData = menuPos(basePos);
         WindGenBaseMenu baseMenu;

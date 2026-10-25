@@ -20,6 +20,11 @@ public final class ImagEnergyArmorItem extends ArmorItem implements IEnergyItem 
 
     @Override public boolean isBookEnchantable(ItemStack stack, ItemStack book) { return false; }
 
+    @Override public void verifyComponentsAfterLoad(ItemStack stack) {
+        super.verifyComponentsAfterLoad(stack);
+        ExtraItemData.migrateEnergy(stack, MAX_ENERGY);
+    }
+
     /** The add-on changes the worn shell at 500 IF; inventory icons remain constant. */
     @Override
     public net.minecraft.resources.ResourceLocation getArmorTexture(ItemStack stack,

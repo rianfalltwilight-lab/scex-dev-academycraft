@@ -1,0 +1,62 @@
+[
+  {
+    "free_bytes": 6819921920,
+    "seconds": 2.2939305,
+    "rss_bytes": 357531648
+  },
+  {
+    "free_bytes": 6394953728,
+    "seconds": 4.520252,
+    "rss_bytes": 756121600
+  },
+  {
+    "free_bytes": 6352437248,
+    "seconds": 6.7475546,
+    "rss_bytes": 803139584
+  },
+  {
+    "free_bytes": 6057259008,
+    "seconds": 8.9688557,
+    "rss_bytes": 1104297984
+  },
+  {
+    "free_bytes": 5915103232,
+    "seconds": 11.1866569,
+    "rss_bytes": 1204166656
+  },
+  {
+    "free_bytes": 5706678272,
+    "seconds": 13.4061232,
+    "rss_bytes": 1425367040
+  },
+  {
+    "free_bytes": 5641158656,
+    "seconds": 15.6366563,
+    "rss_bytes": 1474465792
+  },
+  {
+    "free_bytes": 5634097152,
+    "seconds": 17.846483,
+    "rss_bytes": 1479983104
+  },
+  {
+    "free_bytes": 5639983104,
+    "seconds": 20.0599318,
+    "rss_bytes": 1475547136
+  },
+  {
+    "free_bytes": 5627551744,
+    "seconds": 22.2997972,
+    "rss_bytes": 1488920576
+  },
+  {
+    "free_bytes": 5172645888,
+    "seconds": 24.5224376,
+    "rss_bytes": 1955643392
+  },
+  {
+    "free_bytes": 5129990144,
+    "seconds": 26.7554735,
+    "rss_bytes": 1952374784
+  }
+]

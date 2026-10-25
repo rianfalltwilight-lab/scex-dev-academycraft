@@ -1,0 +1,28 @@
+{
+  "status": "PREPARED_NOT_EXECUTED",
+  "target": "D:\\Minecraft-Validation\\runs\\academy-datasync31-20261025",
+  "host": "VICERACH",
+  "parse_validation": "PowerShell AST parser: no errors; script was not executed",
+  "files": [
+    {
+      "name": "Invoke-Academy31Cleanup.ps1",
+      "sha256": "326059f5495eba007f30242afec0ba16a2a99a973280dbf6af9a5ae275271799"
+    },
+    {
+      "name": "completion.template.json",
+      "sha256": "c651d19af1cb85e9c074a21f283a634d92ec235b1b911d4c3ce9f28556778f92"
+    },
+    {
+      "name": "Lab.Common.ps1",
+      "sha256": "07f34d8eec39a1a92aad65a571b7c67258e14693bf2b5ccab175d8ebf981a62c"
+    },
+    {
+      "name": "Remove-CompletedTestRun.ps1",
+      "sha256": "6ca0dff553eb223a5d14c68a7ca377a982e52f0d0b17e737d418dd2bfa65df98"
+    }
+  ],
+  "tool_sources": {
+    "Lab.Common.ps1": "E:/.codex/skills/minecraft-isolated-validation/scripts/Lab.Common.ps1",
+    "Remove-CompletedTestRun.ps1": "E:/.codex/skills/minecraft-isolated-validation/scripts/Remove-CompletedTestRun.ps1"
+  }
+}

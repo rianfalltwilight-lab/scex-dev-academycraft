@@ -14,8 +14,17 @@ public class AcademyItem extends Item {
         super(p_41383_);
     }
 
+    @Override
+    public void verifyComponentsAfterLoad(ItemStack stack) {
+        super.verifyComponentsAfterLoad(stack);
+        if (this instanceof IEnergyItem energy) {
+            ExtraItemData.migrateEnergy(stack, energy.getMaxEnergyStored(stack));
+        }
+        if (this instanceof HandheldTeleporterItem) ExtraItemData.migrateTeleport(stack);
+        if (this instanceof LaserGunItem) ExtraItemData.clearLegacyHarvest(stack);
+    }
 
-    /** Energy devices retain their charge bar even though DAMAGE is not repairable wear. */
+    /** IF has its own component; this bar does not represent vanilla equipment wear. */
     @Override
     public boolean isBarVisible(ItemStack stack) {
         if (this instanceof IEnergyItem energy) {

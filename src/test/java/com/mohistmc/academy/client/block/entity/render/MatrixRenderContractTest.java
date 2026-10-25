@@ -69,11 +69,8 @@ class MatrixRenderContractTest {
         String renderer = Files.readString(MAIN.resolve(
                 "java/com/mohistmc/academy/client/block/entity/render/MatrixRender.java"));
         assertTrue(renderer.contains("PLATE_COUNT = 3"));
-        assertTrue(renderer.contains("items.get(MatrixBlockEntity.PLATE_SLOT_0).is(AcademyItems.CONSTRAINT_PLATE.get())"));
-        assertTrue(renderer.contains("items.get(MatrixBlockEntity.PLATE_SLOT_1).is(AcademyItems.CONSTRAINT_PLATE.get())"));
-        assertTrue(renderer.contains("items.get(MatrixBlockEntity.PLATE_SLOT_2).is(AcademyItems.CONSTRAINT_PLATE.get())"));
-        assertTrue(renderer.contains("matrix.initializationCoreLevel() >= 0"));
-        assertFalse(renderer.contains("hasInitializationMaterials()"));
+        assertTrue(renderer.contains("matrix.hasInitializationMaterials()"));
+        assertFalse(renderer.contains("getItems()"), "world rendering must not depend on private menu contents");
         assertFalse(renderer.contains("isInitialized()"));
         assertTrue(renderer.contains("timeMillis / 20.0"));
         assertTrue(renderer.contains("timeMillis / 900.0"));
@@ -91,7 +88,7 @@ class MatrixRenderContractTest {
 
         String matrix = Files.readString(MAIN.resolve(
                 "java/com/mohistmc/academy/world/block/entity/MatrixBlockEntity.java"));
-        assertTrue(matrix.contains("CompoundTag tag = super.getUpdateTag(provider)"),
-                "client plate animation requires the live inventory in the block-entity update tag");
+        assertTrue(matrix.contains("tag.putBoolean(\"render_has_materials\", hasInitializationMaterials())"),
+                "client plate animation requires the compact installed-material state");
     }
 }

@@ -1,0 +1,10 @@
+{
+  "passed": false,
+  "exit_code": -1,
+  "host": "VICERACH",
+  "close_reason": "resource-or-timeout",
+  "process_exited": true,
+  "saved_after_stop": false,
+  "visual_review": "pending",
+  "forced": true
+}

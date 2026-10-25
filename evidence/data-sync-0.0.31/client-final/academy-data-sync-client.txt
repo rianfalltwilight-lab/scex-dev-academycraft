@@ -1,0 +1,17 @@
+status=PASS
+PASS player sync phase=0 full state delivered to real client full=1, profile=0, runtime=0, payloadBytes=6264
+PASS player sync phase=1 60 idle ticks emitted zero ability payloads full=0, profile=0, runtime=0, payloadBytes=0
+MEASURE activeClientTicks=40 legacyTwoFullPayloadBytes=12420 actual=full=0, profile=0, runtime=9, payloadBytes=1057 excludesTransportFraming=true
+PASS player sync phase=2 paid resources and cooldown delivered without profile collections full=0, profile=0, runtime=9, payloadBytes=1057
+PASS player sync phase=3 profile, presets and proficiency remain complete full=0, profile=1, runtime=1, payloadBytes=6399
+PASS player sync phase=4 empty cooldown delta clears previous state full=0, profile=0, runtime=1, payloadBytes=68
+PASS player sync phase=5 actual Nether transfer full synchronization full=1, profile=0, runtime=0, payloadBytes=6346
+PASS player sync phase=6 actual Overworld return full synchronization full=1, profile=0, runtime=0, payloadBytes=6346
+PASS player sync phase=7 actual lethal damage and native respawn full synchronization full=1, profile=0, runtime=0, payloadBytes=6346
+PASS machine native menu/world packet phase=0: metal slot=0, menuMode=PLATE, worldMode=PLATE
+PASS machine native menu/world packet phase=1: metal slot=32, menuMode=PLATE, worldMode=PLATE
+PASS machine native menu/world packet phase=2: metal slot=32, menuMode=INCISE, worldMode=INCISE
+PASS machine native menu/world packet phase=3: matrix slots=0,0,0,0, menuMaterials=false, worldMaterials=false
+PASS machine native menu/world packet phase=4: matrix slots=1,1,1,1, menuMaterials=true, worldMaterials=true
+PASS machine native menu/world packet phase=5: matrix slots=0,1,1,1, menuMaterials=false, worldMaterials=false
+PASS native save checkpoint after 20 consecutive ready server ticks; details=academy-data-sync-save-checkpoint.txt

@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "run_id": "academy-datasync31-20261025",
+  "run_root": "D:\\Minecraft-Validation\\runs\\academy-datasync31-20261025",
+  "temporary_container": "D:\\Minecraft-Validation\\runs",
+  "complete": false,
+  "status": "PENDING_FINAL_VALIDATION",
+  "pending_checks": [
+    "Final GameTest run passed and normally exited",
+    "Final client run passed, normally saved and exited",
+    "Sealed final validation and required evidence retained outside cleanup target",
+    "Directory/process identities reviewed on VICERACH"
+  ],
+  "exit_codes": [],
+  "final_runs": [],
+  "attempt_history": [],
+  "basis": "Template only; no completed checks or successful exits are asserted.",
+  "inputs": [],
+  "evidence": [],
+  "java_baseline": [],
+  "ports": [],
+  "protected_roots": [],
+  "cleanup_targets": [
+    {
+      "kind": "disposable-test-copy",
+      "path": "D:\\Minecraft-Validation\\runs\\academy-datasync31-20261025",
+      "created_utc": null
+    }
+  ]
+}

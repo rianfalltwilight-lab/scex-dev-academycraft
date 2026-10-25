@@ -1,0 +1,31 @@
+﻿{
+    "java_processes":  [
+                           {
+                               "ProcessId":  45576,
+                               "CreationDate":  "\/Date(1792633052910)\/",
+                               "SessionId":  0,
+                               "WorkingSetSize":  7257640960
+                           },
+                           {
+                               "ProcessId":  37876,
+                               "CreationDate":  "\/Date(1792854714930)\/",
+                               "SessionId":  0,
+                               "WorkingSetSize":  231297024
+                           },
+                           {
+                               "ProcessId":  38776,
+                               "CreationDate":  "\/Date(1792913799096)\/",
+                               "SessionId":  1,
+                               "WorkingSetSize":  4269162496
+                           }
+                       ],
+    "root":  "D:\\Minecraft-Validation\\runs\\academy-datasync31-20261025",
+    "created":  "2026-10-25T18:55:35.4503476+09:00",
+    "host":  "VICERACH",
+    "pwsh":  "C:\\Users\\4090\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+    "required_free_bytes":  24696061952,
+    "disk_free_bytes":  143026204672,
+    "desktop_session":  1,
+    "expected_additional_bytes":  1610612736,
+    "free_memory_bytes":  9984999424
+}

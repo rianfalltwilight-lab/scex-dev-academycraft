@@ -821,7 +821,7 @@ public final class AcademyServerGameTests {
         helper.getLevel().setBlock(basePos, AcademyBlocks.WINDGEN_BASE.get().defaultBlockState(), 3);
         var base = (com.mohistmc.academy.world.block.entity.WindGenBaseBlockEntity) helper.getLevel().getBlockEntity(basePos);
         ItemStack unit = new ItemStack(AcademyItems.ENERGY_UNIT.get());
-        unit.setDamageValue(com.mohistmc.academy.world.item.EnergyUnit.MAX_ENERGY);
+        com.mohistmc.academy.capability.EnergyItemHelper.setEnergy(unit, 0);
         base.getItems().set(0, unit);
         base.setEnergy(1000);
         base.tick(false, false, false, basePos.getY());
@@ -847,7 +847,8 @@ public final class AcademyServerGameTests {
             }
 
             ItemStack input = new ItemStack(AcademyItems.ENERGY_UNIT.get());
-            input.setDamageValue(0); // explicit full creative fixture; crafted stacks now correctly start empty
+            com.mohistmc.academy.capability.EnergyItemHelper.setEnergy(input,
+                    com.mohistmc.academy.world.item.EnergyUnit.MAX_ENERGY); // explicit full creative fixture
             node.getItems().set(0, input);
             node.setEnergy(capacities[tier] - 50);
             node.serverTick();
@@ -859,7 +860,7 @@ public final class AcademyServerGameTests {
 
             node.getItems().set(0, ItemStack.EMPTY);
             ItemStack output = new ItemStack(AcademyItems.ENERGY_UNIT.get());
-            output.setDamageValue(com.mohistmc.academy.world.item.EnergyUnit.MAX_ENERGY);
+            com.mohistmc.academy.capability.EnergyItemHelper.setEnergy(output, 0);
             node.getItems().set(1, output);
             node.serverTick();
             if ((int) node.getEnergy() != capacities[tier] - bandwidths[tier]

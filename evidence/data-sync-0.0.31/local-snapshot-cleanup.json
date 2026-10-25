@@ -1,0 +1,12 @@
+{
+  "status": "BLOCKED_BY_AUTOMATIC_APPROVAL_POLICY",
+  "executed": false,
+  "reason_reported": "blocked by policy; no more specific reason provided",
+  "retained_superseded_snapshots": [
+    "build/data-sync-0.0.31-tested",
+    "build/data-sync-0.0.31-r2-tested",
+    "build/data-sync-0.0.31-r3-tested"
+  ],
+  "final_tested_snapshot_retained": "build/data-sync-0.0.31-r4-tested",
+  "release_impact": "None. Final deliverables, source and all runtime evidence remain intact. Remote owned test cleanup completed separately with retained receipts."
+}

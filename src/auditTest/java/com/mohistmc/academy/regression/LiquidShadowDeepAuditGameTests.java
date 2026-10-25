@@ -56,6 +56,17 @@ public final class LiquidShadowDeepAuditGameTests {
             TelekinesisPassiveHandler.playerTick(new PlayerTickEvent.Post(p));
             ticks[0]++;
             farthestX[0] = Math.max(farthestX[0], shadow.getX());
+            if (ticks[0] % 15 == 0) {
+                com.mojang.logging.LogUtils.getLogger().info(
+                        "SHADOW_OBSTACLE_PATH ownerTicks={} entityTicks={} origin={} shadowRelative={} targetRelative={} shadowTicking={} targetTicking={} floor={} path={}",
+                        ticks[0], shadow.tickCount, origin,
+                        shadow.position().subtract(origin.getX(), origin.getY(), origin.getZ()),
+                        target.position().subtract(origin.getX(), origin.getY(), origin.getZ()),
+                        h.getLevel().isPositionEntityTicking(shadow.blockPosition()),
+                        h.getLevel().isPositionEntityTicking(target.blockPosition()),
+                        h.getLevel().getBlockState(shadow.blockPosition().below()),
+                        shadow.getNavigation().getPath());
+            }
         });
         h.runAfterDelay(75, () -> {
             done.set(true);

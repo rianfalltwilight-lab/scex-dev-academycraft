@@ -39,20 +39,31 @@ public final class LaserGunItem extends ExtraEnergyItem {
             if (ExtraItemData.isActive(stack)) stop(stack);
             else if (player.getAbilities().instabuild || getEnergyStored(stack) > 20)
                 ExtraItemData.setActive(stack, true);
+            if (player instanceof ServerPlayer serverPlayer) LaserMiningSessions.clear(serverPlayer, stack);
         }
         return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
     }
 
     @Override
     public void inventoryTick(ItemStack stack, Level level, Entity entity, int slot, boolean selected) {
-        if (level.isClientSide || !ExtraItemData.isActive(stack)) return;
-        if (!(entity instanceof ServerPlayer player) || !selected) {
+        if (level.isClientSide) return;
+        if (!ExtraItemData.isActive(stack)) {
+            if (entity instanceof ServerPlayer player) LaserMiningSessions.clear(player, stack);
+            return;
+        }
+        if (!(entity instanceof ServerPlayer player)) {
+            stop(stack);
+            return;
+        }
+        if (!selected || player.getMainHandItem() != stack) {
+            LaserMiningSessions.clear(player, stack);
             stop(stack);
             return;
         }
         if (BREAKING.contains(player.getUUID())) return;
         if (!player.getAbilities().instabuild && !consume(stack, 2)) {
             stop(stack);
+            LaserMiningSessions.clear(player);
             return;
         }
 
@@ -64,7 +75,7 @@ public final class LaserGunItem extends ExtraEnergyItem {
         double beamLength = result.getType() == HitResult.Type.MISS ? 8 : start.distanceTo(result.getLocation());
         ExtraItemActions.beam((ServerLevel) level, start, direction, beamLength);
         if (result.getType() != HitResult.Type.BLOCK || !level.isLoaded(result.getBlockPos())) {
-            ExtraItemData.setHarvest(stack, null, 0);
+            LaserMiningSessions.clear(player);
             return;
         }
         BlockPos pos = result.getBlockPos();
@@ -73,16 +84,14 @@ public final class LaserGunItem extends ExtraEnergyItem {
         if (hardness < 0 || state.isAir() || !isCorrectToolForDrops(stack, state)
                 || !player.getAbilities().mayBuild || !player.mayInteract(level,pos) || !level.mayInteract(player,pos)
                 || !player.mayUseItemAt(pos, result.getDirection(), stack)) {
-            ExtraItemData.setHarvest(stack, null, 0);
+            LaserMiningSessions.clear(player);
             return;
         }
-        float progress = pos.equals(ExtraItemData.harvestPos(stack)) && state.toString().equals(ExtraItemData.harvestState(stack))
-                ? ExtraItemData.harvestProgress(stack) + 0.2F : 0.2F;
+        float progress = LaserMiningSessions.advance(player, stack, slot, pos, state);
         if (progress + 1.0e-5F < hardness) {
-            ExtraItemData.setHarvest(stack, pos, progress, state.toString());
             return;
         }
-        ExtraItemData.setHarvest(stack, null, 0);
+        LaserMiningSessions.clear(player);
         BREAKING.add(player.getUUID());
         try {
             if (harvest((ServerLevel)level, player, stack, pos, state)) {
@@ -113,7 +122,6 @@ public final class LaserGunItem extends ExtraEnergyItem {
 
     private static void stop(ItemStack stack) {
         ExtraItemData.setActive(stack, false);
-        ExtraItemData.setHarvest(stack, null, 0);
     }
 
     @Override

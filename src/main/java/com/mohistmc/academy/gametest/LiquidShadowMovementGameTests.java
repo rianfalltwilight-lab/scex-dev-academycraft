@@ -36,13 +36,13 @@ public final class LiquidShadowMovementGameTests {
     private static final Logger LOGGER = LogUtils.getLogger();
     private LiquidShadowMovementGameTests() {}
 
-    @GameTest(template = "empty", timeoutTicks = 90)
+    @GameTest(template = "empty", timeoutTicks = 90, batch = "liquid_shadow_motion_open")
     public static void shadowPursuesFiveMetresAndPaysForAttack(GameTestHelper helper) { pursue(helper, false, false); }
 
-    @GameTest(template = "empty", timeoutTicks = 90)
+    @GameTest(template = "empty", timeoutTicks = 90, batch = "liquid_shadow_motion_glass")
     public static void pursuingShadowStopsAtGlassCollision(GameTestHelper helper) { pursue(helper, true, false); }
 
-    @GameTest(template = "empty", timeoutTicks = 90)
+    @GameTest(template = "empty", timeoutTicks = 90, batch = "liquid_shadow_motion_short_cp")
     public static void pursuingShadowCannotHurtWhenAttackCpIsShort(GameTestHelper helper) { pursue(helper, false, true); }
 
     private static void pursue(GameTestHelper helper, boolean wall, boolean shortCp) {
@@ -52,11 +52,23 @@ public final class LiquidShadowMovementGameTests {
             helper.setBlock(new BlockPos(x, 1, z), Blocks.STONE);
             for (int y = 2; y < 6; y++) helper.setBlock(new BlockPos(x, y, z), Blocks.AIR);
         }
-        if (wall) for (int x = -16; x < 22; x++) for (int y = 2; y < 6; y++)
-            helper.setBlock(new BlockPos(x, y, 5), Blocks.GLASS_PANE);
+        if (wall) {
+            // Keep the pursuit on its raised platform: otherwise vanilla navigation can
+            // walk off either edge and pass below the elevated glass without crossing it.
+            for (int z = -2; z < 9; z++) for (int y = 2; y < 6; y++) {
+                helper.setBlock(new BlockPos(-1, y, z), Blocks.STONE);
+                helper.setBlock(new BlockPos(6, y, z), Blocks.STONE);
+            }
+            for (int x = 0; x < 6; x++) for (int y = 2; y < 6; y++) {
+                helper.setBlock(new BlockPos(x, y, -2), Blocks.STONE);
+                helper.setBlock(new BlockPos(x, y, 5), Blocks.GLASS_PANE);
+            }
+        }
         var player = FakePlayerFactory.get(level, new GameProfile(UUID.randomUUID(), "[ShadowMotion]"));
         player.setGameMode(GameType.SURVIVAL);
-        player.setPos(origin.getX() + 2.5, origin.getY() + 2, origin.getZ() + 1.5);
+        // The summoned shadow starts 1.6 blocks behind its owner; keep that position
+        // inside the template's forced chunks even when its north edge is a chunk boundary.
+        player.setPos(origin.getX() + 2.5, origin.getY() + 2, origin.getZ() + 2.5);
         player.setYRot(0); player.setXRot(0);
         PlayerAbilityData data = player.getData(AcademyAttachments.PLAYER_ABILITY);
         data.setCurrentAbility(AbilityCategory.TELEKINESIS); data.setPlayerLevel(5);
@@ -98,11 +110,23 @@ public final class LiquidShadowMovementGameTests {
                 LOGGER.info("SHADOW_MOVEMENT_OBSERVATION wall={} shortCP={} entityTicks={} ownerTicks={} moved={} targetDistance={} damage={} cp={} startCP={}",
                         wall, shortCp, shadow.tickCount, ownerTicks[0], distanceMoved, shadow.distanceTo(target), damage,
                         data.getCurrentCp(), startCp);
+                int intactGlass = 0;
+                if (wall) for (int x = 0; x < 6; x++) for (int y = 2; y < 6; y++) {
+                    BlockPos pos = helper.absolutePos(new BlockPos(x, y, 5));
+                    var state = level.getBlockState(pos);
+                    if (state.is(Blocks.GLASS_PANE) && !state.getCollisionShape(level, pos).isEmpty()) intactGlass++;
+                }
+                LOGGER.info("SHADOW_MOVEMENT_GEOMETRY wall={} startRelative={} endRelative={} boundsRelative={} intactGlass={}/{}",
+                        wall, start.subtract(origin.getX(), origin.getY(), origin.getZ()),
+                        shadow.position().subtract(origin.getX(), origin.getY(), origin.getZ()),
+                        shadow.getBoundingBox().move(-origin.getX(), -origin.getY(), -origin.getZ()),
+                        intactGlass, wall ? 24 : 0);
                 check(helper, shadow.tickCount >= (shortCp ? 5 : 45), "the actual world did not tick the shadow fixture");
                 if (wall) check(helper, shadow.getTarget() == target,
                         "owner's marked target behind glass never entered the fixed target goal");
                 check(helper, distanceMoved > 3, "summoned shadow never navigated toward its marked target");
                 if (wall) {
+                    check(helper, intactGlass == 24, "the isolated glass collision wall was modified during pursuit");
                     check(helper, shadow.getBoundingBox().maxZ <= origin.getZ() + 5.4375 + .001,
                             "shadow crossed a real glass-pane collision shape");
                     check(helper, damage == 0 && Math.abs(data.getCurrentCp() - (startCp - ownerTicks[0])) < .01,

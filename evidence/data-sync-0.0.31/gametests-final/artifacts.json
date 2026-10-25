@@ -1,0 +1,12 @@
+[
+  {
+    "name": "AcademyCraft-neoforge-1.21.1-0.0.31-scex-data-sync-audit-tests.jar",
+    "bytes": 267141,
+    "sha256": "443dca9ed91fb19ac68dda2494d13c4ea4ee6b5cfaa081c3a9b17bf6371dfaa0"
+  },
+  {
+    "name": "AcademyCraft-neoforge-1.21.1-0.0.31-scex-data-sync.jar",
+    "bytes": 27845029,
+    "sha256": "d166193173e133e33aeb7854a6bef8971601816c8870cc8c991a9fc2f11d5458"
+  }
+]

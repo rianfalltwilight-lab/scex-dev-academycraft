@@ -37,6 +37,9 @@ public class MatrixBlockEntity extends AcademyContainerBlockEntity implements IW
     private UUID ownerUUID = null;
     private boolean initialized = false;
     private boolean syncedHasPassword = false;
+    private int syncedCoreLevel = -1;
+    private boolean syncedHasMaterials;
+    private int lastInventoryVisualState;
 
     public MatrixBlockEntity(BlockPos pos, BlockState state) {
         super(AcademyBlockEntities.MATRIX.get(), pos, state);
@@ -45,6 +48,7 @@ public class MatrixBlockEntity extends AcademyContainerBlockEntity implements IW
 
     @Override public int getContainerSize() { return 4; }
     public int initializationCoreLevel() {
+        if (level != null && level.isClientSide()) return syncedCoreLevel;
         if (getItems().size() != 4) return -1;
         ItemStack core = getItems().get(CORE_SLOT);
         if (core.is(com.mohistmc.academy.world.AcademyItems.MAT_CORE_0.get())) return 0;
@@ -53,10 +57,28 @@ public class MatrixBlockEntity extends AcademyContainerBlockEntity implements IW
         return -1;
     }
     public boolean hasInitializationMaterials() {
+        if (level != null && level.isClientSide()) return syncedHasMaterials;
         return initializationCoreLevel() >= 0
                 && getItems().get(PLATE_SLOT_0).is(com.mohistmc.academy.world.AcademyItems.CONSTRAINT_PLATE.get())
                 && getItems().get(PLATE_SLOT_1).is(com.mohistmc.academy.world.AcademyItems.CONSTRAINT_PLATE.get())
                 && getItems().get(PLATE_SLOT_2).is(com.mohistmc.academy.world.AcademyItems.CONSTRAINT_PLATE.get());
+    }
+
+    /** Item identity/count/components remain private to the menu. Only the
+     * installed-material appearance needs to reach players tracking the block. */
+    @Override public void setChanged() {
+        super.setChanged();
+        if (level == null || level.isClientSide()) return;
+        int visualState = inventoryVisualState();
+        if (visualState != lastInventoryVisualState) {
+            lastInventoryVisualState = visualState;
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(),
+                    net.minecraft.world.level.block.Block.UPDATE_CLIENTS);
+        }
+    }
+
+    private int inventoryVisualState() {
+        return initializationCoreLevel() + 1 | (hasInitializationMaterials() ? 4 : 0);
     }
 
     // ==================== IWirelessMatrix ====================
@@ -155,6 +177,9 @@ public class MatrixBlockEntity extends AcademyContainerBlockEntity implements IW
         if (tag.contains("matrix_range")) range = boundedFinite(tag.getDouble("matrix_range"), DEFAULT_RANGE, 256);
         if (tag.contains("ownerUUID")) ownerUUID = parseUuid(tag.getString("ownerUUID"));
         if (tag.contains("initialized")) initialized = tag.getBoolean("initialized");
+        if (tag.contains("render_core_level")) syncedCoreLevel = Math.clamp(tag.getInt("render_core_level"), -1, 2);
+        if (tag.contains("render_has_materials")) syncedHasMaterials = tag.getBoolean("render_has_materials");
+        if (level == null || !level.isClientSide()) lastInventoryVisualState = inventoryVisualState();
     }
 
     /**
@@ -207,6 +232,8 @@ public class MatrixBlockEntity extends AcademyContainerBlockEntity implements IW
         tag.putDouble("matrix_range", range);
         if (ownerUUID != null) tag.putString("ownerUUID", ownerUUID.toString());
         tag.putBoolean("initialized", initialized);
+        tag.putInt("render_core_level", initializationCoreLevel());
+        tag.putBoolean("render_has_materials", hasInitializationMaterials());
         return tag;
     }
     @Override public Packet<ClientGamePacketListener> getUpdatePacket() { return ClientboundBlockEntityDataPacket.create(this); }

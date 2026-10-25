@@ -73,8 +73,9 @@ class ExtraAcCompatibilityContractTest {
         assertFalse(paper.contains("ArmorMaterials.LEATHER"));
         assertTrue(imaginary.contains("ExtraItemData.energy"));
         String energy = read("world/item/ExtraEnergyItem.java");
-        assertTrue(energy.contains("component(DataComponents.DAMAGE, capacity)"),
-                "freshly crafted IF devices must start empty like 1.12.2");
+        assertTrue(energy.contains("ExtraItemData.energy(stack, capacity)"),
+                "IF devices must use the independent native charge component");
+        assertFalse(energy.contains(".durability("), "IF must not become repairable equipment wear");
         assertTrue(read("world/AcademyItems.java").contains(
                 "energyItem.setEnergy(full, energyItem.getMaxEnergyStored(full))"),
                 "creative inventory must still expose an explicit full variant");

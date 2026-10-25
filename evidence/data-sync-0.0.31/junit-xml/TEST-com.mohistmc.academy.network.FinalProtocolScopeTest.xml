@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.mohistmc.academy.network.FinalProtocolScopeTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-10-25T10:33:26.801Z" hostname="MONARCH" time="0.016">
+  <properties/>
+  <testcase name="exactLocationSnapshotRejectsIndexShiftAndCoordinateOrNameMutation()" classname="com.mohistmc.academy.network.FinalProtocolScopeTest" time="0.01"/>
+  <testcase name="consentScopeRejectsPetAddRemoveOwnerAndRidingEdgeMutation()" classname="com.mohistmc.academy.network.FinalProtocolScopeTest" time="0.005"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

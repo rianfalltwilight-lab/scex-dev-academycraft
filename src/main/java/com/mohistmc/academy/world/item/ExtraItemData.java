@@ -1,13 +1,18 @@
 package com.mohistmc.academy.world.item;
 
-import net.minecraft.core.BlockPos;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 
-/** Namespaced custom-data access for the clean-room ExtraAcC item behaviours. */
+/** Native persistent values plus narrowly scoped readers for pre-0.0.31 item saves. */
 public final class ExtraItemData {
     private static final String ACTIVE = "academy_extra_active";
     private static final String TELEPORT_SET = "academy_extra_teleport_set";
@@ -45,26 +50,18 @@ public final class ExtraItemData {
 
     public static void setTeleport(ItemStack stack, ResourceLocation dimension,
                                    double x, double y, double z) {
-        update(stack, nbt -> {
-            nbt.putBoolean(TELEPORT_SET, true);
-            nbt.putString(TELEPORT_DIMENSION, dimension.toString());
-            nbt.putDouble(TELEPORT_X, x);
-            nbt.putDouble(TELEPORT_Y, y);
-            nbt.putDouble(TELEPORT_Z, z);
-        });
+        stack.set(AcademyDataComponents.TELEPORT_TARGET.get(), new TeleportTarget(dimension, x, y, z));
+        removeLegacyTeleport(stack);
     }
 
     public static void clearTeleport(ItemStack stack) {
-        update(stack, nbt -> {
-            nbt.remove(TELEPORT_SET);
-            nbt.remove(TELEPORT_DIMENSION);
-            nbt.remove(TELEPORT_X);
-            nbt.remove(TELEPORT_Y);
-            nbt.remove(TELEPORT_Z);
-        });
+        stack.remove(AcademyDataComponents.TELEPORT_TARGET.get());
+        removeLegacyTeleport(stack);
     }
 
     public static TeleportTarget teleport(ItemStack stack) {
+        TeleportTarget target = stack.get(AcademyDataComponents.TELEPORT_TARGET.get());
+        if (target != null) return target;
         CompoundTag nbt = tag(stack);
         if (!nbt.getBoolean(TELEPORT_SET)) return null;
         ResourceLocation dimension = ResourceLocation.tryParse(nbt.getString(TELEPORT_DIMENSION));
@@ -74,34 +71,33 @@ public final class ExtraItemData {
         return new TeleportTarget(dimension, x, y, z);
     }
 
-    public static BlockPos harvestPos(ItemStack stack) {
-        CompoundTag nbt = tag(stack);
-        return nbt.contains(HARVEST_POS) ? BlockPos.of(nbt.getLong(HARVEST_POS)) : null;
+    public static void migrateTeleport(ItemStack stack) {
+        TeleportTarget target = teleport(stack);
+        if (target != null) stack.set(AcademyDataComponents.TELEPORT_TARGET.get(), target);
+        removeLegacyTeleport(stack);
     }
 
-    public static float harvestProgress(ItemStack stack) {
-        float progress = tag(stack).getFloat(HARVEST_PROGRESS);
-        return Float.isFinite(progress) && progress >= 0 ? progress : 0;
+    private static void removeLegacyTeleport(ItemStack stack) {
+        removeLegacyKeys(stack, TELEPORT_SET, TELEPORT_DIMENSION, TELEPORT_X, TELEPORT_Y, TELEPORT_Z);
     }
 
-    public static void setHarvest(ItemStack stack, BlockPos pos, float progress) {
-        setHarvest(stack, pos, progress, "");
+    /** Mining progress belongs to a live server action, never to a copied or saved stack. */
+    public static void clearLegacyHarvest(ItemStack stack) {
+        removeLegacyKeys(stack, HARVEST_POS, HARVEST_PROGRESS, HARVEST_STATE);
     }
 
-    public static String harvestState(ItemStack stack) { return tag(stack).getString(HARVEST_STATE); }
-
-    public static void setHarvest(ItemStack stack, BlockPos pos, float progress, String state) {
-        update(stack, nbt -> {
-            if (pos == null) {
-                nbt.remove(HARVEST_POS);
-                nbt.remove(HARVEST_PROGRESS);
-                nbt.remove(HARVEST_STATE);
-            } else {
-                nbt.putLong(HARVEST_POS, pos.asLong());
-                nbt.putFloat(HARVEST_PROGRESS, Math.max(0, progress));
-                nbt.putString(HARVEST_STATE, state);
-            }
-        });
+    private static void removeLegacyKeys(ItemStack stack, String... keys) {
+        CustomData custom = stack.get(DataComponents.CUSTOM_DATA);
+        if (custom == null) return;
+        CompoundTag nbt = custom.copyTag();
+        boolean changed = false;
+        for (String key : keys) {
+            if (nbt.contains(key)) { nbt.remove(key); changed = true; }
+        }
+        if (changed) {
+            if (nbt.isEmpty()) stack.remove(DataComponents.CUSTOM_DATA);
+            else stack.set(DataComponents.CUSTOM_DATA, CustomData.of(nbt));
+        }
     }
 
     public static long lastUse(ItemStack stack) {
@@ -113,22 +109,51 @@ public final class ExtraItemData {
         update(stack, nbt -> nbt.putLong(LAST_USE, gameTime));
     }
 
-    /** Reads the new independent store, falling back to the 0.0.16 durability encoding. */
+    /** Reads do not mutate stacks, including simulated capability calls and client tooltips. */
     public static int energy(ItemStack stack, int capacity) {
+        Integer component = stack.get(AcademyDataComponents.ENERGY.get());
+        if (component != null) return Math.clamp(component, 0, capacity);
         CompoundTag nbt = tag(stack);
         if (nbt.contains(ENERGY)) return Math.clamp(nbt.getInt(ENERGY), 0, capacity);
         if (stack.has(DataComponents.DAMAGE)) {
-            return Math.clamp(capacity - stack.getOrDefault(DataComponents.DAMAGE, 0), 0, capacity);
+            return (int) Math.clamp((long) capacity - stack.getOrDefault(DataComponents.DAMAGE, 0), 0L, capacity);
         }
         // The legacy IF NBT manager treated an absent tag as an empty item.
         return 0;
     }
 
     public static void setEnergy(ItemStack stack, int energy, int capacity) {
-        update(stack, nbt -> nbt.putInt(ENERGY, Math.clamp(energy, 0, capacity)));
-        // Old builds encoded IF as durability. It must not remain eligible for armor damage.
+        stack.set(AcademyDataComponents.ENERGY.get(), Math.clamp(energy, 0, capacity));
+        removeLegacyKeys(stack, ENERGY);
+        // Neither old durability encoding nor an explicitly saved maximum may become equipment wear.
         stack.remove(DataComponents.DAMAGE);
+        stack.remove(DataComponents.MAX_DAMAGE);
     }
 
-    public record TeleportTarget(ResourceLocation dimension, double x, double y, double z) {}
+    public static void migrateEnergy(ItemStack stack, int capacity) {
+        setEnergy(stack, energy(stack, capacity), capacity);
+    }
+
+    public record TeleportTarget(ResourceLocation dimension, double x, double y, double z) {
+        private static final Codec<Double> FINITE_DOUBLE = Codec.DOUBLE.validate(value ->
+                Double.isFinite(value) ? DataResult.success(value) : DataResult.error(() -> "Non-finite teleport coordinate"));
+        public static final Codec<TeleportTarget> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                ResourceLocation.CODEC.fieldOf("dimension").forGetter(TeleportTarget::dimension),
+                FINITE_DOUBLE.fieldOf("x").forGetter(TeleportTarget::x),
+                FINITE_DOUBLE.fieldOf("y").forGetter(TeleportTarget::y),
+                FINITE_DOUBLE.fieldOf("z").forGetter(TeleportTarget::z)
+        ).apply(instance, TeleportTarget::new));
+        public static final StreamCodec<ByteBuf, TeleportTarget> STREAM_CODEC = StreamCodec.composite(
+                ResourceLocation.STREAM_CODEC, TeleportTarget::dimension,
+                ByteBufCodecs.DOUBLE, TeleportTarget::x,
+                ByteBufCodecs.DOUBLE, TeleportTarget::y,
+                ByteBufCodecs.DOUBLE, TeleportTarget::z,
+                TeleportTarget::new);
+
+        public TeleportTarget {
+            java.util.Objects.requireNonNull(dimension);
+            if (!Double.isFinite(x) || !Double.isFinite(y) || !Double.isFinite(z))
+                throw new IllegalArgumentException("Non-finite teleport coordinate");
+        }
+    }
 }

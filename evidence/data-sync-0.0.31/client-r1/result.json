@@ -1,0 +1,10 @@
+{
+  "exit_code": 0,
+  "visual_review": "pending",
+  "saved_after_stop": true,
+  "close_reason": null,
+  "forced": false,
+  "passed": false,
+  "process_exited": true,
+  "host": "VICERACH"
+}

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.mohistmc.academy.client.LegacyPresentationContractTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-25T10:33:25.139Z" hostname="MONARCH" time="0.021">
+  <properties/>
+  <testcase name="meltdownerRaysAndSustainedSkillsConsumeTheirLegacyAudioVisuals()" classname="com.mohistmc.academy.client.LegacyPresentationContractTest" time="0.002"/>
+  <testcase name="teleporterCriticalUsesTheOfficialFormulaFamilyAndCasterOnlySync()" classname="com.mohistmc.academy.client.LegacyPresentationContractTest" time="0.003"/>
+  <testcase name="movementAndJetKeepTheirDistinctLegacyVisualIdentities()" classname="com.mohistmc.academy.client.LegacyPresentationContractTest" time="0.002"/>
+  <testcase name="plasmaUsesItsLegacyBodyAndTornadoInsteadOfAnItemRenderer()" classname="com.mohistmc.academy.client.LegacyPresentationContractTest" time="0.001"/>
+  <testcase name="teleporterAndMeltdownerUseOfficialCustomParticlesNotVanillaFallbacks()" classname="com.mohistmc.academy.client.LegacyPresentationContractTest" time="0.0"/>
+  <testcase name="bodyIntensifyUsesItsDescendingArcEntityInsteadOfGenericParticles()" classname="com.mohistmc.academy.client.LegacyPresentationContractTest" time="0.001"/>
+  <testcase name="projectileAndBeamRenderersUseOfficialResources()" classname="com.mohistmc.academy.client.LegacyPresentationContractTest" time="0.002"/>
+  <testcase name="thunderSkillsKeepTheirLegacyChargeAndArcPresentation()" classname="com.mohistmc.academy.client.LegacyPresentationContractTest" time="0.002"/>
+  <testcase name="railgunCoinAndItemChargeUseEveryOfficialArcBurstFrame()" classname="com.mohistmc.academy.client.LegacyPresentationContractTest" time="0.001"/>
+  <testcase name="vectorCuesHaveBothVisualLifetimeAndOfficialAudio()" classname="com.mohistmc.academy.client.LegacyPresentationContractTest" time="0.001"/>
+  <testcase name="markAndFlashingCuesReferenceEveryOfficialFrame()" classname="com.mohistmc.academy.client.LegacyPresentationContractTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

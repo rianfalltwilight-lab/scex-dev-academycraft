@@ -45,7 +45,7 @@ public record SwitchPresetPacket(int targetIndex) implements CustomPacketPayload
                 data.syncTo(player);
             } else if (decision.action() == SwitchPresetPolicy.Action.REJECT_SYNC) {
                 // Bounded rollback for stale presentation; flood rejections stay silent.
-                data.syncTo(player);
+                data.resendRuntimeTo(player);
             }
         });
     }

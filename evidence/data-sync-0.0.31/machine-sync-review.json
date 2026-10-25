@@ -1,0 +1,61 @@
+{
+  "scope": "Machine inventory synchronization, 0.0.30 -> 0.0.31",
+  "status": "PASS_FINAL_RECEIPTS_REVIEWED",
+  "findings": [
+    "AcademyContainerBlockEntity.setItems broadcast UPDATE_ALL for every menu inventory save while native slots already synchronized the same items.",
+    "Shared BE getUpdateTag serialized all contentItems into chunk and block packets.",
+    "Client AcademyMenuContainer reloaded the BE inventory on every slot access, so compact BE snapshots would erase or replace native menu slot state.",
+    "MatrixRender was the only production block renderer reading machine inventory, for the valid core plus three constraint-plate condition."
+  ],
+  "changes": [
+    "Keep setItems persistence dirty marking; remove the generic inventory block-update broadcast.",
+    "Keep saveAdditional/loadAdditional inventory schema and item components intact; omit contentItems only from getUpdateTag.",
+    "Use a per-menu client inventory initialized by native content/slot packets; server menus retain the live BE inventory and replacement-instance validity guard.",
+    "Matrix publishes render_core_level and render_has_materials in update tags, never in persistent saves, and broadcasts only a changed material signature.",
+    "Matrix renderer reads the summary through hasInitializationMaterials; working/wind/config state packets and native ContainerData remain in use.",
+    "Update two existing MachineVisualGate battery fixtures to EnergyItemHelper instead of legacy damage encoding."
+  ],
+  "tests_added": {
+    "gametest_namespace": "academy_data_sync",
+    "class": "com.mohistmc.academy.regression.MachineInventorySyncGameTests",
+    "count": 3,
+    "coverage": [
+      "Native save/loadStatic preserves all inventory counts and components across 15 registered machine block types; tracking tags omit inventory.",
+      "Two ordinary ServerPlayers receive native initial inventory and changed slot/data packets, idle and observer receive none, native pickup conserves cursor/inventory count, closed menu stops, replacing BE invalidates old menu and retains saved contents.",
+      "Matrix snapshot retains appearance summary, omits custom inventory NBT, excludes render fields from persistence, and encoded native packet bodies are smaller than reconstructed 0.0.30 inventory snapshots."
+    ],
+    "client_helper": "com.mohistmc.academy.regression.MachineInventoryClientChecks",
+    "client_phases": 6,
+    "client_coverage": "Real integrated-server menu opening and item mutation; actual native slot/data/world packets; MetalFormer world mode changes do not erase cached slots; Matrix core/plate summary tracks insert/remove without full inventory in client BE."
+  },
+  "api_evidence": [
+    "https://docs.neoforged.net/docs/1.21.1/blockentities/",
+    "https://docs.neoforged.net/docs/1.21.1/gui/menus/",
+    "build/moddev/artifacts/neoforge-21.1.248-sources.jar: ServerPlayer containerSynchronizer and openMenu; AbstractContainerMenu broadcastChanges; ClientboundBlockEntityDataPacket and ClientboundContainerSetSlotPacket STREAM_CODEC."
+  ],
+  "jade_review": "No custom Jade block-data provider exists in this source. Existing standard server-side FE capabilities remain unchanged; client HUD avoidance remains unchanged. No new claim of tested full Jade mod compatibility.",
+  "limits": [
+    "Packet byte metrics are encoded packet bodies, excluding transport framing/compression.",
+    "Server replacement test uses native save/loadStatic and BE replacement, not a filesystem process restart; existing persistence tests remain regression coverage.",
+    "No automation, fluid container, recipe cache, machine balance or inventory schema change."
+  ],
+  "execution_owner": "root performed unified build and actual isolated GameTest/client runs; machine agent reviewed resulting receipts only.",
+  "final_receipts": {
+    "gametest_run": "gt-r4",
+    "gametest_result": "gametests-final/result.json",
+    "gametests_total": 461,
+    "client_run": "client-r3",
+    "client_result": "client-final/result.json",
+    "machine_client_checks": [
+      "PASS machine native menu/world packet phase=0: metal slot=0, menuMode=PLATE, worldMode=PLATE",
+      "PASS machine native menu/world packet phase=1: metal slot=32, menuMode=PLATE, worldMode=PLATE",
+      "PASS machine native menu/world packet phase=2: metal slot=32, menuMode=INCISE, worldMode=INCISE",
+      "PASS machine native menu/world packet phase=3: matrix slots=0,0,0,0, menuMaterials=false, worldMaterials=false",
+      "PASS machine native menu/world packet phase=4: matrix slots=1,1,1,1, menuMaterials=true, worldMaterials=true",
+      "PASS machine native menu/world packet phase=5: matrix slots=0,1,1,1, menuMaterials=false, worldMaterials=false"
+    ],
+    "save_checkpoint": "client-final/academy-data-sync-save-checkpoint.txt",
+    "canonical_final_validation": "final-validation.json"
+  },
+  "shutdown_review": "client-r2 passed behavioral assertions but hung during native shutdown and is not a passing final acceptance run. Independent source/thread-dump review found native ChunkHolder generation-ref unload starvation; root/player-sync agent changed only probe shutdown settlement. client-r3 normally saved and exited."
+}

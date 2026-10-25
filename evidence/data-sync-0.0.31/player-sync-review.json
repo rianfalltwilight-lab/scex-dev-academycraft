@@ -1,0 +1,87 @@
+{
+  "status": "FINAL_REVIEW_COMPLETE",
+  "baseline": "0.0.30-scex-native-compat",
+  "network_protocol": "academy-1.21.1-payload-v20-data-v4",
+  "persistent_data_version": 4,
+  "design": {
+    "full": "Existing sync_ability payload retained for login, real dimension transition, respawn and explicit admin resynchronization.",
+    "profile": "sync_ability_profile replaces infrequent configuration, learned skills, presets, tutorial/terminal/media lists and teleport locations. Compared on explicit mutation sync and every 20 ticks.",
+    "runtime": "sync_ability_runtime sends only changed top-level resource/progress/cooldown fields. Checked every 5 ticks at LOWEST PlayerTick.Post priority, plus explicit mutation calls. Proficiency/cooldown maps only accompany changes to those maps.",
+    "prediction": "Client retains existing resource regeneration/cooldown ticking; recovery delays are now included in authoritative full/runtime synchronization.",
+    "lifecycle": "Snapshots are fields of the PlayerAbilityData instance, never serialized/copied; no player, level or connection references or global cache.",
+    "rejected_request": "Bounded rejected preset requests can force runtime correction even when the last sent server value is unchanged.",
+    "persistence": "Existing PlayerAbilityDataCodec v4 is unchanged. Runtime delta application does not replace client configuration. The previous every-20-tick full send in PassiveSkillEventHandler has been removed."
+  },
+  "api_verification": [
+    "https://docs.neoforged.net/docs/1.21.1/networking/payload/",
+    "Actual resolved build/moddev/artifacts/neoforge-21.1.248-merged.jar Connection.channel() verified using Java 21 javap."
+  ],
+  "new_gametests": [
+    "idleOwnerEmitsNoRepeatedAbilitySnapshot",
+    "actualRecoverySendsOnlyRuntimeDeltasAndMeasuresBytes",
+    "profileMutationAndRuntimeResetPreserveEachOther",
+    "actualDimensionAndDiskReconnectEachSendFullState",
+    "actualDeathRespawnReplacesSnapshotAndKeepsPersistentProfile"
+  ],
+  "client_gate": {
+    "property": "academy.dataSyncClient=true",
+    "result": "academy-data-sync-client.txt",
+    "player_stages": 8,
+    "machine_checks": "Delegates to MachineInventoryClientChecks after player stages.",
+    "measurement": "Counts actual delivered payload objects on the real integrated client's network pipeline. Encoded byte counts use the production StreamCodec and include payload ID. They exclude packet framing, compression and transport overhead; baseline is the prior 20-tick full payload at the same rich-profile fixture, not a universal production bandwidth estimate."
+  },
+  "implementation_stage": {
+    "status": "IMPLEMENTED_PENDING_ROOT_BUILD_AND_RUNTIME",
+    "source": "Original player-sync implementation handoff by /root/player_sync31, before root build/runtime validation.",
+    "note": "The design, API verification and test-entry fields above are retained from that implementation stage."
+  },
+  "final_review": {
+    "reviewer": "/root/player_sync31",
+    "scope": "Read-only review of final player ability synchronization and DataSyncClientGate native-save shutdown path.",
+    "findings": [
+      "No new blocking defect identified in the reviewed scope.",
+      "A skipped/failed send does not advance its delivery snapshot; configuration replacement is followed by authoritative runtime state.",
+      "Empty cooldown/proficiency compounds clear previous client values; login/reconnect/dimension/respawn full synchronization and bounded rejected-preset correction remain intact.",
+      "Delivery state belongs to the attachment instance and is excluded from persistent data; it retains no player, level or connection references.",
+      "The client gate waits for 20 consecutive ServerTick.Post samples with zero generation references, all holders ready for saving and no pending main-thread/light work, then completes native saveEverything before publishing success."
+    ],
+    "runtime_execution_attribution": "All final builds, GameTests and desktop client execution were performed by /root. This reviewer read the resulting local receipts and did not independently execute those runs.",
+    "evidence_refs": [
+      "evidence/data-sync-0.0.31/final-validation.json",
+      "evidence/data-sync-0.0.31/gametests-final/result.json",
+      "evidence/data-sync-0.0.31/client-final/result.json",
+      "evidence/data-sync-0.0.31/client-final/academy-data-sync-save-checkpoint.txt"
+    ],
+    "receipt_summary": {
+      "final_validation_status": "PASS",
+      "gametests": {
+        "tests": 461,
+        "failures": 0,
+        "exit_code": 0,
+        "forced": false
+      },
+      "client": {
+        "behavior_checks": 14,
+        "player_checks": 8,
+        "machine_checks": 6,
+        "passed": true,
+        "saved_after_stop": true,
+        "process_exited": true,
+        "exit_code": 0,
+        "forced": false
+      },
+      "native_save_checkpoint": {
+        "status": "PASS",
+        "settle_ticks": 73,
+        "consecutive_ready_server_ticks": 20,
+        "generation_refs": 0,
+        "not_save_ready": 0,
+        "queued_tasks": 0,
+        "light_work": false,
+        "native_save_everything_completed": true,
+        "flush": true
+      }
+    },
+    "limits": "Receipt verification is not an independently repeated runtime run. Actual payload/codec-byte measurements exclude transport framing and compression. The final-validation.json limitations continue to apply."
+  }
+}

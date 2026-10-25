@@ -129,60 +129,71 @@ public final class MeltdownerParityGameTests {
     @GameTest(template = EMPTY, batch = "scatter_bomb_isolated")
     public static void scatterBombMasteryAutoTargetsNearbyMob(GameTestHelper helper) {
         ServerPlayer player = helper.makeMockServerPlayerInLevel();
-        PlayerAbilityData data = meltdowner(player, "scatter_bomb");
-        data.setDevMode(true);
-        player.setYRot(0);
-        player.setYHeadRot(0);
-        player.setXRot(0);
+        // makeMockServerPlayerInLevel logs in at the shared world spawn, not this fixture.
+        // Put this test's ray beside its own structure so prior mock players cannot occlude it.
+        BlockPos origin = helper.absolutePos(new BlockPos(2, 2, 2));
+        player.setPos(origin.getX() + .5, origin.getY(), origin.getZ() + .5);
+        Zombie target = null;
+        try {
+            PlayerAbilityData data = meltdowner(player, "scatter_bomb");
+            data.setDevMode(true);
+            player.setYRot(0);
+            player.setYHeadRot(0);
+            player.setXRot(0);
 
-        // Batch isolation prevents neighbouring tests from contributing mobs,
-        // but it does not disable natural spawning in the shared GameTest
-        // level.  The legacy implementation deliberately picks a random Mob,
-        // so enforce the singleton population promised by this test instead
-        // of assuming the world starts empty.
-        helper.getLevel().getEntitiesOfClass(Mob.class,
-                player.getBoundingBox().inflate(5)).forEach(Mob::discard);
+            // Batch isolation prevents neighbouring tests from contributing mobs,
+            // but it does not disable natural spawning in the shared GameTest
+            // level.  The legacy implementation deliberately picks a random Mob,
+            // so enforce the singleton population promised by this test instead
+            // of assuming the world starts empty.
+            helper.getLevel().getEntitiesOfClass(Mob.class,
+                    player.getBoundingBox().inflate(5)).forEach(Mob::discard);
 
-        Zombie target = EntityType.ZOMBIE.create(helper.getLevel());
-        if (target == null) {
-            helper.fail("could not create Scatter Bomb auto target");
-            return;
-        }
-        // Ninety degrees away from the look vector: the final 1.12.2
-        // high-proficiency auto-target branch is the only way this ray hits.
-        target.setPos(player.getX() + 3, player.getY(), player.getZ());
-        helper.getLevel().addFreshEntity(target);
-        float health = target.getHealth();
+            target = EntityType.ZOMBIE.create(helper.getLevel());
+            if (target == null) {
+                helper.fail("could not create Scatter Bomb auto target");
+                return;
+            }
+            // Ninety degrees away from the look vector: the final 1.12.2
+            // high-proficiency auto-target branch is the only way this ray hits.
+            target.setPos(player.getX() + 3, player.getY(), player.getZ());
+            helper.getLevel().addFreshEntity(target);
+            float health = target.getHealth();
 
-        ScatterBombEffect effect = new ScatterBombEffect();
-        effect.onChargingStart(player, data);
-        if (!effect.onChargingTick(player, data, 20)) {
-            helper.fail("Scatter Bomb could not reach its first ball cadence");
-            return;
+            ScatterBombEffect effect = new ScatterBombEffect();
+            effect.onChargingStart(player, data);
+            if (!effect.onChargingTick(player, data, 20)) {
+                helper.fail("Scatter Bomb could not reach its first ball cadence");
+                return;
+            }
+            var balls = helper.getLevel().getEntitiesOfClass(MdBallEntity.class,
+                    player.getBoundingBox().inflate(4));
+            if (balls.size() != 1) {
+                helper.fail("Scatter Bomb created " + balls.size() + " balls at its first cadence, expected 1");
+                return;
+            }
+            var traced = ScatterBombEffect.nearestVisibleTarget(player, balls.getFirst().position(),
+                    target.position().add(0, target.getEyeHeight(), 0));
+            if (traced != target) {
+                helper.fail("Scatter Bomb auto-target ray selected "
+                        + (traced == null ? "nothing" : traced.getType().toString())
+                        + " instead of the nearby zombie");
+                return;
+            }
+            if (!effect.tryRelease(player, data, 20)) {
+                helper.fail("Scatter Bomb did not release its accumulated ball");
+                return;
+            }
+            if (target.getHealth() >= health) {
+                helper.fail("Scatter Bomb lost final 1.12.2 mastery auto-targeting");
+                return;
+            }
+            helper.succeed();
+        } finally {
+            ScatterBombEffect.discardOnLifecycle(player);
+            if (target != null) target.discard();
+            player.server.getPlayerList().remove(player);
         }
-        var balls = helper.getLevel().getEntitiesOfClass(MdBallEntity.class,
-                player.getBoundingBox().inflate(4));
-        if (balls.size() != 1) {
-            helper.fail("Scatter Bomb created " + balls.size() + " balls at its first cadence, expected 1");
-            return;
-        }
-        var traced = ScatterBombEffect.nearestVisibleTarget(player, balls.getFirst().position(),
-                target.position().add(0, target.getEyeHeight(), 0));
-        if (traced != target) {
-            helper.fail("Scatter Bomb auto-target ray selected "
-                    + (traced == null ? "nothing" : traced.getType().toString())
-                    + " instead of the nearby zombie");
-            return;
-        }
-        if (!effect.tryRelease(player, data, 20)) {
-            helper.fail("Scatter Bomb did not release its accumulated ball");
-            return;
-        }
-        if (target.getHealth() >= health) {
-            helper.fail("Scatter Bomb lost final 1.12.2 mastery auto-targeting");
-            return;
-        }
-        helper.succeed();
     }
 
     @GameTest(template = EMPTY)
