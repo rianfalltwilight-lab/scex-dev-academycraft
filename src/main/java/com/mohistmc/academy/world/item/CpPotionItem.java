@@ -15,7 +15,7 @@ import net.minecraft.world.level.Level;
 
 /** Drinkable 2,000 CP recovery capped at one half of maximum CP. */
 public final class CpPotionItem extends AcademyItem {
-    public CpPotionItem() { super(new Properties().stacksTo(16)); }
+    public CpPotionItem() { super(new Properties().stacksTo(64)); }
 
     @Override public UseAnim getUseAnimation(ItemStack stack) { return UseAnim.DRINK; }
     @Override public int getUseDuration(ItemStack stack, LivingEntity entity) { return 50; }

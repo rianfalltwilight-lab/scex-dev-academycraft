@@ -3,10 +3,16 @@ package com.mohistmc.academy.advancement;
 import com.mohistmc.academy.skill.PlayerAbilityData;
 import com.mohistmc.academy.skill.Skill;
 import java.util.Map;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
 /** Server-authoritative bridge for the 1.0.7 achievement graph. */
+@EventBusSubscriber(modid = "academy")
 public final class LegacyAdvancementBridge {
     private LegacyAdvancementBridge() {}
     private static final String TP_COUNT="academy_legacy_tp_count";
@@ -32,8 +38,25 @@ public final class LegacyAdvancementBridge {
         String id=USE.get(skill.getId()); if(id!=null) award(player,id);
     }
     public static void teleported(ServerPlayer player) {
-        var tag=player.getPersistentData(); int count=Math.min(400,tag.getInt(TP_COUNT)+1); tag.putInt(TP_COUNT,count);
+        var tag=teleportProgress(player); int count=Math.min(400,tag.getInt(TP_COUNT)+1); tag.putInt(TP_COUNT,count);
         if(count>=400) award(player,"teleporter/mastery");
+    }
+    private static CompoundTag teleportProgress(Player player) {
+        var data=player.getPersistentData();
+        if(!data.contains(Player.PERSISTED_NBT_TAG,10)) data.put(Player.PERSISTED_NBT_TAG,new CompoundTag());
+        var persisted=data.getCompound(Player.PERSISTED_NBT_TAG);
+        int count=Math.clamp(Math.max(persisted.getInt(TP_COUNT),data.getInt(TP_COUNT)),0,400);
+        persisted.putInt(TP_COUNT,count);
+        data.remove(TP_COUNT);
+        return persisted;
+    }
+    @SubscribeEvent
+    public static void cloned(PlayerEvent.Clone event) {
+        if(!(event.getEntity() instanceof ServerPlayer player)) return;
+        // Old saves may die before their next teleport has migrated the top-level key.
+        int previous=teleportProgress(event.getOriginal()).getInt(TP_COUNT);
+        var current=teleportProgress(player);
+        current.putInt(TP_COUNT,Math.max(previous,current.getInt(TP_COUNT)));
     }
     public static void teleporterCritical(ServerPlayer player){award(player,"teleporter/critical_attack");}
     public static void electromasterChargedCreeper(ServerPlayer player){award(player,"electromaster/attack_creeper");}

@@ -24,22 +24,28 @@ public final class PaperPlaneItem extends AcademyItem {
         ItemStack stack = player.getItemInHand(hand);
         if (!level.isClientSide && player instanceof ServerPlayer serverPlayer) {
             PlayerAbilityData data = player.getData(AcademyAttachments.PLAYER_ABILITY);
+            var before = data.captureDynamicResources();
             boolean reinforced = false;
             if (data.hasLearnedSkill("perfect_paper")) {
                 float proficiency = data.getProficiency("perfect_paper");
                 float cp = 300F - 100F * Math.clamp(proficiency, 0, 1);
                 reinforced = DynamicSkillRules.tryPay(data, "perfect_paper", cp, 0);
-                if (reinforced) DynamicSkillRules.addExp(serverPlayer, data,
-                        "perfect_paper", 0.001F);
             }
+            var paid = data.captureDynamicResources();
             ExtraPaperPlaneEntity plane = new ExtraPaperPlaneEntity(
                     AcademyEntities.PAPER_PLANE.get(), level);
             plane.launch(player, reinforced);
-            if (level.addFreshEntity(plane)) {
-                if (!player.getAbilities().instabuild) stack.shrink(1);
-                level.playSound(null, player.blockPosition(), SoundEvents.ARROW_SHOOT,
-                        SoundSource.PLAYERS, 0.5F, reinforced ? 1.3F : 0.9F);
+            if (!level.addFreshEntity(plane) || !plane.isAlive() || !player.isAlive()
+                    || player.level() != level || player.getItemInHand(hand) != stack || stack.isEmpty()) {
+                plane.discard();
+                data.rollbackDynamicPayment(before, paid);
+                return InteractionResultHolder.fail(stack);
             }
+            if (!player.getAbilities().instabuild) stack.shrink(1);
+            plane.arm();
+            if (reinforced) DynamicSkillRules.addExp(serverPlayer, data, "perfect_paper", 0.001F);
+            level.playSound(null, player.blockPosition(), SoundEvents.ARROW_SHOOT,
+                    SoundSource.PLAYERS, 0.5F, reinforced ? 1.3F : 0.9F);
             data.syncTo(player);
         }
         return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());

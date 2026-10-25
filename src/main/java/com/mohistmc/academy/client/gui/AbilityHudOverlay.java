@@ -61,7 +61,8 @@ public class AbilityHudOverlay {
         }
         if (activeSlots.isEmpty()) return;
 
-        int totalH = activeSlots.size() * (ICON_SIZE + 6) - 6;
+        int rowHeight = ICON_SIZE + 6 + SLOT_SPACING;
+        int totalH = (activeSlots.size() - 1) * rowHeight + ICON_SIZE;
         int x = Math.clamp(screenW - ICON_SIZE - MARGIN + ACConfig.Client.keyHintX(),
                 0, Math.max(0, screenW - ICON_SIZE));
         int y = Math.clamp(screenH / 2 - totalH / 2 + ACConfig.Client.keyHintY(),
@@ -69,7 +70,7 @@ public class AbilityHudOverlay {
 
         for (int idx = 0; idx < activeSlots.size(); idx++) {
             int slot = activeSlots.get(idx);
-            int iy = y + idx * (ICON_SIZE + 6 + SLOT_SPACING);
+            int iy = y + idx * rowHeight;
             String skillId = preset.getSlot(slot);
 
             // 按键标签（左侧小字）

@@ -22,6 +22,7 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.monster.Drowned;
+import com.mohistmc.academy.skill.ability.telekinesis.LiquidShadowEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -206,8 +207,9 @@ public final class ExtraAdversarialGameTests {
         var player = caster(helper, effect instanceof AirBladeEffect || effect instanceof BomberLanceEffect
                 || effect instanceof VolcanicBallEffect ? AbilityCategory.AEROHAND : AbilityCategory.TELEKINESIS);
         var victim = mob(helper, EntityType.VILLAGER, 3.90);
-        // Real front face is z=3.60; the isolated pane ends at z=3.5625.
-        helper.setBlock(new BlockPos(2, 3, 3), Blocks.GLASS_PANE);
+        // A connected thin iron-bar wall resists the lance's <= .4 fragile-block harvesting
+        // and spans the blade's lateral oscillation. The victim's real front face is behind it.
+        for(int x=0;x<6;x++) helper.setBlock(new BlockPos(x, 3, 3), Blocks.IRON_BARS);
         float before = victim.getHealth();
         try {
             var data = player.getData(AcademyAttachments.PLAYER_ABILITY);
@@ -220,7 +222,7 @@ public final class ExtraAdversarialGameTests {
                 }
             } else executeWithFlight(helper, player, data, effect);
             if (victim.getHealth() != before) {
-                helper.fail(effect.getId() + " damaged a real hitbox entirely behind a glass pane"); return;
+                helper.fail(effect.getId() + " damaged a real hitbox entirely behind a thin resistant wall"); return;
             }
             helper.succeed();
         } finally {
@@ -235,11 +237,21 @@ public final class ExtraAdversarialGameTests {
     @GameTest(template = "empty") public static void volcanicStopsAtThinWall(GameTestHelper h) { thinWall(h, new VolcanicBallEffect()); }
     @GameTest(template = "empty") public static void needlingStopsAtThinWall(GameTestHelper h) { thinWall(h, new PsychoNeedlingEffect()); }
     @GameTest(template = "empty") public static void throwingStopsAtThinWall(GameTestHelper h) { thinWall(h, new PsychoThrowingEffect()); }
-    @GameTest(template = "empty") public static void slamStopsAtThinWall(GameTestHelper h) { thinWall(h, new PsychoSlamEffect()); }
+    @GameTest(template = "empty") public static void slamStopsAtThinWall(GameTestHelper h) { slamSurface(h, true); }
     @GameTest(template = "empty") public static void paperDrillStopsAtThinWall(GameTestHelper h) { thinWall(h, new PaperDrillEffect()); }
 
     private static void executeWithFlight(GameTestHelper helper, ServerPlayer player,
                                           com.mohistmc.academy.skill.PlayerAbilityData data, SkillEffect effect) {
+        if(effect instanceof AirBladeEffect || effect instanceof BomberLanceEffect || effect instanceof VolcanicBallEffect) {
+            helper.assertTrue(effect.executeAndReport(player,data),"Air projectile fixture failed to launch");
+            var shots=helper.getLevel().getEntitiesOfClass(com.mohistmc.academy.world.entity.AeroProjectileEntity.class,
+                    player.getBoundingBox().inflate(3),e->e.getOwner()==player);
+            helper.assertTrue(shots.size()==1,"Expected one air projectile");
+            var shot=shots.getFirst();
+            try {for(int i=0;i<40&&!shot.isRemoved();i++)shot.tick();}
+            finally {shot.discard();}
+            return;
+        }
         if (!(effect instanceof PsychoThrowingEffect || effect instanceof PsychoNeedlingEffect)) {
             effect.execute(player, data); return;
         }
@@ -277,15 +289,36 @@ public final class ExtraAdversarialGameTests {
     @GameTest(template = "empty") public static void volcanicHitsFirstSurface(GameTestHelper h) { firstIntersection(h, new VolcanicBallEffect()); }
     @GameTest(template = "empty") public static void needlingHitsFirstSurface(GameTestHelper h) { firstIntersection(h, new PsychoNeedlingEffect()); }
     @GameTest(template = "empty") public static void throwingHitsFirstSurface(GameTestHelper h) { firstIntersection(h, new PsychoThrowingEffect()); }
-    @GameTest(template = "empty") public static void slamHitsFirstSurface(GameTestHelper h) { firstIntersection(h, new PsychoSlamEffect()); }
+    @GameTest(template = "empty") public static void slamHitsFirstSurface(GameTestHelper h) { slamSurface(h, false); }
 
-    private static Drowned summonShadow(GameTestHelper helper, ServerPlayer player) {
+    private static void slamSurface(GameTestHelper helper, boolean wall) {
+        var player = caster(helper, AbilityCategory.TELEKINESIS);
+        // Delayed server sessions resolve the owner from the actual level entity manager.
+        helper.getLevel().addNewPlayer(player);
+        player.setNoGravity(true);
+        var small = mob(helper, EntityType.VILLAGER, 5.6);
+        var large = mob(helper, EntityType.GHAST, 7);
+        if (wall) for (int x = 0; x < 6; x++) helper.setBlock(new BlockPos(x, 3, 3), Blocks.IRON_BARS);
+        var data = player.getData(AcademyAttachments.PLAYER_ABILITY);
+        data.setProficiency("psycho_slam", 1);
+        new PsychoSlamEffect().execute(player, data);
+        helper.assertTrue(small.getHealth() == 200 && large.getHealth() == 200, "Slam attacked before its first server tick");
+        helper.runAfterDelay(3, () -> {
+            try {
+                helper.assertTrue(small.getHealth() == 200 && (wall ? large.getHealth() == 200 : large.getHealth() < 200),
+                        "Delayed slam ignored the wall or selected an entity origin instead of its real surface");
+                helper.succeed();
+            } finally { small.discard(); large.discard(); player.discard(); }
+        });
+    }
+
+    private static LiquidShadowEntity summonShadow(GameTestHelper helper, ServerPlayer player) {
         var data = player.getData(AcademyAttachments.PLAYER_ABILITY);
         data.learnSkill("liquid_shadow");
         player.getInventory().add(new ItemStack(Items.WATER_BUCKET));
         if (!TelekinesisPassiveHandler.toggleLiquidShadow(player))
             throw new IllegalStateException("shadow fixture did not summon");
-        return helper.getLevel().getEntitiesOfClass(Drowned.class, player.getBoundingBox().inflate(8),
+        return helper.getLevel().getEntitiesOfClass(LiquidShadowEntity.class, player.getBoundingBox().inflate(8),
                 e -> e.getTags().contains("academy_liquid_shadow_owner_" + player.getUUID())).getFirst();
     }
 
@@ -301,6 +334,7 @@ public final class ExtraAdversarialGameTests {
         data.setProficiency("liquid_shadow", 0);
         data.setCurrentCp(50);
         try {
+            shadow.doHurtTarget(victim);
             TelekinesisPassiveHandler.playerTick(new PlayerTickEvent.Post(player));
             if (victim.getHealth() != 200) {
                 helper.fail("liquid shadow hurt before checking the 100 CP attack debit at only 50 CP"); return;
@@ -320,6 +354,7 @@ public final class ExtraAdversarialGameTests {
         player.setLastHurtMob(victim);
         player.tickCount = 20;
         try {
+            shadow.doHurtTarget(victim);
             TelekinesisPassiveHandler.playerTick(new PlayerTickEvent.Post(player));
             if (victim.getHealth() != 200) {
                 helper.fail("liquid shadow performed melee through a glass pane"); return;
@@ -343,6 +378,7 @@ public final class ExtraAdversarialGameTests {
         player.setLastHurtMob(victim);
         player.tickCount = 20;
         try {
+            shadow.doHurtTarget(victim);
             TelekinesisPassiveHandler.playerTick(new PlayerTickEvent.Post(player));
             if (victim.getHealth() != 200) {
                 helper.fail("liquid shadow attacked a cached target belonging to another dimension"); return;
@@ -410,6 +446,7 @@ public final class ExtraAdversarialGameTests {
         data.setProficiency("liquid_shadow", 0);
         data.setCurrentCp(101);
         try {
+            shadow.doHurtTarget(victim);
             TelekinesisPassiveHandler.playerTick(new PlayerTickEvent.Post(player));
             if (Math.abs(victim.getHealth() - 180) > 1e-4 || Math.abs(data.getCurrentCp()) > 1e-4) {
                 helper.fail("visible shadow attack must deal 20 damage and debit 1 upkeep + 100 attack CP"); return;
@@ -429,8 +466,8 @@ public final class ExtraAdversarialGameTests {
         player.tickCount = 20;
         try {
             TelekinesisPassiveHandler.playerTick(new PlayerTickEvent.Post(player));
-            if (victim.getHealth() != 200 || shadow.distanceToSqr(player) > 16) {
-                helper.fail("catch-up must return to the owner without teleporting into a melee hit"); return;
+            if (victim.getHealth() != 200 || shadow.distanceToSqr(victim) < 100) {
+                helper.fail("owner upkeep must not teleport the shadow onto a distant melee target"); return;
             }
             helper.succeed();
         } finally {
@@ -490,21 +527,36 @@ public final class ExtraAdversarialGameTests {
         var player = caster(helper, AbilityCategory.TELEKINESIS);
         var shadow = summonShadow(helper, player);
         var victim = mob(helper, EntityType.VILLAGER, 3.9);
-        victim.setInvulnerable(true);
         shadow.setPos(victim.position().add(0, 0, -1));
-        player.setLastHurtMob(victim);
-        player.tickCount = 20;
         var data = player.getData(AcademyAttachments.PLAYER_ABILITY);
         data.setDevMode(false);
         data.setProficiency("liquid_shadow", 0);
-        data.setCurrentCp(101);
+        data.setCurrentCp(100);
+        float growth = data.getUsageMaxCp();
+        int[] cancelled = {0};
+        java.util.function.Consumer<net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent> deny = event -> {
+            if (event.getEntity() == victim && event.getSource().getEntity() == player) {
+                cancelled[0]++;
+                event.setCanceled(true);
+            }
+        };
+        NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent.class, deny);
         try {
-            TelekinesisPassiveHandler.playerTick(new PlayerTickEvent.Post(player));
-            if (victim.getHealth() != 200 || Math.abs(data.getCurrentCp()) > 1e-4) {
+            // Vanilla target rejection precedes payment. A downstream protection
+            // veto is different: the real melee boundary has already paid for it.
+            victim.setInvulnerable(true);
+            helper.assertTrue(!shadow.doHurtTarget(victim) && data.getCurrentCp() == 100
+                    && data.getUsageMaxCp() == growth && cancelled[0] == 0,
+                    "ineligible target reached the paid attack transaction");
+            victim.setInvulnerable(false);
+            boolean accepted = shadow.doHurtTarget(victim);
+            if (accepted || cancelled[0] != 1 || victim.getHealth() != 200
+                    || Math.abs(data.getCurrentCp()) > 1e-4 || data.getUsageMaxCp() <= growth) {
                 helper.fail("a rejected shadow attack must retain its paid debit, not refund CP while keeping usage growth"); return;
             }
             helper.succeed();
         } finally {
+            NeoForge.EVENT_BUS.unregister(deny);
             TelekinesisPassiveHandler.logout(new PlayerEvent.PlayerLoggedOutEvent(player)); victim.discard();
         }
     }

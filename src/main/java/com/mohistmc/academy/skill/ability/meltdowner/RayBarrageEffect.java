@@ -1,5 +1,7 @@
 package com.mohistmc.academy.skill.ability.meltdowner;
 
+import com.mohistmc.academy.skill.ability.LoadedRaycast;
+
 import static com.mohistmc.academy.utils.MathUtils.lerpf;
 
 import com.mohistmc.academy.config.DynamicSkillRules;
@@ -101,7 +103,7 @@ public final class RayBarrageEffect implements SkillEffect {
     }
 
     private static Vec3 blockEnd(ServerPlayer player, Vec3 from, Vec3 to) {
-        var hit = player.serverLevel().clip(new ClipContext(from, to, ClipContext.Block.COLLIDER,
+        var hit = LoadedRaycast.clip(player.serverLevel(), new ClipContext(from, to, ClipContext.Block.COLLIDER,
                 ClipContext.Fluid.NONE, player));
         return hit.getType() == HitResult.Type.MISS ? to : hit.getLocation();
     }

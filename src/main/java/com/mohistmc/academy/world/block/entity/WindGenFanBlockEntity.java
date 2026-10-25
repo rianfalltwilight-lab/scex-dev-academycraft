@@ -25,4 +25,8 @@ public class WindGenFanBlockEntity extends BlockEntity {
         super.saveAdditional(tag, registries);
         tag.putBoolean("isRunning", this.isRunning);
     }
+    @Override public void onLoad() {
+        super.onLoad();
+        if (level != null && !level.isClientSide()) level.scheduleTick(worldPosition, getBlockState().getBlock(), 1);
+    }
 }

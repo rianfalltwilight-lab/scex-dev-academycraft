@@ -55,6 +55,7 @@ public class MatrixSubBlock extends BaseEntityBlock {
         // both possible layers and then require the oriented footprint to
         // contain this exact proxy; this avoids capturing an adjacent matrix.
         for (BlockPos main : BlockPos.betweenClosed(sub.offset(-1, -1, -1), sub.offset(1, 0, 1))) {
+            if (!com.mohistmc.academy.world.block.LoadedMachineChunks.contains(level, main)) continue;
             BlockState candidate = level.getBlockState(main);
             if (candidate.getBlock() instanceof Matrix && Matrix.structurePositions(main, candidate).contains(sub)) {
                 return main.immutable();
@@ -100,7 +101,9 @@ public class MatrixSubBlock extends BaseEntityBlock {
 
     @Override
     public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos neighbor, boolean p_60514_) {
-        if (!level.isClientSide && findMain(level, pos) == null) {
+        if (!level.isClientSide
+                && com.mohistmc.academy.world.block.LoadedMachineChunks.containsArea(level, pos.offset(-1, -1, -1), pos.offset(1, 0, 1))
+                && findMain(level, pos) == null) {
             // A sub-block belongs to the main whose oriented footprint contains it.
             // Unrelated neighbouring matrix changes must never invalidate it.
             level.destroyBlock(pos, false);
@@ -115,4 +118,15 @@ public class MatrixSubBlock extends BaseEntityBlock {
     }
 
 
+    @Override
+    public void tick(BlockState state, net.minecraft.server.level.ServerLevel level, BlockPos pos,
+                     net.minecraft.util.RandomSource random) {
+        if (!com.mohistmc.academy.world.block.LoadedMachineChunks.containsArea(level, pos.offset(-1, -1, -1), pos.offset(1, 0, 1))) {
+            level.scheduleTick(pos, this, 20);
+            return;
+        }
+        BlockPos main = findMain(level, pos);
+        if (main == null) level.destroyBlock(pos, false);
+        else level.scheduleTick(main, level.getBlockState(main).getBlock(), 1);
+    }
 }

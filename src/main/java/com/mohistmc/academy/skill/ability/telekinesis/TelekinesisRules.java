@@ -15,19 +15,8 @@ public final class TelekinesisRules {
         return lerp(1000.0f, 2000.0f, proficiency);
     }
 
-    public static float insulationReduction(float proficiency, boolean electromasterOrMeltdowner) {
-        return lerp(0.10f, 0.20f, proficiency) * (electromasterOrMeltdowner ? 2.0F : 1.0F);
-    }
-
-    public static float mitigateAbilityDamage(float amount, float proficiency,
-                                              boolean electromasterOrMeltdowner) {
-        if (!Float.isFinite(amount) || amount <= 0) return 0;
-        return amount * (1.0f - insulationReduction(proficiency, electromasterOrMeltdowner));
-    }
-
-    public static boolean mayEnterHardenedStance(boolean passiveAvailable,
-                                                  boolean crouching, boolean onGround) {
-        return passiveAvailable && crouching && onGround;
+    public static float insulationReduction(float proficiency, float categoryMultiplier) {
+        return lerp(0.10f, 0.20f, proficiency) * categoryMultiplier;
     }
 
     public static float paperDrillDamage(float proficiency) {

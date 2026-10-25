@@ -49,6 +49,7 @@ public class SkillSlotGui extends AcademyScreen {
     private int dropdownSlot = -1;
     private int dropdownX;
     private int dropdownY;
+    private int dropdownScroll;
     private List<DropdownEntry> dropdownEntries = new ArrayList<>();
     private int hoveredDropdownItem = -1;
 
@@ -175,16 +176,17 @@ public class SkillSlotGui extends AcademyScreen {
         graphics.pose().pushPose();
         graphics.pose().translate(0, 0, 200);
 
-        int totalHeight = dropdownEntries.size() * DROPDOWN_ITEM_HEIGHT + DROPDOWN_PADDING * 2;
+        int visibleRows = dropdownVisibleRows();
+        int totalHeight = visibleRows * DROPDOWN_ITEM_HEIGHT + DROPDOWN_PADDING * 2;
 
         graphics.fill(dropdownX - 1, dropdownY - 1, dropdownX + DROPDOWN_WIDTH + 1, dropdownY + totalHeight + 1, AcademyColors.BORDER_ACTIVE);
         graphics.fill(dropdownX, dropdownY, dropdownX + DROPDOWN_WIDTH, dropdownY + totalHeight, COLOR_DROPDOWN_BG);
 
         int itemY = dropdownY + DROPDOWN_PADDING;
-        for (int i = 0; i < dropdownEntries.size(); i++) {
+        for (int i = dropdownScroll; i < Math.min(dropdownEntries.size(), dropdownScroll + visibleRows); i++) {
             DropdownEntry entry = dropdownEntries.get(i);
             int ix = dropdownX + DROPDOWN_PADDING;
-            int iy = itemY + i * DROPDOWN_ITEM_HEIGHT;
+            int iy = itemY + (i - dropdownScroll) * DROPDOWN_ITEM_HEIGHT;
             boolean isHovered = isHovered(dropdownX, iy, DROPDOWN_WIDTH, DROPDOWN_ITEM_HEIGHT, mouseX, mouseY);
             if (isHovered) hoveredDropdownItem = i;
 
@@ -206,6 +208,14 @@ public class SkillSlotGui extends AcademyScreen {
                 int textY = iy + (DROPDOWN_ITEM_HEIGHT - 8) / 2;
                 graphics.drawString(this.font, label, textX, textY, COLOR_DROPDOWN_CLEAR);
             }
+        }
+
+        if (dropdownEntries.size() > visibleRows) {
+            int trackHeight = visibleRows * DROPDOWN_ITEM_HEIGHT;
+            int thumbHeight = Math.max(4, trackHeight * visibleRows / dropdownEntries.size());
+            int thumbY = itemY + (trackHeight - thumbHeight) * dropdownScroll / (dropdownEntries.size() - visibleRows);
+            graphics.fill(dropdownX + DROPDOWN_WIDTH - 3, thumbY,
+                    dropdownX + DROPDOWN_WIDTH - 1, thumbY + thumbHeight, AcademyColors.TEXT_SECONDARY);
         }
 
         graphics.pose().popPose();
@@ -360,7 +370,8 @@ public class SkillSlotGui extends AcademyScreen {
 
         dropdownX = Math.clamp(dropdownX, guiLeft + 2, guiLeft + GUI_WIDTH - DROPDOWN_WIDTH - 2);
 
-        int totalDropdownHeight = dropdownEntries.size() * DROPDOWN_ITEM_HEIGHT + DROPDOWN_PADDING * 2;
+        dropdownScroll = 0;
+        int totalDropdownHeight = dropdownVisibleRows() * DROPDOWN_ITEM_HEIGHT + DROPDOWN_PADDING * 2;
         int centerY = slotY + SLOT_SIZE / 2;
         dropdownY = centerY - totalDropdownHeight / 2;
 
@@ -375,6 +386,23 @@ public class SkillSlotGui extends AcademyScreen {
         }
 
         dropdownSlot = slotIndex;
+    }
+
+    private int dropdownVisibleRows() {
+        return Math.min(dropdownEntries.size(), Math.max(1, (height - 2 - DROPDOWN_PADDING * 2) / DROPDOWN_ITEM_HEIGHT));
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        int visibleRows = dropdownVisibleRows();
+        int dropdownHeight = visibleRows * DROPDOWN_ITEM_HEIGHT + DROPDOWN_PADDING * 2;
+        if (dropdownSlot >= 0 && mouseX >= dropdownX && mouseX < dropdownX + DROPDOWN_WIDTH
+                && mouseY >= dropdownY && mouseY < dropdownY + dropdownHeight) {
+            dropdownScroll = (int) Math.clamp(dropdownScroll - scrollY, 0, Math.max(0, dropdownEntries.size() - visibleRows));
+            hoveredDropdownItem = -1;
+            return true;
+        }
+        return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
     }
 
     private List<String> getLearnedActiveSkills(PlayerAbilityData data) {

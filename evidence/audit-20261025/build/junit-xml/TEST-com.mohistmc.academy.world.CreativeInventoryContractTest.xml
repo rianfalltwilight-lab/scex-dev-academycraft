@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.mohistmc.academy.world.CreativeInventoryContractTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-25T08:05:22.011Z" hostname="MONARCH" time="0.005">
+  <properties/>
+  <testcase name="everyPlayerObtainableBlockHasExactlyOneMatchingBlockItem()" classname="com.mohistmc.academy.world.CreativeInventoryContractTest" time="0.004"/>
+  <testcase name="multiblockImplementationPartsHaveNeitherItemsNorItemModels()" classname="com.mohistmc.academy.world.CreativeInventoryContractTest" time="0.001"/>
+  <testcase name="creativeGeneratorHasOnlyTheItemRegistryAsItsStackSource()" classname="com.mohistmc.academy.world.CreativeInventoryContractTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

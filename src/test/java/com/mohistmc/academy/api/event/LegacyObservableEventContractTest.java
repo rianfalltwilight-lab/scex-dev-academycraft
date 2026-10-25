@@ -47,8 +47,16 @@ class LegacyObservableEventContractTest {
 
     @Test void terminalEventsOnlyFollowSuccessfulStateChanges() throws Exception {
         String terminal=source("world/item/TerminalInstaller.java");
-        assertTrue(terminal.indexOf("data.setTerminalInstalled(true)") < terminal.indexOf("new TerminalEvents.Installed"));
+        int installState = terminal.indexOf("data.setTerminalInstalled(true)");
+        int installedEvent = terminal.indexOf("new TerminalEvents.Installed");
+        assertTrue(installState >= 0, "terminal installation state mutation is missing");
+        assertTrue(installedEvent >= 0, "terminal installed event is missing");
+        assertTrue(installState < installedEvent);
         String app=source("world/item/BaseApp.java");
-        assertTrue(app.indexOf("data.installApp(getAppId())") < app.indexOf("new TerminalEvents.AppInstalled"));
+        int appState = app.indexOf("data.installApp(getAppId())");
+        int appEvent = app.indexOf("new TerminalEvents.AppInstalled");
+        assertTrue(appState >= 0, "app installation state mutation is missing");
+        assertTrue(appEvent >= 0, "app installed event is missing");
+        assertTrue(appState < appEvent);
     }
 }

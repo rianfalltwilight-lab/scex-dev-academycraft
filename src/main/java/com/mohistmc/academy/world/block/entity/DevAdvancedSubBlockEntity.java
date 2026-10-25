@@ -25,6 +25,7 @@ public class DevAdvancedSubBlockEntity extends BlockEntity implements IDevSubStr
     @Override
     public void setStructureId(UUID structureId) {
         this.structureId = structureId;
+        invalidateCapabilities();
         setChanged();
     }
 
@@ -36,6 +37,7 @@ public class DevAdvancedSubBlockEntity extends BlockEntity implements IDevSubStr
     @Override
     public void setMainPos(BlockPos mainPos) {
         this.mainPos = mainPos;
+        invalidateCapabilities();
         setChanged();
     }
 
@@ -60,5 +62,9 @@ public class DevAdvancedSubBlockEntity extends BlockEntity implements IDevSubStr
         if (mainPos != null) {
             tag.putLong("mainPos", mainPos.asLong());
         }
+    }
+    @Override public void onLoad() {
+        super.onLoad();
+        if (level != null && !level.isClientSide()) level.scheduleTick(worldPosition, getBlockState().getBlock(), 1);
     }
 }

@@ -73,6 +73,7 @@ public class WindGenFan extends BaseEntityBlock {
     public static BlockPos findMain(BlockGetter level, BlockPos proxy) {
         for (Direction direction : Direction.Plane.HORIZONTAL) {
             BlockPos candidate = proxy.relative(direction);
+            if (level instanceof Level world && !com.mohistmc.academy.world.block.LoadedMachineChunks.contains(world, candidate)) continue;
             BlockState state = level.getBlockState(candidate);
             if (state.getBlock() instanceof WindGenMain
                     && WindGenMain.proxyPositions(candidate, state).contains(proxy)) {
@@ -114,7 +115,8 @@ public class WindGenFan extends BaseEntityBlock {
     @Override
     public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block,
                                 BlockPos neighbor, boolean movedByPiston) {
-        if (!level.isClientSide && findMain(level, pos) == null) {
+        if (!level.isClientSide && com.mohistmc.academy.world.block.LoadedMachineChunks.containsArea(level, pos.offset(-1, 0, -1), pos.offset(1, 0, 1))
+                && findMain(level, pos) == null) {
             level.destroyBlock(pos, false);
         }
         super.neighborChanged(state, level, pos, block, neighbor, movedByPiston);
@@ -140,5 +142,16 @@ public class WindGenFan extends BaseEntityBlock {
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext p_49820_) {
         return this.defaultBlockState().setValue(FACING, p_49820_.getHorizontalDirection().getOpposite());
+    }
+    @Override
+    public void tick(BlockState state, net.minecraft.server.level.ServerLevel level, BlockPos pos,
+                     net.minecraft.util.RandomSource random) {
+        if (!com.mohistmc.academy.world.block.LoadedMachineChunks.containsArea(level, pos.offset(-1, 0, -1), pos.offset(1, 0, 1))) {
+            level.scheduleTick(pos, this, 20);
+            return;
+        }
+        BlockPos main = findMain(level, pos);
+        if (main == null) level.destroyBlock(pos, false);
+        else level.scheduleTick(main, level.getBlockState(main).getBlock(), 1);
     }
 }

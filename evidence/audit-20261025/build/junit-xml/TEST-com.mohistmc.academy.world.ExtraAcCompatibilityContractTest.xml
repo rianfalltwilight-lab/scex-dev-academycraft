@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.mohistmc.academy.world.ExtraAcCompatibilityContractTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-25T08:05:22.017Z" hostname="MONARCH" time="0.005">
+  <properties/>
+  <testcase name="allTwentyFiveAddonItemsHaveRegistryModelRecipeAndBilingualNames()" classname="com.mohistmc.academy.world.ExtraAcCompatibilityContractTest" time="0.002"/>
+  <testcase name="dynamicAddonModelsAndArmorSemanticsCannotRegressToStaticVanillaPlaceholders()" classname="com.mohistmc.academy.world.ExtraAcCompatibilityContractTest" time="0.001"/>
+  <testcase name="formerlyPassiveSustainedSkillsAreSelectableActiveEffects()" classname="com.mohistmc.academy.world.ExtraAcCompatibilityContractTest" time="0.0"/>
+  <testcase name="offenseArmourRestoresItsLegacyKnockbackResistanceLifecycle()" classname="com.mohistmc.academy.world.ExtraAcCompatibilityContractTest" time="0.001"/>
+  <testcase name="damagingRaysShareTheAuditedCollisionBoundary()" classname="com.mohistmc.academy.world.ExtraAcCompatibilityContractTest" time="0.0"/>
+  <testcase name="legacyToggleContextsOwnTerminationCooldownAndTransmissionStaysActive()" classname="com.mohistmc.academy.world.ExtraAcCompatibilityContractTest" time="0.001"/>
+  <testcase name="addonSkillTreesRetainAuditedLevelsPositionsAndParentEdges()" classname="com.mohistmc.academy.world.ExtraAcCompatibilityContractTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

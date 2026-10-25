@@ -26,7 +26,11 @@ class TerminalAppResourceContractTest {
         String terminal = Files.readString(Path.of(
                 "src/main/java/com/mohistmc/academy/client/gui/DataTerminalGui.java"));
         assertTrue(registry.contains("new BuiltinApp(\"about\", \"item.academy.app_about\")"));
-        assertTrue(registry.indexOf("register(ABOUT)") < registry.indexOf("register(SETTINGS)"));
+        int aboutRegistration = registry.indexOf("register(ABOUT)");
+        int settingsRegistration = registry.indexOf("register(SETTINGS)");
+        assertTrue(aboutRegistration >= 0, "About app registration is missing");
+        assertTrue(settingsRegistration >= 0, "Settings app registration is missing");
+        assertTrue(aboutRegistration < settingsRegistration);
         assertTrue(terminal.contains("new AboutAppGui(true)"));
 
         assertSha256("build/resources/main/assets/academy/textures/guis/about/bg.png",

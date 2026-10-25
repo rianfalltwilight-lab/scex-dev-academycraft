@@ -1,5 +1,7 @@
 package com.mohistmc.academy.skill.ability.meltdowner;
 
+import com.mohistmc.academy.skill.ability.LoadedRaycast;
+
 import com.mohistmc.academy.config.DynamicSkillRules;
 
 import com.mohistmc.academy.world.effect.EffectHelper;
@@ -26,7 +28,7 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.level.BlockEvent;
 
 abstract class AbstractMineRayEffect implements ChargingSkillEffect {
-    private record Mining(BlockPos pos, float left) {}
+    private record Mining(BlockPos pos, BlockState state, float left) {}
     private final Map<UUID, Mining> mining = new HashMap<>();
     private final Map<UUID, Float> overloadFloors = new HashMap<>();
     private final Map<UUID, UUID> visualBeams = new HashMap<>();
@@ -63,28 +65,32 @@ abstract class AbstractMineRayEffect implements ChargingSkillEffect {
         // executing server tick, including target progress and break logic.
         boolean maintained=DynamicSkillRules.tryPay(d,getId(),cp,0);
         ServerLevel level=p.serverLevel(); Vec3 from=p.getEyePosition();
-        BlockHitResult hit=level.clip(new ClipContext(from,from.add(p.getLookAngle().scale(range())),ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,p));
+        BlockHitResult hit=LoadedRaycast.clip(level, new ClipContext(from,from.add(p.getLookAngle().scale(range())),ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,p));
         // Presentation is one persistent owner-following entity, matching the
         // old client context instead of spawning overlapping network entities.
         if(hit.getType()!=HitResult.Type.BLOCK){mining.remove(p.getUUID());return maintained;}
-        BlockPos pos=hit.getBlockPos(); BlockState state=level.getBlockState(pos); float hardness=state.getDestroySpeed(level,pos);
+        BlockPos pos=hit.getBlockPos();
+        if(!LoadedRaycast.isLoaded(level, pos)){mining.remove(p.getUUID());return maintained;}
+        BlockState state=level.getBlockState(pos); float hardness=state.getDestroySpeed(level,pos);
         Mining old=mining.get(p.getUUID());
-        if(old==null||!old.pos.equals(pos)){
+        if(old==null||!old.pos.equals(pos)||old.state!=state){
             if(hardness<0||!canHarvest(p,state)||!preflight(level,p,pos,state)){mining.remove(p.getUUID());return maintained;}
-            mining.put(p.getUUID(),new Mining(pos.immutable(),hardness));
+            mining.put(p.getUUID(),new Mining(pos.immutable(),state,hardness));
             return maintained;
         }
         float left=old.left-speed(exp);
         EffectHelper.meltdownBurst(level,pos.getX()+.5,pos.getY()+.5,pos.getZ()+.5,
                 3+p.getRandom().nextInt(2),.65);
         if(left<=0){boolean broken=DynamicSkillRules.destroysBlocks(level,getId())&&breakBlock(level,p,pos,state);mining.remove(p.getUUID());if(broken&&!d.isDevMode())DynamicSkillRules.addExp(p,d, getId(), getId().endsWith("basic")?.0005f:.0003f);}
-        else mining.put(p.getUUID(),new Mining(pos.immutable(),left)); return maintained;
+        else mining.put(p.getUUID(),new Mining(pos.immutable(),state,left)); return maintained;
     }
     private ItemStack harvestTool(ServerPlayer p){ItemStack tool=new ItemStack(harvestLevel()<=2?Items.IRON_PICKAXE:Items.NETHERITE_PICKAXE);if(fortuneLevel()>0){var fortune=p.registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.ENCHANTMENT).getHolderOrThrow(Enchantments.FORTUNE);tool.enchant(fortune,fortuneLevel());}return tool;}
     private boolean canHarvest(ServerPlayer p,BlockState state){return !state.requiresCorrectToolForDrops()||harvestTool(p).isCorrectToolForDrops(state);}
-    private boolean preflight(ServerLevel l,ServerPlayer p,BlockPos pos,BlockState state){if(!l.hasChunkAt(pos)||!l.getWorldBorder().isWithinBounds(pos)||!p.mayInteract(l,pos))return false;BlockEvent.BreakEvent event=new BlockEvent.BreakEvent(l,pos,state,p);NeoForge.EVENT_BUS.post(event);return !event.isCanceled()&&l.getBlockState(pos)==state;}
+    private boolean preflight(ServerLevel l,ServerPlayer p,BlockPos pos,BlockState state){if(!LoadedRaycast.isLoaded(l, pos)||!l.getWorldBorder().isWithinBounds(pos)||!p.mayInteract(l,pos))return false;BlockEvent.BreakEvent event=new BlockEvent.BreakEvent(l,pos,state,p);NeoForge.EVENT_BUS.post(event);return !event.isCanceled()&&l.getBlockState(pos)==state;}
     private boolean breakBlock(ServerLevel l,ServerPlayer p,BlockPos pos,BlockState state){
-        if(l.getBlockState(pos)!=state)return false;
+        // Permissions and the block may have changed during the multi-tick mining operation.
+        if(!LoadedRaycast.isLoaded(l, pos)||l.getBlockState(pos)!=state||state.getDestroySpeed(l,pos)<0
+                ||!canHarvest(p,state)||!preflight(l,p,pos,state))return false;
         ItemStack tool=harvestTool(p);
         var blockEntity=l.getBlockEntity(pos);var drops=net.minecraft.world.level.block.Block.getDrops(state,l,pos,blockEntity,p,tool);
         if(!l.removeBlock(pos,false))return false;

@@ -1,8 +1,10 @@
 package com.mohistmc.academy.worldgen;
 
 import static org.junit.jupiter.api.Assertions.*;
+import com.google.gson.JsonParser;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashSet;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -60,12 +62,9 @@ class WorldgenResourceContractTest {
             assertTrue(modifier.contains("minecraft:chests/" + structure));
             assertTrue(modifier.contains("academy:chests/induction_factors"));
         }
-        String table = Files.readString(DATA.resolve("loot_table/chests/induction_factors.json"));
-        for (String category : List.of("electromaster", "meltdowner", "teleporter", "vecmanip",
-                "aerohand", "telekinesis")) {
-            assertTrue(table.contains("academy:factor_" + category));
-        }
-        assertTrue(table.contains("\"weight\": 4"), "legacy category weights must remain equal");
+        assertWeightedChestTable("induction_factors", List.of(
+                "academy:factor_electromaster", "academy:factor_meltdowner", "academy:factor_teleporter",
+                "academy:factor_vecmanip", "academy:factor_aerohand", "academy:factor_telekinesis"), 0.5);
     }
 
     @Test void academyOresAndMachinesKeepLegacyPickaxeTiers() throws Exception {
@@ -100,12 +99,31 @@ class WorldgenResourceContractTest {
             assertTrue(modifier.contains("minecraft:chests/" + structure));
             assertTrue(modifier.contains("academy:chests/media"));
         }
-        String table = Files.readString(DATA.resolve("loot_table/chests/media.json"));
-        for (String id : List.of("only_my_railgun", "level5_judgelight", "sisters_noise")) {
-            assertTrue(table.contains("academy:media_" + id));
+        assertWeightedChestTable("media", List.of("academy:media_only_my_railgun",
+                "academy:media_level5_judgelight", "academy:media_sisters_noise"), 0.25);
+    }
+
+    private static void assertWeightedChestTable(String id, List<String> expectedItems, double chance) throws Exception {
+        var table = JsonParser.parseString(Files.readString(
+                DATA.resolve("loot_table/chests/" + id + ".json"))).getAsJsonObject();
+        var pools = table.getAsJsonArray("pools");
+        assertEquals(1, pools.size(), id);
+        var pool = pools.get(0).getAsJsonObject();
+        var conditions = pool.getAsJsonArray("conditions");
+        assertEquals(1, conditions.size(), id);
+        var condition = conditions.get(0).getAsJsonObject();
+        assertEquals("minecraft:random_chance", condition.get("condition").getAsString(), id);
+        assertEquals(chance, condition.get("chance").getAsDouble(), 0.000001, id);
+        var entries = pool.getAsJsonArray("entries");
+        assertEquals(expectedItems.size(), entries.size(), id);
+        var actualItems = new HashSet<String>();
+        for (var element : entries) {
+            var entry = element.getAsJsonObject();
+            String item = entry.get("name").getAsString();
+            assertTrue(actualItems.add(item), "duplicate chest entry: " + item);
+            assertEquals("minecraft:item", entry.get("type").getAsString(), item);
+            assertEquals(4, entry.get("weight").getAsInt(), "legacy weight changed for " + item);
         }
-        assertTrue(table.contains("\"chance\": 0.25"),
-                "three legacy weight-4 media entries should retain half the six-factor aggregate chance");
-        assertTrue(table.contains("\"weight\": 4"), "legacy media weights must remain equal");
+        assertEquals(new HashSet<>(expectedItems), actualItems, id);
     }
 }

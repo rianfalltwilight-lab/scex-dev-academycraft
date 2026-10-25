@@ -1,4 +1,6 @@
 package com.mohistmc.academy.skill.ability.vecmanip;
+
+import com.mohistmc.academy.skill.ability.LoadedRaycast;
 import com.mohistmc.academy.skill.AcademyDamageHelper;
 
 import com.mohistmc.academy.config.DynamicSkillRules;
@@ -121,7 +123,7 @@ public class GroundShockEffect implements ChargingSkillEffect {
                 if (level.random.nextDouble() >= probabilities[i]) continue;
                 Vec3 offset = offsets[i];
                 BlockPos pos = BlockPos.containing(x + offset.x, y + offset.y, z + offset.z);
-                if (!level.hasChunkAt(pos) || !level.getWorldBorder().isWithinBounds(pos)) continue;
+                if (!LoadedRaycast.isLoaded(level, pos) || !level.getWorldBorder().isWithinBounds(pos)) continue;
                 BlockState state = level.getBlockState(pos);
                 if (state.isAir() || !visitedBlocks.add(pos)) continue;
 
@@ -165,7 +167,7 @@ public class GroundShockEffect implements ChargingSkillEffect {
                 for (int oy = -1; oy < 1; oy++) {
                     for (int oz = -5; oz < 5; oz++) {
                         BlockPos pos = new BlockPos(px + ox, py + oy, pz + oz);
-                        if (!level.hasChunkAt(pos) || !level.getWorldBorder().isWithinBounds(pos)) continue;
+                        if (!LoadedRaycast.isLoaded(level, pos) || !level.getWorldBorder().isWithinBounds(pos)) continue;
                         BlockState state = level.getBlockState(pos);
                         float hardness = state.getDestroySpeed(level, pos);
                         if (hardness >= 0 && hardness <= 0.6f && !state.isAir())
@@ -201,7 +203,7 @@ public class GroundShockEffect implements ChargingSkillEffect {
     }
 
     private static boolean mayBreak(ServerLevel level, ServerPlayer player, BlockPos pos, BlockState state) {
-        if (!level.hasChunkAt(pos) || !level.getWorldBorder().isWithinBounds(pos)
+        if (!LoadedRaycast.isLoaded(level, pos) || !level.getWorldBorder().isWithinBounds(pos)
                 || !level.mayInteract(player, pos)) return false;
         BlockEvent.BreakEvent event = new BlockEvent.BreakEvent(level, pos, state, player);
         NeoForge.EVENT_BUS.post(event);
@@ -210,7 +212,7 @@ public class GroundShockEffect implements ChargingSkillEffect {
 
     private static double breakWithForce(ServerLevel level, ServerPlayer player, BlockPos pos,
                                          boolean mayDrop, float dropRate, double energy) {
-        if (!level.hasChunkAt(pos) || !level.getWorldBorder().isWithinBounds(pos)) return energy;
+        if (!LoadedRaycast.isLoaded(level, pos) || !level.getWorldBorder().isWithinBounds(pos)) return energy;
         BlockState state = level.getBlockState(pos);
         if (state.isAir() || state.is(Blocks.FARMLAND) || !state.getFluidState().isEmpty()) return energy;
         float hardness = state.getDestroySpeed(level, pos);

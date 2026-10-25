@@ -1,4 +1,6 @@
 package com.mohistmc.academy.skill.ability.electromaster;
+
+import com.mohistmc.academy.skill.ability.LoadedRaycast;
 import com.mohistmc.academy.skill.AcademyDamageHelper;
 
 import com.mohistmc.academy.config.DynamicSkillRules;
@@ -44,6 +46,13 @@ import static com.mohistmc.academy.utils.MathUtils.lerpf;
 @EventBusSubscriber(modid = AcademyCraft.MODID)
 public class ArcGenEffect implements SkillEffect {
     private static final Map<UUID, Long> LAST_CAST = new ConcurrentHashMap<>();
+
+    @SubscribeEvent public static void logout(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent event) {
+        LAST_CAST.remove(event.getEntity().getUUID());
+    }
+    @SubscribeEvent public static void dimension(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerChangedDimensionEvent event) {
+        LAST_CAST.remove(event.getEntity().getUUID());
+    }
 
     @Override public boolean appliesBaseResourceCost() { return false; }
     @Override public boolean grantsActivationProficiency() { return false; }
@@ -103,7 +112,7 @@ public class ArcGenEffect implements SkillEffect {
                         DynamicSkillRules.damage(getId(),damage));
 
                 expIncr = getExpIncr(exp, true);
-            } else if (result.blockPos != null) {
+            } else if (result.blockPos != null && LoadedRaycast.isLoaded(level, result.blockPos)) {
                 // === 命中方块 ===
                 BlockState state = level.getBlockState(result.blockPos);
 
@@ -123,7 +132,7 @@ public class ArcGenEffect implements SkillEffect {
                 } else {
                     if (level.random.nextDouble() < igniteProb) {
                         BlockPos firePos = result.blockPos.above();
-                        if (level.isEmptyBlock(firePos) && authorized(player, level, firePos)) {
+                        if (authorized(player, level, firePos) && level.isEmptyBlock(firePos)) {
                             BlockEvent.EntityPlaceEvent permission = new BlockEvent.EntityPlaceEvent(
                                     BlockSnapshot.create(level.dimension(), level, firePos),
                                     level.getBlockState(result.blockPos), player);
@@ -147,7 +156,7 @@ public class ArcGenEffect implements SkillEffect {
     }
 
     private static boolean authorized(ServerPlayer player, ServerLevel level, BlockPos pos) {
-        return level.hasChunkAt(pos) && level.getWorldBorder().isWithinBounds(pos) && level.mayInteract(player, pos);
+        return LoadedRaycast.isLoaded(level, pos) && level.getWorldBorder().isWithinBounds(pos) && level.mayInteract(player, pos);
     }
 
     @SubscribeEvent public static void stopped(ServerStoppedEvent event) { LAST_CAST.clear(); }
@@ -161,7 +170,7 @@ public class ArcGenEffect implements SkillEffect {
         // LambdaLib's filNormal used exact collision shapes and ArcGen added
         // water to that selector. Vanilla's collider + any-fluid clip is the
         // 1.21.1 equivalent; fixed 0.3-block stepping skipped slabs/fences.
-        BlockHitResult blockHit = level.clip(new ClipContext(start, end,
+        BlockHitResult blockHit = LoadedRaycast.clip(level, new ClipContext(start, end,
                 ClipContext.Block.COLLIDER, ClipContext.Fluid.ANY, player));
         Vec3 entityEnd = blockHit.getType() == HitResult.Type.MISS ? end : blockHit.getLocation();
         EntityHitResult entityHit = rayTraceEntities(player, start, entityEnd);

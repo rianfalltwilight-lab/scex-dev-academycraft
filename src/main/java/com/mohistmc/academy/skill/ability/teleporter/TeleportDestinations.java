@@ -1,5 +1,7 @@
 package com.mohistmc.academy.skill.ability.teleporter;
 
+import com.mohistmc.academy.skill.ability.LoadedRaycast;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -13,10 +15,8 @@ public final class TeleportDestinations {
     public static boolean isSafe(Player player, Level level, Vec3 feet) {
         if (!isWithinBounds(player, level, feet)) return false;
         AABB box = player.getBoundingBox().move(feet.subtract(player.position()));
-        BlockPos min = BlockPos.containing(box.minX, box.minY, box.minZ);
-        BlockPos max = BlockPos.containing(Math.nextDown(box.maxX), Math.nextDown(box.maxY), Math.nextDown(box.maxZ));
-        // Check residency before querying collision shapes; a preview must not load chunks.
-        return level.hasChunksAt(min, max) && level.noCollision(player, box);
+        // BlockCollisions also visits adjacent cells for protruding shapes.
+        return LoadedRaycast.isAreaLoaded(level, box.inflate(1)) && level.noCollision(player, box);
     }
 
     public static boolean isWithinBounds(Player player, Level level, Vec3 feet) {

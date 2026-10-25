@@ -25,7 +25,9 @@ public abstract class AcademyContainerBlockEntity extends BlockEntity {
     @Override
     public void loadAdditional(CompoundTag p_331149_, HolderLookup.Provider p_333170_) {
         super.loadAdditional(p_331149_, p_333170_);
-        setItems(deserializeContentItems(p_331149_, p_333170_));
+        // Deserialization is not an inventory mutation and must not echo a
+        // client update or dirty the chunk while it is being loaded.
+        this.items = deserializeContentItems(p_331149_, p_333170_);
     }
 
     @Override
@@ -71,6 +73,17 @@ public abstract class AcademyContainerBlockEntity extends BlockEntity {
     }
 
     public abstract int getContainerSize();
+
+    /** Persist runtime changes once per clean-to-dirty chunk transition.
+     * The next save reads current fields, including the last change before
+     * unload. Delaying setChanged to an unload callback would be too late:
+     * vanilla saves the chunk before invoking that callback. */
+    public void markMachineChanged() {
+        if (level instanceof net.minecraft.server.level.ServerLevel server) {
+            var chunk = server.getChunkSource().getChunkNow(worldPosition.getX() >> 4, worldPosition.getZ() >> 4);
+            if (chunk != null && !chunk.isUnsaved()) setChanged();
+        }
+    }
 
     /**
      * Drops a machine's live inventory exactly once on the logical server and

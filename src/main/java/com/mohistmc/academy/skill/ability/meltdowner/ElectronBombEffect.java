@@ -1,5 +1,7 @@
 package com.mohistmc.academy.skill.ability.meltdowner;
 
+import com.mohistmc.academy.skill.ability.LoadedRaycast;
+
 import static com.mohistmc.academy.utils.MathUtils.lerpf;
 
 import com.mohistmc.academy.AcademyCraft;
@@ -87,7 +89,8 @@ public final class ElectronBombEffect implements SkillEffect {
         while (iterator.hasNext()) {
             Ball ball = iterator.next();
             ServerPlayer player = event.getServer().getPlayerList().getPlayer(ball.owner);
-            if (player == null || !player.isAlive() || AbilityInterferenceService.isInterfered(player)) {
+            if (player == null || !player.isAlive() || player.level() != ball.visual.level()
+                    || AbilityInterferenceService.isInterfered(player)) {
                 ball.visual.discard();
                 iterator.remove();
                 continue;
@@ -131,7 +134,7 @@ public final class ElectronBombEffect implements SkillEffect {
     static Vec3 lookingDestination(ServerPlayer player, double range) {
         Vec3 from = player.getEyePosition();
         Vec3 intended = from.add(player.getLookAngle().normalize().scale(range));
-        HitResult block = player.serverLevel().clip(new ClipContext(from, intended,
+        HitResult block = LoadedRaycast.clip(player.serverLevel(), new ClipContext(from, intended,
                 ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
         double best = block.getType() == HitResult.Type.MISS
                 ? from.distanceToSqr(intended) : from.distanceToSqr(block.getLocation());
@@ -154,7 +157,7 @@ public final class ElectronBombEffect implements SkillEffect {
     }
 
     static Entity firstEntity(ServerPlayer player, Vec3 from, Vec3 destination) {
-        HitResult block = player.serverLevel().clip(new ClipContext(from, destination,
+        HitResult block = LoadedRaycast.clip(player.serverLevel(), new ClipContext(from, destination,
                 ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
         double best = block.getType() == HitResult.Type.MISS
                 ? from.distanceToSqr(destination) : from.distanceToSqr(block.getLocation());

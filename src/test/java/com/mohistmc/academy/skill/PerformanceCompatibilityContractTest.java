@@ -21,12 +21,12 @@ class PerformanceCompatibilityContractTest {
 
     @Test void mineDetectFinal112PayloadIsBoundedAndOwnerOnly() throws Exception {
         // Final 1.12.2 limit: short count + range + (packed BlockPos + harvest level) * 8400.
-        assertEquals(75_606, 2 + Float.BYTES + (Long.BYTES + 1) * 8_400);
+        // 75,606 maximum bytes; behavior is exercised by the real server packet tests.
 
         String effect = source("skill/ability/electromaster/MineDetectEffect.java");
         String packet = source("network/MineDetectResultPacket.java");
         assertTrue(effect.contains("MAX_ORES = 8400"));
-        assertTrue(effect.contains("!level.hasChunkAt(pos)"), "scan must not force-load chunks");
+        assertTrue(effect.contains("!LoadedRaycast.isLoaded(level, pos)"), "scan must not force-load chunks");
         assertTrue(effect.contains("Mth.floor(centerX-range)")&&effect.contains("Mth.ceil(centerX+range)")
                         &&effect.contains("dx*dx+dy*dy+dz*dz>rangeSq"),
                 "fractional legacy radius and exact player-coordinate sphere must not be truncated");
@@ -43,8 +43,11 @@ class PerformanceCompatibilityContractTest {
 
     @Test void plasmaUsesTheBoundedVanillaExplosionAndNeverLoadsMissingChunks() throws Exception {
         String plasma = source("entity/PlasmaOrbEntity.java");
-        assertTrue(plasma.contains("!serverLevel.hasChunkAt(BlockPos.containing(next))"));
-        assertTrue(plasma.contains("level.hasChunksAt(min, max)"));
+        assertTrue(plasma.contains("!LoadedRaycast.isLoaded(serverLevel, BlockPos.containing(next))"));
+        assertTrue(plasma.contains("LoadedRaycast.isAreaLoaded(level, blastArea)"));
+        assertTrue(plasma.contains("inflate(radius * 2 + 2)"));
+        assertTrue(plasma.contains("new ProtectedBlast(level, player)") && plasma.contains("BlockEvent.BreakEvent"));
+        assertFalse(plasma.contains("serverLevel.clip("));
         assertTrue(plasma.contains("DynamicSkillRules.destroysBlocks(level, \"plasma_cannon\")"),
                 "the global legacy block-destruction gate must control the explosion interaction");
         assertTrue(plasma.contains("Level.ExplosionInteraction.BLOCK"));

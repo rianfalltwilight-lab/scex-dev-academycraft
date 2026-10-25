@@ -1,0 +1,10 @@
+{
+  "saved_after_stop": true,
+  "process_exited": true,
+  "close_reason": null,
+  "exit_code": 0,
+  "host": "MONARCH",
+  "passed": true,
+  "visual_review": "pending",
+  "forced": false
+}

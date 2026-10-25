@@ -110,10 +110,10 @@ public class DevAdvancedBlockEntity extends AcademyContainerBlockEntity
 
     @Override
     public void setEnergy(int energy) {
-        this.energy = Math.clamp(energy, 0, MAX_ENERGY);
-        setChanged();
-        if (level != null && !level.isClientSide)
-            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_CLIENTS);
+        int bounded = Math.clamp(energy, 0, MAX_ENERGY);
+        if (this.energy == bounded) return;
+        this.energy = bounded;
+        markMachineChanged(); // Open menus already use incremental ContainerData.
     }
 
     // ==================== IWirelessReceiver ====================
@@ -166,5 +166,9 @@ public class DevAdvancedBlockEntity extends AcademyContainerBlockEntity
         if (structureId != null) {
             tag.putString("structureId", structureId.toString());
         }
+    }
+    @Override public void onLoad() {
+        super.onLoad();
+        if (level != null && !level.isClientSide()) level.scheduleTick(worldPosition, getBlockState().getBlock(), 1);
     }
 }

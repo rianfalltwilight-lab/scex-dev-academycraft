@@ -10,8 +10,6 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.Mth;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -20,15 +18,12 @@ import net.minecraft.world.level.block.state.BlockState;
  * 风力猫引擎 —— 实现 IWirelessGenerator 向无线能源网络供电。
  * @author Mgazul
  */
-public class CatEngineBlockEntity extends BlockEntity implements IWirelessGenerator {
+public class CatEngineBlockEntity extends AcademyContainerBlockEntity implements IWirelessGenerator {
 
-    public int time;
-    public float rot;
-    public float oRot;
-    public float tRot;
-    /** Client-visible legacy spin state: the cat spins while its buffer is refilling. */
+    /** Transient client animation; the renderer only interpolates this tick-owned state. */
+    private double previousSpinDegrees;
+    private double spinDegrees;
     public boolean enable = false;
-    public float rH = 0;
 
     /** AcademyCraft 1.0.7 TileCatEngine: buffer 2000, bandwidth 200, generation 500/t. */
     private static final int MAX_STORAGE = 2000;
@@ -37,32 +32,31 @@ public class CatEngineBlockEntity extends BlockEntity implements IWirelessGenera
     private float storedEnergy = 0;
     private double thisTickGeneration;
     private boolean linked;
-    private long lastClientSyncTick = Long.MIN_VALUE;
+    private double lastSyncedGeneration;
+    private long lastGenerationSyncTick = Long.MIN_VALUE;
 
     public CatEngineBlockEntity(BlockPos pos, BlockState state) {
         super(AcademyBlockEntities.CAT_ENGINE.get(), pos, state);
     }
 
+    @Override public int getContainerSize() { return 0; }
+
     // ==================== Animation ====================
 
     public static void tickAnim(Level level, BlockPos blockPos, BlockState blockState, CatEngineBlockEntity e) {
-        e.oRot = e.rot;
-        Player player = level.getNearestPlayer(blockPos.getX(), blockPos.getY(), blockPos.getZ(), 10, false);
-        if (player != null) {
-            double d0 = player.getX() - ((double) blockPos.getX() + 0.5D);
-            double d1 = player.getZ() - ((double) blockPos.getZ() + 0.5D);
-            e.tRot = (float) Mth.atan2(d1, d0);
+        e.previousSpinDegrees = e.spinDegrees;
+        // Upstream: elapsed milliseconds * actual generation * .01 degrees.
+        e.spinDegrees += e.thisTickGeneration * .5;
+        if (e.spinDegrees >= 360) {
+            double turns = Math.floor(e.spinDegrees / 360) * 360;
+            e.spinDegrees -= turns;
+            e.previousSpinDegrees -= turns;
         }
-        while (e.rot >= (float) Math.PI) e.rot -= ((float) Math.PI * 2F);
-        while (e.rot < -(float) Math.PI) e.rot += ((float) Math.PI * 2F);
-        while (e.tRot >= (float) Math.PI) e.tRot -= ((float) Math.PI * 2F);
-        while (e.tRot < -(float) Math.PI) e.tRot += ((float) Math.PI * 2F);
+    }
 
-        float f2;
-        for (f2 = e.tRot - e.rot; f2 >= (float) Math.PI; f2 -= ((float) Math.PI * 2F)) {}
-        while (f2 < -(float) Math.PI) f2 += ((float) Math.PI * 2F);
-        e.rot += f2 * 0.4F;
-        ++e.time;
+    public float interpolatedSpinDegrees(float partialTick) {
+        return (float) (previousSpinDegrees + (spinDegrees - previousSpinDegrees)
+                * Math.clamp(partialTick, 0, 1));
     }
 
     /** Fill the legacy finite buffer; wireless transfer happens later in the server tick. */
@@ -81,12 +75,15 @@ public class CatEngineBlockEntity extends BlockEntity implements IWirelessGenera
         boolean runtimeChanged = linked != nowLinked || enable != (thisTickGeneration > 0);
         linked = nowLinked;
         enable = thisTickGeneration > 0;
-        if (before != storedEnergy || runtimeChanged) setChanged();
+        if (before != storedEnergy || runtimeChanged) markMachineChanged();
 
-        long now = level.getGameTime();
-        if (runtimeChanged || lastClientSyncTick == Long.MIN_VALUE || now - lastClientSyncTick >= 20) {
+        boolean generationSyncDue = thisTickGeneration != lastSyncedGeneration
+                && (lastGenerationSyncTick == Long.MIN_VALUE
+                    || level.getGameTime() - lastGenerationSyncTick >= 10);
+        if (runtimeChanged || generationSyncDue) {
+            lastSyncedGeneration = thisTickGeneration;
+            lastGenerationSyncTick = level.getGameTime();
             level.sendBlockUpdated(pos, state, state, net.minecraft.world.level.block.Block.UPDATE_CLIENTS);
-            lastClientSyncTick = now;
         }
     }
 
@@ -97,7 +94,7 @@ public class CatEngineBlockEntity extends BlockEntity implements IWirelessGenera
         if (!Double.isFinite(req) || req <= 0) return 0;
         double give = Math.min(Math.max(0, req), storedEnergy);
         storedEnergy -= (float) give;
-        if (give > 0) setChanged();
+        if (give > 0) markMachineChanged();
         return give;
     }
 
@@ -124,7 +121,7 @@ public class CatEngineBlockEntity extends BlockEntity implements IWirelessGenera
     // ==================== NBT ====================
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider provider) {
+    public void loadAdditional(CompoundTag tag, HolderLookup.Provider provider) {
         super.loadAdditional(tag, provider);
         if (tag.contains("storedEnergy")) storedEnergy = MachineStateSanitizer.clampFinite(tag.getFloat("storedEnergy"), MAX_STORAGE);
         if (tag.contains("thisTickGeneration")) {
@@ -136,7 +133,7 @@ public class CatEngineBlockEntity extends BlockEntity implements IWirelessGenera
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider provider) {
+    public void saveAdditional(CompoundTag tag, HolderLookup.Provider provider) {
         super.saveAdditional(tag, provider);
         tag.putFloat("storedEnergy", storedEnergy);
     }

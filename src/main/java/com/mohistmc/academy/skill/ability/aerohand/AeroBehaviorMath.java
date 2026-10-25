@@ -12,25 +12,16 @@ public final class AeroBehaviorMath {
         return lerp(200.0f, 800.0f, proficiency);
     }
 
-    public static float cooledOverload(float currentOverload, float proficiency) {
-        if (!Float.isFinite(currentOverload) || currentOverload <= 0) return 0;
-        return Math.max(0, currentOverload - coolingReduction(proficiency));
-    }
-
     public static double airJetSpeed(float proficiency) {
         return lerp(2.0f, 4.0f, proficiency);
     }
 
-    /** ExtraAcC's projectile retains half of its initial damage at its 80-tick lifetime. */
-    public static float volcanicDamage(float pointBlankDamage, double distance, double range) {
+    /** Attenuation uses the original projectile's age counter, not distance traveled. */
+    public static float volcanicDamage(float pointBlankDamage, double age, double lifespan) {
         if (!Float.isFinite(pointBlankDamage) || pointBlankDamage <= 0
-                || !Double.isFinite(distance) || !Double.isFinite(range) || range <= 0) return 0;
-        float travelled = clamp01((float) (Math.max(0, distance) / range));
+                || !Double.isFinite(age) || !Double.isFinite(lifespan) || lifespan <= 0) return 0;
+        float travelled = clamp01((float) (Math.max(0, age) / lifespan));
         return pointBlankDamage * lerp(1.0f, 0.5f, travelled);
-    }
-
-    public static int separatorChargeTicks(float proficiency) {
-        return Math.round(lerp(30.0f, 18.0f, proficiency));
     }
 
     public static float separatorRadius(float proficiency) {
@@ -43,23 +34,11 @@ public final class AeroBehaviorMath {
 
     /** Maximum raw fall damage before vanilla enchantment/effect reductions. */
     public static float ascendingAirDamageCap(float proficiency) {
-        return lerp(8.0f, 2.0f, proficiency);
-    }
-
-    public static float cappedFallDistance(float distance, float damageMultiplier, float proficiency) {
-        if (!Float.isFinite(distance) || distance <= 0) return 0;
-        if (!Float.isFinite(damageMultiplier) || damageMultiplier <= 0) return distance;
-        float maximumDistance = 3.0f + ascendingAirDamageCap(proficiency) / damageMultiplier;
-        return Math.min(distance, maximumDistance);
+        return lerp(10.0f, 5.0f, proficiency);
     }
 
     public static float offenseArmourDamageMultiplier(float proficiency) {
         return lerp(0.10f, 0.05f, proficiency);
-    }
-
-    /** Number of ticks between vanilla air consumption steps below mastery. */
-    public static int airflowConsumptionInterval(float proficiency) {
-        return Math.max(1, Math.round(lerp(1.0f, 5.0f, proficiency)));
     }
 
     public static int cruiseBombOrbCount(float proficiency) {
@@ -69,10 +48,6 @@ public final class AeroBehaviorMath {
         if (p >= 0.5f) return 6;
         if (p >= 0.25f) return 5;
         return 4;
-    }
-
-    public static int cruiseBombDurationTicks(float proficiency) {
-        return 72_000;
     }
 
     public static float cruiseBombDamage(float proficiency) {

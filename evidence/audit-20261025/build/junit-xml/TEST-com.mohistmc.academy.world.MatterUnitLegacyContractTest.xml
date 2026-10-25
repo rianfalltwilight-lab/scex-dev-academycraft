@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.mohistmc.academy.world.MatterUnitLegacyContractTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-10-25T08:05:22.069Z" hostname="MONARCH" time="0.001">
+  <properties/>
+  <testcase name="splitMatterUnitVariantsRetainTheLegacyStackLimit()" classname="com.mohistmc.academy.world.MatterUnitLegacyContractTest" time="0.0"/>
+  <testcase name="creativeHarvestDoesNotConsumeTheEmptyUnit()" classname="com.mohistmc.academy.world.MatterUnitLegacyContractTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

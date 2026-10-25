@@ -104,7 +104,7 @@ public class MetalFormingRecipe implements Recipe<MetalFormingRecipeInput> {
 
     @Override
     public boolean matches(MetalFormingRecipeInput input_, Level level) {
-        return input_.mode() == mode && input.test(input_.input())
+        return input_.mode() == mode && input_.input().getCount() >= inputCount && input.test(input_.input())
                 && !getOutput(level.registryAccess()).isEmpty();
     }
 

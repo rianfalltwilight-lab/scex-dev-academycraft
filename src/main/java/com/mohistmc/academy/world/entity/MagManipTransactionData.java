@@ -221,7 +221,7 @@ public final class MagManipTransactionData extends SavedData {
             CompoundTag value = entries.getCompound(i);
             if (!value.hasUUID("Owner") || !value.hasUUID("Transaction") || !value.hasUUID("Entity")) continue;
             Entry entry = new Entry(value.getUUID("Owner"), value.getUUID("Transaction"), value.getUUID("Entity"),
-                    value.getString("Dimension"),value.getLong("EntityChunk"),value.getLong("Source"),value.getInt("BlockState"),
+                    value.getString("Dimension"),value.getLong("EntityChunk"),value.getLong("Source"),readMaterialState(value),
                     value.contains("BlockEntity")?value.getCompound("BlockEntity"):null,value.getString("BlockEntityType"),value.getString("SourceKind"),value.getInt("SourceSlot"),value.getInt("SourceCount"),value.getString("SourceHash"),value.getString("State"),
                     value.contains("Touched") ? value.getLong("Touched") : value.getLong("Expiry"),value.hasUUID("RecoveryEntity")?value.getUUID("RecoveryEntity"):null,
                     value.contains("Generation")?value.getLong("Generation"):1L,value.contains("RepresentationKind")?value.getString("RepresentationKind"):"CARRIER",
@@ -238,6 +238,7 @@ public final class MagManipTransactionData extends SavedData {
             CompoundTag value = new CompoundTag(); value.putUUID("Owner", entry.owner()); value.putUUID("Transaction", entry.transaction());
             value.putUUID("Entity", entry.entity()); value.putString("Dimension", entry.dimension()); value.putString("State", entry.state());
             value.putLong("EntityChunk",entry.entityChunk());value.putBoolean("EntityChunkKnown",entityChunkKnown.contains(entry.transaction()));value.putLong("Source",entry.source());value.putInt("BlockState",entry.blockState());
+            value.put("MaterialState", net.minecraft.nbt.NbtUtils.writeBlockState(Block.stateById(entry.blockState())));
             if(entry.blockEntity()!=null)value.put("BlockEntity",entry.blockEntity().copy());value.putString("BlockEntityType",entry.blockEntityType());
             value.putString("SourceKind",entry.sourceKind());value.putInt("SourceSlot",entry.sourceSlot());value.putInt("SourceCount",entry.sourceCount());value.putString("SourceHash",entry.sourceHash());if(entry.recoveryEntity()!=null)value.putUUID("RecoveryEntity",entry.recoveryEntity());
             value.putLong("Generation",entry.generation());value.putString("RepresentationKind",entry.representationKind());
@@ -247,4 +248,9 @@ public final class MagManipTransactionData extends SavedData {
         tag.put("Entries", entries);if(migrationCursor!=null)tag.putUUID("MigrationCursor",migrationCursor);return tag;
     }
     private static CompoundTag copy(CompoundTag value){return value==null?null:value.copy();}
+    static int readMaterialState(CompoundTag tag) {
+        return tag.contains("MaterialState", 10)
+                ? Block.getId(net.minecraft.nbt.NbtUtils.readBlockState(net.minecraft.core.registries.BuiltInRegistries.BLOCK.asLookup(), tag.getCompound("MaterialState")))
+                : tag.getInt("BlockState");
+    }
 }

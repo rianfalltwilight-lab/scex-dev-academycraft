@@ -45,7 +45,7 @@ public record ConnectNodeToMatrixPacket(MenuActionToken actionToken, BlockPos no
                     || packet.password().filter(value -> value.length() > MAX_PASSWORD_LENGTH).isPresent()
                     || !PayloadRateLimiter.allow(player.getUUID(), "node_matrix_connect",
                     level.getGameTime(), 20, 4)
-                    || !level.isLoaded(packet.nodePos()) || !level.isLoaded(packet.matrixPos())
+                    || !com.mohistmc.academy.skill.ability.LoadedRaycast.isLoaded(level, packet.nodePos()) || !com.mohistmc.academy.skill.ability.LoadedRaycast.isLoaded(level, packet.matrixPos())
                     || !level.mayInteract(player, packet.nodePos())
                     || !level.mayInteract(player, packet.matrixPos())
                     || !(level.getBlockEntity(packet.nodePos()) instanceof BaseNodeBlockEntity node)

@@ -16,7 +16,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.Drowned;
+import com.mohistmc.academy.skill.ability.telekinesis.LiquidShadowEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
@@ -151,7 +151,7 @@ public final class TelekinesisGameTests {
             helper.fail("liquid shadow did not transactionally consume one water bucket"); return;
         }
         AABB nearby = player.getBoundingBox().inflate(8);
-        var shadows = helper.getLevel().getEntitiesOfClass(Drowned.class, nearby,
+        var shadows = helper.getLevel().getEntitiesOfClass(LiquidShadowEntity.class, nearby,
                 drowned -> drowned.getTags().contains("academy_liquid_shadow"));
         if (shadows.size() != 1) {
             helper.fail("liquid shadow expected one follower, found " + shadows.size()); return;

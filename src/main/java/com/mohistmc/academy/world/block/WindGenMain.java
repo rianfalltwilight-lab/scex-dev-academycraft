@@ -59,7 +59,7 @@ public class WindGenMain extends BaseEntityBlock {
     public static boolean hasCompleteProxySet(Level level, BlockPos main, BlockState state) {
         Direction facing = state.getValue(FACING);
         return proxyPositions(main, state).stream()
-                .allMatch(pos -> level.getBlockState(pos).getBlock() instanceof WindGenFan
+                .allMatch(pos -> com.mohistmc.academy.world.block.LoadedMachineChunks.contains(level, pos) && level.getBlockState(pos).getBlock() instanceof WindGenFan
                         && level.getBlockState(pos).getValue(WindGenFan.FACING) == facing);
     }
 
@@ -140,7 +140,8 @@ public class WindGenMain extends BaseEntityBlock {
     @Override
     public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block,
                                 BlockPos neighbor, boolean movedByPiston) {
-        if (!level.isClientSide && !hasCompleteProxySet(level, pos, state)) {
+        if (!level.isClientSide && proxyPositions(pos, state).stream().allMatch(part -> com.mohistmc.academy.world.block.LoadedMachineChunks.contains(level, part))
+                && !hasCompleteProxySet(level, pos, state)) {
             // Defer one tick: the transactional item places the centre before
             // its two proxies, so an immediate check would tear down a valid
             // placement halfway through its transaction.
@@ -151,6 +152,7 @@ public class WindGenMain extends BaseEntityBlock {
 
     @Override
     protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+        if (!proxyPositions(pos, state).stream().allMatch(part -> com.mohistmc.academy.world.block.LoadedMachineChunks.contains(level, part))) { level.scheduleTick(pos, this, 20); return; }
         if (!hasCompleteProxySet(level, pos, state)) {
             Block.popResource(level, pos, new ItemStack(this));
             level.destroyBlock(pos, false);
@@ -188,7 +190,7 @@ public class WindGenMain extends BaseEntityBlock {
             }
             if (!world.isClientSide) {
                 for (BlockPos proxy : proxyPositions(pos, p_60515_)) {
-                    if (world.getBlockState(proxy).getBlock() instanceof WindGenFan) {
+                    if (com.mohistmc.academy.world.block.LoadedMachineChunks.contains(world, proxy) && world.getBlockState(proxy).getBlock() instanceof WindGenFan) {
                         world.destroyBlock(proxy, false);
                     }
                 }

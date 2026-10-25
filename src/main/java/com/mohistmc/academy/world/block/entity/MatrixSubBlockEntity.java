@@ -12,4 +12,8 @@ public class MatrixSubBlockEntity extends BlockEntity {
 
 
 
+    @Override public void onLoad() {
+        super.onLoad();
+        if (level != null && !level.isClientSide()) level.scheduleTick(worldPosition, getBlockState().getBlock(), 1);
+    }
 }

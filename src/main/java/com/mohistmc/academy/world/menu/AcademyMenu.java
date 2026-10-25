@@ -249,7 +249,7 @@ public abstract class AcademyMenu extends AbstractContainerMenu {
         }
 
         public AcademyContainerBlockEntity getBlockEntity(AcademyMenu menu) {
-            if (menu != null && menu.pos != null) {
+            if (menu != null && menu.pos != null && com.mohistmc.academy.world.block.LoadedMachineChunks.contains(menu.inv.player.level(), menu.pos)) {
                 BlockEntity entity = menu.inv.player.level().getBlockEntity(menu.pos);
                 if (entity == menu.boundEntity() && entity instanceof AcademyContainerBlockEntity blockEntity && !blockEntity.isRemoved()) {
                     return blockEntity;
@@ -286,8 +286,8 @@ public abstract class AcademyMenu extends AbstractContainerMenu {
 
         @Override
         public boolean stillValid(Player p_18946_) {
-            boolean loaded = menu.pos != null && p_18946_.level().isLoaded(menu.pos);
-            BlockEntity current = menu.pos == null ? null
+            boolean loaded = menu.pos != null && com.mohistmc.academy.world.block.LoadedMachineChunks.contains(p_18946_.level(), menu.pos);
+            BlockEntity current = !loaded ? null
                     : p_18946_.level().getBlockEntity(menu.pos);
             boolean valid = loaded && menu.boundEntity() != null && getBlockEntity(this.menu) != null
                     && p_18946_.distanceToSqr(menu.pos.getX() + 0.5, menu.pos.getY() + 0.5, menu.pos.getZ() + 0.5) <= 64.0

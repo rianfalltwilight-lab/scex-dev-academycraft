@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.mohistmc.academy.skill.PerformanceCompatibilityContractTest" tests="14" skipped="0" failures="0" errors="0" timestamp="2026-10-25T08:05:21.973Z" hostname="MONARCH" time="0.006">
+  <properties/>
+  <testcase name="transientChargeBallsCannotSurviveRestartOrLiveForever()" classname="com.mohistmc.academy.skill.PerformanceCompatibilityContractTest" time="0.001"/>
+  <testcase name="railgunTreatsUnknownLivingEntitiesGenericallyAndHonorsWalls()" classname="com.mohistmc.academy.skill.PerformanceCompatibilityContractTest" time="0.0"/>
+  <testcase name="magManipAbortDropsTheCarrierAndSuccessOwnsItsFinalSound()" classname="com.mohistmc.academy.skill.PerformanceCompatibilityContractTest" time="0.0"/>
+  <testcase name="serializationAndServerStopAreDefenceInDepthBoundaries()" classname="com.mohistmc.academy.skill.PerformanceCompatibilityContractTest" time="0.001"/>
+  <testcase name="plasmaUsesTheBoundedVanillaExplosionAndNeverLoadsMissingChunks()" classname="com.mohistmc.academy.skill.PerformanceCompatibilityContractTest" time="0.0"/>
+  <testcase name="magneticMovementRemainsHeldAtTheAnchorUntilReleaseOrExhaustion()" classname="com.mohistmc.academy.skill.PerformanceCompatibilityContractTest" time="0.001"/>
+  <testcase name="everyLegacyTerrainSkillUsesTheGlobalDimensionAwareGate()" classname="com.mohistmc.academy.skill.PerformanceCompatibilityContractTest" time="0.0"/>
+  <testcase name="arcGenWorldSideEffectsArePermissionCheckedAndRateBounded()" classname="com.mohistmc.academy.skill.PerformanceCompatibilityContractTest" time="0.001"/>
+  <testcase name="electromasterMetalTargetsRemainConfigAndTagDriven()" classname="com.mohistmc.academy.skill.PerformanceCompatibilityContractTest" time="0.0"/>
+  <testcase name="persistedRuntimeNumbersAndLocationsFailClosed()" classname="com.mohistmc.academy.skill.PerformanceCompatibilityContractTest" time="0.0"/>
+  <testcase name="mineDetectFinal112PayloadIsBoundedAndOwnerOnly()" classname="com.mohistmc.academy.skill.PerformanceCompatibilityContractTest" time="0.001"/>
+  <testcase name="jetKeepsLegacyEightTickVectorAcrossItsSixteenMovementUpdates()" classname="com.mohistmc.academy.skill.PerformanceCompatibilityContractTest" time="0.0"/>
+  <testcase name="coinTossKeepsTheLegacyQteKinematicsAndRestartRefund()" classname="com.mohistmc.academy.skill.PerformanceCompatibilityContractTest" time="0.0"/>
+  <testcase name="currentChargingKeepsTheLegacyExternalEnergyCompatibilityEdge()" classname="com.mohistmc.academy.skill.PerformanceCompatibilityContractTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -2,6 +2,7 @@ package com.mohistmc.academy.entity;
 
 import com.mohistmc.academy.config.DynamicSkillRules;
 import com.mohistmc.academy.skill.AcademyDamageHelper;
+import com.mohistmc.academy.skill.ability.LoadedRaycast;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -48,7 +49,7 @@ public final class PlasmaOrbEntity extends Entity implements ItemSupplier {
     public boolean arm(Vec3 destination, float damage, float radius) {
         if (level().isClientSide || !valid(destination, damage, radius) || !isAlive()) return false;
         BlockPos target = BlockPos.containing(destination);
-        if (!level().getWorldBorder().isWithinBounds(target) || !level().hasChunkAt(target)) return false;
+        if (!level().getWorldBorder().isWithinBounds(target) || !LoadedRaycast.isLoaded(level(), target)) return false;
         entityData.set(DEST_X, (float) destination.x);
         entityData.set(DEST_Y, (float) destination.y);
         entityData.set(DEST_Z, (float) destination.z);
@@ -116,7 +117,7 @@ public final class PlasmaOrbEntity extends Entity implements ItemSupplier {
 
         ServerLevel serverLevel = (ServerLevel) level();
         ServerPlayer player = owner == null ? null : serverLevel.getServer().getPlayerList().getPlayer(owner);
-        if (player == null || player.level() != serverLevel) {
+        if (player == null || !player.isAlive() || player.level() != serverLevel) {
             discard();
             return;
         }
@@ -126,12 +127,12 @@ public final class PlasmaOrbEntity extends Entity implements ItemSupplier {
         Vec3 old = position();
         Vec3 rawDelta = destination.subtract(old);
         Vec3 next = rawDelta.length() < 1 ? destination : old.add(rawDelta.normalize());
-        if (!serverLevel.hasChunkAt(BlockPos.containing(next))) {
+        if (!LoadedRaycast.isLoaded(serverLevel, BlockPos.containing(next))) {
             discard();
             return;
         }
 
-        HitResult blockHit = serverLevel.clip(new ClipContext(old, next,
+        HitResult blockHit = LoadedRaycast.clip(serverLevel, new ClipContext(old, next,
                 ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this));
         boolean entityHit = serverLevel.getEntities(this, new AABB(old, next).inflate(.75),
                         entity -> entity != player && entity.isAlive() && entity.isPickable())
@@ -147,7 +148,7 @@ public final class PlasmaOrbEntity extends Entity implements ItemSupplier {
     private void explodeAtDestination(ServerLevel level, ServerPlayer player) {
         Vec3 destination = destination();
         BlockPos center = BlockPos.containing(destination);
-        if (!level.hasChunkAt(center)) {
+        if (!LoadedRaycast.isLoaded(level, center)) {
             discard();
             return;
         }
@@ -162,14 +163,47 @@ public final class PlasmaOrbEntity extends Entity implements ItemSupplier {
         }
 
         float radius = entityData.get(RADIUS);
-        int wholeRadius = (int) Math.ceil(radius);
-        BlockPos min = center.offset(-wholeRadius, -wholeRadius, -wholeRadius);
-        BlockPos max = center.offset(wholeRadius, wholeRadius, wholeRadius);
-        boolean mayBreak = DynamicSkillRules.destroysBlocks(level, "plasma_cannon")
-                && level.hasChunksAt(min, max);
-        level.explode(player, destination.x, destination.y, destination.z, radius, false,
-                mayBreak ? Level.ExplosionInteraction.BLOCK : Level.ExplosionInteraction.NONE);
+        // Even KEEP/NONE explosions trace terrain and entity exposure. Merely disabling
+        // block destruction is not a safe fallback at a cold chunk boundary.
+        AABB blastArea = new AABB(destination, destination).inflate(radius * 2 + 2);
+        boolean resident = LoadedRaycast.isAreaLoaded(level, blastArea);
+        if (resident) for (Entity entity : level.getEntities(this, blastArea)) {
+            if (!LoadedRaycast.isAreaLoaded(level, entity.getBoundingBox().inflate(1))) {
+                resident = false;
+                break;
+            }
+        }
+        if (resident) {
+            boolean mayBreak = DynamicSkillRules.destroysBlocks(level, "plasma_cannon");
+            level.explode(player, player.damageSources().explosion(player, player),
+                    new ProtectedBlast(level, player), destination, radius, false,
+                    mayBreak ? Level.ExplosionInteraction.BLOCK : Level.ExplosionInteraction.NONE);
+        } else {
+            level.sendParticles(net.minecraft.core.particles.ParticleTypes.EXPLOSION_EMITTER,
+                    destination.x, destination.y, destination.z, 1, 0, 0, 0, 0);
+            level.playSound(null, destination.x, destination.y, destination.z,
+                    net.minecraft.sounds.SoundEvents.GENERIC_EXPLODE, net.minecraft.sounds.SoundSource.BLOCKS, 4, .7f);
+        }
         discard();
+    }
+
+    /** A skill explosion observes the same player/claim boundary as direct skill mining. */
+    private static final class ProtectedBlast extends net.minecraft.world.level.ExplosionDamageCalculator {
+        private final ServerLevel level;
+        private final ServerPlayer player;
+        private final java.util.Map<BlockPos, Boolean> permissions = new java.util.HashMap<>();
+        private ProtectedBlast(ServerLevel level, ServerPlayer player) { this.level = level; this.player = player; }
+        @Override public boolean shouldBlockExplode(net.minecraft.world.level.Explosion explosion,
+                net.minecraft.world.level.BlockGetter getter, BlockPos pos,
+                net.minecraft.world.level.block.state.BlockState state, float power) {
+            if (state.isAir()) return true;
+            return permissions.computeIfAbsent(pos.immutable(), key -> {
+                if (!player.mayInteract(level, key) || state.getDestroySpeed(level, key) < 0) return false;
+                var event = new net.neoforged.neoforge.event.level.BlockEvent.BreakEvent(level, key, state, player);
+                net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(event);
+                return !event.isCanceled() && level.getBlockState(key) == state;
+            });
+        }
     }
 
     private Vec3 destination() {

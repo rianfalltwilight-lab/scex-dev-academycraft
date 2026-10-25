@@ -31,7 +31,7 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 /** Legacy toggle context: repeatedly transmits one sighted dropped stack into the inventory. */
 @EventBusSubscriber(modid = AcademyCraft.MODID)
 public final class PsychoTransmissionEffect implements SkillEffect {
-    private record Session(ResourceKey<Level> dimension, long expiresAt) {}
+    private record Session(ResourceKey<Level> dimension) {}
     private static final Map<UUID, Session> SESSIONS = new HashMap<>();
 
     @Override public String getId() { return "psycho_transmission"; }
@@ -54,8 +54,7 @@ public final class PsychoTransmissionEffect implements SkillEffect {
             return true;
         }
         if (!DynamicSkillRules.tryPay(data, getId(), 0, 5F)) return false;
-        long now = player.serverLevel().getGameTime();
-        SESSIONS.put(player.getUUID(), new Session(player.level().dimension(), now + 72_000));
+        SESSIONS.put(player.getUUID(), new Session(player.level().dimension()));
         return true;
     }
 
@@ -83,6 +82,23 @@ public final class PsychoTransmissionEffect implements SkillEffect {
         int before = target.getItem().getCount();
         Vec3 from = player.getEyePosition();
         Vec3 at = target.position().add(0, target.getBbHeight() * 0.5, 0);
+        if (!hasInventorySpace(player,target.getItem())) {
+            // The original ability still brings a stack to the caster when the inventory is full.
+            // Keep its entity, components, owner and pickup delay intact; the move stays in a loaded chunk.
+            var permission=net.neoforged.neoforge.event.EventHooks.fireItemPickupPre(target,player).canPickup();
+            if (permission.isFalse() || SESSIONS.get(player.getUUID())!=session || !valid(player,data,session)
+                    || !target.isAlive() || target.level()!=player.level() || target.hasPickUpDelay()
+                    || target.getTarget()!=null&&!player.getUUID().equals(target.getTarget())
+                    || !player.level().isLoaded(player.blockPosition())) {
+                data.rollbackDynamicPayment(resourcesBefore,resourcesPaid);
+                return;
+            }
+            target.setPos(player.position());
+            target.setDeltaMovement(Vec3.ZERO);
+            target.hasImpulse=true;
+            EffectHelper.electricTether(player.serverLevel(),from,at);
+            return;
+        }
         target.playerTouch(player);
         int after = target.isAlive() ? target.getItem().getCount() : 0;
         if (before - after <= 0) {
@@ -100,7 +116,6 @@ public final class PsychoTransmissionEffect implements SkillEffect {
 
     private static boolean valid(ServerPlayer player, PlayerAbilityData data, Session session) {
         return player.isAlive() && !player.isRemoved()
-                && player.serverLevel().getGameTime() < session.expiresAt()
                 && player.level().dimension().equals(session.dimension())
                 && !AbilityInterferenceService.isInterfered(player)
                 && data.isAbilityActive()
@@ -113,10 +128,18 @@ public final class PsychoTransmissionEffect implements SkillEffect {
         Vec3 intended = from.add(player.getLookAngle().normalize()
                 .scale(TelekinesisRules.psychoTransmissionRange(proficiency)));
         UUID playerId = player.getUUID();
-        return SkillRaycast.traceEntities(player, ItemEntity.class, from, intended, item ->
-                !item.getItem().isEmpty() && !item.hasPickUpDelay()
-                        && (item.getTarget() == null || playerId.equals(item.getTarget()))
-                        && hasInventorySpace(player, item.getItem())).firstEntity();
+        var block=com.mohistmc.academy.skill.ability.LoadedRaycast.clip(player.level(),new net.minecraft.world.level.ClipContext(
+                from,intended,net.minecraft.world.level.ClipContext.Block.COLLIDER,net.minecraft.world.level.ClipContext.Fluid.NONE,player));
+        Vec3 end=block.getType()==net.minecraft.world.phys.HitResult.Type.MISS?intended:block.getLocation();
+        // 1.12 AxisAlignedBB.expand(1,1,1) expands the positive sides, unlike grow/inflate.
+        var area=new net.minecraft.world.phys.AABB(from,end).expandTowards(1,1,1);
+        return player.serverLevel().getEntitiesOfClass(ItemEntity.class,area,item->
+                !item.getItem().isEmpty()&&!item.hasPickUpDelay()&&item.distanceToSqr(player)>=1
+                        &&(item.getTarget()==null||playerId.equals(item.getTarget()))
+                        &&com.mohistmc.academy.skill.ability.LoadedRaycast.clip(player.level(),new net.minecraft.world.level.ClipContext(
+                                from,item.getBoundingBox().getCenter(),net.minecraft.world.level.ClipContext.Block.COLLIDER,
+                                net.minecraft.world.level.ClipContext.Fluid.NONE,player)).getType()==net.minecraft.world.phys.HitResult.Type.MISS)
+                .stream().min(java.util.Comparator.comparingDouble(player::distanceToSqr)).orElse(null);
     }
 
     private static boolean hasInventorySpace(ServerPlayer player, ItemStack incoming) {

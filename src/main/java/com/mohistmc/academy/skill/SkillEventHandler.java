@@ -19,8 +19,13 @@ import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 
 @EventBusSubscriber(modid = AcademyCraft.MODID)
 public class SkillEventHandler {
+    public static final int CHARGING_SYNC_INTERVAL_TICKS = 5;
 
-    @SubscribeEvent public static void onServerStopping(ServerStoppingEvent event) { SkillChargingManager.cancelAll(event.getServer()); }
+    @SubscribeEvent public static void onServerStopping(ServerStoppingEvent event) {
+        for (ServerPlayer player : event.getServer().getPlayerList().getPlayers())
+            com.mohistmc.academy.skill.ability.meltdowner.ScatterBombEffect.discardOnLifecycle(player);
+        SkillChargingManager.cancelAll(event.getServer());
+    }
     @SubscribeEvent public static void onServerStopped(ServerStoppedEvent event) { SkillChargingManager.clearAll(); }
 
     @SubscribeEvent
@@ -54,7 +59,8 @@ public class SkillEventHandler {
                 }
                 Skill skill = data.getSlotSkill(data.getCurrentPresetIndex(), state.slotIndex);
                 if (skill == null || !skill.getId().equals(state.skillId)
-                        || !data.isAbilityActive() || !data.hasLearnedSkill(state.skillId)) {
+                        || !data.isAbilityActive() || !data.hasLearnedSkill(state.skillId)
+                        || !data.isDevMode() && data.getPlayerLevel() < skill.getLevel()) {
                     SkillChargingManager.cancel(player);
                     notifyCharging(player,state,-1,0);
                 } else {
@@ -62,8 +68,10 @@ public class SkillEventHandler {
                     if (effect instanceof ChargingSkillEffect chargingEffect) {
                         if (!state.acknowledged) return;
                         state.ticks++;
-                        com.mohistmc.academy.network.SafePayloadSender.send(player,
-                                new SyncChargingStatePacket(state.ticks, chargingEffect.getMaxChargeTicks(data), state.slotIndex, state.skillId, state.epoch, state.generation, true));
+                        if (state.ticks % CHARGING_SYNC_INTERVAL_TICKS == 0) {
+                            com.mohistmc.academy.network.SafePayloadSender.send(player,
+                                    new SyncChargingStatePacket(state.ticks, chargingEffect.getMaxChargeTicks(data), state.slotIndex, state.skillId, state.epoch, state.generation, true));
+                        }
 
                         ChargingSkillEffect.TickResult tickResult = chargingEffect.getTickResult(player, data, state.ticks);
                         int sessionTimeout = Math.max(1, chargingEffect.getSessionTimeoutTicks(data));
@@ -126,7 +134,10 @@ public class SkillEventHandler {
 
     @SubscribeEvent
     public static void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
-        if (event.getEntity() instanceof ServerPlayer player) SkillChargingManager.cancel(player);
+        if (event.getEntity() instanceof ServerPlayer player) {
+            com.mohistmc.academy.skill.ability.meltdowner.ScatterBombEffect.discardOnLifecycle(player);
+            SkillChargingManager.cancel(player);
+        }
         com.mohistmc.academy.network.SwitchPresetPacket.forget(event.getEntity().getUUID());
         RequestNodesPacket.forgetPlayer(event.getEntity().getUUID());
         ConnectToNodePacket.forgetPlayer(event.getEntity().getUUID());
@@ -137,13 +148,17 @@ public class SkillEventHandler {
 
     @SubscribeEvent
     public static void onPlayerChangedDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
-        if (event.getEntity() instanceof ServerPlayer player) cancelChargingAndNotify(player);
+        if (event.getEntity() instanceof ServerPlayer player) {
+            cancelChargingAndNotify(player);
+            LearnSkillPacket.syncToClient(player);
+        }
         LocationTeleportActionPacket.forgetPlayer(event.getEntity().getUUID());
         DevLearningSessionManager.clear(event.getEntity().getUUID());
     }
 
     public static void onConfirmedDeath(net.minecraft.world.entity.LivingEntity entity) {
         if (entity instanceof ServerPlayer player) {
+            com.mohistmc.academy.network.TeleportChunkRequests.cancel(player.getUUID());
             cancelChargingAndNotify(player);
             LocationTeleportActionPacket.forgetPlayer(player.getUUID());
             DevLearningSessionManager.clear(player.getUUID());
@@ -159,7 +174,7 @@ public class SkillEventHandler {
         }
     }
 
-    private static void cancelChargingAndNotify(ServerPlayer player){SkillChargingManager.ChargingState state=SkillChargingManager.getState(player.getUUID());if(state==null)return;SkillChargingManager.cancel(player);notifyCharging(player,state,-1,0);}
+    private static void cancelChargingAndNotify(ServerPlayer player){com.mohistmc.academy.skill.ability.meltdowner.ScatterBombEffect.discardOnLifecycle(player);SkillChargingManager.ChargingState state=SkillChargingManager.getState(player.getUUID());if(state==null)return;SkillChargingManager.cancel(player);notifyCharging(player,state,-1,0);}
     private static void notifyCharging(ServerPlayer player,SkillChargingManager.ChargingState state,int ticks,int maxTicks){
         com.mohistmc.academy.network.SafePayloadSender.send(player,
                 new SyncChargingStatePacket(ticks,maxTicks,state.slotIndex,state.skillId,state.epoch,state.generation,true));

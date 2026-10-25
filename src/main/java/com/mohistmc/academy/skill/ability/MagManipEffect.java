@@ -90,7 +90,7 @@ public final class MagManipEffect implements ChargingSkillEffect {
     /** LambdaLib Raytrace.getLookingPos: nearest collider within 20, entity point raised by 60% eye height. */
     private static Vec3 throwTarget(ServerPlayer p){
         Vec3 start=p.getEyePosition(),intended=start.add(p.getLookAngle().scale(20));
-        HitResult block=p.pick(20,0,false);Vec3 end=block.getType()==HitResult.Type.MISS?intended:block.getLocation();
+        HitResult block=LoadedRaycast.pick(p, 20);Vec3 end=block.getType()==HitResult.Type.MISS?intended:block.getLocation();
         Entity nearest=null;double best=Double.MAX_VALUE;
         for(Entity entity:p.level().getEntities(p,new AABB(start,end).inflate(1),
                 entity->entity!=p&&entity.isAlive()&&entity.isPickable())){
@@ -108,18 +108,21 @@ public final class MagManipEffect implements ChargingSkillEffect {
             if (!(encoded instanceof CompoundTag itemTag)) return null;
             return new Source(p.isCreative()?"CREATIVE":"INVENTORY",p.getInventory().selected,held.getCount(),held.getItem()+"|"+held.getComponents(),p.blockPosition(),bi.getBlock().defaultBlockState(),itemTag,null);
         }
-        if(!allowWorldDestruction)return null;HitResult raw=p.pick(10,0,false);if(!(raw instanceof BlockHitResult h)||raw.getType()!=HitResult.Type.BLOCK)return null;
-        ServerLevel level=p.serverLevel();BlockPos pos=h.getBlockPos();if(!level.hasChunkAt(pos)||!p.mayInteract(level,pos))return null;
-        BlockState state=level.getBlockState(pos);if(!magnetic(state))return null;
+        if(!allowWorldDestruction)return null;HitResult raw=LoadedRaycast.pick(p, 10);if(!(raw instanceof BlockHitResult h)||raw.getType()!=HitResult.Type.BLOCK)return null;
+        ServerLevel level=p.serverLevel();BlockPos pos=h.getBlockPos();if(!LoadedRaycast.isLoaded(level, pos)||!p.mayInteract(level,pos))return null;
+        BlockState state=level.getBlockState(pos);if(!magnetic(state)||state.getDestroySpeed(level,pos)<0)return null;
+        BlockEvent.BreakEvent event=new BlockEvent.BreakEvent(level,pos,state,p);NeoForge.EVENT_BUS.post(event);
+        if(event.isCanceled()||level.getBlockState(pos)!=state)return null;
         BlockEntity be=level.getBlockEntity(pos);CompoundTag payload=null;ResourceLocation type=null;
         if(be!=null){if(!MagManipTransferPolicy.mayMove(be))return null;payload=MagManipTransferPolicy.capture(be,level.registryAccess());if(payload==null)return null;type=MagManipTransferPolicy.typeId(be);}
-        BlockEvent.BreakEvent event=new BlockEvent.BreakEvent(level,pos,state,p);NeoForge.EVENT_BUS.post(event);if(event.isCanceled())return null;
         return new Source("BLOCK",-1,0,"",pos,state,payload,type);
     }
     private static boolean consumeSource(ServerPlayer p,Source s){
         if("CREATIVE".equals(s.kind))return true;
-        if("INVENTORY".equals(s.kind)){ItemStack live=p.getInventory().getItem(s.slot);if(live.isEmpty()||live.getCount()!=s.count)return false;live.shrink(1);return true;}
-        ServerLevel level=p.serverLevel();if(level.getBlockState(s.pos)!=s.state)return false;
+        if("INVENTORY".equals(s.kind)){ItemStack live=p.getInventory().getItem(s.slot);if(live.isEmpty()||live.getCount()!=s.count||!s.itemFingerprint.equals(live.getItem()+"|"+live.getComponents()))return false;live.shrink(1);return true;}
+        ServerLevel level=p.serverLevel();if(!LoadedRaycast.isLoaded(level,s.pos)||!p.mayInteract(level,s.pos)||level.getBlockState(s.pos)!=s.state||s.state.getDestroySpeed(level,s.pos)<0)return false;
+        BlockEntity be=level.getBlockEntity(s.pos);
+        if(be==null?s.payload!=null:!MagManipTransferPolicy.sameType(be,s.beType)||!Objects.equals(s.payload,MagManipTransferPolicy.capture(be,level.registryAccess())))return false;
         return level.setBlock(s.pos,AcademyBlocks.MAG_MANIP_ESCROW.get().defaultBlockState(),3);
     }
     private static void restoreImmediate(ServerPlayer p,Source s){

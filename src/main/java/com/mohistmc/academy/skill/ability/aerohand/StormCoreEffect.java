@@ -53,7 +53,7 @@ public final class StormCoreEffect implements DynamicOneShotSkillEffect {
         float p = data.getProficiency(getId());
         Vec3 from = player.getEyePosition();
         Vec3 intended = from.add(player.getLookAngle().normalize().scale(6));
-        var hit = player.serverLevel().clip(new ClipContext(from, intended, ClipContext.Block.COLLIDER,
+        var hit = com.mohistmc.academy.skill.ability.LoadedRaycast.clip(player.serverLevel(), new ClipContext(from, intended, ClipContext.Block.COLLIDER,
                 ClipContext.Fluid.NONE, player));
         Vec3 position = hit.getType() == HitResult.Type.BLOCK ? hit.getLocation() : intended;
         CORES.add(new Core(player, position, p));
@@ -64,12 +64,11 @@ public final class StormCoreEffect implements DynamicOneShotSkillEffect {
 
     @SubscribeEvent
     public static void tick(ServerTickEvent.Post event) {
-        Iterator<Core> iterator = CORES.iterator();
-        while (iterator.hasNext()) {
-            Core core = iterator.next();
+        for (Core core : List.copyOf(CORES)) {
+            if (!CORES.contains(core)) continue;
             ServerPlayer owner = core.level.getServer().getPlayerList().getPlayer(core.owner);
             if (owner == null || owner.serverLevel() != core.level || !owner.isAlive() || ++core.age >= 100) {
-                iterator.remove();
+                CORES.remove(core);
                 continue;
             }
             EffectHelper.windBurst(core.level, core.position.x, core.position.y, core.position.z,
@@ -77,8 +76,9 @@ public final class StormCoreEffect implements DynamicOneShotSkillEffect {
             if (core.age > 80) continue;
             AABB area = new AABB(core.position, core.position).inflate(8);
             for (Entity entity : core.level.getEntities(owner, area, Entity::isAlive)) {
+                if (!owner.isAlive() || owner.level()!=core.level || !CORES.contains(core)) break;
                 if (entity instanceof Projectile projectile) {
-                    if (projectile.getOwner() != owner) projectile.discard();
+                    projectile.discard();
                     continue;
                 }
                 if (!(entity instanceof LivingEntity living) || living == owner || owner.isAlliedTo(living)) continue;

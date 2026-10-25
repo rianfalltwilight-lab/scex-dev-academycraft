@@ -64,7 +64,7 @@ public final class AbilityInterfererBlockEntity extends AcademyContainerBlockEnt
 
         if (!enabled) {
             AbilityInterferenceService.remove(this);
-            if (changed) setChanged();
+            if (changed) markMachineChanged();
             return;
         }
 
@@ -81,7 +81,7 @@ public final class AbilityInterfererBlockEntity extends AcademyContainerBlockEnt
             AbilityInterferenceService.publish(this, activeUntil);
             changed = true;
         }
-        if (changed) setChanged();
+        if (changed) markMachineChanged();
     }
 
     private boolean chargeFromBattery() {
@@ -225,8 +225,10 @@ public final class AbilityInterfererBlockEntity extends AcademyContainerBlockEnt
 
     @Override
     public void setEnergy(int energy) {
-        this.energy = MachineStateSanitizer.clampAmount(energy, getMaxEnergyStored());
-        setChanged();
+        int bounded = MachineStateSanitizer.clampAmount(energy, getMaxEnergyStored());
+        if (this.energy == bounded) return;
+        this.energy = bounded;
+        markMachineChanged();
     }
 
     @Override

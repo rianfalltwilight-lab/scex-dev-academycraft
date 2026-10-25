@@ -11,14 +11,10 @@ import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
 import net.minecraft.world.level.levelgen.structure.templatesystem.TagMatchTest;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
 
 /**
  * AcademyCraft 世界生成 —— 矿石和 PhaseLiquid 湖。
  */
-@EventBusSubscriber(modid = AcademyCraft.MODID)
 public final class AcademyWorldGen {
 
     private AcademyWorldGen() {}
@@ -85,11 +81,4 @@ public final class AcademyWorldGen {
         ));
     }
 
-    // ==================== Events ====================
-
-    @SubscribeEvent
-    public static void onServerStart(ServerAboutToStartEvent event) {
-        // 世界生成在 datapack 层面通过 BiomeModifier JSON 配置，
-        // 这里主要记录日志确认生成已启用
-    }
 }

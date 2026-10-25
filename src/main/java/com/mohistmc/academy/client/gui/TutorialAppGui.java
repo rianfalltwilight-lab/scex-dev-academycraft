@@ -166,7 +166,7 @@ public class TutorialAppGui extends AcademyScreen {
     private void drawBackButton(GuiGraphics g, int mx, int my) {
         if (!fromTerminal) return;
         int bx = -20, by = -20, bs = 18;
-        boolean hovered = mx >= fx + bx && mx <= fx + bx + bs && my >= fy + by && my <= fy + by + bs;
+        boolean hovered = isHoveredInFrame(mx, my, bx, by, bs, bs);
         g.fill(bx, by, bx + bs, by + bs, hovered ? 0xFF3a4a5e : 0xFF2a3a4e);
         String arrow = "<-";
         int aw = font.width(arrow);
@@ -513,8 +513,7 @@ public class TutorialAppGui extends AcademyScreen {
 
         // 返回按钮
         if (fromTerminal) {
-            int bx = (int) (fx - 20 * fscale), by = (int) (fy - 20 * fscale), bs = (int) (18 * fscale);
-            if (mx >= bx && mx <= bx + bs && my >= by && my <= by + bs) {
+            if (isHoveredInFrame(mx, my, -20, -20, 18, 18)) {
                 Minecraft.getInstance().setScreen(new DataTerminalGui());
                 return true;
             }

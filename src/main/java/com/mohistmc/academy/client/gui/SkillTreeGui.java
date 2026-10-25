@@ -175,7 +175,6 @@ public class SkillTreeGui extends AcademyScreen {
 
     @Override public void tick() {
         super.tick();
-        refreshAuthoritativeEnergy();
         if (++refreshTicker >= 10 || skillNodes.isEmpty()) {
             refreshTicker = 0;
             String selectedId = selectedNode == null ? null : selectedNode.skill.getId();
@@ -210,15 +209,11 @@ public class SkillTreeGui extends AcademyScreen {
         }
     }
 
-    private void refreshAuthoritativeEnergy() {
+    public static void acceptServerEnergy(com.mohistmc.academy.network.DevEnergyPacket snapshot) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null) return;
-        if (devType == DevMachineType.PORTABLE) {
-            energy = com.mohistmc.academy.capability.EnergyItemHelper.getEnergy(mc.player.getMainHandItem());
-        } else if (devPos != null && mc.level != null
-                && mc.level.getBlockEntity(devPos) instanceof com.mohistmc.academy.capability.IFEnergyStorage storage) {
-            energy = Math.clamp(storage.getEnergyStored(), 0, storage.getMaxEnergyStored());
-        }
+        if (mc.screen instanceof SkillTreeGui gui && !gui.sessionSpent && gui.sessionNonce != null
+                && gui.sessionNonce.equals(snapshot.nonce()))
+            gui.energy = Math.clamp(snapshot.energy(), 0, Math.max(0, snapshot.maxEnergy()));
     }
 
     public static void acceptServerResult(DevLearningResultPacket result) {
@@ -382,7 +377,6 @@ public class SkillTreeGui extends AcademyScreen {
         if (devType == null || readOnly) {
             networkActionTop = -1;
             networkActionWidth = 0;
-            return;
         }
         Minecraft mc = Minecraft.getInstance();
         PlayerAbilityData data = mc.player == null ? null
@@ -394,6 +388,7 @@ public class SkillTreeGui extends AcademyScreen {
             drawLegacySkillDetail(graphics, data, mouseX, mouseY);
             return;
         }
+        if (devType == null || readOnly) return;
         if (levelDetailOpen) {
             drawLegacyLevelDetail(graphics, data, mouseX, mouseY);
             return;
@@ -437,6 +432,11 @@ public class SkillTreeGui extends AcademyScreen {
         graphics.drawCenteredString(font, Component.translatable("ac.skill_tree.skill_not_learned"),
                 centerX, textY, 0xFFFF5555);
         drawLegacyRequirements(graphics, node.skill, data, centerX, textY + scaled(13));
+        if (readOnly || devType == null) {
+            drawCenteredWrapped(graphics, Component.translatable(node.skill.getDescKey()).getString(),
+                    centerX, textY + scaled(39), scaled(200), 0xFFE8E8E8);
+            return;
+        }
         int stimulations = (int) (3 + node.skill.getLevel() * node.skill.getLevel() * .5f);
         int cost = devType.actualEnergyPerStimulation() * stimulations;
         String prompt = pendingSkillId != null ? serverFeedback.getString()
@@ -462,7 +462,7 @@ public class SkillTreeGui extends AcademyScreen {
             case NORMAL -> tex("textures/item/dev_normal.png");
             case ADVANCED -> tex("textures/item/dev_advanced.png");
         };
-        requirements.add(new RequirementIcon(machineIcon, devType.ordinal() >= minimumType.ordinal()));
+        requirements.add(new RequirementIcon(machineIcon, devType != null && devType.ordinal() >= minimumType.ordinal()));
         for (Skill.Prerequisite prerequisite : skill.getPrerequisites()) {
             if (prerequisite.skillId().startsWith("any_level_")) {
                 int level = Integer.parseInt(prerequisite.skillId().substring("any_level_".length()));
@@ -913,7 +913,7 @@ public class SkillTreeGui extends AcademyScreen {
         boolean resetMode = isResetMode(clickData);
 
         if (button == 0 && (detailOpen || levelDetailOpen)) {
-            if (inside(mouseX, mouseY, actionLeft, actionTop, actionWidth, scaled(16))) {
+            if (!readOnly && devType != null && inside(mouseX, mouseY, actionLeft, actionTop, actionWidth, scaled(16))) {
                 if (levelDetailOpen && clickData != null && clickData.canLevelUp()) {
                     beginAction(LearnSkillPacket.LEVEL_UP_ACTION, clickData);
                 } else if (detailOpen && selectedNode != null && !selectedNode.learned

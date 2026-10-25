@@ -252,9 +252,6 @@ public class RailgunBeamRenderer extends EntityRenderer<RailgunBeamEntity> {
             return frac / 0.8f;
         }
 
-        void tick() {
-            if (life > 0) life--;
-        }
     }
 
     public static class ArcData {
@@ -299,10 +296,8 @@ public class RailgunBeamRenderer extends EntityRenderer<RailgunBeamEntity> {
                 cleared = true;
             }
 
-            if (!cleared) {
-                for (ArcSegment seg : segments) {
-                    seg.tick();
-                }
+            for (ArcSegment seg : segments) {
+                seg.life = Math.max(0, seg.maxLife - Math.max(0, entityTick));
             }
         }
 

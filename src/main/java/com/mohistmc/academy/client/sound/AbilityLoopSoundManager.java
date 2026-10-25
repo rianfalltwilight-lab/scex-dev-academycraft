@@ -41,7 +41,7 @@ public final class AbilityLoopSoundManager {
         shield = sync(mc, shield, "light_shield", AcademySounds.MD_SHIELD_LOOP.value(), 1.0f);
         syncStormWingEntities(mc);
 
-        boolean mdCharging = ACConfig.Client.enableSkillSounds() && mc.player != null
+        boolean mdCharging = ACConfig.Client.enableSkillSounds() && mc.player != null && mc.player.isAlive()
                 && ChargingHudOverlay.isCharging("meltdowner");
         if (mdCharging && !meltdownerWasCharging) {
             meltdownerCharge = new FollowPlayerLoop(
@@ -78,7 +78,7 @@ public final class AbilityLoopSoundManager {
 
     private static FollowPlayerLoop sync(Minecraft mc, FollowPlayerLoop current,
                                          SoundEvent sound, float volume, String... skills) {
-        boolean wanted = ACConfig.Client.enableSkillSounds() && mc.player != null
+        boolean wanted = ACConfig.Client.enableSkillSounds() && mc.player != null && mc.player.isAlive()
                 && isAnyCharging(skills);
         if(wanted&&(current==null||current.isStopped())){current=new FollowPlayerLoop(sound,mc.player,volume,1f,true,()->isAnyCharging(skills));mc.getSoundManager().play(current);}
         if(!wanted&&current!=null){mc.getSoundManager().stop(current);current=null;}
@@ -132,7 +132,7 @@ public final class AbilityLoopSoundManager {
         }
 
         @Override public void tick() {
-            if (player.isRemoved() || !alive.getAsBoolean()) { stop(); return; }
+            if (!player.isAlive() || player.isRemoved() || !alive.getAsBoolean()) { stop(); return; }
             updatePosition();
         }
 

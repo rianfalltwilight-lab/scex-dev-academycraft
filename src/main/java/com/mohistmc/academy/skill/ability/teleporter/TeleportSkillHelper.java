@@ -1,5 +1,7 @@
 package com.mohistmc.academy.skill.ability.teleporter;
 
+import com.mohistmc.academy.skill.ability.LoadedRaycast;
+
 import com.mohistmc.academy.skill.PlayerAbilityData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -18,9 +20,10 @@ final class TeleportSkillHelper {
     static boolean safe(ServerPlayer player, Vec3 feet) {
         ServerLevel level = player.serverLevel();
         BlockPos pos = BlockPos.containing(feet);
-        if (!level.isLoaded(pos) || !level.getWorldBorder().isWithinBounds(pos)) return false;
+        if (!LoadedRaycast.isLoaded(level, pos) || !level.getWorldBorder().isWithinBounds(pos)) return false;
         AABB moved = player.getBoundingBox().move(feet.subtract(player.position()));
-        return level.noCollision(player, moved) && !level.getBlockState(pos.below()).isAir();
+        return LoadedRaycast.isAreaLoaded(level, moved.inflate(1)) && level.noCollision(player, moved)
+                && LoadedRaycast.isLoaded(level, pos.below()) && !level.getBlockState(pos.below()).isAir();
     }
 
     static Vec3 furthestSafe(ServerPlayer player, Vec3 start, Vec3 direction, double maxDistance) {

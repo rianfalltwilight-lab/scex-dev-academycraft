@@ -101,8 +101,8 @@ public final class ExternalMediaManager {
 
     /** Dynamic textures must be recreated after a resource reload. */
     public static synchronized void invalidateForResourceReload() {
+        releaseDynamicCovers();
         TRACKS.clear();
-        DYNAMIC_COVERS.clear();
         initialized = false;
     }
 

@@ -1,0 +1,211 @@
+{
+  "schema_version": 1,
+  "status": "PASS",
+  "completed_at_utc": "2026-10-25T08:24:59.906762+00:00",
+  "project": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025",
+  "version": "0.0.29-scex-deep-audit",
+  "minecraft": "1.21.1",
+  "runtime_tested": {
+    "neoforge": "21.1.248",
+    "java": "21.0.12.1+1",
+    "heap_mib": 1536,
+    "cpu_workers": 2
+  },
+  "source_identity": {
+    "source_tree_sha256": "37d61a4cdac678c01d4af46e79ac840dd387be724ac1ce549eb30f6c6fb37dfe",
+    "source_files": 1862,
+    "build_info_matches": true,
+    "checked_at": "2026-10-25T17:15:56.1885037+09:00"
+  },
+  "artifacts": [
+    {
+      "name": "AcademyCraft-neoforge-1.21.1-0.0.29-scex-deep-audit-audit-tests.jar",
+      "sha256": "b0f67a8ffa551fb04aba33fc15888a7dff5baa25c82cb5ea759fdc20a05f816f",
+      "bytes": 171456,
+      "build": "final"
+    },
+    {
+      "name": "AcademyCraft-neoforge-1.21.1-0.0.29-scex-deep-audit.jar",
+      "sha256": "b1ccdeb5f30505183a9b5978ce6554012852bda72bc50d1b5f1a0662329097ca",
+      "bytes": 27827380,
+      "build": "final"
+    }
+  ],
+  "entry_comparison": {
+    "basis": "Uncompressed ZIP entry SHA256 for all entries",
+    "comparisons": [
+      {
+        "name": "AcademyCraft-neoforge-1.21.1-0.0.29-scex-deep-audit-audit-tests.jar",
+        "tested_r11_sha256": "b0f67a8ffa551fb04aba33fc15888a7dff5baa25c82cb5ea759fdc20a05f816f",
+        "final_sha256": "b0f67a8ffa551fb04aba33fc15888a7dff5baa25c82cb5ea759fdc20a05f816f",
+        "changed_entries": [],
+        "all_executable_classes_and_resources_identical": true
+      },
+      {
+        "name": "AcademyCraft-neoforge-1.21.1-0.0.29-scex-deep-audit.jar",
+        "tested_r11_sha256": "9af4617d16eba2971b7cf111e365469f1419079f004f55d2c2de8dfb70335563",
+        "final_sha256": "b1ccdeb5f30505183a9b5978ce6554012852bda72bc50d1b5f1a0662329097ca",
+        "changed_entries": [
+          "BUILD-INFO.txt",
+          "META-INF/MANIFEST.MF"
+        ],
+        "all_executable_classes_and_resources_identical": true
+      }
+    ],
+    "audit_main_packages_disjoint": true,
+    "build_info_exact": true,
+    "license_notice_readme_present": true,
+    "extra_r2_behavior_applicability": "5 real key input and 1 passive case passed on r11; all runtime entries identical in final JARs; only metadata differs"
+  },
+  "build": {
+    "command": "./gradlew --offline --no-daemon --no-configuration-cache --console=plain --max-workers=2 check build auditTestJar",
+    "result": "BUILD SUCCESSFUL",
+    "log": "build/build-audit-final.log",
+    "junit_execution_log": "build/build-audit-r11.log",
+    "junit_final_build_status": "UP-TO-DATE; identical source/results from successful r11 execution",
+    "junit": {
+      "tests": 342,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "gametests_final_package": {
+    "evidence": "monarch-gt-final",
+    "result": {
+      "host": "MONARCH",
+      "expected_tests": 430,
+      "basis": "Actual NeoForge GameTestServer; release JAR plus separate probe mod",
+      "forced": false,
+      "exit_code": 0,
+      "failures": 0,
+      "expected_failures": 0,
+      "passed": true,
+      "expectation_met": true,
+      "tests": 430,
+      "process_exited": true,
+      "namespaces": "academy,academy_charging,academy_audit,academy_followup,academy_projectiles"
+    },
+    "peak_sampled_rss_bytes": 1552089088,
+    "min_sampled_free_bytes": 35973935104,
+    "test_duration_seconds": 70.56
+  },
+  "client_final_package": {
+    "evidence": "monarch-client-final",
+    "result": {
+      "passed": true,
+      "host": "MONARCH",
+      "close_reason": null,
+      "process_exited": true,
+      "visual_review": "pending",
+      "exit_code": 0,
+      "saved_after_stop": true,
+      "forced": false
+    },
+    "peak_sampled_rss_bytes": 1229529088,
+    "min_sampled_free_bytes": 36367327232,
+    "functional_checks": 18,
+    "render_check": "PASS 13 actual render frames; managed text requests=416; five restored entity renderers completed, caller pose preserved",
+    "visual_review": {
+      "reviewed": true,
+      "reviewer": "Codex root via view_image",
+      "screenshot": "screenshots/deep-audit-render.png",
+      "observed": [
+        "cyan sphere",
+        "cyan crescent viewed obliquely",
+        "cyan lance trail",
+        "blue cruise sphere",
+        "blue waterman humanoid",
+        "managed font buffer stress text"
+      ],
+      "scope": "Five registered renderer paths visible and no missing-texture pattern; deliberately overlapping font stress text is a fixture, not a production UI layout; not pixel-perfect legacy animation validation"
+    }
+  },
+  "extra_scenarios": {
+    "evidence": "monarch-extra-r2",
+    "result": {
+      "saved_after_stop": true,
+      "process_exited": true,
+      "close_reason": null,
+      "exit_code": 0,
+      "host": "MONARCH",
+      "passed": true,
+      "visual_review": "pending",
+      "forced": false
+    },
+    "peak_sampled_rss_bytes": 1467863040,
+    "min_sampled_free_bytes": 37197574144,
+    "cases_passed": 6,
+    "client_key_edge_cases": 5,
+    "passive_environment_cases": 1,
+    "tested_artifacts": [
+      {
+        "name": "AcademyCraft-neoforge-1.21.1-0.0.29-scex-deep-audit-audit-tests.jar",
+        "sha256": "b0f67a8ffa551fb04aba33fc15888a7dff5baa25c82cb5ea759fdc20a05f816f",
+        "bytes": 171456,
+        "build": "r11"
+      },
+      {
+        "name": "AcademyCraft-neoforge-1.21.1-0.0.29-scex-deep-audit.jar",
+        "sha256": "9af4617d16eba2971b7cf111e365469f1419079f004f55d2c2de8dfb70335563",
+        "bytes": 27826947,
+        "build": "r11"
+      }
+    ],
+    "final_package_equivalence": "artifact-entry-comparison.json",
+    "visual_review": {
+      "reviewed": true,
+      "reviewer": "Codex root via view_image",
+      "run": "extra-r2",
+      "casesPassed": 6,
+      "clientKeyEdgeCases": 5,
+      "passiveEnvironmentCases": 1,
+      "trackedServerEntities": [
+        "volcanic_ball",
+        "air_blade",
+        "bomber_lance",
+        "cruise_bomb",
+        "liquid_shadow"
+      ],
+      "observed": [
+        "volcanic cyan sphere",
+        "air blade edge-on cyan strip",
+        "bomber lance ring viewed along travel axis",
+        "cruise target damage particles",
+        "liquid shadow blue humanoid in melee"
+      ],
+      "scope": "Representative frames and actual tracking receipts; not a pixel-parity or animation-fidelity claim"
+    }
+  },
+  "review_inventory": {
+    "main_java": 593,
+    "junit_java": 103,
+    "audit_java": 20,
+    "total_java": 716,
+    "lines": 78446,
+    "review_registration_gaps": 0,
+    "language_keys_each": 573,
+    "language_missing_keys": 0
+  },
+  "cleanup": {
+    "remote": "remote-cleanup.json",
+    "local": "local-cleanup.json",
+    "logical_bytes_removed": 1611147054.0
+  },
+  "limits": [
+    "NeoForge other 21.1 patches and optional third-party compatibility matrix were not executed.",
+    "22 historical GameTest aliases and 10 optional compatibility cases are excluded from the selected 430.",
+    "Extra inputs use programmatic KeyMapping edges and prelearned Level 5 fixtures; not physical keyboard or survival-unlock proof.",
+    "Client renderer screenshots establish visible paths, not pixel-perfect legacy animation parity.",
+    "Charging 5-tick throttling is source/state-machine reviewed, not real network packet counting.",
+    "Extra r11 runtime entries are byte-identical to final; only BUILD-INFO and MANIFEST differ, so those six cases were not redundantly rerun.",
+    "No production deployment or GitHub publication performed in this audit."
+  ],
+  "key_evidence_sha256": {
+    "BUILD-INFO.txt": "f4fa1d0cff4ab103a0552da9ad68632962743ce8a88f1865a0b41f5c24e68954",
+    "evidence/audit-20261025/build/build-audit-final.log": "29baedbecb38267a555efd528dcef2000053d6784a4fc7e272942b5332e76c85",
+    "evidence/audit-20261025/monarch-gt-final/result.json": "6eaf792b6f48ce92eb461f05f4eae2751acf1317396671331cbb92415a342cf3",
+    "evidence/audit-20261025/monarch-client-final/result.json": "08e6de8107c347382b7e9871843a692bc4be9334d3c30e526e716a194f8b00b1",
+    "evidence/audit-20261025/monarch-extra-r2/result.json": "89bece9b09a5f1a2b498955e25dfc76f30b3e73a37c307bf65e18b05cf464ccd"
+  }
+}

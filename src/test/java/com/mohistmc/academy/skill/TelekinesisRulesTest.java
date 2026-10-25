@@ -16,18 +16,9 @@ class TelekinesisRulesTest {
     }
 
     @Test void insulationIsStrongestAgainstElectromasterAndMeltdowner() {
-        float generic = TelekinesisRules.mitigateAbilityDamage(20, 1, false);
-        float favored = TelekinesisRules.mitigateAbilityDamage(20, 1, true);
-        assertEquals(16.0f, generic, 0.001f);
-        assertEquals(12.0f, favored, 0.001f);
-        assertTrue(favored < generic);
-    }
-
-    @Test void hardeningNeedsAnAvailablePassiveGroundedCrouchingStance() {
-        assertTrue(TelekinesisRules.mayEnterHardenedStance(true, true, true));
-        assertFalse(TelekinesisRules.mayEnterHardenedStance(false, true, true));
-        assertFalse(TelekinesisRules.mayEnterHardenedStance(true, false, true));
-        assertFalse(TelekinesisRules.mayEnterHardenedStance(true, true, false));
+        assertEquals(.2F, TelekinesisRules.insulationReduction(1, 1), .001F);
+        assertEquals(.4F, TelekinesisRules.insulationReduction(1, 2), .001F);
+        assertEquals(.5F, TelekinesisRules.insulationReduction(1, 2.5F), .001F);
     }
 
     @Test void paperDrillHasAnExactFullStackAndBoundedPulseContract() {

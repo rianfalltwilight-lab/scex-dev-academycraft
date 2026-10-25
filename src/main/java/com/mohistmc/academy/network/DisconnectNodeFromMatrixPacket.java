@@ -37,7 +37,7 @@ public record DisconnectNodeFromMatrixPacket(MenuActionToken actionToken, BlockP
                     || !packet.nodePos().equals(menu.pos) || !menu.stillValid(player) || !menu.acceptAction(packet.actionToken(), player)
                     || !PayloadRateLimiter.allow(player.getUUID(), "node_matrix_disconnect",
                     level.getGameTime(), 20, 4)
-                    || !level.isLoaded(packet.nodePos())
+                    || !com.mohistmc.academy.skill.ability.LoadedRaycast.isLoaded(level, packet.nodePos())
                     || !level.mayInteract(player, packet.nodePos())
                     || !(level.getBlockEntity(packet.nodePos()) instanceof BaseNodeBlockEntity node)) {
                 return;

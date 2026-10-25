@@ -89,6 +89,8 @@ public class RailgunBeamEntity extends Entity {
     protected void addAdditionalSaveData(CompoundTag tag) {
     }
 
+    @Override public boolean shouldBeSaved() { return false; }
+
     @Override
     public void tick() {
         super.tick();

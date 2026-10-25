@@ -23,7 +23,10 @@ class WindGeneratorSourceContractTest {
         assertTrue(block.contains("mainHeight > MAX_PILLARS"));
         assertTrue(entity.contains("Math.min((int) storedEnergy, (int) getBandwidth())"));
         assertTrue(entity.contains("return 300"));
-        assertTrue(entity.contains("now - lastClientSyncTick >= 10"));
+        // Numeric menu data is incremental; only changed world-visible state broadcasts.
+        assertTrue(entity.contains("if (stateChanged)"));
+        assertFalse(entity.contains("periodicEnergySync"));
+        assertTrue(entity.contains("charged > 0 || stateChanged) markMachineChanged()"));
         assertTrue(entity.contains("Block.UPDATE_CLIENTS"));
         assertFalse(entity.contains("Block.UPDATE_ALL"));
     }

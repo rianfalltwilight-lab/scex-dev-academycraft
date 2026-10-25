@@ -558,5 +558,18 @@
   "item.academy.paper_armor.desc": "只有掌握浸纸念力并持续提供 CP 时才能保持形态。",
   "item.academy.extra.enabled": "当前状态：开启",
   "item.academy.extra.disabled": "当前状态：关闭",
-  "entity.academy.paper_plane": "纸飞机"
+  "entity.academy.paper_plane": "纸飞机",
+  "hud.academy.charge.hold": "长按蓄力",
+  "hud.academy.charge.release": "[QTE] 松开发射",
+  "hud.academy.charge.ready": "可释放",
+  "hud.academy.charge.shield": "护盾维持中",
+  "hud.academy.charge.missiles": "导弹锁定中",
+  "hud.academy.charge.targeting": "射线定位中",
+  "hud.academy.charge.flight": "飞行维持中",
+  "hud.academy.charge.vector": "矢量偏转中",
+  "entity.academy.aero_volcanic_ball": "爆裂气弹",
+  "entity.academy.aero_air_blade": "空气刃",
+  "entity.academy.aero_bomber_lance": "爆轰长枪",
+  "entity.academy.cruise_bomb": "巡航炸弹",
+  "entity.academy.liquid_shadow": "液态分身"
 }

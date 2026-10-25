@@ -2,7 +2,7 @@
   "repository": "https://github.com/NullaDev/ExtraAcC-1.12.2-",
   "commit": "d66a190e3ae00d9ca8c154b47fca0509d4c171f7",
   "licenseStatus": "No LICENSE file or README license grant at this fixed snapshot; this provenance does not grant or relicense the assets.",
-  "scope": "25 registered add-on items, seven alternate state models, two induction factors, and eight worn armor layers. No copied Java implementation. PNG files are byte-identical to the user-specified upstream.",
+  "scope": "25 registered add-on items, seven alternate state models, two induction factors, eight worn armor layers, and the original Waterman entity skin. Adapted modern behavior and renderers; no copied Java implementation. PNG files are byte-identical to the user-specified upstream.",
   "assets": [
     {
       "source": "assets/exac/textures/items/air_jet.png",
@@ -297,6 +297,13 @@
       "sha256": "F52B2CE6BBCB5CE57531BCA88CB688FB4E5E7BD071C5F290E5DD9774DD5CB7B2",
       "width": 64,
       "height": 32
+    },
+    {
+      "source": "assets/exac/textures/entities/waterman.png",
+      "destination": "assets/academy/textures/entity/extraacc/waterman.png",
+      "sha256": "A1D7F05D3C09D07FE4321BD25D3F1C4C94728952C7049E9F0CFDC24D3886B56C",
+      "width": 64,
+      "height": 64
     }
   ],
   "adaptedModels": [
@@ -541,7 +548,6 @@
   ],
   "unusedUpstreamArtNotImported": [
     "electricalibur_and_avalon.png",
-    "entities/waterman.png",
     "particles/particle.png"
   ]
 }

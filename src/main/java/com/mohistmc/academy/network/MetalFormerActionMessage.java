@@ -43,7 +43,7 @@ public record MetalFormerActionMessage(BlockPos pos, int delta) implements Custo
             if (context.player() instanceof ServerPlayer player) {
                 if (packet.delta() == 0 || !(player.containerMenu instanceof MetalFomerMenu menu)
                         || menu.pos == null || !packet.pos().equals(menu.pos) || !menu.stillValid(player)
-                        || !player.level().isLoaded(packet.pos())
+                        || !com.mohistmc.academy.skill.ability.LoadedRaycast.isLoaded(player.level(), packet.pos())
                         || player.distanceToSqr(packet.pos().getX() + 0.5, packet.pos().getY() + 0.5,
                         packet.pos().getZ() + 0.5) > 64.0
                         || !player.level().mayInteract(player, packet.pos())

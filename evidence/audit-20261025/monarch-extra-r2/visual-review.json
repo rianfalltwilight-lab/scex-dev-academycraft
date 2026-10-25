@@ -1,0 +1,23 @@
+{
+  "reviewed": true,
+  "reviewer": "Codex root via view_image",
+  "run": "extra-r2",
+  "casesPassed": 6,
+  "clientKeyEdgeCases": 5,
+  "passiveEnvironmentCases": 1,
+  "trackedServerEntities": [
+    "volcanic_ball",
+    "air_blade",
+    "bomber_lance",
+    "cruise_bomb",
+    "liquid_shadow"
+  ],
+  "observed": [
+    "volcanic cyan sphere",
+    "air blade edge-on cyan strip",
+    "bomber lance ring viewed along travel axis",
+    "cruise target damage particles",
+    "liquid shadow blue humanoid in melee"
+  ],
+  "scope": "Representative frames and actual tracking receipts; not a pixel-parity or animation-fidelity claim"
+}

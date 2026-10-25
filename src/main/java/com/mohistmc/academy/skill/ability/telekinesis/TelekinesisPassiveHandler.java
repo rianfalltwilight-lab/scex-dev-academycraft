@@ -68,11 +68,11 @@ public final class TelekinesisPassiveHandler {
         float proficiency = defense.getProficiency("insulation");
         float multiplier = source == AbilityCategory.MELTDOWNER ? 2.5F
                 : source == AbilityCategory.ELECTROMASTER ? 2.0F : 1.0F;
-        float reduction = (0.10F + 0.10F * proficiency) * multiplier;
+        float reduction = TelekinesisRules.insulationReduction(proficiency, multiplier);
         if (!DynamicSkillRules.tryPay(defense, "insulation", 100F * amount, 0)) return amount;
         float reduced = amount * (1F - Math.clamp(reduction, 0, 0.95F));
         if (reduced < amount) {
-            AbilityMutationService.addSkillExp(defender, defense, "insulation", amount * 0.0003f);
+            AbilityMutationService.addSkillExp(defender, defense, "insulation", amount * 0.002f);
             EffectHelper.psychoBurst(defender.serverLevel(), defender.getX(),
                     defender.getY() + defender.getBbHeight() * 0.55, defender.getZ(), 2, 0.18);
         }
@@ -83,7 +83,6 @@ public final class TelekinesisPassiveHandler {
     public static void playerTick(PlayerTickEvent.Post event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         PlayerAbilityData data = player.getData(AcademyAttachments.PLAYER_ABILITY);
-        tickPerfectPaperTraining(player, data);
         Anchor anchor = HARDENED.get(player.getUUID());
         if (anchor != null && (!passive(player, data, "psycho_harden")
                 || !anchor.dimension().equals(player.level().dimension()))) {
@@ -105,22 +104,6 @@ public final class TelekinesisPassiveHandler {
             }
         }
         tickShadow(player, data);
-    }
-
-    /**
-     * Perfect Paper is passive but gates skills at 0.5/1.0 proficiency.  Training while handling
-     * paper gives that passive an attainable, server-owned progression path instead of leaving
-     * its descendants permanently locked at the initial zero proficiency.
-     */
-    private static void tickPerfectPaperTraining(ServerPlayer player, PlayerAbilityData data) {
-        if (player.tickCount % 5 != 0 || !passive(player, data, "perfect_paper")) return;
-        if (!player.getMainHandItem().is(Items.PAPER)
-                && !player.getOffhandItem().is(Items.PAPER)) return;
-        AbilityMutationService.addSkillExp(player, data, "perfect_paper", 0.00125f);
-        if (player.tickCount % 20 == 0) {
-            EffectHelper.psychoBurst(player.serverLevel(), player.getX(),
-                    player.getY() + 1.0, player.getZ(), 1, 0.08);
-        }
     }
 
     /** Invoked only after the complete public damage-veto, shield and iframe stages. */
@@ -193,7 +176,7 @@ public final class TelekinesisPassiveHandler {
     public static boolean toggleLiquidShadow(ServerPlayer player) {
         PlayerAbilityData data = player.getData(AcademyAttachments.PLAYER_ABILITY);
         if (!passive(player, data, "liquid_shadow")) return false;
-        Drowned existing = resolveShadow(player);
+        LiquidShadowEntity existing = resolveShadow(player);
         if (existing != null) {
             stopShadow(player, data, true);
             return true;
@@ -204,11 +187,11 @@ public final class TelekinesisPassiveHandler {
         float startOverload = 300F - 100F * p;
         if (!DynamicSkillRules.canPay(data, "liquid_shadow", startCp, startOverload)) return false;
         ServerLevel level = player.serverLevel();
-        LiquidShadowEntity shadow = new LiquidShadowEntity(level, player.getUUID());
+        LiquidShadowEntity shadow = com.mohistmc.academy.world.AcademyEntities.LIQUID_SHADOW.get().create(level);
+        if (shadow == null) return false;
+        shadow.setOwnerUUID(player.getUUID());
         Vec3 spawn = shadowTarget(player);
         shadow.setPos(spawn.x, spawn.y, spawn.z);
-        shadow.setNoAi(true);
-        shadow.setSilent(true);
         shadow.setPersistenceRequired();
         shadow.setCustomName(Component.translatable(
                 "item.academy.factor_telekinesis.liquid_shadow"));
@@ -225,6 +208,8 @@ public final class TelekinesisPassiveHandler {
         // Entity insertion can be vetoed by another mod. Commit resources only after acceptance;
         // if a callback changes the owner's resources, remove the uncommitted follower.
         if (!level.addFreshEntity(shadow) || !shadow.isAlive()
+                || SHADOWS.get(player.getUUID()) != session || player.level() != level
+                || !passive(player, data, "liquid_shadow") || !hasWaterBucket(player)
                 || !DynamicSkillRules.tryPay(data, "liquid_shadow", startCp, startOverload)) {
             SHADOWS.remove(player.getUUID(), session);
             shadow.discard();
@@ -239,7 +224,7 @@ public final class TelekinesisPassiveHandler {
     }
 
     private static void tickShadow(ServerPlayer player, PlayerAbilityData data) {
-        Drowned shadow = resolveShadow(player);
+        LiquidShadowEntity shadow = resolveShadow(player);
         if (shadow == null) return;
         if (shadow.isInWater()) {
             stopShadow(player, data, true);
@@ -253,38 +238,6 @@ public final class TelekinesisPassiveHandler {
             stopShadow(player, data, true);
             return;
         }
-        LivingEntity victim = validShadowVictim(player, shadow, player.getLastHurtMob())
-                ? player.getLastHurtMob() : validShadowVictim(player, shadow, player.getLastHurtByMob())
-                ? player.getLastHurtByMob() : null;
-        Vec3 target = victim == null ? shadowTarget(player) : victim.position();
-        Vec3 delta = target.subtract(shadow.position());
-        boolean catchingUp = delta.lengthSqr() > 64;
-        if (catchingUp) {
-            // Catch up to the owner, never teleport straight onto an attack target.
-            Vec3 follow = shadowTarget(player);
-            shadow.setPos(follow.x, follow.y, follow.z);
-            shadow.setDeltaMovement(Vec3.ZERO);
-        } else {
-            shadow.setDeltaMovement(delta.scale(0.22));
-            shadow.hurtMarked = true;
-        }
-        if (!catchingUp && victim != null && shadow.distanceToSqr(victim) <= 4
-                && player.tickCount % 20 == 0 && SkillRaycast.hasClearPath(shadow, victim)) {
-            float rawDamage = 20F + 10F * data.getProficiency("liquid_shadow");
-            float attackCp = 5F * rawDamage;
-            // Reserve the entire attack cost before raising any damage callbacks.
-            if (!DynamicSkillRules.tryPay(data, "liquid_shadow", attackCp, 0)) {
-                stopShadow(player, data, true);
-                return;
-            }
-            if (com.mohistmc.academy.skill.AcademyDamageHelper.hurt(player, victim,
-                    player.damageSources().playerAttack(player),
-                    DynamicSkillRules.damage("liquid_shadow", rawDamage))) {
-                AbilityMutationService.addSkillExp(player, data, "liquid_shadow", rawDamage * 0.0001F);
-            }
-            // A paid attempt remains paid if a protection hook rejects damage. Refunding only
-            // CP would retain usage growth and let invulnerable targets train resources for free.
-        }
         shadow.setRemainingFireTicks(0);
         if (player.tickCount % 2 == 0) {
             player.serverLevel().sendParticles(ParticleTypes.SPLASH,
@@ -294,20 +247,49 @@ public final class TelekinesisPassiveHandler {
         DynamicSkillRules.addExp(player, data, "liquid_shadow", 0.0001F);
     }
 
-    private static boolean validShadowVictim(ServerPlayer player, Drowned shadow, LivingEntity victim) {
-        return victim != null && victim != player && victim != shadow && victim.isAlive()
-                && victim.level() == shadow.level() && shadow.level() == player.level()
-                && !player.isAlliedTo(victim) && player.distanceToSqr(victim) <= 64
+    static boolean validShadowVictim(LiquidShadowEntity shadow, LivingEntity victim) {
+        ServerPlayer player = shadowOwner(shadow);
+        return player != null && victim != null && victim != player && victim != shadow && victim.isAlive()
+                && victim.level() == shadow.level() && !player.isAlliedTo(victim)
+                && (!(victim instanceof net.minecraft.world.entity.player.Player targetPlayer)
+                    || player.canHarmPlayer(targetPlayer))
                 && com.mohistmc.academy.skill.AcademyDamageHelper.allowsTarget(victim);
     }
 
-    static boolean isCurrentShadow(LiquidShadowEntity shadow) {
+    static ServerPlayer shadowOwner(LiquidShadowEntity shadow) {
         ShadowSession session = SHADOWS.get(shadow.abilityOwner());
         return session != null && session.shadow() == shadow && session.owner().isAlive()
-                && !session.owner().isRemoved() && session.owner().level() == shadow.level();
+                && !session.owner().isRemoved() && session.owner().level() == shadow.level() ? session.owner() : null;
     }
 
-    private static Drowned resolveShadow(ServerPlayer player) {
+    static boolean attackWithShadow(LiquidShadowEntity shadow, LivingEntity victim) {
+        ServerPlayer player = shadowOwner(shadow);
+        if (player == null || !validShadowVictim(shadow, victim)) return false;
+        PlayerAbilityData data = player.getData(AcademyAttachments.PLAYER_ABILITY);
+        if (!passive(player, data, "liquid_shadow")) { endShadow(shadow); return false; }
+        float rawDamage = 20F + 10F * data.getProficiency("liquid_shadow");
+        if (!DynamicSkillRules.tryPay(data, "liquid_shadow", 5F * rawDamage, 0)) {
+            stopShadow(player, data, true);
+            return false;
+        }
+        boolean accepted = com.mohistmc.academy.skill.AcademyDamageHelper.hurt(player, victim,
+                player.damageSources().playerAttack(player), DynamicSkillRules.damage("liquid_shadow", rawDamage));
+        if (accepted) AbilityMutationService.addSkillExp(player, data, "liquid_shadow", rawDamage * .0001F);
+        return accepted;
+    }
+
+    static void endShadow(LiquidShadowEntity shadow) {
+        ServerPlayer owner = shadowOwner(shadow);
+        if (owner != null) stopShadow(owner, owner.getData(AcademyAttachments.PLAYER_ABILITY), true);
+        else shadow.discard();
+    }
+
+    static boolean isCurrentShadow(LiquidShadowEntity shadow) {
+        ServerPlayer owner = shadowOwner(shadow);
+        return owner != null && passive(owner, owner.getData(AcademyAttachments.PLAYER_ABILITY), "liquid_shadow");
+    }
+
+    private static LiquidShadowEntity resolveShadow(ServerPlayer player) {
         ShadowSession session = SHADOWS.get(player.getUUID());
         if (session == null) return null;
         LiquidShadowEntity shadow = session.shadow();
@@ -331,6 +313,10 @@ public final class TelekinesisPassiveHandler {
         for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
             ItemStack stack = player.getInventory().getItem(slot);
             if (stack.is(Items.WATER_BUCKET)) {
+                if (stack.getCount() == 1) {
+                    player.getInventory().setItem(slot, new ItemStack(Items.BUCKET));
+                    return;
+                }
                 stack.shrink(1);
                 if (!player.getInventory().add(new ItemStack(Items.BUCKET)))
                     player.drop(new ItemStack(Items.BUCKET), false);

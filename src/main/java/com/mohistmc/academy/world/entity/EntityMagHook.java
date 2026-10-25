@@ -43,6 +43,9 @@ public final class EntityMagHook extends Entity implements ItemSupplier {
     // Final 1.12.2 commit 8dee31a4 initialized hitSide to DOWN so the first
     // synchronized/render tick can never expose a null/undefined collision face.
     private Direction anchorFace = Direction.DOWN;
+    private boolean recovering;
+    private boolean settling;
+    private int retry;
 
     public EntityMagHook(EntityType<? extends EntityMagHook> type, Level level) {
         super(type, level);
@@ -74,6 +77,11 @@ public final class EntityMagHook extends Entity implements ItemSupplier {
 
     @Override
     public void tick() {
+        if (isRemoved() || settling) return;
+        if (recovering) {
+            if (!level().isClientSide && --retry <= 0) recover(null);
+            return;
+        }
         super.tick();
         if (isHit()) {
             setDeltaMovement(Vec3.ZERO);
@@ -158,13 +166,21 @@ public final class EntityMagHook extends Entity implements ItemSupplier {
     }
 
     private void recover(Player collector) {
-        if (isRemoved()) return;
-        if (entityData.get(RETURN_ITEM)) {
-            ItemEntity item = new ItemEntity(level(), getX(), getY(), getZ(),
-                    new ItemStack(AcademyItems.MAG_HOOK.get()));
-            if (level().addFreshEntity(item) && collector != null) item.playerTouch(collector);
-        }
-        discard();
+        if (isRemoved() || settling) return;
+        settling = true;
+        recovering = true;
+        retry = 20;
+        setDeltaMovement(Vec3.ZERO);
+        try {
+            if (entityData.get(RETURN_ITEM)) {
+                ItemEntity item = new ItemEntity(level(), getX(), getY(), getZ(),
+                        new ItemStack(AcademyItems.MAG_HOOK.get()));
+                if (!level().addFreshEntity(item)) return;
+                entityData.set(RETURN_ITEM, false);
+                if (collector != null) item.playerTouch(collector);
+            }
+            discard();
+        } finally { settling = false; }
     }
 
     @Override public boolean isPickable() { return isHit(); }
@@ -173,6 +189,7 @@ public final class EntityMagHook extends Entity implements ItemSupplier {
     protected void readAdditionalSaveData(CompoundTag tag) {
         entityData.set(HIT, tag.getBoolean("Hit"));
         entityData.set(RETURN_ITEM, !tag.contains("ReturnItem") || tag.getBoolean("ReturnItem"));
+        recovering = tag.getBoolean("Recovering");
         if (tag.hasUUID("Owner")) entityData.set(OWNER, Optional.of(tag.getUUID("Owner")));
         if (tag.contains("Anchor")) anchor = BlockPos.of(tag.getLong("Anchor"));
         anchorFace = Direction.from3DDataValue(Math.clamp(tag.getInt("AnchorFace"), 0, 5));
@@ -187,6 +204,7 @@ public final class EntityMagHook extends Entity implements ItemSupplier {
     protected void addAdditionalSaveData(CompoundTag tag) {
         tag.putBoolean("Hit", isHit());
         tag.putBoolean("ReturnItem", entityData.get(RETURN_ITEM));
+        tag.putBoolean("Recovering", recovering);
         entityData.get(OWNER).ifPresent(id -> tag.putUUID("Owner", id));
         tag.putLong("Anchor", anchor.asLong());
         tag.putInt("AnchorFace", anchorFace.get3DDataValue());

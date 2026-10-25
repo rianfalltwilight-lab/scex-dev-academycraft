@@ -27,7 +27,7 @@ public final class LocationTeleportGui extends AcademyScreen {
     private static final int TOP = 28;
     private static final int LIST_W = 252;
     private static final int ROW_H = 32;
-    private static final int ROWS = 5;
+    private int visibleRows = 5;
     private static final ResourceLocation TELEPORT_ICON = ResourceLocation.fromNamespaceAndPath(
             AcademyCraft.MODID, "textures/guis/icons/icon_location_on.png");
     private static final ResourceLocation REMOVE_ICON = ResourceLocation.fromNamespaceAndPath(
@@ -51,8 +51,9 @@ public final class LocationTeleportGui extends AcademyScreen {
     protected void init() {
         super.init();
         centerGui(Math.min(GUI_W, width - 12), Math.min(GUI_H, height - 12));
+        visibleRows = Math.max(1, Math.min(5, (guiHeight - TOP - 5 - 34) / ROW_H));
         name = new EditBox(font, guiLeft + 10, guiTop + guiHeight - 24,
-                Math.max(80, Math.min(196, guiWidth - 58)), 18,
+                Math.max(40, split() - guiLeft - 82), 18,
                 Component.translatable("ac.gui.loctele.add"));
         name.setMaxLength(16);
         name.setHint(Component.translatable("ac.gui.loctele.add"));
@@ -76,8 +77,8 @@ public final class LocationTeleportGui extends AcademyScreen {
 
         hoveredRow = -1;
         hoverTeleport = hoverRemove = hoverAdd = false;
-        int begin = page * ROWS;
-        int end = Math.min(begin + ROWS, latest.size());
+        int begin = page * visibleRows;
+        int end = Math.min(begin + visibleRows, latest.size());
         for (int index = begin; index < end; index++) {
             int visible = index - begin;
             int y = guiTop + TOP + 5 + visible * ROW_H;
@@ -107,15 +108,15 @@ public final class LocationTeleportGui extends AcademyScreen {
             g.blit(REMOVE_ICON, removeX, y + 7, 16, 16, 0, 0, 48, 48, 48, 48);
         }
 
-        int addX = guiLeft + Math.max(40, Math.min(214, guiWidth - 34));
+        int addX = name.getX() + name.getWidth() + 6;
         hoverAdd = isHovered(addX, guiTop + guiHeight - 23, 18, 18, mouseX, mouseY);
         if (hoverAdd) g.fill(addX - 2, guiTop + guiHeight - 25, addX + 20,
                 guiTop + guiHeight - 3, 0x6057B7CA);
         g.blit(ADD_ICON, addX, guiTop + guiHeight - 23, 18, 18, 0, 0, 48, 48, 48, 48);
 
-        if (page > 0) g.drawString(font, "<", split - 45, guiTop + guiHeight - 19, 0xFFB5E3EC);
-        if (end < latest.size()) g.drawString(font, ">", split - 32, guiTop + guiHeight - 19, 0xFFB5E3EC);
-        renderInformation(g, split + 8, guiTop + TOP + 8);
+        if (page > 0) g.drawString(font, "<", split - 34, guiTop + guiHeight - 19, 0xFFB5E3EC);
+        if (end < latest.size()) g.drawString(font, ">", split - 16, guiTop + guiHeight - 19, 0xFFB5E3EC);
+        if (guiWidth >= 330) renderInformation(g, split + 8, guiTop + TOP + 8);
         popZ(g);
         super.render(g, mouseX, mouseY, partialTick);
     }
@@ -180,10 +181,10 @@ public final class LocationTeleportGui extends AcademyScreen {
             return true;
         }
         int split = split();
-        if (button == 0 && isHovered(split - 49, guiTop + guiHeight - 24, 14, 20,
+        if (button == 0 && isHovered(split - 38, guiTop + guiHeight - 24, 14, 20,
                 (int) mouseX, (int) mouseY) && page > 0) { page--; return true; }
-        if (button == 0 && isHovered(split - 36, guiTop + guiHeight - 24, 14, 20,
-                (int) mouseX, (int) mouseY) && (page + 1) * ROWS < latest.size()) { page++; return true; }
+        if (button == 0 && isHovered(split - 20, guiTop + guiHeight - 24, 14, 20,
+                (int) mouseX, (int) mouseY) && (page + 1) * visibleRows < latest.size()) { page++; return true; }
         return super.mouseClicked(mouseX, mouseY, button);
     }
 
@@ -198,7 +199,7 @@ public final class LocationTeleportGui extends AcademyScreen {
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-        int max = Math.max(0, (latest.size() - 1) / ROWS);
+        int max = Math.max(0, (latest.size() - 1) / visibleRows);
         page = Math.clamp(page - (int) Math.signum(scrollY), 0, max);
         return true;
     }
@@ -213,11 +214,11 @@ public final class LocationTeleportGui extends AcademyScreen {
     }
 
     private int split() {
-        return guiLeft + Math.min(LIST_W, Math.max(210, guiWidth - 126));
+        return guiLeft + (guiWidth < 330 ? guiWidth : LIST_W);
     }
 
     private void clampPage() {
-        page = Math.clamp(page, 0, Math.max(0, (latest.size() - 1) / ROWS));
+        page = Math.clamp(page, 0, Math.max(0, (latest.size() - 1) / visibleRows));
     }
 
     private static String dimensionName(String raw) {

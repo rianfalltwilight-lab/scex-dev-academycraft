@@ -1,5 +1,7 @@
 package com.mohistmc.academy.skill.ability.meltdowner;
 
+import com.mohistmc.academy.skill.ability.LoadedRaycast;
+
 import static com.mohistmc.academy.utils.MathUtils.lerpf;
 
 import com.mohistmc.academy.config.DynamicSkillRules;
@@ -35,7 +37,10 @@ public final class ScatterBombEffect implements ChargingSkillEffect {
     private static final class State {
         final List<UUID> balls = new ArrayList<>();
         final float overloadFloor;
-        State(float overloadFloor) { this.overloadFloor = overloadFloor; }
+        final net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> dimension;
+        State(float overloadFloor, ServerPlayer player) {
+            this.overloadFloor = overloadFloor; dimension = player.level().dimension();
+        }
     }
 
     private static final Map<UUID, State> STATES = new HashMap<>();
@@ -59,13 +64,13 @@ public final class ScatterBombEffect implements ChargingSkillEffect {
     @Override
     public void onChargingStart(ServerPlayer player, PlayerAbilityData data) {
         if (!DynamicSkillRules.tryPay(data, getId(), 0, startOverload(data))) return;
-        STATES.put(player.getUUID(), new State(data.getCurrentOverload()));
+        STATES.put(player.getUUID(), new State(data.getCurrentOverload(), player));
     }
 
     @Override
     public boolean onChargingTick(ServerPlayer player, PlayerAbilityData data, int ticks) {
         State state = STATES.get(player.getUUID());
-        if (state == null) return false;
+        if (state == null || !state.dimension.equals(player.level().dimension())) return false;
         if (!data.isDevMode() && data.getCurrentOverload() < state.overloadFloor) {
             data.setCurrentOverload(state.overloadFloor);
         }
@@ -113,6 +118,11 @@ public final class ScatterBombEffect implements ChargingSkillEffect {
     }
 
     private void fire(ServerPlayer player, PlayerAbilityData data, State state) {
+        // Lifecycle aborts must never reinterpret an old dimension's orb positions in a new world.
+        if (!player.isAlive() || player.isRemoved() || !state.dimension.equals(player.level().dimension())) {
+            discard(player, state);
+            return;
+        }
         float exp = data.getProficiency(getId());
         float damage = lerpf(5, 9, exp);
         int fired = 0;
@@ -159,7 +169,7 @@ public final class ScatterBombEffect implements ChargingSkillEffect {
     }
 
     static Entity nearestVisibleTarget(ServerPlayer player, Vec3 from, Vec3 destination) {
-        BlockHitResult wall = player.serverLevel().clip(new ClipContext(from, destination,
+        BlockHitResult wall = LoadedRaycast.clip(player.serverLevel(), new ClipContext(from, destination,
                 ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
         double maxDistance = wall.getType() == HitResult.Type.BLOCK
                 ? from.distanceToSqr(wall.getLocation()) : from.distanceToSqr(destination);
@@ -194,4 +204,17 @@ public final class ScatterBombEffect implements ChargingSkillEffect {
 
     @Override public void execute(ServerPlayer player, PlayerAbilityData data) {}
     @Override public int getCooldownTicks(float proficiency) { return 0; }
+
+    /** Lifecycle cancellation is distinct from the legacy same-world release/upkeep termination. */
+    public static void discardOnLifecycle(ServerPlayer player) {
+        State state = STATES.remove(player.getUUID());
+        if (state != null) discard(player, state);
+    }
+    private static void discard(ServerPlayer player, State state) {
+        var original = player.server.getLevel(state.dimension);
+        if (original != null) for (UUID id : state.balls) {
+            Entity ball = original.getEntity(id);
+            if (ball != null) ball.discard();
+        }
+    }
 }

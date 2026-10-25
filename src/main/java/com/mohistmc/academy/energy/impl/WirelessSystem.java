@@ -47,6 +47,22 @@ public class WirelessSystem {
         }
     }
 
+    @SubscribeEvent
+    public static void onChunkLoad(net.neoforged.neoforge.event.level.ChunkEvent.Load event) {
+        if (event.getLevel() instanceof ServerLevel level) {
+            WiWorldData data = WiWorldData.getNonCreate(level);
+            if (data != null) data.chunkStateChanged(event.getChunk().getPos().toLong(), true);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onChunkUnload(net.neoforged.neoforge.event.level.ChunkEvent.Unload event) {
+        if (event.getLevel() instanceof ServerLevel level) {
+            WiWorldData data = WiWorldData.getNonCreate(level);
+            if (data != null) data.chunkStateChanged(event.getChunk().getPos().toLong(), false);
+        }
+    }
+
     // ==================== 便捷方法 ====================
 
     /** 创建无线网络 */

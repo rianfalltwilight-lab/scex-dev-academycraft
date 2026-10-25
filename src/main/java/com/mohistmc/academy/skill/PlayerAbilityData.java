@@ -19,7 +19,7 @@ import net.minecraft.resources.ResourceLocation;
 import com.mohistmc.academy.config.ACConfig;
 import com.mohistmc.academy.config.LegacyAbilityRules;
 
-public class PlayerAbilityData implements com.mohistmc.academy.skill.ability.meltdowner.LightShieldResourceLedger.ResourceAccount {
+public class PlayerAbilityData {
 
     public static final float BASE_MAX_CP = 1800;
     /** Porting baseline: AcademyCraft 1.0.7 default.conf ability.init_cp[5] = 8000. */
@@ -380,6 +380,7 @@ public class PlayerAbilityData implements com.mohistmc.academy.skill.ability.mel
         var tuning = ACConfig.Server.skill(skill.getId());
         if (!tuning.enabled()) return false;
         if (isDevMode()) return true;
+        if (currentAbility != skill.getCategory() || playerLevel < skill.getLevel()) return false;
         if (!hasLearnedSkill(skill.getId())) return false;
         if (isOnCooldown(skill.getId())) return false;
         SkillEffect effect = skill.getEffect();

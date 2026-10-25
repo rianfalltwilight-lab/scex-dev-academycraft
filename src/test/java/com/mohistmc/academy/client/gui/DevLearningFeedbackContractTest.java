@@ -24,7 +24,16 @@ class DevLearningFeedbackContractTest {
     @Test void energyIsLiveAndTinyAdvancedScreenDisablesInteraction() throws Exception {
         String tree = source("com/mohistmc/academy/client/gui/SkillTreeGui.java");
         String gui = source("com/mohistmc/academy/client/block/gui/DevAdvancedGui.java");
-        assertTrue(tree.contains("refreshAuthoritativeEnergy()"));
+        String sessions = source("com/mohistmc/academy/network/DevLearningSessionManager.java");
+        String registration = source("com/mohistmc/academy/AcademyCraft.java");
+        assertFalse(tree.contains("refreshAuthoritativeEnergy"), "old client BE state must not overwrite authoritative results");
+        assertTrue(tree.contains("acceptServerEnergy") && tree.contains("!gui.sessionSpent")
+                && tree.contains("gui.sessionNonce.equals(snapshot.nonce())"));
+        assertTrue(sessions.contains("syncIdleEnergy(player)") && sessions.contains("now + 5"));
+        assertTrue(sessions.contains("boolean changed = snapshot.energy() != view.energy")
+                && sessions.contains("changed && SafePayloadSender.send(player, snapshot)"));
+        assertTrue(sessions.contains("validate(player, view.nonce, view.context.type, view.context.pos)"));
+        assertTrue(registration.contains("registrar.playToClient(com.mohistmc.academy.network.DevEnergyPacket.TYPE"));
         assertTrue(gui.contains("compactFallback"));
         assertTrue(gui.contains("if (compactFallback) return true"));
         assertFalse(gui.contains("addAcademySlot"));

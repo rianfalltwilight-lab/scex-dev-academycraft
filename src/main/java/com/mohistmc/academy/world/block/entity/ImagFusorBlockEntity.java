@@ -41,7 +41,9 @@ public class ImagFusorBlockEntity extends AcademyContainerBlockEntity implements
     private int processingTime = 0;
     private double energy = 0;
     private final FluidTank tank = new FluidTank(MAX_FLUID,
-            fs -> fs.getFluid() == AcademyFluids.PHASE_LIQUID.get());
+            fs -> fs.getFluid() == AcademyFluids.PHASE_LIQUID.get()) {
+        @Override protected void onContentsChanged() { markMachineChanged(); }
+    };
 
     public ImagFusorBlockEntity(BlockPos pos, BlockState state) {
         super(AcademyBlockEntities.IMAG_FUSOR.get(), pos, state);
@@ -84,7 +86,7 @@ public class ImagFusorBlockEntity extends AcademyContainerBlockEntity implements
         if (!Double.isFinite(amt) || amt <= 0) return amt;
         double accepted = Math.min(amt, MAX_ENERGY - energy);
         energy += accepted;
-        if (accepted > 0) setChanged();
+        if (accepted > 0) markMachineChanged();
         return amt - accepted;
     }
 
@@ -93,7 +95,7 @@ public class ImagFusorBlockEntity extends AcademyContainerBlockEntity implements
         if (!Double.isFinite(amt) || amt <= 0) return 0;
         double pulled = Math.min(amt, energy);
         energy -= pulled;
-        if (pulled > 0) setChanged();
+        if (pulled > 0) markMachineChanged();
         return pulled;
     }
 
@@ -122,14 +124,14 @@ public class ImagFusorBlockEntity extends AcademyContainerBlockEntity implements
                 } else {
                     emptySlot.grow(1);
                 }
-                setChanged();
+                markMachineChanged();
             }
         }
 
         ItemStack battery = getItems().get(ENERGY_INPUT_SLOT);
         if (EnergyItemHelper.isEnergyItem(battery) && energy < MAX_ENERGY) {
             int gained = EnergyItemHelper.extractEnergy(battery,
-                    Math.min((int) Math.ceil(MAX_ENERGY - energy), (int) getBandwidth()), false);
+                    Math.min((int) Math.floor(MAX_ENERGY - energy), (int) getBandwidth()), false);
             if (gained > 0) injectEnergy(gained);
         }
 
@@ -174,7 +176,7 @@ public class ImagFusorBlockEntity extends AcademyContainerBlockEntity implements
             } else {
                 output.grow(result.getCount());
             }
-            setChanged();
+            markMachineChanged();
         }
     }
 
@@ -183,7 +185,12 @@ public class ImagFusorBlockEntity extends AcademyContainerBlockEntity implements
     @Override
     public void loadAdditional(CompoundTag tag, HolderLookup.Provider provider) {
         super.loadAdditional(tag, provider);
-        if (tag.contains("tank")) tank.readFromNBT(provider, tag.getCompound("tank"));
+        if (tag.contains("tank")) {
+            tank.readFromNBT(provider, tag.getCompound("tank"));
+            FluidStack loaded = tank.getFluid();
+            if (!loaded.isEmpty() && !tank.isFluidValid(loaded)) tank.setFluid(FluidStack.EMPTY);
+            else if (loaded.getAmount() > MAX_FLUID) tank.setFluid(loaded.copyWithAmount(MAX_FLUID));
+        }
         else tank.setFluid(new FluidStack(AcademyFluids.PHASE_LIQUID.get(),
                 MachineStateSanitizer.clampAmount(tag.getInt("fluidAmount"), MAX_FLUID)));
         processingTime = MachineStateSanitizer.clampCounter(tag.getInt("processingTime"), PROCESSING_DURATION);
@@ -261,7 +268,7 @@ public class ImagFusorBlockEntity extends AcademyContainerBlockEntity implements
                     ItemStack inserted = stack.copy();
                     inserted.setCount(moved);
                     getItems().set(machineSlot, inserted);
-                    setChanged();
+                    markMachineChanged();
                 }
                 ItemStack remainder = stack.copy();
                 remainder.shrink(moved);
@@ -270,7 +277,7 @@ public class ImagFusorBlockEntity extends AcademyContainerBlockEntity implements
             if (!ItemStack.isSameItemSameComponents(existing, stack)) return stack;
             int moved = Math.min(stack.getCount(), Math.max(0, limit - existing.getCount()));
             if (moved <= 0) return stack;
-            if (!simulate) { existing.grow(moved); setChanged(); }
+            if (!simulate) { existing.grow(moved); markMachineChanged(); }
             ItemStack remainder = stack.copy();
             remainder.shrink(moved);
             return remainder;
@@ -286,7 +293,7 @@ public class ImagFusorBlockEntity extends AcademyContainerBlockEntity implements
             if (!simulate) {
                 existing.shrink(moved);
                 if (existing.isEmpty()) getItems().set(slots[slot], ItemStack.EMPTY);
-                setChanged();
+                markMachineChanged();
             }
             return extracted;
         }

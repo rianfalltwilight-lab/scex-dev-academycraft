@@ -1,4 +1,6 @@
 package com.mohistmc.academy.skill.ability.vecmanip;
+
+import com.mohistmc.academy.skill.ability.LoadedRaycast;
 import com.mohistmc.academy.skill.AcademyDamageHelper;
 
 import com.mohistmc.academy.config.DynamicSkillRules;
@@ -105,7 +107,7 @@ public class BloodRetroEffect implements ChargingSkillEffect {
             for (int pitch : new int[]{0,30,45,60,80,-30,-45,-60,-80}) {
                 float yaw = player.getYHeadRot() + level.random.nextFloat() * 40 - 20;
                 Vec3 look = Vec3.directionFromRotation(pitch, yaw);
-                BlockHitResult decalHit = level.clip(new ClipContext(head.subtract(look.scale(.5)),
+                BlockHitResult decalHit = LoadedRaycast.clip(level, new ClipContext(head.subtract(look.scale(.5)),
                         head.add(look.scale(5)), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, target));
                 if (decalHit.getType() == HitResult.Type.BLOCK) {
                     BloodSprayDecalEntity.spawn(level, decalHit.getLocation(), decalHit.getDirection());
@@ -157,7 +159,7 @@ public class BloodRetroEffect implements ChargingSkillEffect {
     private EntityHitResult rayTraceEntity(ServerPlayer player, double range) {
         Vec3 start = player.getEyePosition();
         Vec3 end = start.add(player.getLookAngle().scale(range));
-        var block=player.level().clip(new ClipContext(start,end,ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,player));
+        var block=LoadedRaycast.clip(player.level(), new ClipContext(start,end,ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,player));
         double wallDist=block.getType()==HitResult.Type.MISS?Double.MAX_VALUE:start.distanceTo(block.getLocation());
         List<Entity> entities = player.level().getEntities(player,
                 player.getBoundingBox().inflate(range),

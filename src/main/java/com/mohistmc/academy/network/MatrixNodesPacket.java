@@ -35,7 +35,7 @@ public record MatrixNodesPacket(MenuActionToken actionToken, BlockPos matrixPos,
             if (!(context.player() instanceof ServerPlayer player)
                     || !(player.containerMenu instanceof MatrixMenu menu)
                     || !packet.matrixPos.equals(menu.pos) || !menu.stillValid(player) || !menu.acceptAction(packet.actionToken(), player)
-                    || !player.serverLevel().isLoaded(packet.matrixPos)
+                    || !com.mohistmc.academy.skill.ability.LoadedRaycast.isLoaded(player.serverLevel(), packet.matrixPos)
                     || !player.serverLevel().mayInteract(player, packet.matrixPos)
                     || !(player.serverLevel().getBlockEntity(packet.matrixPos) instanceof MatrixBlockEntity matrix)
                     || !matrix.canManage(player)) return;
@@ -52,9 +52,8 @@ public record MatrixNodesPacket(MenuActionToken actionToken, BlockPos matrixPos,
             int minChunkZ = (packet.matrixPos.getZ() - range) >> 4, maxChunkZ = (packet.matrixPos.getZ() + range) >> 4;
             java.util.List<net.minecraft.world.level.block.entity.BlockEntity> candidates = new java.util.ArrayList<>();
             for (int cx = minChunkX; cx <= maxChunkX; cx++) for (int cz = minChunkZ; cz <= maxChunkZ; cz++) {
-                if (player.serverLevel().hasChunk(cx, cz)) {
-                    candidates.addAll(player.serverLevel().getChunk(cx, cz).getBlockEntities().values());
-                }
+                var resident = player.serverLevel().getChunkSource().getChunkNow(cx, cz);
+                if (resident != null) candidates.addAll(resident.getBlockEntities().values());
             }
             for (var be : candidates) {
                 BlockPos pos = be.getBlockPos();

@@ -44,7 +44,7 @@ public record MatrixConfigPacket(MenuActionToken actionToken, BlockPos matrixPos
                     || packet.ssid().isEmpty() && packet.password().isEmpty()
                     || !PayloadRateLimiter.allow(player.getUUID(), "matrix_config",
                     level.getGameTime(), 20, 4)
-                    || !level.isLoaded(packet.matrixPos())
+                    || !com.mohistmc.academy.skill.ability.LoadedRaycast.isLoaded(level, packet.matrixPos())
                     || !level.mayInteract(player, packet.matrixPos())
                     || !(level.getBlockEntity(packet.matrixPos()) instanceof MatrixBlockEntity matrix)
                     || !matrix.canManage(player) || !matrix.isInitialized()) {
@@ -69,7 +69,7 @@ public record MatrixConfigPacket(MenuActionToken actionToken, BlockPos matrixPos
     static void reply(ServerPlayer player, MenuActionToken token, BlockPos pos, boolean accepted) {
         if (token == null || !(player.containerMenu instanceof MatrixMenu menu)
                 || !pos.equals(menu.pos) || !menu.stillValid(player)
-                || !player.level().isLoaded(pos)
+                || !com.mohistmc.academy.skill.ability.LoadedRaycast.isLoaded(player.level(), pos)
                 || !(player.level().getBlockEntity(pos) instanceof MatrixBlockEntity matrix)) return;
         SafePayloadSender.send(player, new MatrixConfigResultPacket(token, pos, accepted,
                 matrix.getSSID().substring(0, Math.min(matrix.getSSID().length(), NetworkInputLimits.SSID))));

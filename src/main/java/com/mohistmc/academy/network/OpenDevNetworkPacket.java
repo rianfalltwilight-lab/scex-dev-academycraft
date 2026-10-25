@@ -27,13 +27,14 @@ public record OpenDevNetworkPacket(BlockPos pos, UUID nonce) implements CustomPa
     public static void handle(OpenDevNetworkPacket packet, IPayloadContext context) {
         context.enqueueWork(() -> {
             if (!(context.player() instanceof ServerPlayer player)) return;
+            if (!PayloadRateLimiter.allow(player.getUUID(), "dev_network", player.serverLevel().getGameTime(), 20, 4)) return;
             Optional<BlockPos> sessionPos = Optional.of(packet.pos());
             boolean normalSession = DevLearningSessionManager.validate(player, packet.nonce(),
                     DevMachineType.NORMAL, sessionPos);
             boolean advancedSession = DevLearningSessionManager.validate(player, packet.nonce(),
                     DevMachineType.ADVANCED, sessionPos);
             if ((!normalSession && !advancedSession)
-                    || !player.serverLevel().isLoaded(packet.pos())
+                    || !com.mohistmc.academy.skill.ability.LoadedRaycast.isLoaded(player.serverLevel(), packet.pos())
                     || player.distanceToSqr(packet.pos().getX() + .5, packet.pos().getY() + .5,
                     packet.pos().getZ() + .5) > 64
                     || !player.serverLevel().mayInteract(player, packet.pos())) return;

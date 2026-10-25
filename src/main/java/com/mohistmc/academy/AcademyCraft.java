@@ -86,7 +86,7 @@ public class AcademyCraft {
     public static final String MODID = "academy";
     /** Strict and mandatory on both peers: NeoForge rejects any unequal protocol before play payloads. */
     /** Payload layout generation; bump whenever any play payload or synced data schema changes. */
-    public static final String NETWORK_PROTOCOL = "academy-1.21.1-payload-v18-data-v4";
+    public static final String NETWORK_PROTOCOL = "academy-1.21.1-payload-v19-data-v4";
     private static final Logger LOGGER = LogUtils.getLogger();
 
     public AcademyCraft(IEventBus modEventBus, ModContainer modContainer) {
@@ -170,7 +170,10 @@ public class AcademyCraft {
         var mainEntity = com.mohistmc.academy.world.block.DevMachineSubBase.validatedMainForProxy(
                 subEntity.getLevel(), subEntity.getBlockPos(), subEntity.getBlockState().getBlock(), sub);
         if (!(mainEntity instanceof com.mohistmc.academy.capability.IFEnergyStorage energy)) return null;
-        return new com.mohistmc.academy.capability.ForgeEnergyView(energy);
+        return new com.mohistmc.academy.capability.ForgeEnergyView(energy, () ->
+                !subEntity.isRemoved() && subEntity.getLevel() != null
+                && com.mohistmc.academy.world.block.DevMachineSubBase.validatedMainForProxy(
+                        subEntity.getLevel(), subEntity.getBlockPos(), subEntity.getBlockState().getBlock(), sub) == mainEntity);
     }
 
     /**
@@ -183,11 +186,15 @@ public class AcademyCraft {
             net.minecraft.world.level.block.entity.BlockEntity subEntity) {
         if (!(subEntity instanceof com.mohistmc.academy.world.block.entity.WindGenBaseSubBlockEntity)
                 || subEntity.getLevel() == null) return null;
+        if (!com.mohistmc.academy.world.block.LoadedMachineChunks.contains(subEntity.getLevel(), subEntity.getBlockPos().below())) return null;
         var main = subEntity.getLevel().getBlockEntity(subEntity.getBlockPos().below());
         if (!(main instanceof com.mohistmc.academy.world.block.entity.WindGenBaseBlockEntity energy)) {
             return null;
         }
-        return new com.mohistmc.academy.capability.ForgeEnergyView(energy);
+        return new com.mohistmc.academy.capability.ForgeEnergyView(energy, () ->
+                !subEntity.isRemoved() && subEntity.getLevel() != null
+                && com.mohistmc.academy.world.block.LoadedMachineChunks.contains(subEntity.getLevel(), subEntity.getBlockPos().below())
+                && subEntity.getLevel().getBlockEntity(subEntity.getBlockPos().below()) == main);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
@@ -211,6 +218,9 @@ public class AcademyCraft {
                 AbilityInterfererStatePacket.STREAM_CODEC, AbilityInterfererStatePacket::handle);
         registrar.playToClient(DevLearningResultPacket.TYPE,
                 DevLearningResultPacket.STREAM_CODEC, DevLearningResultPacket::handle);
+        registrar.playToClient(com.mohistmc.academy.network.DevEnergyPacket.TYPE,
+                com.mohistmc.academy.network.DevEnergyPacket.STREAM_CODEC,
+                com.mohistmc.academy.network.DevEnergyPacket::handle);
         registrar.playToServer(
                 CloseDevLearningSessionPacket.TYPE,
                 CloseDevLearningSessionPacket.STREAM_CODEC,

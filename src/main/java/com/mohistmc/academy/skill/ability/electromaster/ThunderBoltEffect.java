@@ -1,4 +1,6 @@
 package com.mohistmc.academy.skill.ability.electromaster;
+
+import com.mohistmc.academy.skill.ability.LoadedRaycast;
 import com.mohistmc.academy.config.DynamicSkillRules;
 
 import com.mohistmc.academy.world.effect.EffectHelper;
@@ -58,7 +60,7 @@ public class ThunderBoltEffect implements SkillEffect {
         Vec3 endPos = eyePos.add(lookVec.scale(RANGE));
 
         EntityHitResult entityHit = rayTraceEntities(player, eyePos, endPos);
-        BlockHitResult blockHit = (BlockHitResult) player.pick(RANGE, 0, false);
+        BlockHitResult blockHit = (BlockHitResult) LoadedRaycast.pick(player, RANGE);
 
         Vec3 impactPoint;
         final Entity targetEntity;

@@ -1,10 +1,5 @@
 # SCEX AcademyCraft 1.21.1
 
-最新冻结交付与验证边界 / Current frozen delivery: [release notes](docs/releases/0.0.28-scex-machineui.md).
-本版更新与验证：[说明](docs/releases/0.0.28-scex-machineui.md)。
-
-**[0.0.28-scex-machineui：直接下载运行 JAR / Download JAR](https://github.com/rianfalltwilight-lab/scex-academycraft/releases/download/v0.0.28-scex-machineui/AcademyCraft-neoforge-1.21.1-0.0.28-scex-machineui.jar)** · [更新说明 / Release notes](docs/releases/0.0.28-scex-machineui.md)
-
 > 本仓库由 **Space Creator EX（SCEX）服务器**维护。Minecraft 1.21.1 / NeoForge 重建、测试和公开版整理主要由 **OpenAI Codex** 在维护者监督下完成，是明确标注的 AI / Vibe Coding 项目。详见 [AI 参与开发声明](AI-GENERATED.md)。
 
 这是 AcademyCraft 的 SCEX 非官方维护与重建版本，目标是在 Minecraft 1.21.1 + NeoForge 上恢复 1.12.2 最终可玩版本的超能力、机器、无线能源网络、终端、UI 与表现。
@@ -16,33 +11,32 @@
 
 ## 当前状态
 
-当前开发版本为 **0.0.28-scex-machineui**。节点旧实例串名、EXP 布局与按钮叠字已修复；保留矩阵传能守恒、无线输入等修复。客户端与服务端同步使用协议 v18/data-v4；NeoForge 精确锁定 21.1.248。详见 [本版更新与验证](docs/releases/0.0.28-scex-machineui.md)。
+当前开发版本为 **0.0.29-scex-deep-audit**。本轮对照 AcademyCraft 与 ExtraAcC 固定源码审计网络权限、能力管线、机器与无线能源、持久化、客户端资源和测试真实性，并按台账修复。客户端与服务端使用 **payload-v19-data-v4** 协议，能力存档保持 v4；新增实体需要两端配套更新。构建固定 **NeoForge 21.1.248 / Java 21**，加载范围为 Minecraft 1.21.1 对应的 NeoForge 21.1 系列；其他 21.1 小版本尚未逐一运行验证。完整缺陷、修复和实际验证记录见 [深度自检台账](docs/audit-20261025/DEEP-AUDIT.md)。
 
-本仓库包含 ExtraAcC 行为参考的 25 个物品、23 个专属技能和 29 个配方；这些数量是盘点范围，不能当作玩法或视觉完成率。测试结果应以配套交付报告中的精确 JAR SHA-256、证据路径及已验证层级为准。本次源码和预发布附件已同步 GitHub；不代表生产部署。
+本仓库包含 ExtraAcC 行为参考的 25 个物品、23 个专属技能和 29 个配方；这些数量是盘点范围，不能当作玩法或视觉完成率。测试结果应以配套交付报告中的精确 JAR SHA-256、证据路径及已验证层级为准。本次源码修改和隔离测试不代表已经公开发布或部署生产。
 
-ExtraAcC 原仓库固定快照没有 LICENSE。本版含固定上游素材，逐文件来源见 `assets/academy/extraacc-provenance.json`，该记录不授予或变更素材许可；Java 实现未直接复制。移动实体及专属美术仍有行为和表现差异，Liquid Shadow 仍采用原版 Drowned 外观。请先备份世界并在非生产实例验证。
+ExtraAcC 原仓库固定快照没有 LICENSE。本轮按用户指定的原始资源来源，纳入 **43 个逐字节保留的 PNG**：25 个物品外观、7 个额外状态纹理、2 个诱导因子、8 个穿戴护甲层和 1 个水人皮肤；物品模型 JSON 按 1.21.1 格式适配并保留原显示变换，没有逐字导入其 Java 实现。逐文件来源与 SHA-256 见 [资源溯源清单](src/main/resources/assets/academy/extraacc-provenance.json)，权利声明见 [NOTICE](NOTICE)；来源记录不代表获得新的授权或重新许可。液态分身已注册独立实体，采用上游水人皮肤与僵尸式模型动画。
 
 ## 运行与安装
 
 | 组件 | 版本 |
 |---|---|
 | Minecraft | 1.21.1 |
-| NeoForge | 21.1.248 |
+| NeoForge | 21.1 系列；本轮构建与实测固定 21.1.248 |
 | Java | 21 |
-| AcademyCraft | 0.0.28-scex-machineui |
+| AcademyCraft | 0.0.29-scex-deep-audit |
 | JEI / Jade | 可选，不是硬前置 |
 
-从 Releases 下载最新的 `AcademyCraft-neoforge-1.21.1-*.jar`，同时放入客户端与服务端的 `mods` 目录。不要与其他使用 `academy` 模组 ID 的 AcademyCraft JAR 同时安装。准确 SHA-256 以对应 Release 页面为准。
+使用交付目录中的主 JAR `AcademyCraft-neoforge-1.21.1-0.0.29-scex-deep-audit.jar`，同时放入客户端与服务端的 `mods` 目录；带 `audit-tests` 后缀的独立探针包仅供测试。不要与其他使用 `academy` 模组 ID 的 AcademyCraft JAR 同时安装。准确 SHA-256 以本轮验证回执为准；此次本地审计不代表 GitHub Release 已更新。
 
 ## 构建与测试
 
 ```powershell
 .\scripts\generate-build-info.ps1
-.\gradlew.bat build --no-daemon
-.\gradlew.bat runGameTestServer --no-daemon
+.\gradlew.bat --no-daemon check build auditTestJar
 ```
 
-Linux/macOS 使用 `./gradlew`。成品输出到 `build/libs/`；不同证据层级及其限制见 [docs/TESTING.md](docs/TESTING.md)。
+Linux/macOS 使用 `./gradlew`。成品输出到 `build/libs/`；带 `audit-tests` 后缀的 JAR 仅用于隔离验证，不安装到正常客户端/服务端。实际 GameTest 和客户端验证按台账复用 Vicerach 隔离环境。交付构建固定 Java 工具链、缓存与独立源码包复建步骤见 [0.0.20 验收说明](docs/ACCEPTANCE-0.0.20.md)。不同证据层级及其限制见 [docs/TESTING.md](docs/TESTING.md)。
 
 ---
 

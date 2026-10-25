@@ -36,7 +36,11 @@ class SkillRegistryIntegrityContractTest {
         assertTrue(source.contains("Duplicate AcademyCraft skill effect id"));
         assertTrue(source.contains("skill.getType() == SkillType.ACTIVE && !skill.hasEffect()"));
         assertTrue(source.contains("Active AcademyCraft skills without behavior"));
-        assertTrue(source.indexOf("bindEffects();") < source.indexOf("validateBindings();"));
+        int bindEffects = source.indexOf("bindEffects();");
+        int validateBindings = source.indexOf("validateBindings();");
+        assertTrue(bindEffects >= 0, "effect binding call is missing");
+        assertTrue(validateBindings >= 0, "binding validation call is missing");
+        assertTrue(bindEffects < validateBindings);
     }
 
     @Test void emptyExecuteEntrypointsAreRestrictedToChargingSkills() throws Exception {

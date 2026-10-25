@@ -44,6 +44,7 @@ public record InitMatrixPacket(MenuActionToken actionToken, BlockPos pos, String
     public static void handle(InitMatrixPacket packet, IPayloadContext context) {
         context.enqueueWork(() -> {
             if (context.player() instanceof ServerPlayer player) {
+                if (!PayloadRateLimiter.allow(player.getUUID(), "matrix_init", player.serverLevel().getGameTime(), 20, 4)) return;
                 boolean accepted = false;
                 try {
                     if (!NetworkInputLimits.validRequired(packet.ssid(), MAX_SSID_LENGTH)
@@ -51,7 +52,7 @@ public record InitMatrixPacket(MenuActionToken actionToken, BlockPos pos, String
                     ServerLevel level = player.serverLevel();
                     if (!(player.containerMenu instanceof MatrixMenu menu)
                             || !packet.pos().equals(menu.pos) || !menu.stillValid(player) || !menu.acceptAction(packet.actionToken(), player)) return;
-                    if (!level.isLoaded(packet.pos())
+                    if (!com.mohistmc.academy.skill.ability.LoadedRaycast.isLoaded(level, packet.pos())
                             || player.distanceToSqr(packet.pos().getX() + 0.5, packet.pos().getY() + 0.5,
                             packet.pos().getZ() + 0.5) > 64.0
                             || !level.mayInteract(player, packet.pos())) return;

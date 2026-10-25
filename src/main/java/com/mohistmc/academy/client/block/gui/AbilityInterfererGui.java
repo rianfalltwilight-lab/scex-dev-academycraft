@@ -44,7 +44,6 @@ public final class AbilityInterfererGui extends AcademyBaseUI<AbilityInterfererM
     private boolean initialStateRequested;
     private int page;
     private int stateRange = AbilityInterferenceRules.MIN_RANGE;
-    private int stateEnergy;
     private boolean stateEnabled;
 
     public AbilityInterfererGui(AbilityInterfererMenu menu, Inventory inventory, Component title) {
@@ -63,7 +62,6 @@ public final class AbilityInterfererGui extends AcademyBaseUI<AbilityInterfererM
         removeButtons.clear();
         initialStateRequested = false;
         stateRange = menu.getRange();
-        stateEnergy = menu.getEnergy();
         stateEnabled = menu.isEnabled();
 
         toggle = addRenderableWidget(Button.builder(toggleLabel(), ignored -> send(
@@ -134,7 +132,6 @@ public final class AbilityInterfererGui extends AcademyBaseUI<AbilityInterfererM
         if (!(minecraft.screen instanceof AbilityInterfererGui screen)
                 || screen.menu.pos == null || !screen.menu.pos.equals(packet.pos())
                 || screen.menu.containerId != packet.containerId()) return;
-        screen.stateEnergy = Math.clamp(packet.energy(), 0, AbilityInterferenceRules.MAX_ENERGY);
         screen.stateRange = AbilityInterferenceRules.clampRange(packet.range());
         screen.stateEnabled = packet.enabled();
         screen.canManage = packet.owner();
@@ -199,7 +196,7 @@ public final class AbilityInterfererGui extends AcademyBaseUI<AbilityInterfererM
         String rangeText = Integer.toString(stateRange);
         graphics.drawString(font, rangeText, 86 - font.width(rangeText) / 2,
                 46, 0xFFFFFF, false);
-        graphics.drawString(font, stateEnergy + "/" + AbilityInterferenceRules.MAX_ENERGY + " IF",
+        graphics.drawString(font, menu.getEnergy() + "/" + AbilityInterferenceRules.MAX_ENERGY + " IF",
                 101, 10, 0xBFEAFF, false);
         graphics.drawString(font, Component.translatable("gui.academy.interferer.whitelist"),
                 12, 59, 0xE8F6FF, false);

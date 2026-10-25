@@ -213,7 +213,8 @@ public final class FreqTransmitterSessionManager {
             Session session = entry.getValue();
             if (player == null) {
                 SESSIONS.remove(entry.getKey(), session);
-            } else if (expiredOrWrongDimension(player, session) || !hasTransmitter(player)) {
+            } else if (expiredOrWrongDimension(player, session) || !hasTransmitter(player)
+                    || session.sourceIdentity != null && session.sourceIdentity.isRemoved()) {
                 if (SESSIONS.remove(entry.getKey(), session)) {
                     sendClosed(player, session.nonce, "频率变送器会话已超时");
                 }
@@ -355,7 +356,7 @@ public final class FreqTransmitterSessionManager {
     private static boolean canPlayerSelect(ServerPlayer player, BlockPos pos,
                                            boolean interactionDistanceValidated) {
         ServerLevel level = player.serverLevel();
-        return pos != null && level.isLoaded(pos)
+        return pos != null && com.mohistmc.academy.skill.ability.LoadedRaycast.isLoaded(level, pos)
                 && (interactionDistanceValidated
                     || eyeToBlockDistanceSqr(player, pos) <= MAX_PLAYER_SELECT_DISTANCE_SQR)
                 && level.mayInteract(player, pos);
@@ -372,7 +373,7 @@ public final class FreqTransmitterSessionManager {
 
     private static boolean canPlayerOperateCanonical(ServerPlayer player, BlockPos pos) {
         ServerLevel level = player.serverLevel();
-        return pos != null && level.isLoaded(pos)
+        return pos != null && com.mohistmc.academy.skill.ability.LoadedRaycast.isLoaded(level, pos)
                 && player.distanceToSqr(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5)
                 <= MAX_CANONICAL_REVALIDATE_DISTANCE_SQR
                 && level.mayInteract(player, pos);
@@ -408,7 +409,7 @@ public final class FreqTransmitterSessionManager {
 
     /** Resolves the multiblock proxies that can represent logical wireless machines. */
     private static Resolved resolveCanonical(ServerLevel level, BlockPos clicked) {
-        if (level == null || clicked == null || !level.isLoaded(clicked)) return null;
+        if (level == null || clicked == null || !com.mohistmc.academy.skill.ability.LoadedRaycast.isLoaded(level, clicked)) return null;
         BlockEntity direct = level.getBlockEntity(clicked);
         if (direct instanceof IWirelessMatrix || direct instanceof IWirelessNode
                 || direct instanceof IWirelessGenerator || direct instanceof IWirelessReceiver) {
@@ -417,7 +418,7 @@ public final class FreqTransmitterSessionManager {
 
         if (direct instanceof IDevSubStructure sub) {
             BlockPos mainPos = sub.getMainPos();
-            if (mainPos != null && level.isLoaded(mainPos)) {
+            if (mainPos != null && com.mohistmc.academy.skill.ability.LoadedRaycast.isLoaded(level, mainPos)) {
                 BlockEntity main = level.getBlockEntity(mainPos);
                 if (main instanceof IDevStructure mainStructure
                         && sub.getStructureId() != null
@@ -432,7 +433,7 @@ public final class FreqTransmitterSessionManager {
         if (state.getBlock() instanceof MatrixSubBlock) {
             for (BlockPos candidate : BlockPos.betweenClosed(
                     clicked.offset(-1, -1, -1), clicked.offset(1, 0, 1))) {
-                if (!level.isLoaded(candidate)) continue;
+                if (!com.mohistmc.academy.skill.ability.LoadedRaycast.isLoaded(level, candidate)) continue;
                 BlockState candidateState = level.getBlockState(candidate);
                 if (candidateState.getBlock() instanceof Matrix
                         && Matrix.structurePositions(candidate, candidateState).contains(clicked)
@@ -504,6 +505,12 @@ public final class FreqTransmitterSessionManager {
 
     public static void clearPlayer(UUID player) {
         if (player != null) SESSIONS.remove(player);
+    }
+
+    @SubscribeEvent
+    public static void unload(net.neoforged.neoforge.event.level.LevelEvent.Unload event) {
+        if (event.getLevel() instanceof ServerLevel level)
+            SESSIONS.values().removeIf(session -> session.dimension.equals(level.dimension()));
     }
 
     public static void clearAll() {

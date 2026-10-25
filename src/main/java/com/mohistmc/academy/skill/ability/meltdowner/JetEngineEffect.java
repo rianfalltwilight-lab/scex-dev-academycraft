@@ -1,5 +1,7 @@
 package com.mohistmc.academy.skill.ability.meltdowner;
 
+import com.mohistmc.academy.skill.ability.LoadedRaycast;
+
 import static com.mohistmc.academy.utils.MathUtils.lerpf;
 
 import com.mohistmc.academy.config.DynamicSkillRules;
@@ -76,7 +78,7 @@ public final class JetEngineEffect implements ChargingSkillEffect {
     static Vec3 legacyDestination(ServerPlayer player) {
         Vec3 from = player.getEyePosition();
         Vec3 intended = from.add(player.getLookAngle().normalize().scale(RANGE));
-        BlockHitResult hit = player.serverLevel().clip(new ClipContext(from, intended,
+        BlockHitResult hit = LoadedRaycast.clip(player.serverLevel(), new ClipContext(from, intended,
                 ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
         return hit.getType() == HitResult.Type.BLOCK ? hit.getLocation() : intended;
     }

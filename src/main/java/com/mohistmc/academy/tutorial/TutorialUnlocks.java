@@ -2,7 +2,6 @@ package com.mohistmc.academy.tutorial;
 
 import com.mohistmc.academy.skill.PlayerAbilityData;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Server-safe mapping of the 1.0.7 item-obtained conditions to tutorial ids.
@@ -46,17 +45,8 @@ public final class TutorialUnlocks {
         return tutorialId != null && data.activateTutorial(tutorialId) ? tutorialId : null;
     }
 
-    static String activateForItem(Set<String> activatedTutorials, String itemId) {
-        String tutorialId = tutorialForItem(itemId);
-        return tutorialId != null && activatedTutorials.add(tutorialId) ? tutorialId : null;
-    }
-
     /** Migrates existing obtained-item history without replaying old notifications. */
     public static void reconcile(PlayerAbilityData data) {
         for (String itemId : data.getObtainedItems()) activateForItem(data, itemId);
-    }
-
-    static void reconcile(Set<String> obtainedItems, Set<String> activatedTutorials) {
-        for (String itemId : obtainedItems) activateForItem(activatedTutorials, itemId);
     }
 }

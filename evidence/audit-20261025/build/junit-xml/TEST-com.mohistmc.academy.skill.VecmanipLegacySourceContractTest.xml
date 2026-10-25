@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.mohistmc.academy.skill.VecmanipLegacySourceContractTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-25T08:05:21.984Z" hostname="MONARCH" time="0.001">
+  <properties/>
+  <testcase name="groundShockRetainsPlayedRadiansFootprintAndSoundPitch()" classname="com.mohistmc.academy.skill.VecmanipLegacySourceContractTest" time="0.0"/>
+  <testcase name="stormWingDoesNotEnableASecondVanillaFlightController()" classname="com.mohistmc.academy.skill.VecmanipLegacySourceContractTest" time="0.0"/>
+  <testcase name="heldDefensesUseScreenRipplesWhileHitsUseOfficialWaveGeometry()" classname="com.mohistmc.academy.skill.VecmanipLegacySourceContractTest" time="0.001"/>
+  <testcase name="directedBlastKeepsLegacyTargetSphereAndHalfOpenBlockCube()" classname="com.mohistmc.academy.skill.VecmanipLegacySourceContractTest" time="0.0"/>
+  <testcase name="plasmaUsesTheLegacyLivingFamilyAndEntityEndpoint()" classname="com.mohistmc.academy.skill.VecmanipLegacySourceContractTest" time="0.0"/>
+  <testcase name="vectorHandsAndGroundCameraUseTheLegacyTimelines()" classname="com.mohistmc.academy.skill.VecmanipLegacySourceContractTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

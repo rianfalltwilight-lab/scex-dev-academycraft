@@ -1,5 +1,7 @@
 package com.mohistmc.academy.skill.ability.meltdowner;
 
+import com.mohistmc.academy.skill.ability.LoadedRaycast;
+
 import com.mohistmc.academy.config.DynamicSkillRules;
 
 import com.mohistmc.academy.entity.MeltdownBeamEntity;
@@ -107,7 +109,7 @@ public final class MeltdownerEffect implements ChargingSkillEffect {
  }
 
  private float destroyAlongRay(ServerLevel level,ServerPlayer player,BlockPos pos,float energy){
-  if(!level.hasChunkAt(pos)||!level.getWorldBorder().isWithinBounds(pos))return 0;
+  if(!LoadedRaycast.isLoaded(level, pos)||!level.getWorldBorder().isWithinBounds(pos))return 0;
   var state=level.getBlockState(pos);if(state.isAir())return energy;
   float hardness=state.getDestroySpeed(level,pos);if(hardness<0||energy<hardness||!level.mayInteract(player,pos))return 0;
   BlockEvent.BreakEvent event=new BlockEvent.BreakEvent(level,pos,state,player);NeoForge.EVENT_BUS.post(event);
@@ -118,7 +120,7 @@ public final class MeltdownerEffect implements ChargingSkillEffect {
 
  private static void reflected(ServerLevel level,ServerPlayer attacker,ServerPlayer reflector,float damage,Set<Integer> hit){
   Vec3 start=reflector.getEyePosition(),direction=reflector.getLookAngle().normalize(),intended=start.add(direction.scale(10));
-  HitResult wall=level.clip(new ClipContext(start,intended,ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,reflector));
+  HitResult wall=LoadedRaycast.clip(level, new ClipContext(start,intended,ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,reflector));
   Vec3 end=wall.getType()==HitResult.Type.MISS?intended:wall.getLocation();LivingEntity nearest=null;double best=Double.MAX_VALUE;
   for(LivingEntity target:level.getEntitiesOfClass(LivingEntity.class,new AABB(start,end).inflate(1),
           target->target!=reflector&&target.isAlive())){var intercept=target.getBoundingBox().inflate(.3).clip(start,end);if(intercept.isPresent()&&start.distanceToSqr(intercept.get())<best){best=start.distanceToSqr(intercept.get());nearest=target;}}

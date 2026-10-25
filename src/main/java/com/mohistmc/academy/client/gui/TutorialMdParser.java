@@ -90,8 +90,8 @@ public class TutorialMdParser {
         List<TutorialLine> result = new ArrayList<>();
 
         Section section = Section.NONE;
+        Section beforeCode = Section.NONE;
         List<String> codeBuffer = new ArrayList<>();
-        List<List<String>> tableBuffer = new ArrayList<>();
 
         for (String raw : rawLines) {
             String line = raw.stripTrailing();
@@ -103,7 +103,8 @@ public class TutorialMdParser {
                             String.join("\n", codeBuffer)));
                     codeBuffer.clear();
                 }
-                section = section == Section.CODE ? Section.NONE : Section.CODE;
+                if (section == Section.CODE) section = beforeCode;
+                else { beforeCode = section; section = Section.CODE; }
                 continue;
             }
             if (section == Section.CODE) {

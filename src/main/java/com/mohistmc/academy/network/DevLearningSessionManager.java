@@ -28,11 +28,13 @@ public final class DevLearningSessionManager {
     public static final int INDUCTION_STIMULATIONS = 5;
     private static final OneShotSessionLedger<SessionContext> SESSIONS = new OneShotSessionLedger<>();
     private static final Map<UUID, Development> ACTIVE = new ConcurrentHashMap<>();
+    private static final Map<UUID, EnergyView> ENERGY_VIEWS = new ConcurrentHashMap<>();
 
     private DevLearningSessionManager() {}
 
     private record SessionContext(DevMachineType type, Optional<BlockPos> pos,
                                   ResourceKey<Level> dimension) {}
+    private record EnergyView(UUID nonce, SessionContext context, int energy, int maximum, long nextTick) {}
     private static final class Development {
         final UUID nonce; final DevMachineType type; final Optional<BlockPos> pos; final String skillId;
         final AbilityCategory skillCategory;
@@ -164,8 +166,13 @@ public final class DevLearningSessionManager {
     }
 
     public static UUID issue(ServerPlayer player, DevMachineType type, Optional<BlockPos> pos) {
-        return SESSIONS.issue(player.getUUID(), context(player, type, pos),
-                player.serverLevel().getGameTime() + LIFETIME_TICKS);
+        long now = player.serverLevel().getGameTime();
+        SessionContext context = context(player, type, pos);
+        UUID nonce = SESSIONS.issue(player.getUUID(), context, now + LIFETIME_TICKS);
+        DevEnergyPacket initial = energySnapshot(player, nonce, context);
+        ENERGY_VIEWS.put(player.getUUID(), new EnergyView(nonce, context,
+                initial == null ? -1 : initial.energy(), initial == null ? -1 : initial.maxEnergy(), now + 5));
+        return nonce;
     }
 
     /** Read-only authorization check. Semantic failures must not burn the open UI session. */
@@ -177,8 +184,10 @@ public final class DevLearningSessionManager {
 
     /** One-shot compare-and-remove at the mutation commit boundary. */
     public static boolean commit(ServerPlayer player, UUID nonce, DevMachineType type, Optional<BlockPos> pos) {
-        return validate(player, nonce, type, pos) && SESSIONS.commit(player.getUUID(), nonce,
+        boolean committed = validate(player, nonce, type, pos) && SESSIONS.commit(player.getUUID(), nonce,
                 context(player, type, pos), player.serverLevel().getGameTime());
+        if (committed) ENERGY_VIEWS.remove(player.getUUID());
+        return committed;
     }
 
     /** Starts the legacy 1.0.7 stimulation process after consuming the UI nonce exactly once. */
@@ -265,6 +274,7 @@ public final class DevLearningSessionManager {
 
     /** Server-authoritative legacy cadence: CPS energy is spread over TPS ticks per stimulation. */
     public static void tick(ServerPlayer player) {
+        syncIdleEnergy(player);
         Development d = ACTIVE.get(player.getUUID());
         if (d == null) return;
         if (d.induction != null && !d.induction.stillPresent(player, d.type, d.pos)) {
@@ -310,20 +320,54 @@ public final class DevLearningSessionManager {
     /** A stale close packet may only revoke the exact screen that emitted it. */
     public static void clear(UUID playerId, UUID nonce) {
         SESSIONS.clear(playerId, nonce);
+        ENERGY_VIEWS.computeIfPresent(playerId, (id, view) -> view.nonce.equals(nonce) ? null : view);
     }
 
     public static void clear(UUID playerId) {
         SESSIONS.clear(playerId);
         ACTIVE.remove(playerId);
+        ENERGY_VIEWS.remove(playerId);
     }
 
     /** Integrated-server restart safety for process-static authorization/development state. */
     public static void clearAll() {
         SESSIONS.clearAll();
         ACTIVE.clear();
+        ENERGY_VIEWS.clear();
     }
 
     public static void clearExpired(ServerPlayer player) {
         SESSIONS.clearExpired(player.getUUID(), player.serverLevel().getGameTime());
+        EnergyView view = ENERGY_VIEWS.get(player.getUUID());
+        if (view != null && !validate(player, view.nonce, view.context.type, view.context.pos))
+            ENERGY_VIEWS.remove(player.getUUID(), view);
+    }
+
+    private static DevEnergyPacket energySnapshot(ServerPlayer player, UUID nonce, SessionContext context) {
+        if (!LearnSkillPacket.validateEnergySource(player, context.type, 0, context.pos.orElse(null))) return null;
+        if (context.type == DevMachineType.PORTABLE)
+            return new DevEnergyPacket(nonce, com.mohistmc.academy.capability.EnergyItemHelper.getEnergy(
+                    player.getMainHandItem()), DeveloperPortable.MAX_ENERGY);
+        if (player.level().getBlockEntity(context.pos.orElseThrow()) instanceof com.mohistmc.academy.capability.IFEnergyStorage storage)
+            return new DevEnergyPacket(nonce, storage.getEnergyStored(), storage.getMaxEnergyStored());
+        return null;
+    }
+
+    private static void syncIdleEnergy(ServerPlayer player) {
+        EnergyView view = ENERGY_VIEWS.get(player.getUUID());
+        if (view == null) return;
+        long now = player.serverLevel().getGameTime();
+        if (now < view.nextTick) return;
+        if (!SkillInputSessionManager.isCurrentPlayer(player)
+                || !validate(player, view.nonce, view.context.type, view.context.pos)) {
+            ENERGY_VIEWS.remove(player.getUUID(), view);
+            return;
+        }
+        DevEnergyPacket snapshot = energySnapshot(player, view.nonce, view.context);
+        if (snapshot == null) { ENERGY_VIEWS.remove(player.getUUID(), view); return; }
+        boolean changed = snapshot.energy() != view.energy || snapshot.maxEnergy() != view.maximum;
+        boolean delivered = changed && SafePayloadSender.send(player, snapshot);
+        ENERGY_VIEWS.replace(player.getUUID(), view, new EnergyView(view.nonce, view.context,
+                delivered ? snapshot.energy() : view.energy, delivered ? snapshot.maxEnergy() : view.maximum, now + 5));
     }
 }

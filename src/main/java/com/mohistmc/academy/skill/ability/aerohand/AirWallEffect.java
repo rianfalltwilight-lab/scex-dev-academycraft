@@ -64,27 +64,27 @@ public final class AirWallEffect implements DynamicOneShotSkillEffect {
 
     @SubscribeEvent
     public static void tick(ServerTickEvent.Post event) {
-        Iterator<Ring> iterator = RINGS.iterator();
-        while (iterator.hasNext()) {
-            Ring ring = iterator.next();
+        for (Ring ring : List.copyOf(RINGS)) {
+            if (!RINGS.contains(ring)) continue;
             ServerPlayer owner = ring.level.getServer().getPlayerList().getPlayer(ring.owner);
             if (owner == null || owner.serverLevel() != ring.level || !owner.isAlive()) {
-                iterator.remove();
+                RINGS.remove(ring);
                 continue;
             }
             ring.age++;
-            ring.radius += 0.2F;
             if (ring.radius > ring.maximum) {
-                iterator.remove();
+                RINGS.remove(ring);
                 continue;
             }
             EffectHelper.shockwaveRing(ring.level, ring.centre.x, ring.centre.y + 0.8,
                     ring.centre.z, Math.max(4, Math.round(ring.radius * 3)), ring.radius);
-            if ((ring.age & 1) != 0) continue;
             float r = ring.radius;
+            ring.radius += 0.2F;
+            if ((ring.age & 1) != 0) continue;
             AABB area = new AABB(ring.centre.x - r, ring.centre.y - 0.5, ring.centre.z - r,
                     ring.centre.x + r, ring.centre.y + 2.5, ring.centre.z + r);
             for (Entity entity : ring.level.getEntities(owner, area, Entity::isAlive)) {
+                if (!owner.isAlive() || owner.level()!=ring.level || !RINGS.contains(ring)) break;
                 if (entity instanceof Projectile projectile) {
                     projectile.discard();
                     continue;

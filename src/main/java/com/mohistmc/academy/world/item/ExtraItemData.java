@@ -17,6 +17,7 @@ public final class ExtraItemData {
     private static final String TELEPORT_Z = "academy_extra_teleport_z";
     private static final String HARVEST_POS = "academy_extra_harvest_pos";
     private static final String HARVEST_PROGRESS = "academy_extra_harvest_progress";
+    private static final String HARVEST_STATE = "academy_extra_harvest_state";
     private static final String LAST_USE = "academy_extra_last_use";
     private static final String ENERGY = "academy_extra_energy";
 
@@ -84,13 +85,21 @@ public final class ExtraItemData {
     }
 
     public static void setHarvest(ItemStack stack, BlockPos pos, float progress) {
+        setHarvest(stack, pos, progress, "");
+    }
+
+    public static String harvestState(ItemStack stack) { return tag(stack).getString(HARVEST_STATE); }
+
+    public static void setHarvest(ItemStack stack, BlockPos pos, float progress, String state) {
         update(stack, nbt -> {
             if (pos == null) {
                 nbt.remove(HARVEST_POS);
                 nbt.remove(HARVEST_PROGRESS);
+                nbt.remove(HARVEST_STATE);
             } else {
                 nbt.putLong(HARVEST_POS, pos.asLong());
                 nbt.putFloat(HARVEST_PROGRESS, Math.max(0, progress));
+                nbt.putString(HARVEST_STATE, state);
             }
         });
     }

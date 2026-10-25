@@ -1,5 +1,7 @@
 package com.mohistmc.academy.skill.ability.vecmanip;
 
+import com.mohistmc.academy.skill.ability.LoadedRaycast;
+
 import com.mohistmc.academy.AcademyCraft;
 import com.mohistmc.academy.config.DynamicSkillRules;
 
@@ -32,7 +34,8 @@ import static com.mohistmc.academy.utils.MathUtils.lerpf;
 public class StormWingEffect implements ChargingSkillEffect {
     private static final Map<UUID, FlightSnapshot> FLIGHT = new ConcurrentHashMap<>();
     private static final java.util.Set<UUID> EXTERNAL_FLIGHT = ConcurrentHashMap.newKeySet();
-    private record FlightSnapshot(boolean mayfly, boolean flying, boolean grantedMayfly, UUID visualId) {}
+    private record FlightSnapshot(boolean mayfly, boolean flying, boolean grantedMayfly, UUID visualId,
+            net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> dimension) {}
     /** Compatibility lease: another flight provider can retain flight across StormWing cleanup. */
     public static void claimExternalFlight(UUID player){EXTERNAL_FLIGHT.add(player);}
     public static void releaseExternalFlight(UUID player){EXTERNAL_FLIGHT.remove(player);}
@@ -94,7 +97,7 @@ public class StormWingEffect implements ChargingSkillEffect {
                 .configure(player, (int) lerpf(70, 30, data.getProficiency(getId())));
         UUID visualId = player.serverLevel().addFreshEntity(visual) ? visual.getUUID() : null;
         FlightSnapshot old = new FlightSnapshot(player.getAbilities().mayfly,
-                player.getAbilities().flying, !player.getAbilities().mayfly, visualId);
+                player.getAbilities().flying, !player.getAbilities().mayfly, visualId, player.level().dimension());
         FLIGHT.put(player.getUUID(), old);
         // The legacy context grants allowFlying as soon as it is made alive;
         // actual resource consumption starts only after the charge transition.
@@ -180,7 +183,10 @@ public class StormWingEffect implements ChargingSkillEffect {
     private void cleanupFlight(ServerPlayer player) {
         FlightSnapshot old=FLIGHT.remove(player.getUUID());
         StormWingVisualEntity visual=visual(player.serverLevel(),old);
-        if(visual!=null)visual.terminate();
+        if(visual!=null){
+            if(!player.isAlive() || !old.dimension().equals(player.level().dimension())) visual.discard();
+            else visual.terminate();
+        }
         if(old!=null&&old.grantedMayfly()&&!player.isCreative()&&!player.isSpectator()&&!EXTERNAL_FLIGHT.contains(player.getUUID())){
             player.getAbilities().mayfly=false;
             if(!old.flying())player.getAbilities().flying=false;
@@ -219,7 +225,7 @@ public class StormWingEffect implements ChargingSkillEffect {
         } else {
             Vec3 current = player.getDeltaMovement();
             Vec3 feet = player.position();
-            HitResult ground = player.level().clip(new ClipContext(feet.add(0, .5, 0),
+            HitResult ground = LoadedRaycast.clip(player.level(), new ClipContext(feet.add(0, .5, 0),
                     feet.add(0, -.3, 0), ClipContext.Block.COLLIDER,
                     ClipContext.Fluid.NONE, player));
             player.setDeltaMovement(current.x,
@@ -241,12 +247,13 @@ public class StormWingEffect implements ChargingSkillEffect {
                 int dy = level.random.nextIntBetweenInclusive(-10, 10);
                 int dz = level.random.nextIntBetweenInclusive(-10, 10);
                 BlockPos pos = player.blockPosition().offset(dx, dy, dz);
+                if (!LoadedRaycast.isLoaded(level, pos) || !player.mayInteract(level, pos)) continue;
                 BlockState state = level.getBlockState(pos);
                 float hardness = state.getDestroySpeed(level, pos);
                 if (hardness >= 0 && hardness <= 0.3f && !state.isAir()) {
                     BlockEvent.BreakEvent breakEvent = new BlockEvent.BreakEvent(level, pos, state, player);
                     NeoForge.EVENT_BUS.post(breakEvent);
-                    if (!breakEvent.isCanceled()) {
+                    if (!breakEvent.isCanceled() && level.getBlockState(pos) == state) {
                         level.destroyBlock(pos, false);
                     }
                 }
@@ -256,7 +263,8 @@ public class StormWingEffect implements ChargingSkillEffect {
 
     private static StormWingVisualEntity visual(ServerLevel level, FlightSnapshot snapshot) {
         if (snapshot == null || snapshot.visualId() == null) return null;
-        Entity entity = level.getEntity(snapshot.visualId());
+        ServerLevel original = level.getServer().getLevel(snapshot.dimension());
+        Entity entity = original == null ? null : original.getEntity(snapshot.visualId());
         return entity instanceof StormWingVisualEntity visual ? visual : null;
     }
 

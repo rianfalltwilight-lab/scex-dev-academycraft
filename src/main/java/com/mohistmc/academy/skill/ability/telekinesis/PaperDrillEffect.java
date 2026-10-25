@@ -105,7 +105,6 @@ public final class PaperDrillEffect implements ChargingSkillEffect {
         if (ticks % TelekinesisRules.PAPER_DRILL_PULSE_INTERVAL == 0) {
             float damage = DynamicSkillRules.damage(getId(),
                     TelekinesisRules.paperDrillDamage(proficiency));
-            int hits = 0;
             for (var hit : trace.hits()) {
                 LivingEntity target = hit.entity();
                 if (!DynamicSkillRules.tryPay(data, getId(), 100F * target.getBbHeight(), 0)) {
@@ -113,17 +112,8 @@ public final class PaperDrillEffect implements ChargingSkillEffect {
                     givePaper(player);
                     return false;
                 }
-                // The drill's configured pulse is intentional; vanilla's ten-tick hurt window
-                // would otherwise silently discard every other continuous-damage pulse.
-                target.invulnerableTime = 0;
-                if (AcademyDamageHelper.hurt(player, target,
-                        player.damageSources().playerAttack(player), damage)) {
-                    hits++;
-                    DynamicSkillRules.addExp(player, data, getId(), 0.002F);
-                }
-            }
-            if (hits > 0 && !data.isDevMode()) {
-                DynamicSkillRules.addExp(player, data, getId(), 0.0005f * hits);
+                DynamicSkillRules.addExp(player, data, getId(), 0.002F);
+                AcademyDamageHelper.hurt(player, target, player.damageSources().playerAttack(player), damage);
             }
         }
         return true;
@@ -186,9 +176,7 @@ public final class PaperDrillEffect implements ChargingSkillEffect {
     }
 
     private static void givePaper(ServerPlayer player) {
-        ItemStack paper = new ItemStack(Items.PAPER, TelekinesisRules.PAPER_DRILL_REQUIRED_PAPER);
-        if (!player.getInventory().add(paper)) player.drop(paper, false);
-        player.getInventory().setChanged();
+        com.mohistmc.academy.world.item.ExtraPaperReturns.give(player,TelekinesisRules.PAPER_DRILL_REQUIRED_PAPER);
     }
 
     private static void renderDrill(ServerLevel level, Vec3 from, Vec3 to) {

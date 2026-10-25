@@ -64,7 +64,7 @@ public record ConnectToNodePacket(MenuActionToken actionToken, BlockPos machineP
                 Attempt previousAttempt = FAILED_AUTH.get(attemptKey);
                 if (previousAttempt != null && level.getGameTime() < previousAttempt.retryAt()) return;
 
-                if (!level.isLoaded(packet.machinePos()) || !level.isLoaded(packet.nodePos())
+                if (!com.mohistmc.academy.skill.ability.LoadedRaycast.isLoaded(level, packet.machinePos()) || !com.mohistmc.academy.skill.ability.LoadedRaycast.isLoaded(level, packet.nodePos())
                         || player.distanceToSqr(packet.machinePos().getX() + 0.5, packet.machinePos().getY() + 0.5,
                         packet.machinePos().getZ() + 0.5) > 64.0) {
                     return;

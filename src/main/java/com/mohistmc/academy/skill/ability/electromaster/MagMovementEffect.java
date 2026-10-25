@@ -1,5 +1,7 @@
 package com.mohistmc.academy.skill.ability.electromaster;
 
+import com.mohistmc.academy.skill.ability.LoadedRaycast;
+
 import com.mohistmc.academy.AcademyCraft;
 import com.mohistmc.academy.config.DynamicSkillRules;
 
@@ -177,12 +179,13 @@ public class MagMovementEffect implements ChargingSkillEffect {
         Vec3 eyePos = player.getEyePosition();
         Vec3 lookVec = player.getLookAngle();
 
-        BlockHitResult blockHit = (BlockHitResult) player.pick(range, 0, false);
+        BlockHitResult blockHit = (BlockHitResult) LoadedRaycast.pick(player, range);
         Vec3 entityEnd = blockHit != null && blockHit.getType() != HitResult.Type.MISS
                 ? blockHit.getLocation() : eyePos.add(lookVec.scale(range));
         EntityHitResult entityHit = rayTraceEntities(player, eyePos, entityEnd);
 
-        if (blockHit != null && blockHit.getType() != HitResult.Type.MISS) {
+        if (blockHit != null && blockHit.getType() != HitResult.Type.MISS
+                && LoadedRaycast.isLoaded(player.serverLevel(), blockHit.getBlockPos())) {
             BlockState state = player.serverLevel().getBlockState(blockHit.getBlockPos());
             if (isMetalBlock(state, proficiency)) {
                 // 如果实体更近，优先选择实体

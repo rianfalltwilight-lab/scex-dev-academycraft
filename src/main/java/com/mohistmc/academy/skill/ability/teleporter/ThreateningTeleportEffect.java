@@ -1,5 +1,7 @@
 package com.mohistmc.academy.skill.ability.teleporter;
 
+import com.mohistmc.academy.skill.ability.LoadedRaycast;
+
 import com.mohistmc.academy.config.DynamicSkillRules;
 import com.mohistmc.academy.skill.AcademyDamageHelper;
 import com.mohistmc.academy.skill.ChargingSkillEffect;
@@ -112,7 +114,7 @@ public final class ThreateningTeleportEffect implements ChargingSkillEffect {
     private static Target target(ServerPlayer player, double range) {
         Vec3 start = player.getEyePosition();
         Vec3 intended = start.add(player.getLookAngle().scale(range));
-        HitResult wall = player.serverLevel().clip(new ClipContext(start, intended,
+        HitResult wall = LoadedRaycast.clip(player.serverLevel(), new ClipContext(start, intended,
                 ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
         Vec3 end = wall.getType() == HitResult.Type.MISS ? intended : wall.getLocation();
         // ThreateningTeleport deliberately used filEverything (which rejects

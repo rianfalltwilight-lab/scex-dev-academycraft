@@ -61,8 +61,6 @@ public final class PsychoSlamEffect implements DynamicOneShotSkillEffect {
         if (horizontal.lengthSqr() < 1.0e-6) horizontal = new Vec3(0, 0, 1);
         ACTIVE.put(target.getUUID(), new Slam(player.level().dimension(), player.getUUID(),
                 target.getUUID(), horizontal.normalize(), p, player.serverLevel().getGameTime()));
-        AcademyDamageHelper.hurt(player, target, player.damageSources().playerAttack(player),
-                DynamicSkillRules.damage("psycho_slam", 15 + 5 * p));
         EffectHelper.psychoBurst(player.serverLevel(), target.getX(), target.getY() + 0.8,
                 target.getZ(), 18, 0.45);
         player.serverLevel().playSound(null, target.blockPosition(), SoundEvents.ENDER_DRAGON_GROWL,
@@ -78,29 +76,39 @@ public final class PsychoSlamEffect implements DynamicOneShotSkillEffect {
 
     @SubscribeEvent
     public static void tick(ServerTickEvent.Post event) {
-        ACTIVE.entrySet().removeIf(entry -> {
-            Slam slam = entry.getValue();
+        for (Slam slam : java.util.List.copyOf(ACTIVE.values())) {
+            if (ACTIVE.get(slam.target()) != slam) continue;
             ServerLevel level = event.getServer().getLevel(slam.dimension());
-            if (level == null) return true;
-            Entity ownerEntity = level.getEntity(slam.owner());
-            Entity targetEntity = level.getEntity(slam.target());
+            Entity ownerEntity = level == null ? null : level.getEntity(slam.owner());
+            Entity targetEntity = level == null ? null : level.getEntity(slam.target());
             if (!(ownerEntity instanceof ServerPlayer owner) || !(targetEntity instanceof LivingEntity target)
-                    || !owner.isAlive() || !target.isAlive()) return true;
+                    || !owner.isAlive() || !target.isAlive()) {
+                ACTIVE.remove(slam.target(), slam);
+                continue;
+            }
             long age = level.getGameTime() - slam.started();
+            if (age <= 0) continue;
             if (age < 30) {
+                if (age == 1) {
+                    AcademyDamageHelper.hurt(owner, target, owner.damageSources().playerAttack(owner),
+                            DynamicSkillRules.damage("psycho_slam", 15 + 5 * slam.proficiency()));
+                    if (ACTIVE.get(slam.target()) != slam || !owner.isAlive() || !target.isAlive()
+                            || owner.level() != level || target.level() != level) continue;
+                }
                 Vec3 push = new Vec3(slam.horizontal().x, Math.sqrt(3), slam.horizontal().z)
                         .normalize().scale(0.2);
                 target.push(push.x, push.y, push.z);
                 target.hurtMarked = true;
-                return false;
+                continue;
             }
+            // Remove this stage before damage callbacks can create another slam for the target.
+            if (!ACTIVE.remove(slam.target(), slam)) continue;
             target.setDeltaMovement(0, -2, 0);
             target.hurtMarked = true;
             AcademyDamageHelper.hurt(owner, target, owner.damageSources().playerAttack(owner),
                     DynamicSkillRules.damage("psycho_slam", 2 * (15 + 5 * slam.proficiency())));
             EffectHelper.psychoBurst(level, target.getX(), target.getY(), target.getZ(), 24, 0.6);
-            return true;
-        });
+        }
     }
 
     @SubscribeEvent public static void stopped(ServerStoppedEvent event) { ACTIVE.clear(); }

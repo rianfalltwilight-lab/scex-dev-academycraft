@@ -1,4 +1,6 @@
 package com.mohistmc.academy.skill.ability.electromaster;
+
+import com.mohistmc.academy.skill.ability.LoadedRaycast;
 import com.mohistmc.academy.skill.AcademyDamageHelper;
 
 import com.mohistmc.academy.config.DynamicSkillRules;
@@ -126,7 +128,7 @@ public class ThunderClapEffect implements ChargingSkillEffect {
 
 
     private Vec3 getTargetPos(ServerPlayer player) {
-        BlockHitResult hit = (BlockHitResult) player.pick(40.0, 0, false);
+        BlockHitResult hit = (BlockHitResult) LoadedRaycast.pick(player, 40.0);
         if (hit.getType() != HitResult.Type.MISS) return hit.getLocation();
         Vec3 eye = player.getEyePosition(0);
         Vec3 look = player.getLookAngle().scale(40.0);

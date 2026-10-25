@@ -1,4 +1,6 @@
 package com.mohistmc.academy.skill.ability.vecmanip;
+
+import com.mohistmc.academy.skill.ability.LoadedRaycast;
 import com.mohistmc.academy.skill.AcademyDamageHelper;
 
 import com.mohistmc.academy.config.DynamicSkillRules;
@@ -140,7 +142,7 @@ public class DirShockEffect implements ChargingSkillEffect {
     private EntityHitResult rayTraceEntities(ServerPlayer player, double range) {
         Vec3 start = player.getEyePosition();
         Vec3 end = start.add(player.getLookAngle().scale(range));
-        var block=player.level().clip(new ClipContext(start,end,ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,player));
+        var block=LoadedRaycast.clip(player.level(), new ClipContext(start,end,ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,player));
         double wallDist=block.getType()==HitResult.Type.MISS?Double.MAX_VALUE:start.distanceTo(block.getLocation());
         AABB area = player.getBoundingBox().inflate(range);
         List<Entity> entities = player.level().getEntities(player, area,

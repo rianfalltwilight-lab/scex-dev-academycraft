@@ -15,6 +15,7 @@ public final class ClientSessionState {
         SkillInputClientState.clear();
         KeyInputHandler.resetClientSession();
         ChargingHudOverlay.resetClientSession();
+        com.mohistmc.academy.client.gui.LegacyVectorWaveOverlay.reset();
         com.mohistmc.academy.client.sound.AbilityLoopSoundManager.resetClientSession();
         com.mohistmc.academy.client.sound.MachineLoopSoundManager.resetClientSession();
         ClientPacketBridge.resetClientSession();

@@ -77,6 +77,7 @@ $content = @(
     'Loader=NeoForge 21.1.248'
     'MohistMC-Upstream-SHA=00e9cf09fc4c52d2f9b3b3af7d4cda140a4ccf1c'
     'Legacy-Upstream-SHA=7b1401cd420bd6888a2b9d8db5cd8a69fe314bb9'
+    'ExtraAcC-Upstream-SHA=d66a190e3ae00d9ca8c154b47fca0509d4c171f7'
     "Evaluation-Date=$EvaluationDate"
     "Source-Tree-SHA256=$treeHash"
     "Source-File-Count=$($source.Count)"

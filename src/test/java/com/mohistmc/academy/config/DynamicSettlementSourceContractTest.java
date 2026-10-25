@@ -13,7 +13,6 @@ class DynamicSettlementSourceContractTest {
     // GameTest fixtures intentionally seed CP/OL to exercise production
     // effects; they are not player-facing settlement implementations.
     if(p.getFileName().toString().endsWith("GameTests.java")) continue;
-    if(p.getFileName().toString().equals("LightShieldResourceLedger.java")) continue;
     String source=Files.readString(p);
     for(String forbidden:List.of(".setCurrentCp(",".addOverload(",".addProficiency("))
      if(source.contains(forbidden)) violations.add(root.relativize(p)+" uses "+forbidden);

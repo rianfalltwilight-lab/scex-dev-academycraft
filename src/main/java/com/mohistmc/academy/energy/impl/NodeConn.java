@@ -88,8 +88,15 @@ public class NodeConn {
 
     // ==================== 生命周期 ====================
 
-    public void dispose() { disposed = true; }
+    public void dispose() {
+        if (disposed) return;
+        disposed = true;
+        data.queueRemoval(this);
+        data.setDirty();
+    }
     public boolean isDisposed() { return disposed; }
+    long ownerChunk() { return node.chunkKey(); }
+    boolean ownerLoaded() { return node.isLoaded(getLevel()); }
 
     void onAdded(WiWorldData data) {
         data.nodeLookup.put(node, this);
@@ -109,7 +116,7 @@ public class NodeConn {
         Level level = getLevel();
         if (!disposed && node.isLoaded(level)) {
             if (node.get(level) == null || (generators.isEmpty() && receivers.isEmpty())) {
-                disposed = true;
+                dispose();
             }
         }
         return !disposed;
@@ -127,6 +134,7 @@ public class NodeConn {
         // can replace the authoritative edge immediately without duplicates.
         if (!receivers.contains(receiver)) receivers.add(receiver);
         data.nodeLookup.put(receiver, this);
+        data.setDirty();
         return true;
     }
 
@@ -136,7 +144,9 @@ public class NodeConn {
     public boolean unlinkReceiver(VNReceiver receiver) {
         if (receiver == null) return false;
         data.nodeLookup.remove(receiver, this);
-        return receivers.removeIf(receiver::equals);
+        boolean removed = receivers.removeIf(receiver::equals);
+        if (removed) data.setDirty();
+        return removed;
     }
 
     boolean addGenerator(VNGenerator generator) {
@@ -147,6 +157,7 @@ public class NodeConn {
         if (old != null) old.unlinkGenerator(generator);
         if (!generators.contains(generator)) generators.add(generator);
         data.nodeLookup.put(generator, this);
+        data.setDirty();
         return true;
     }
 
@@ -155,11 +166,14 @@ public class NodeConn {
     public boolean unlinkGenerator(VNGenerator generator) {
         if (generator == null) return false;
         data.nodeLookup.remove(generator, this);
-        return generators.removeIf(generator::equals);
+        boolean removed = generators.removeIf(generator::equals);
+        if (removed) data.setDirty();
+        return removed;
     }
     private boolean checkRange(VBlock<?> block) {
         IWirelessNode inode = node.get(getLevel());
-        double range = inode == null ? 1000 : inode.getRange();
+        if (inode == null) return false;
+        double range = Math.min(EnergyBoundary.nonNegative(inode.getRange()), 256);
         return block.distSq(node) <= range * range;
     }
 
@@ -209,10 +223,11 @@ public class NodeConn {
             double current = EnergyBoundary.bounded(iNode.getEnergy(), max);
             double required = Math.min(transferLeft,
                     Math.min(EnergyBoundary.transfer(source.getBandwidth()), max - current));
+            if (required <= 0) continue;
             double raw = source.getProvidedEnergy(required);
             double amount = EnergyBoundary.bounded(raw, required);
             if (raw != amount) LOGGER.warn("Energy input overflow for generator {}", source);
-            iNode.setEnergy(current + amount);
+            if (amount > 0) iNode.setEnergy(current + amount);
             transferLeft -= amount;
         }
 
@@ -232,9 +247,10 @@ public class NodeConn {
             double give = Math.min(current,
                     Math.min(transferLeft, EnergyBoundary.transfer(target.getBandwidth())));
             give = Math.min(EnergyBoundary.transfer(target.getRequiredEnergy()), give);
+            if (give <= 0) continue;
             double remainder = EnergyBoundary.bounded(target.injectEnergy(give), give);
             double accepted = give - remainder;
-            iNode.setEnergy(current - accepted);
+            if (accepted > 0) iNode.setEnergy(current - accepted);
             transferLeft -= accepted;
         }
     }

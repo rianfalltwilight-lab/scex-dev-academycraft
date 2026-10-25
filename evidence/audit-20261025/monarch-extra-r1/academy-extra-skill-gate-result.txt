@@ -1,0 +1,14 @@
+status=FAIL
+scope=real client input/environment server assertions and rendered frame capture
+visualInspection=REQUIRED; screenshots alone do not prove visible effects or original-animation fidelity
+progression=PRELEARNED FIXTURE; no survival unlock proof
+completedCases=0/6
+stage=WAIT_FINISH
+reason=java.lang.IllegalStateException: java.lang.IllegalStateException: flying projectile did not hurt aligned target
+screenshots=2
+fixture=isolated integrated survival player; level5/prelearned skills; devMode=false; not an unlock/progression proof
+input=programmatically injected KeyMapping state handled by normal client key edges, not physical keyboard operation
+SYNC volcanic_ball category=AbilityCategory{aerohand} level=5 slot=2 skill=volcanic_ball
+TRACKED_CLIENT_ENTITY academy:aero_volcanic_ball id=6 tick=1 position=(0.74075, 82.59650000476837, 0.879375)
+CAPTURE_REQUEST extra-01-volcanic_ball-early.png clientTick=213 age=3 category=AbilityCategory{aerohand} level=5 proficiency=0.50000->0.50150 cp=8000.00[min=7930.00,max=8000.00,current=7930.00] ol=0.00[min=0.00,max=35.00,current=35.00] cooldownMax=11 hp=100.00->100.00 target=500.00->500.00 targetMove=0.000 targetMaxY=81.000 playerMove=0.000 air=300..300 paperMin=0 paperNow=0 sustained=false charging=false projectilesCleared=false shadowsMax=0
+CAPTURE_REQUEST extra-01-volcanic_ball-end.png clientTick=233 age=23 category=AbilityCategory{aerohand} level=5 proficiency=0.50000->0.50150 cp=8000.00[min=7930.00,max=8000.00,current=7963.48] ol=0.00[min=0.00,max=35.00,current=35.00] cooldownMax=11 hp=100.00->100.00 target=500.00->500.00 targetMove=0.000 targetMaxY=81.000 playerMove=0.000 air=300..300 paperMin=0 paperNow=0 sustained=false charging=false projectilesCleared=false shadowsMax=0

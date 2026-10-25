@@ -41,7 +41,10 @@ public class Coin extends AcademyItem {
             coinEntity.setYRot(level.random.nextFloat() * 360.0F);
             coinEntity.setXRot(level.random.nextFloat() * 360.0F);
 
-            level.addFreshEntity(coinEntity);
+            if (!level.addFreshEntity(coinEntity) || !coinEntity.isAlive()) {
+                coinEntity.discard();
+                return InteractionResultHolder.fail(itemstack);
+            }
             player.playSound(AcademySounds.ENTITY_FLIPCOIN.value(), 0.5F, 1.0F);
 
             if (!player.getAbilities().instabuild) {

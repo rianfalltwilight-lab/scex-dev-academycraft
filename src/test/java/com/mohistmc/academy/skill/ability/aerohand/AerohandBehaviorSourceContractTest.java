@@ -27,24 +27,25 @@ class AerohandBehaviorSourceContractTest {
     }
 
     @Test
-    void jetMovesCasterAndVolcanicBallIsDistanceAttenuatedAir() throws Exception {
+    void jetMovesCasterAndAirProjectilesAreRealEntities() throws Exception {
         String jet = source("skill/ability/aerohand/AirJetEffect.java");
-        String ball = source("skill/ability/aerohand/VolcanicBallEffect.java");
+        String ball = source("world/entity/AeroProjectileEntity.java");
         assertTrue(jet.contains("player.setDeltaMovement"));
         assertTrue(jet.contains("isOffenseArmourEngaged"));
         assertFalse(jet.contains("AcademyDamageHelper"));
         assertTrue(ball.contains("AeroBehaviorMath.volcanicDamage"));
-        assertTrue(ball.contains("target.setDeltaMovement"));
+        assertTrue(ball.contains("extends Projectile"));
+        assertTrue(ball.contains("LoadedRaycast.clip"));
         assertFalse(ball.contains(".explode("));
         assertFalse(ball.contains("setSecondsOnFire"));
     }
 
     @Test
-    void separatorIsAnImmediateOneShotAndExplicitlyIncludesSelfSuffocation() throws Exception {
+    void separatorIsANonChargingDelayedPulseIncludingSelfSuffocation() throws Exception {
         String separator = source("skill/ability/aerohand/AeroSeparatorEffect.java");
         String boundary = source("skill/AcademyDamageHelper.java");
         assertTrue(separator.contains("implements DynamicOneShotSkillEffect"));
-        assertTrue(separator.contains("player.position().add"));
+        assertTrue(separator.contains("getGameTime() + 5"));
         assertTrue(separator.contains("living == player"));
         assertTrue(separator.contains("damageSources().drown()"));
         assertTrue(separator.contains("living.setAirSupply"));
@@ -60,7 +61,7 @@ class AerohandBehaviorSourceContractTest {
         assertTrue(cruise.contains("new ItemStack(Items.BUCKET)"));
         assertTrue(cruise.contains("Map<UUID, Session> SESSIONS"));
         assertTrue(cruise.contains("PlayerTickEvent.Post"));
-        assertTrue(cruise.contains("projectile.discard()"));
+        assertTrue(source("world/entity/CruiseBombEntity.java").contains("projectile.discard()"));
         assertFalse(cruise.contains("GENERIC_EXPLODE"));
         assertFalse(cruise.contains("level.explode"));
     }

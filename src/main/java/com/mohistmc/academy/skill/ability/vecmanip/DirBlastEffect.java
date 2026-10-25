@@ -1,4 +1,6 @@
 package com.mohistmc.academy.skill.ability.vecmanip;
+
+import com.mohistmc.academy.skill.ability.LoadedRaycast;
 import com.mohistmc.academy.skill.AcademyDamageHelper;
 
 import com.mohistmc.academy.config.DynamicSkillRules;
@@ -102,7 +104,7 @@ public class DirBlastEffect implements ChargingSkillEffect {
         Vec3 lookDir = player.getLookAngle();
         Vec3 eyePos = player.getEyePosition();
         Vec3 rayEnd=eyePos.add(lookDir.scale(RANGE));
-        var blockHit=level.clip(new ClipContext(eyePos,rayEnd,ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,player));
+        var blockHit=LoadedRaycast.clip(level, new ClipContext(eyePos,rayEnd,ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,player));
         Vec3 position = blockHit.getType()==HitResult.Type.MISS?rayEnd:blockHit.getLocation();
         double closestTarget=eyePos.distanceToSqr(position);
 
@@ -156,13 +158,14 @@ public class DirBlastEffect implements ChargingSkillEffect {
                     if ((dx != 0 || dy != 0 || dz != 0) && level.random.nextFloat() >= breakProb) continue;
 
                     BlockPos pos = new BlockPos(cx + dx, cy + dy, cz + dz);
+                    if (!LoadedRaycast.isLoaded(level, pos) || !player.mayInteract(level, pos)) continue;
                     BlockState state = level.getBlockState(pos);
                     float hardness = state.getDestroySpeed(level, pos);
 
                     if (hardness >= 0 && hardness <= breakHardness && !state.isAir()) {
                         BlockEvent.BreakEvent breakEvent = new BlockEvent.BreakEvent(level, pos, state, player);
                         NeoForge.EVENT_BUS.post(breakEvent);
-                        if (!breakEvent.isCanceled()) {
+                        if (!breakEvent.isCanceled() && level.getBlockState(pos) == state) {
                             level.destroyBlock(pos, level.random.nextFloat() < dropRate, player);
                         }
                     }

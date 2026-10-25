@@ -1,4 +1,6 @@
 package com.mohistmc.academy.skill.ability.electromaster;
+
+import com.mohistmc.academy.skill.ability.LoadedRaycast;
 import com.mohistmc.academy.skill.AcademyDamageHelper;
 
 import com.mohistmc.academy.config.DynamicSkillRules;
@@ -259,7 +261,7 @@ public class RailgunEffect implements ChargingSkillEffect {
             BlockPos pos = BlockPos.containing(origin.add(direction.scale(d)));
             if (pos.equals(previous)) continue;
             previous = pos;
-            if (!level.hasChunkAt(pos) || !level.getWorldBorder().isWithinBounds(pos)
+            if (!LoadedRaycast.isLoaded(level, pos) || !level.getWorldBorder().isWithinBounds(pos)
                     || !level.mayInteract(player, pos)) return Math.max(0, d - .01);
             var state = level.getBlockState(pos);
             if (state.isAir()) continue;
@@ -281,7 +283,7 @@ public class RailgunEffect implements ChargingSkillEffect {
             BlockPos pos = BlockPos.containing(origin.add(direction.scale(d)));
             if (pos.equals(previous)) continue;
             previous = pos;
-            if (!level.hasChunkAt(pos) || !level.getWorldBorder().isWithinBounds(pos)
+            if (!LoadedRaycast.isLoaded(level, pos) || !level.getWorldBorder().isWithinBounds(pos)
                     || !level.mayInteract(player, pos)) break;
             var state = level.getBlockState(pos);
             if (state.isAir()) continue;
@@ -294,7 +296,7 @@ public class RailgunEffect implements ChargingSkillEffect {
             energy -= Math.max(0, hardness);
             if (level.random.nextFloat() < .05f) {
                 BlockPos neighbor = pos.relative(net.minecraft.core.Direction.getRandom(level.random));
-                if (!level.hasChunkAt(neighbor) || !level.getWorldBorder().isWithinBounds(neighbor)
+                if (!LoadedRaycast.isLoaded(level, neighbor) || !level.getWorldBorder().isWithinBounds(neighbor)
                         || !level.mayInteract(player, neighbor)) continue;
                 var neighborState = level.getBlockState(neighbor);
                 float neighborHardness = neighborState.getDestroySpeed(level, neighbor);
@@ -314,7 +316,7 @@ public class RailgunEffect implements ChargingSkillEffect {
         ServerLevel level = reflector.serverLevel();
         Vec3 start = reflector.getEyePosition(), direction = reflector.getLookAngle().normalize(), end = start.add(direction.scale(REFLECT_RANGE));
         // Upstream Raytrace.traceLiving clips the reflected ray against blocks before selecting an entity.
-        end = level.clip(new ClipContext(start, end, ClipContext.Block.COLLIDER,
+        end = LoadedRaycast.clip(level, new ClipContext(start, end, ClipContext.Block.COLLIDER,
                 ClipContext.Fluid.NONE, reflector)).getLocation();
         LivingEntity best = null; double bestDistance = Double.MAX_VALUE;
         for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, new AABB(start, end).inflate(.8),

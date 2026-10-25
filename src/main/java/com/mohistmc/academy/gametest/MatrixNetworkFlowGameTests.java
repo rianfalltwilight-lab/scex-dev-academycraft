@@ -24,6 +24,8 @@ public final class MatrixNetworkFlowGameTests {
         var level=h.getLevel(); var mp=h.absolutePos(new BlockPos(3,2,3));
         var aPos=mp.east(4);var bPos=mp.south(4);
         level.setBlock(mp,AcademyBlocks.MATRIX.get().defaultBlockState(),3);
+        ((com.mohistmc.academy.world.block.Matrix)AcademyBlocks.MATRIX.get())
+                .createStructure(level,mp,level.getBlockState(mp));
         level.setBlock(aPos,AcademyBlocks.NODE_BASIC.get().defaultBlockState(),3);
         level.setBlock(bPos,AcademyBlocks.NODE_BASIC.get().defaultBlockState(),3);
         level.setBlock(aPos.east(),AcademyBlocks.RF_INPUT.get().defaultBlockState(),3);
@@ -60,6 +62,8 @@ public final class MatrixNetworkFlowGameTests {
         require(WirelessSystem.linkGenerator(level,a,input,false,"")&&WirelessSystem.linkReceiver(level,b,output,false,""),"bridge links failed");
         require(input.receiveExternalFe(4000,false)==4000,"input FE fixture failed");
         h.runAfterDelay(80,()->{
+            require(level.getBlockEntity(mp)==matrix&&data.getNetwork(matrix)==net&&!net.isDisposed(),
+                    "complete matrix fixture did not retain its live network");
             double stored=input.getStoredIf()+output.getStoredIf()+a.getEnergy()+b.getEnergy();
             CompoundTag snapshot=data.save(new CompoundTag(),level.registryAccess());
             double buffer=0;

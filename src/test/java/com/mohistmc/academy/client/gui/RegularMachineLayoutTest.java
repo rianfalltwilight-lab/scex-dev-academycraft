@@ -45,19 +45,20 @@ class RegularMachineLayoutTest {
         assertEquals(317, left + 295);
     }
 
-    @Test void developerCompactAndFullSidebarsNeverCoverTheirCanvas() {
-        for (int width : new int[] {320, 426}) {
-            int left = RegularMachineLayout.machineLeft(width, true);
-            assertTrue(left - 20 + 18 <= left, Integer.toString(width));
-            assertTrue(left + RegularMachineLayout.INFO_X + RegularMachineLayout.INFO_WIDTH <= width,
-                    Integer.toString(width));
-            assertTrue(left + 94 + 72 <= left + RegularMachineLayout.MACHINE_WIDTH,
-                    Integer.toString(width));
+    @Test void developerSidebarCanvasAndMenuStayWithinTheFullLayout() {
+        for (int width : new int[] {427, 640, 854}) {
+            int canvas = RegularMachineLayout.developerCanvasLeft(width);
+            int sidebar = RegularMachineLayout.developerSidebarLeft(width);
+            int menu = RegularMachineLayout.developerMenuLeft(width);
+            assertTrue(sidebar >= 0, Integer.toString(width));
+            assertTrue(sidebar + RegularMachineLayout.SIDEBAR_WIDTH <= canvas, Integer.toString(width));
+            assertTrue(canvas + RegularMachineLayout.DEVELOPER_CANVAS_WIDTH <= width, Integer.toString(width));
+            assertTrue(menu >= canvas, Integer.toString(width));
+            assertTrue(menu + RegularMachineLayout.MACHINE_WIDTH
+                    <= canvas + RegularMachineLayout.DEVELOPER_CANVAS_WIDTH, Integer.toString(width));
         }
-        int fullLeft = (640 - 400) / 2;
-        int fullSidebar = fullLeft - 20;
-        assertTrue(fullSidebar >= 0);
-        assertTrue(fullSidebar + 18 <= fullLeft);
-        assertTrue(fullLeft + 400 <= 640);
+        assertEquals(130, RegularMachineLayout.developerCanvasLeft(640));
+        assertEquals(110, RegularMachineLayout.developerSidebarLeft(640));
+        assertEquals(242, RegularMachineLayout.developerMenuLeft(640));
     }
 }

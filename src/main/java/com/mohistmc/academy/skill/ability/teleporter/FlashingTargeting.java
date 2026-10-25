@@ -1,5 +1,7 @@
 package com.mohistmc.academy.skill.ability.teleporter;
 
+import com.mohistmc.academy.skill.ability.LoadedRaycast;
+
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -48,7 +50,7 @@ public final class FlashingTargeting {
         if (start == null || !finite(start)) return null;
         Vec3 end = start.add(rawDirection.normalize().scale(distance));
 
-        BlockHitResult blockHit = level.clip(new ClipContext(start, end,
+        BlockHitResult blockHit = LoadedRaycast.clip(level, new ClipContext(start, end,
                 ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
         double blockDistance = blockHit.getType() == HitResult.Type.MISS
                 ? Double.POSITIVE_INFINITY : start.distanceToSqr(blockHit.getLocation());
@@ -70,7 +72,7 @@ public final class FlashingTargeting {
         BlockPos destination = BlockPos.containing(result);
         // Keep the legacy coordinates without force-loading chunks or crossing
         // the world border. These are transport boundaries, not floor checks.
-        if (!level.hasChunkAt(destination) || !TeleportDestinations.isSafe(player, level, result)) return null;
+        if (!LoadedRaycast.isLoaded(level, destination) || !TeleportDestinations.isSafe(player, level, result)) return null;
         return result;
     }
 
@@ -111,7 +113,7 @@ public final class FlashingTargeting {
         if (face.getAxis().isHorizontal()) {
             // Fix the inherited negative-coordinate truncation instead of inspecting a neighbouring cell.
             BlockPos head = BlockPos.containing(x, y + 1, z);
-            if (level.hasChunkAt(head) && !level.getBlockState(head).isAir()) y -= 1.25;
+            if (LoadedRaycast.isLoaded(level, head) && !level.getBlockState(head).isAir()) y -= 1.25;
         }
         return new Vec3(x, y, z);
     }

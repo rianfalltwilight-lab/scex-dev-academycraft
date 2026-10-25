@@ -558,5 +558,18 @@
   "item.academy.paper_armor.desc": "Keeps its shape only while Perfect Paper is learned and supplied with CP.",
   "item.academy.extra.enabled": "Status: enabled",
   "item.academy.extra.disabled": "Status: disabled",
-  "entity.academy.paper_plane": "Paper Plane"
+  "entity.academy.paper_plane": "Paper Plane",
+  "hud.academy.charge.hold": "Hold to charge",
+  "hud.academy.charge.release": "[QTE] Release",
+  "hud.academy.charge.ready": "Ready to release",
+  "hud.academy.charge.shield": "Shield active",
+  "hud.academy.charge.missiles": "Missiles locking",
+  "hud.academy.charge.targeting": "Targeting",
+  "hud.academy.charge.flight": "Flight active",
+  "hud.academy.charge.vector": "Vector field active",
+  "entity.academy.aero_volcanic_ball": "Volcanic Ball",
+  "entity.academy.aero_air_blade": "Air Blade",
+  "entity.academy.aero_bomber_lance": "Bomber Lance",
+  "entity.academy.cruise_bomb": "Cruise Bomb",
+  "entity.academy.liquid_shadow": "Liquid Shadow"
 }

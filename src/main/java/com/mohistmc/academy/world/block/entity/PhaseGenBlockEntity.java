@@ -29,7 +29,9 @@ public class PhaseGenBlockEntity extends AcademyContainerBlockEntity implements 
 
     private float storedEnergy = 0;
     private final FluidTank tank = new FluidTank(TANK_SIZE,
-            fs -> fs.getFluid() == AcademyFluids.PHASE_LIQUID.get());
+            fs -> fs.getFluid() == AcademyFluids.PHASE_LIQUID.get()) {
+        @Override protected void onContentsChanged() { markMachineChanged(); }
+    };
 
     public PhaseGenBlockEntity(BlockPos pos, BlockState state) {
         super(AcademyBlockEntities.PHASE_GEN.get(), pos, state);
@@ -88,7 +90,7 @@ public class PhaseGenBlockEntity extends AcademyContainerBlockEntity implements 
             storedEnergy -= charged;
             if (charged > 0) changed = true;
         }
-        if (changed) setChanged();
+        if (changed) markMachineChanged();
     }
 
     // ==================== IWirelessGenerator ====================
@@ -101,7 +103,7 @@ public class PhaseGenBlockEntity extends AcademyContainerBlockEntity implements 
         // here for safe direct callers.
         double give = Math.min(Math.min(req, MAX_BANDWIDTH), storedEnergy);
         storedEnergy -= (float) give;
-        if (give > 0) setChanged();
+        if (give > 0) markMachineChanged();
         return give;
     }
 
@@ -132,7 +134,12 @@ public class PhaseGenBlockEntity extends AcademyContainerBlockEntity implements 
     public void loadAdditional(CompoundTag tag, HolderLookup.Provider provider) {
         super.loadAdditional(tag, provider);
         storedEnergy = MachineStateSanitizer.clampFinite(tag.getFloat("storedEnergy"), MAX_STORAGE);
-        if (tag.contains("tank")) tank.readFromNBT(provider, tag.getCompound("tank"));
+        if (tag.contains("tank")) {
+            tank.readFromNBT(provider, tag.getCompound("tank"));
+            FluidStack loaded = tank.getFluid();
+            if (!loaded.isEmpty() && !tank.isFluidValid(loaded)) tank.setFluid(FluidStack.EMPTY);
+            else if (loaded.getAmount() > TANK_SIZE) tank.setFluid(loaded.copyWithAmount(TANK_SIZE));
+        }
     }
 
     @Override

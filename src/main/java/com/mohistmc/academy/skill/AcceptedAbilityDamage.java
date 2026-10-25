@@ -5,6 +5,7 @@ import com.mohistmc.academy.skill.ability.telekinesis.TelekinesisPassiveHandler;
 import com.mohistmc.academy.skill.passive.PassiveSkillEventHandler;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 
 /**
  * Internal settlement for a hit accepted by the outer player gates, all Incoming listeners,
@@ -33,6 +34,8 @@ public final class AcceptedAbilityDamage {
         var hit = new AcceptedAbilityDamage(player, source, amount);
         // A fully blocked shield reaches actuallyHurt with zero damage, and must not activate/pay defenses.
         if (!(amount > 0) || !Float.isFinite(amount)) return hit;
+        // Administrative death and the void cannot be mitigated, reflected or paid for by abilities.
+        if (source.is(DamageTypes.GENERIC_KILL) || source.is(DamageTypes.FELL_OUT_OF_WORLD)) return hit;
         ServerPlayer attacker = AcademyDamageHelper.hostileAbilityAttacker(player, source);
         if (attacker != null)
             hit.setAmount(TelekinesisPassiveHandler.mitigateAbilityDamage(attacker, player, hit.getAmount()));

@@ -42,16 +42,26 @@ class ProjectileItemLegacyContractTest {
         assertTrue(entity.contains("private Direction anchorFace = Direction.DOWN"));
     }
 
-    @Test void locationTeleportUsesOnlyBoundedTemporaryFullChunkTickets() throws Exception {
+    @Test void locationTeleportUsesBoundedNonblockingTemporaryChunkTickets() throws Exception {
         String packet = source("network/LocationTeleportActionPacket.java");
+        String handheld = source("world/item/HandheldTeleporterItem.java");
+        String requests = source("network/TeleportChunkRequests.java");
         assertTrue(packet.contains("MAX_DESTINATION_CHUNKS = 16"));
-        assertTrue(packet.contains("ChunkStatus.FULL,true"));
-        assertTrue(packet.contains("addRegionTicket(LOCATION_TELEPORT_TICKET"));
-        assertTrue(packet.contains("removeRegionTicket(LOCATION_TELEPORT_TICKET"));
-        assertTrue(packet.contains("finally"));
+        assertTrue(packet.contains("TeleportChunkRequests.request") && handheld.contains("TeleportChunkRequests.request"));
+        for (String entry : new String[]{packet, handheld, requests}) {
+            assertFalse(entry.contains(".getChunk("), "no synchronous loading in either teleport path");
+            assertFalse(entry.contains(".getChunkFuture("), "the main-thread Future API also managedBlocks in 1.21.1");
+            assertFalse(entry.contains(".join()") || entry.contains(".managedBlock("));
+        }
+        assertTrue(requests.contains("MAX_REQUESTS = 16") && requests.contains("MAX_CHUNKS = 16")
+                && requests.contains("TIMEOUT_TICKS = 200"));
+        assertTrue(requests.contains("getChunkNow") && requests.contains("addRegionTicket(TICKET")
+                && requests.contains("removeRegionTicket(TICKET") && requests.contains("finally { release(request); }"));
+        assertTrue(requests.contains("PlayerLoggedOutEvent") && requests.contains("LevelEvent.Unload")
+                && requests.contains("ServerStoppingEvent"));
         assertTrue(packet.contains("insideBorder(target.getWorldBorder(),box)"));
-        assertFalse(packet.contains("target.hasChunkAt(pos)"),
-                "a legitimate server-saved destination must not fail merely because it is unloaded");
+        // Actual arrival, cancellation, timeout and Minecraft-ticket counts are asserted by
+        // TeleportChunkRequestsGameTests; this contract only forbids regressing the blocking APIs.
     }
 
     @Test void locationTeleportRestoresTheLegacyFiveBlockLivingEntitySweep() throws Exception {

@@ -601,34 +601,27 @@ public class SkillRegistry {
                 .prereq("airflow", 0.1f)
                 .cpCost(200).overload(80).build());
 
-        // 大脑训练课程(被动)
-        registerSkill(new Skill.Builder("brain_course", cat, 3)
-                .position(30, 110)
-                .type(SkillType.PASSIVE)
-                .anyLevelPrereq(3).build());
-
-        // 攻击装甲（原版为按键开关的持续主动技能）
-        registerSkill(new Skill.Builder("offense_armour", cat, 4)
-                .position(160, 45)
-                .prereq("air_wall", 1.0f).build());
-
         // 轰炸长矛
         registerSkill(new Skill.Builder("bomber_lance", cat, 4)
                 .position(150, 10)
                 .prereq("air_blade", 0.5f)
                 .cpCost(600).overload(240).build());
 
-        // 大脑训练课程(高级)(被动)
-        registerSkill(new Skill.Builder("brain_course_advanced", cat, 4)
-                .position(115, 110)
-                .type(SkillType.PASSIVE)
-                .prereq("brain_course", 0.0f)
-                .anyLevelPrereq(4).build());
+        // 攻击装甲（原版为按键开关的持续主动技能）
+        registerSkill(new Skill.Builder("offense_armour", cat, 4)
+                .position(160, 45)
+                .prereq("air_wall", 1.0f).build());
 
         // 飞行（原版为按键开关的持续主动技能）
         registerSkill(new Skill.Builder("flying", cat, 4)
                 .position(165, 85)
                 .prereq("air_jet", 0.5f).build());
+
+        // 空气分离器
+        registerSkill(new Skill.Builder("aero_separator", cat, 5)
+                .position(200, 25)
+                .prereq("bomber_lance", 0.5f)
+                .cpCost(1200).overload(480).build());
 
         // 风暴核心
         registerSkill(new Skill.Builder("storm_core", cat, 5)
@@ -636,11 +629,18 @@ public class SkillRegistry {
                 .prereq("flying", 0.5f)
                 .cpCost(3000).overload(300).build());
 
-        // 空气分离器
-        registerSkill(new Skill.Builder("aero_separator", cat, 5)
-                .position(200, 25)
-                .prereq("bomber_lance", 0.5f)
-                .cpCost(1200).overload(480).build());
+        // 大脑训练课程(被动)
+        registerSkill(new Skill.Builder("brain_course", cat, 3)
+                .position(30, 110)
+                .type(SkillType.PASSIVE)
+                .anyLevelPrereq(3).build());
+
+        // 大脑训练课程(高级)(被动)
+        registerSkill(new Skill.Builder("brain_course_advanced", cat, 4)
+                .position(115, 110)
+                .type(SkillType.PASSIVE)
+                .prereq("brain_course", 0.0f)
+                .anyLevelPrereq(4).build());
 
         // 思维修养课程(被动)
         registerSkill(new Skill.Builder("mind_course", cat, 5)
@@ -693,12 +693,6 @@ public class SkillRegistry {
                 .type(SkillType.PASSIVE)
                 .prereq("insulation", 0.0f).build());
 
-        // 大脑训练课程(被动)
-        registerSkill(new Skill.Builder("brain_course", cat, 3)
-                .position(30, 110)
-                .type(SkillType.PASSIVE)
-                .anyLevelPrereq(3).build());
-
         // 念力猛击
         registerSkill(new Skill.Builder("psycho_slam", cat, 4)
                 .position(160, 30)
@@ -710,13 +704,6 @@ public class SkillRegistry {
                 .position(165, 60)
                 .prereq("overload_thinking", 0.5f).build());
 
-        // 大脑训练课程(高级)(被动)
-        registerSkill(new Skill.Builder("brain_course_advanced", cat, 4)
-                .position(115, 110)
-                .type(SkillType.PASSIVE)
-                .prereq("brain_course", 0.0f)
-                .anyLevelPrereq(4).build());
-
         // 液态阴影（原版为按键开关的持续主动技能）
         registerSkill(new Skill.Builder("liquid_shadow", cat, 5)
                 .position(190, 15)
@@ -727,6 +714,19 @@ public class SkillRegistry {
                 .position(205, 80)
                 .prereq("perfect_paper", 0.5f)
                 .cpCost(4000).overload(120).build());
+
+        // 大脑训练课程(被动)
+        registerSkill(new Skill.Builder("brain_course", cat, 3)
+                .position(30, 110)
+                .type(SkillType.PASSIVE)
+                .anyLevelPrereq(3).build());
+
+        // 大脑训练课程(高级)(被动)
+        registerSkill(new Skill.Builder("brain_course_advanced", cat, 4)
+                .position(115, 110)
+                .type(SkillType.PASSIVE)
+                .prereq("brain_course", 0.0f)
+                .anyLevelPrereq(4).build());
 
         // 思维修养课程(被动)
         registerSkill(new Skill.Builder("mind_course", cat, 5)

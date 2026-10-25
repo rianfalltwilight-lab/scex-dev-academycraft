@@ -1,11 +1,9 @@
 package com.mohistmc.academy.world.item;
 
 import com.mohistmc.academy.network.LocationTeleportChunkPlan;
+import com.mohistmc.academy.network.TeleportChunkRequests;
 import com.mohistmc.academy.skill.ability.teleporter.TeleportDestinations;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.LinkedHashSet;
-import java.util.UUID;
 import java.util.List;
 import java.util.Set;
 import net.minecraft.ChatFormatting;
@@ -13,7 +11,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.level.TicketType;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -24,14 +21,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.phys.Vec3;
 
 /** Overworld-only bind-and-return teleporter consuming 5,000 IF and one ender pearl. */
 public final class HandheldTeleporterItem extends ExtraEnergyItem {
-    private static final TicketType<UUID> TELEPORT_TICKET =
-            TicketType.create("academy_handheld_teleport", Comparator.<UUID>naturalOrder(), 20);
     public HandheldTeleporterItem() { super(10_000, 100); }
 
     @Override
@@ -66,23 +59,18 @@ public final class HandheldTeleporterItem extends ExtraEnergyItem {
             return InteractionResultHolder.fail(stack);
         var box = player.getBoundingBox().move(feet.subtract(player.position()));
         var chunks = new LinkedHashSet<LocationTeleportChunkPlan.Chunk>();
-        if (!LocationTeleportChunkPlan.addBox(chunks, box.minX, box.minZ, box.maxX, box.maxZ, 16))
+        if (!LocationTeleportChunkPlan.addBox(chunks, box.minX-1, box.minZ-1, box.maxX+1, box.maxZ+1, 16))
             return InteractionResultHolder.fail(stack);
-        UUID ticket = UUID.randomUUID();
-        var ticketed = new ArrayList<ChunkPos>();
-        try {
-            for (var chunk : chunks) {
-                ChunkPos pos = new ChunkPos(chunk.x(), chunk.z());
-                destination.getChunkSource().addRegionTicket(TELEPORT_TICKET, pos, 1, ticket);
-                ticketed.add(pos);
-                if (destination.getChunkSource().getChunk(chunk.x(), chunk.z(), ChunkStatus.FULL, true) == null)
-                    return InteractionResultHolder.fail(stack);
-            }
-            if (!TeleportDestinations.isSafe(player, destination, feet)) return InteractionResultHolder.fail(stack);
-            return teleport(serverPlayer, destination, stack, feet);
-        } finally {
-            for (ChunkPos pos : ticketed) destination.getChunkSource().removeRegionTicket(TELEPORT_TICKET, pos, 1, ticket);
-        }
+        boolean accepted = TeleportChunkRequests.request(serverPlayer, destination, chunks,
+                () -> serverPlayer.getItemInHand(hand) == stack
+                        && target.equals(ExtraItemData.teleport(stack))
+                        && (serverPlayer.getAbilities().instabuild
+                            || getEnergyStored(stack) >= 5_000 && ExtraItemActions.has(serverPlayer, Items.ENDER_PEARL)),
+                () -> {
+                    if (TeleportDestinations.isSafe(serverPlayer, destination, feet))
+                        teleport(serverPlayer, destination, stack, feet);
+                });
+        return accepted ? InteractionResultHolder.consume(stack) : InteractionResultHolder.fail(stack);
     }
 
     private InteractionResultHolder<ItemStack> teleport(ServerPlayer player, ServerLevel destination,

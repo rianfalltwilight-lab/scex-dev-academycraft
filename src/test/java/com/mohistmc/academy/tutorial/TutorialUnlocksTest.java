@@ -1,11 +1,8 @@
 package com.mohistmc.academy.tutorial;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.HashSet;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
@@ -24,21 +21,5 @@ class TutorialUnlocksTest {
                 "academy:rf_output", "energy_bridge");
         samples.forEach((item, tutorial) -> assertEquals(tutorial, TutorialUnlocks.tutorialForItem(item)));
         assertNull(TutorialUnlocks.tutorialForItem("minecraft:stone"));
-    }
-
-    @Test
-    void multipleItemsForOneTutorialEmitOnlyOneActivation() {
-        var activated = new HashSet<String>();
-        assertEquals("ores", TutorialUnlocks.activateForItem(activated, "academy:constraint_metal"));
-        assertNull(TutorialUnlocks.activateForItem(activated, "academy:crystal_ore"));
-        assertTrue(activated.contains("ores"));
-    }
-
-    @Test
-    void existingObtainedHistoryMigratesWithoutInventingDefaultTutorials() {
-        var activated = new HashSet<String>();
-        TutorialUnlocks.reconcile(java.util.Set.of("academy:windgen_main"), activated);
-        assertTrue(activated.contains("wind_generator"));
-        assertFalse(activated.contains("welcome"));
     }
 }

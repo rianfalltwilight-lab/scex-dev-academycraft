@@ -30,8 +30,7 @@ public class AirCoolingEffect implements com.mohistmc.academy.skill.ability.Dyna
 
     @Override
     public boolean canActivate(ServerPlayer player, PlayerAbilityData data) {
-        return (data.isDevMode() || data.getCurrentOverload() > 0.0f)
-                && com.mohistmc.academy.skill.ability.DynamicOneShotSkillEffect.super.canActivate(player, data);
+        return com.mohistmc.academy.skill.ability.DynamicOneShotSkillEffect.super.canActivate(player, data);
     }
 
     @Override
@@ -39,7 +38,10 @@ public class AirCoolingEffect implements com.mohistmc.academy.skill.ability.Dyna
         float exp = data.getProficiency(getId());
         ServerLevel level = player.serverLevel();
 
-        data.setCurrentOverload(AeroBehaviorMath.cooledOverload(data.getCurrentOverload(), exp));
+        float cooling = AeroBehaviorMath.coolingReduction(exp);
+        if (level.dimension().equals(net.minecraft.world.level.Level.NETHER)) cooling /= 4;
+        else player.clearFire();
+        data.setCurrentOverload(Math.max(0, data.getCurrentOverload() - cooling));
         EffectHelper.windBurst(level, player.getX(), player.getY() + player.getBbHeight() / 2,
                 player.getZ(), 36, 1.4 + exp);
 

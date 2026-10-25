@@ -7,6 +7,7 @@ import com.mohistmc.academy.terminal.MediaTrack;
 import com.mohistmc.academy.terminal.MediaTrackRegistry;
 import com.mojang.blaze3d.audio.Channel;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
@@ -208,6 +209,20 @@ public final class MediaPlayerManager {
         if (handle != null) handle.execute(operation);
     }
 
+    private static AudioStream openExternalStream(InputStream input) throws IOException {
+        try {
+            return new JOrbisAudioStream(input);
+        } catch (IOException | RuntimeException failure) {
+            // JOrbis owns the input only after its constructor succeeds.
+            try {
+                input.close();
+            } catch (IOException closeFailure) {
+                failure.addSuppressed(closeFailure);
+            }
+            throw failure;
+        }
+    }
+
     private static final class MediaSoundInstance extends AbstractTickableSoundInstance {
         private final Path externalSource;
         private final Sound externalSound;
@@ -250,7 +265,7 @@ public final class MediaPlayerManager {
             if (externalSource == null) return super.getStream(buffers, sound, looping);
             return CompletableFuture.supplyAsync(() -> {
                 try {
-                    return new JOrbisAudioStream(Files.newInputStream(externalSource));
+                    return openExternalStream(Files.newInputStream(externalSource));
                 } catch (IOException ex) {
                     throw new CompletionException(ex);
                 }

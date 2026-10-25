@@ -144,7 +144,7 @@ public class Matrix extends BaseEntityBlock {
 
     private static void removeStructureParts(LevelAccessor level, BlockPos pos, BlockState state) {
         for (BlockPos subPos : structurePositions(pos, state)) {
-            if (level.getBlockState(subPos).getBlock() instanceof MatrixSubBlock) {
+            if (com.mohistmc.academy.world.block.LoadedMachineChunks.contains(level, subPos) && level.getBlockState(subPos).getBlock() instanceof MatrixSubBlock) {
                 level.destroyBlock(subPos, false);
             }
         }
@@ -152,7 +152,7 @@ public class Matrix extends BaseEntityBlock {
 
     private static boolean hasCompleteStructure(LevelAccessor level, BlockPos pos, BlockState state) {
         return structurePositions(pos, state).stream()
-                .allMatch(part -> level.getBlockState(part).getBlock() instanceof MatrixSubBlock);
+                .allMatch(part -> com.mohistmc.academy.world.block.LoadedMachineChunks.contains(level, part) && level.getBlockState(part).getBlock() instanceof MatrixSubBlock);
     }
 
     @Override
@@ -170,6 +170,7 @@ public class Matrix extends BaseEntityBlock {
 
     @Override
     protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+        if (!structurePositions(pos, state).stream().allMatch(part -> com.mohistmc.academy.world.block.LoadedMachineChunks.contains(level, part))) { level.scheduleTick(pos, this, 20); return; }
         if (!hasCompleteStructure(level, pos, state)) {
             // Structural invalidation is not a player loot path. Materialize the
             // recoverable main block explicitly, then let onRemove drop the four

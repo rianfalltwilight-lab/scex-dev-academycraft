@@ -1,6 +1,5 @@
 package com.mohistmc.academy.utils;
 
-import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.io.DataInputStream;
@@ -131,7 +130,7 @@ public class RenderUtils {
     }
 
     public static void renderText(GuiGraphics stack, String text, int x, int y, Style style) {
-        MultiBufferSource.BufferSource source = MultiBufferSource.immediate(new ByteBufferBuilder(1536));
+        MultiBufferSource.BufferSource source = stack.bufferSource();
         ClientTooltipComponent.create(FormattedCharSequence.forward(text,
                         style))
                 .renderText(Minecraft.getInstance().font,
@@ -139,7 +138,7 @@ public class RenderUtils {
                         y,
                         stack.pose().last().pose(),
                         source);
-        source.endBatch();
+        stack.flush();
     }
 
 

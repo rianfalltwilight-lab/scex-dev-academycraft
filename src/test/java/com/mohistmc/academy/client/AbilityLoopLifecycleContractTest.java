@@ -49,7 +49,11 @@ class AbilityLoopLifecycleContractTest {
     @Test void staleChargingPacketsCannotOverwriteHudBeforeStateValidation() throws Exception {
         String bridge=source("com/mohistmc/academy/client/ClientPacketBridge.java");
         String input=source("com/mohistmc/academy/client/KeyInputHandler.java");
-        assertTrue(bridge.indexOf("acceptChargingState") < bridge.indexOf("setChargingState"));
+        int acceptState = bridge.indexOf("acceptChargingState");
+        int updateHud = bridge.indexOf("setChargingState");
+        assertTrue(acceptState >= 0, "charging state acceptance is missing");
+        assertTrue(updateHud >= 0, "charging HUD update is missing");
+        assertTrue(acceptState < updateHud);
         assertTrue(input.contains("return false")&&input.contains("return true"));
     }
 

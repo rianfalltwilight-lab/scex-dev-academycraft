@@ -49,7 +49,7 @@ public record AbilityInterfererConfigPacket(MenuActionToken actionToken, BlockPo
                     || packet.target == null || packet.target.length() > MAX_TARGET) return;
             long now = player.serverLevel().getGameTime();
             if (!PayloadRateLimiter.allow(player.getUUID(), "ability_interferer_config", now, 5, 6)
-                    || !player.serverLevel().isLoaded(packet.pos)
+                    || !com.mohistmc.academy.skill.ability.LoadedRaycast.isLoaded(player.serverLevel(), packet.pos)
                     || player.distanceToSqr(packet.pos.getX() + 0.5, packet.pos.getY() + 0.5,
                     packet.pos.getZ() + 0.5) > 64.0
                     || !player.serverLevel().mayInteract(player, packet.pos)) return;

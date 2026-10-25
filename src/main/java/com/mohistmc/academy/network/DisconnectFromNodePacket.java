@@ -43,7 +43,7 @@ public record DisconnectFromNodePacket(MenuActionToken actionToken, BlockPos mac
                         || !packet.machinePos().equals(menu.pos) || !menu.stillValid(player) || !menu.acceptAction(packet.actionToken(), player)) return;
                 if (!PayloadRateLimiter.allow(player.getUUID(), "machine_node_disconnect",
                         level.getGameTime(), 20, 8)) return;
-                if (!level.isLoaded(packet.machinePos())
+                if (!com.mohistmc.academy.skill.ability.LoadedRaycast.isLoaded(level, packet.machinePos())
                         || player.distanceToSqr(packet.machinePos().getX() + 0.5, packet.machinePos().getY() + 0.5,
                         packet.machinePos().getZ() + 0.5) > 64.0
                         || !level.mayInteract(player, packet.machinePos())) return;

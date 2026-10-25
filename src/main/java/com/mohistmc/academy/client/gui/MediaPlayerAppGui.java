@@ -335,8 +335,8 @@ public class MediaPlayerAppGui extends AcademyScreen {
                 return true;
             }
             Player player = Minecraft.getInstance().player;
-            if (player == null || !player.getData(AcademyAttachments.PLAYER_ABILITY)
-                    .getLoadedMedia().contains(trackId)) {
+            if (player == null || !tracks.get(hoveredTrack).external()
+                    && !player.getData(AcademyAttachments.PLAYER_ABILITY).getLoadedMedia().contains(trackId)) {
                 hoveredTrack = -1;
                 hoveredTrackId = null;
                 return true;

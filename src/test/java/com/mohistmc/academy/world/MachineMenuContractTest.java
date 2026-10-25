@@ -32,7 +32,8 @@ class MachineMenuContractTest {
         String s = source("com/mohistmc/academy/world/menu/AcademyMenu.java");
         assertTrue(s.contains("entity == menu.boundEntity()"));
         assertTrue(s.contains("distanceToSqr"));
-        assertTrue(s.contains("isLoaded(menu.pos)"));
+        assertTrue(s.contains("LoadedMachineChunks.contains(p_18946_.level(), menu.pos)"));
+        assertTrue(source("com/mohistmc/academy/world/block/LoadedMachineChunks.java").contains("getChunkNow"));
         assertTrue(s.contains("mayInteract"));
     }
 

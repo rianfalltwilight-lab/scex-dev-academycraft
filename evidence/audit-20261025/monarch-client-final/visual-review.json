@@ -1,0 +1,14 @@
+{
+  "reviewed": true,
+  "reviewer": "Codex root via view_image",
+  "screenshot": "screenshots/deep-audit-render.png",
+  "observed": [
+    "cyan sphere",
+    "cyan crescent viewed obliquely",
+    "cyan lance trail",
+    "blue cruise sphere",
+    "blue waterman humanoid",
+    "managed font buffer stress text"
+  ],
+  "scope": "Five registered renderer paths visible and no missing-texture pattern; deliberately overlapping font stress text is a fixture, not a production UI layout; not pixel-perfect legacy animation validation"
+}

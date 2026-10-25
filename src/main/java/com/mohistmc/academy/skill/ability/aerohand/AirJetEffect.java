@@ -37,12 +37,8 @@ public class AirJetEffect implements com.mohistmc.academy.skill.ability.DynamicO
         ServerLevel level = player.serverLevel();
         Vec3 look = player.getLookAngle().normalize();
         double speed = AeroBehaviorMath.airJetSpeed(exp);
-        // Preserve a little existing momentum while making the server's new
-        // impulse authoritative.  A small vertical floor prevents the common
-        // case where a horizontal cast is immediately eaten by ground friction.
         Vec3 impulse = look.scale(speed);
-        impulse = new Vec3(impulse.x, Math.max(0.28, impulse.y + 0.18), impulse.z);
-        player.setDeltaMovement(player.getDeltaMovement().scale(0.15).add(impulse));
+        player.setDeltaMovement(player.getDeltaMovement().add(impulse));
         player.resetFallDistance();
         player.hurtMarked = true;
 

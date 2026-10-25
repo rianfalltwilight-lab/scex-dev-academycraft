@@ -1,11 +1,10 @@
 package com.mohistmc.academy.client.block.entity.render;
 
 import com.mohistmc.academy.AcademyCraft;
-import com.mohistmc.academy.client.block.entity.model.CatEngineModel;
 import com.mohistmc.academy.world.block.entity.CatEngineBlockEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
@@ -13,33 +12,37 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
+/** Upstream's camera-facing, double-sided one-block cat quad. */
 public class CatEngineRender implements BlockEntityRenderer<CatEngineBlockEntity> {
-    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(AcademyCraft.MODID, "textures/block/cat_engine.png");
-    private final CatEngineModel model;
+    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(
+            AcademyCraft.MODID, "textures/block/cat_engine.png");
 
-    public CatEngineRender(BlockEntityRendererProvider.Context ctx) {
-        this.model = new CatEngineModel(ctx.bakeLayer(CatEngineModel.LAYER_LOCATION));
-    }
+    public CatEngineRender(BlockEntityRendererProvider.Context ctx) {}
 
     @Override
-    public void render(CatEngineBlockEntity p_112307_, float p_112308_, PoseStack p_112309_, @NotNull MultiBufferSource p_112310_, int p_112311_, int p_112312_) {
-        p_112309_.pushPose();
-        float f1;
-        for (f1 = p_112307_.rot - p_112307_.oRot; f1 >= (float) Math.PI; f1 -= ((float) Math.PI * 2F)) {
-
-        }
-        while (f1 < -(float) Math.PI) {
-            f1 += ((float) Math.PI * 2F);
-        }
-        float f2 = p_112307_.oRot + f1 * p_112308_;
-        p_112309_.rotateAround(Axis.YN.rotation(f2), 0.5f, 0.5f, 0.5f);
-        p_112309_.rotateAround(Axis.YN.rotation(90), 0.5f, 0.5f, 0.5f);
-
-        if (p_112307_.enable) {
-            p_112309_.rotateAround(Axis.XN.rotation(p_112307_.rH += 0.2F), 0.5f, 0.5f, 0.5f);
-        }
-        VertexConsumer vertexconsumer = p_112310_.getBuffer(RenderType.entityTranslucentCull(TEXTURE));
-        this.model.renderToBuffer(p_112309_, vertexconsumer, p_112311_, p_112312_, 0xFFFFFFFF);
-        p_112309_.popPose();
+    public void render(CatEngineBlockEntity engine, float partialTick, PoseStack pose,
+                       @NotNull MultiBufferSource buffers, int light, int overlay) {
+        var camera = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
+        var pos = engine.getBlockPos();
+        float yaw = (float) Math.toDegrees(Math.atan2(pos.getX() + .5 - camera.x,
+                pos.getZ() + .5 - camera.z)) + 180;
+        double timeSeconds = engine.getLevel() == null ? 0
+                : (engine.getLevel().getGameTime() + partialTick) / 20d;
+        pose.pushPose();
+        pose.translate(.5, .5 + .03 * Math.sin(timeSeconds * .006), .5);
+        pose.mulPose(Axis.YP.rotationDegrees(yaw));
+        pose.mulPose(Axis.XP.rotationDegrees(engine.interpolatedSpinDegrees(partialTick)));
+        var out = buffers.getBuffer(RenderType.entityTranslucent(TEXTURE));
+        var matrix = pose.last().pose();
+        var normal = pose.last();
+        out.addVertex(matrix, -.5f, -.5f, 0).setColor(-1).setUv(0, 0)
+                .setOverlay(overlay).setLight(light).setNormal(normal, 0, 0, 1);
+        out.addVertex(matrix, .5f, -.5f, 0).setColor(-1).setUv(1, 0)
+                .setOverlay(overlay).setLight(light).setNormal(normal, 0, 0, 1);
+        out.addVertex(matrix, .5f, .5f, 0).setColor(-1).setUv(1, 1)
+                .setOverlay(overlay).setLight(light).setNormal(normal, 0, 0, 1);
+        out.addVertex(matrix, -.5f, .5f, 0).setColor(-1).setUv(0, 1)
+                .setOverlay(overlay).setLight(light).setNormal(normal, 0, 0, 1);
+        pose.popPose();
     }
 }

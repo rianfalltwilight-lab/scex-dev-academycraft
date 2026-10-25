@@ -33,7 +33,9 @@ class LootTableResourceContractTest {
         assertEmptyProxyLoot("dev_normal_sub");
         assertEmptyProxyLoot("dev_advanced_sub");
         assertEmptyProxyLoot("windgen_fan_block");
-        assertEquals(26, Files.list(BLOCKS).filter(p -> p.toString().endsWith(".json")).count());
+        try (var tables = Files.list(BLOCKS)) {
+            assertEquals(26, tables.filter(p -> p.toString().endsWith(".json")).count());
+        }
     }
 
     private static void assertEmptyProxyLoot(String id) throws Exception {

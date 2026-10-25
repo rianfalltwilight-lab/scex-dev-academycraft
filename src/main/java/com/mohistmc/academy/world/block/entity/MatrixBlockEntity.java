@@ -210,4 +210,8 @@ public class MatrixBlockEntity extends AcademyContainerBlockEntity implements IW
         return tag;
     }
     @Override public Packet<ClientGamePacketListener> getUpdatePacket() { return ClientboundBlockEntityDataPacket.create(this); }
+    @Override public void onLoad() {
+        super.onLoad();
+        if (level != null && !level.isClientSide()) level.scheduleTick(worldPosition, getBlockState().getBlock(), 1);
+    }
 }

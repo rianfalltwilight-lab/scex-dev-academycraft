@@ -1,0 +1,14 @@
+{
+  "host": "MONARCH",
+  "expected_tests": 430,
+  "basis": "Actual NeoForge GameTestServer; release JAR plus separate probe mod",
+  "forced": false,
+  "exit_code": 0,
+  "failures": 0,
+  "expected_failures": 0,
+  "passed": true,
+  "expectation_met": true,
+  "tests": 430,
+  "process_exited": true,
+  "namespaces": "academy,academy_charging,academy_audit,academy_followup,academy_projectiles"
+}

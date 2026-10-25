@@ -1,5 +1,7 @@
 package com.mohistmc.academy.skill.ability.teleporter;
 
+import com.mohistmc.academy.skill.ability.LoadedRaycast;
+
 import com.mohistmc.academy.config.DynamicSkillRules;
 import com.mohistmc.academy.skill.AcademyDamageHelper;
 import com.mohistmc.academy.skill.ChargingSkillEffect;
@@ -158,14 +160,17 @@ public final class ShiftTpEffect implements ChargingSkillEffect {
         Vec3 start = player.getEyePosition();
         Vec3 end = start.add(player.getLookAngle().scale(range));
         ServerLevel level = player.serverLevel();
-        BlockHitResult hit = level.clip(new ClipContext(start, end,
+        BlockHitResult hit = LoadedRaycast.clip(level, new ClipContext(start, end,
                 ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, player));
         if (hit.getType() == HitResult.Type.MISS) {
             BlockPos remote = BlockPos.containing(end);
             hit = new BlockHitResult(end, Direction.DOWN, remote, false);
         }
+        // Its constructor already reads the clicked block; guard before constructing it.
+        if (!LoadedRaycast.isLoaded(level, hit.getBlockPos())) return null;
         BlockPlaceContext context = new BlockPlaceContext(player, InteractionHand.MAIN_HAND, stack, hit);
         BlockPos target = context.getClickedPos();
+        if (!LoadedRaycast.isAreaLoaded(level, new AABB(target).inflate(1))) return null;
         return new Placement(hit, target, Vec3.atCenterOf(target));
     }
 
@@ -174,7 +179,7 @@ public final class ShiftTpEffect implements ChargingSkillEffect {
         ItemStack stack = player.getMainHandItem();
         return stack.getItem() instanceof BlockItem
                 && DynamicSkillRules.destroysBlocks(level, getId())
-                && level.isLoaded(placement.target)
+                && LoadedRaycast.isLoaded(level, placement.target)
                 && level.getWorldBorder().isWithinBounds(placement.target)
                 && level.mayInteract(player, placement.target)
                 && player.mayUseItemAt(placement.target, placement.hit.getDirection(), stack)

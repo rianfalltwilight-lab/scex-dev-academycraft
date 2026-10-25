@@ -1,5 +1,7 @@
 package com.mohistmc.academy.skill.ability.vecmanip;
 
+import com.mohistmc.academy.skill.ability.LoadedRaycast;
+
 import static com.mohistmc.academy.utils.MathUtils.lerpf;
 
 import com.mohistmc.academy.config.DynamicSkillRules;
@@ -23,7 +25,8 @@ import net.minecraft.world.phys.Vec3;
 
 /** 1.0.7 PlasmaCannonContext: a visible fixed overhead body while held, then a 1-block/tick projectile. */
 public final class PlasmaCannonEffect implements ChargingSkillEffect {
-    private record State(float overloadFloor, UUID orbId) {}
+    private record State(float overloadFloor, UUID orbId,
+            net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> dimension) {}
     private static final Map<UUID, State> STATES = new ConcurrentHashMap<>();
 
     @Override public String getId() { return "plasma_cannon"; }
@@ -54,7 +57,7 @@ public final class PlasmaCannonEffect implements ChargingSkillEffect {
         orb.configureCharging(player, chargePosition);
         if (!player.serverLevel().addFreshEntity(orb)) return;
 
-        STATES.put(player.getUUID(), new State(data.getCurrentOverload(), orb.getUUID()));
+        STATES.put(player.getUUID(), new State(data.getCurrentOverload(), orb.getUUID(), player.level().dimension()));
         // The legacy FollowEntitySound was attached to the caster, while the
         // visible plasma body was fifteen blocks overhead.
         AcademySounds.playSound(player.serverLevel(), player.getX(), player.getY(), player.getZ(),
@@ -65,7 +68,8 @@ public final class PlasmaCannonEffect implements ChargingSkillEffect {
     public boolean onChargingTick(ServerPlayer player, PlayerAbilityData data, int ticks) {
         State state = STATES.get(player.getUUID());
         PlasmaOrbEntity orb = resolve(player.serverLevel(), state);
-        if (state == null || orb == null || orb.isArmed()) return false;
+        if (state == null || !state.dimension().equals(player.level().dimension())
+                || orb == null || orb.isArmed()) return false;
 
         if (!data.isDevMode() && data.getCurrentOverload() < state.overloadFloor()) {
             data.setCurrentOverload(state.overloadFloor());
@@ -91,7 +95,8 @@ public final class PlasmaCannonEffect implements ChargingSkillEffect {
     @Override
     public boolean canRelease(ServerPlayer player, PlayerAbilityData data, int ticks) {
         State state = STATES.get(player.getUUID());
-        return ticks >= chargeTime(data) && resolve(player.serverLevel(), state) != null;
+        return ticks >= chargeTime(data) && state != null
+                && state.dimension().equals(player.level().dimension()) && resolve(player.serverLevel(), state) != null;
     }
 
     @Override
@@ -133,7 +138,8 @@ public final class PlasmaCannonEffect implements ChargingSkillEffect {
 
     private static PlasmaOrbEntity resolve(ServerLevel level, State state) {
         if (state == null) return null;
-        Entity entity = level.getEntity(state.orbId());
+        ServerLevel original = level.getServer().getLevel(state.dimension());
+        Entity entity = original == null ? null : original.getEntity(state.orbId());
         return entity instanceof PlasmaOrbEntity orb && orb.isAlive() ? orb : null;
     }
 
@@ -147,7 +153,7 @@ public final class PlasmaCannonEffect implements ChargingSkillEffect {
         ServerLevel level = player.serverLevel();
         Vec3 eye = player.getEyePosition();
         Vec3 end = eye.add(player.getLookAngle().scale(range));
-        HitResult blockHit = player.pick(range, 0, false);
+        HitResult blockHit = LoadedRaycast.pick(player, range);
         double nearest = blockHit.getType() == HitResult.Type.MISS
                 ? range : eye.distanceTo(blockHit.getLocation());
         Vec3 destination = blockHit.getType() == HitResult.Type.MISS ? end : blockHit.getLocation();

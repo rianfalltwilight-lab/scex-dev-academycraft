@@ -105,7 +105,7 @@ public abstract class DevMachineSubBase extends BaseEntityBlock implements IDevM
                                                      Block expectedSubBlock, IDevSubStructure sub) {
         if (level == null || subPos == null || expectedSubBlock == null || sub == null) return null;
         BlockPos mainPos = sub.getMainPos();
-        if (mainPos == null || !level.isLoaded(mainPos)
+        if (mainPos == null || !com.mohistmc.academy.world.block.LoadedMachineChunks.contains(level, mainPos)
                 || Math.abs(mainPos.getX() - subPos.getX()) > 2
                 || Math.abs(mainPos.getY() - subPos.getY()) > 2
                 || Math.abs(mainPos.getZ() - subPos.getZ()) > 2) return null;
@@ -121,5 +121,19 @@ public abstract class DevMachineSubBase extends BaseEntityBlock implements IDevM
         if (!(mainBe instanceof IDevStructure main)) return null;
         UUID subId = sub.getStructureId();
         return subId != null && subId.equals(main.getStructureId()) ? mainBe : null;
+    }
+    @Override
+    public void tick(BlockState state, net.minecraft.server.level.ServerLevel level, BlockPos pos,
+                     net.minecraft.util.RandomSource random) {
+        if (level.getBlockEntity(pos) instanceof IDevSubStructure sub) {
+            BlockPos main = sub.getMainPos();
+            if (main != null && Math.abs(main.getX() - pos.getX()) <= 2
+                    && Math.abs(main.getY() - pos.getY()) <= 2 && Math.abs(main.getZ() - pos.getZ()) <= 2
+                    && !com.mohistmc.academy.world.block.LoadedMachineChunks.contains(level, main)) {
+                level.scheduleTick(pos, this, 20); return;
+            }
+            if (validatedMainForProxy(level, pos, this, sub) != null) return;
+        }
+        level.destroyBlock(pos, false);
     }
 }

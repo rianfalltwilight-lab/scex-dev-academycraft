@@ -6,6 +6,7 @@ import com.mohistmc.academy.client.KeyInputHandler;
 import com.mohistmc.academy.skill.AcademyAttachments;
 import com.mohistmc.academy.skill.PlayerAbilityData;
 import com.mohistmc.academy.skill.ability.teleporter.FlashingTargeting;
+import com.mohistmc.academy.skill.ability.teleporter.PenetrateTargeting;
 import com.mohistmc.academy.world.entity.CoinEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -88,17 +89,12 @@ public final class LegacyAbilityPresentationRenderer {
 
     private static void renderPenetrateMark(RenderLevelStageEvent event, Minecraft mc) {
         PlayerAbilityData data=mc.player.getData(AcademyAttachments.PLAYER_ABILITY);
-        float exp=data.getProficiency("penetrate_teleport");
-        double max=KeyInputHandler.getPenetrateDistance(data);
-        Vec3 dir=mc.player.getLookAngle().normalize(),cursor=mc.player.position();
-        int stage=0,counter=0;double travelled=0;
-        while(travelled<=max){boolean free=clientHasPlace(mc, cursor);if(stage==0){if(!free)stage=1;}
-            else if(stage==1){if(free)stage=2;}else if(!free||++counter>4)break;travelled+=.8;cursor=cursor.add(dir.scale(.8));}
+        var destination=PenetrateTargeting.destination(mc.player,data,KeyInputHandler.getPenetrateDistance(data));
         int frame=(mc.player.tickCount/2)&7;
         ResourceLocation texture=ResourceLocation.fromNamespaceAndPath(AcademyCraft.MODID,"textures/effects/tp_mark/"+frame+".png");
-        Vec3 marker=cursor.add(0,mc.player.getEyeHeight(),0);
-        renderMarkModel(event,marker,texture,mc,stage==1?0xE8FF3333:0xE8FFFFFF);
-        if(stage!=1)emitTeleportMarkerParticle(mc,marker);
+        Vec3 marker=destination.position().add(0,mc.player.getEyeHeight(),0);
+        renderMarkModel(event,marker,texture,mc,destination.available()?0xE8FFFFFF:0xE8FF3333);
+        if(destination.available())emitTeleportMarkerParticle(mc,marker);
     }
 
     private static void emitTeleportMarkerParticle(Minecraft mc,Vec3 marker){
@@ -229,12 +225,6 @@ public final class LegacyAbilityPresentationRenderer {
             if(clip.isPresent()&&start.distanceToSqr(clip.get())<best){best=start.distanceToSqr(clip.get());point=clip.get();closest=entity;}
         }
         return new TargetPreview(point==null?end:point,closest);
-    }
-
-    private static boolean clientHasPlace(Minecraft mc,Vec3 point){
-        BlockPos feet=new BlockPos((int)point.x,(int)point.y,(int)point.z);
-        return mc.level.getBlockState(feet).getCollisionShape(mc.level,feet).isEmpty()
-                &&mc.level.getBlockState(feet.above()).getCollisionShape(mc.level,feet.above()).isEmpty();
     }
 
     private static void renderJetDestination(RenderLevelStageEvent event, Minecraft mc) {

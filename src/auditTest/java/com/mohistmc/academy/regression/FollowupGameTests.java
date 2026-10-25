@@ -20,6 +20,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.gametest.framework.GameTestInfo;
+import net.minecraft.gametest.framework.GameTestListener;
+import net.minecraft.gametest.framework.GameTestRunner;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.PacketFlow;
@@ -52,7 +55,10 @@ public final class FollowupGameTests {
         var cookie = CommonListenerCookie.createInitial(new GameProfile(UUID.randomUUID(), "followup-probe"), false);
         var p = new ServerPlayer(h.getLevel().getServer(), h.getLevel(), cookie.gameProfile(), cookie.clientInformation());
         var connection = new Connection(PacketFlow.SERVERBOUND);
-        new EmbeddedChannel(connection);
+        var channel = new EmbeddedChannel(connection);
+        // Register before login so setup failures, assertion failures and timeouts all
+        // release only this test's player/channel. ProjectileGameTests shares this fixture.
+        h.testInfo.addListener(new PlayerCleanup(p, channel));
         h.getLevel().getServer().getPlayerList().placeNewPlayer(connection, p, cookie);
         p.setGameMode(GameType.SURVIVAL);
         check(h, !p.isCreative() && !p.hasInfiniteMaterials(), "Fixture must use real survival semantics");
@@ -63,6 +69,27 @@ public final class FollowupGameTests {
         if (category == AbilityCategory.TELEPORTER) d.learnSkill("threatening_teleport");
         d.setCurrentCp(d.getMaxCp()); d.setCurrentOverload(0);
         return p;
+    }
+
+    private static final class PlayerCleanup implements GameTestListener {
+        private final ServerPlayer player;
+        private final EmbeddedChannel channel;
+        private boolean closed;
+        PlayerCleanup(ServerPlayer player, EmbeddedChannel channel) {
+            this.player = player; this.channel = channel;
+        }
+        private void close() {
+            if (closed) return;
+            closed = true;
+            try {
+                if (player.server.getPlayerList().getPlayer(player.getUUID()) == player)
+                    player.server.getPlayerList().remove(player);
+            } finally { channel.finishAndReleaseAll(); }
+        }
+        @Override public void testStructureLoaded(GameTestInfo info) {}
+        @Override public void testPassed(GameTestInfo info, GameTestRunner runner) { close(); }
+        @Override public void testFailed(GameTestInfo info, GameTestRunner runner) { close(); }
+        @Override public void testAddedForRerun(GameTestInfo previous, GameTestInfo next, GameTestRunner runner) { close(); }
     }
 
     static PlayerAbilityData data(ServerPlayer p) { return p.getData(AcademyAttachments.PLAYER_ABILITY); }
@@ -237,6 +264,7 @@ public final class FollowupGameTests {
         for (int i = 0; i < p.getInventory().items.size(); i++) p.getInventory().items.set(i, new ItemStack(Items.STONE, 64));
         if (mergeOffhand) p.setItemInHand(InteractionHand.OFF_HAND, new ItemStack(Items.DIAMOND, 63));
         var item = startTransmission(h, p); int[] callbacks = {0};
+        float beforeCp=data(p).getCurrentCp();
         Consumer<ItemEntityPickupEvent.Pre> seen = e -> { if (e.getPlayer() == p && e.getItemEntity() == item) callbacks[0]++; };
         NeoForge.EVENT_BUS.addListener(ItemEntityPickupEvent.Pre.class, seen);
         try { PsychoTransmissionEffect.tick(new PlayerTickEvent.Post(p)); }
@@ -245,7 +273,9 @@ public final class FollowupGameTests {
             check(h, callbacks[0] == 1 && p.getOffhandItem().getCount() == 64 && item.getItem().getCount() == 2, "Existing offhand stack must accept a partial pickup");
             check(h, data(p).getProficiency("psycho_transmission") > 0, "Partial successful pickup lost proficiency");
         } else {
-            check(h, callbacks[0] == 0 && item.getItem().getCount() == 3, "Empty armor/offhand falsely passed inventory-space preflight");
+            check(h, callbacks[0] == 1 && item.isAlive() && item.getItem().getCount() == 3
+                    && item.position().distanceToSqr(p.position())<.0001, "Full inventory must retain the whole stack and bring it to the caster");
+            check(h,data(p).getCurrentCp()<beforeCp-.5F,"Full-inventory movement must pay the distance cost");
         }
         h.succeed();
     }

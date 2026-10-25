@@ -18,6 +18,8 @@ import com.mohistmc.academy.world.entity.EntitySilbarn;
 import com.mohistmc.academy.world.entity.EntityMagHook;
 import com.mohistmc.academy.world.entity.ExtraPaperPlaneEntity;
 import com.mohistmc.academy.world.entity.PsychoProjectileEntity;
+import com.mohistmc.academy.world.entity.AeroProjectileEntity;
+import com.mohistmc.academy.world.entity.CruiseBombEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -26,6 +28,23 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 
 public class AcademyEntities {
     public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(Registries.ENTITY_TYPE, AcademyCraft.MODID);
+    public static final DeferredHolder<EntityType<?>, EntityType<com.mohistmc.academy.skill.ability.telekinesis.LiquidShadowEntity>> LIQUID_SHADOW = ENTITIES.register("liquid_shadow",
+            () -> EntityType.Builder.of(com.mohistmc.academy.skill.ability.telekinesis.LiquidShadowEntity::new, MobCategory.MISC)
+                    .sized(.6F, 1.8F).fireImmune().clientTrackingRange(8).updateInterval(1).noSave().noSummon().build("liquid_shadow"));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<CruiseBombEntity>> CRUISE_BOMB = ENTITIES.register("cruise_bomb",
+            () -> EntityType.Builder.of(CruiseBombEntity::new, MobCategory.MISC).sized(.1F,.1F).fireImmune()
+                    .clientTrackingRange(8).updateInterval(1).noSave().noSummon().build("cruise_bomb"));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<AeroProjectileEntity>> AERO_VOLCANIC_BALL = ENTITIES.register("aero_volcanic_ball",
+            () -> EntityType.Builder.<AeroProjectileEntity>of((type, level) -> new AeroProjectileEntity(type, level, AeroProjectileEntity.Kind.VOLCANIC_BALL), MobCategory.MISC)
+                    .sized(.2F, .2F).fireImmune().clientTrackingRange(8).updateInterval(1).noSave().noSummon().build("aero_volcanic_ball"));
+    public static final DeferredHolder<EntityType<?>, EntityType<AeroProjectileEntity>> AERO_AIR_BLADE = ENTITIES.register("aero_air_blade",
+            () -> EntityType.Builder.<AeroProjectileEntity>of((type, level) -> new AeroProjectileEntity(type, level, AeroProjectileEntity.Kind.AIR_BLADE), MobCategory.MISC)
+                    .sized(2F, .02F).fireImmune().clientTrackingRange(8).updateInterval(1).noSave().noSummon().build("aero_air_blade"));
+    public static final DeferredHolder<EntityType<?>, EntityType<AeroProjectileEntity>> AERO_BOMBER_LANCE = ENTITIES.register("aero_bomber_lance",
+            () -> EntityType.Builder.<AeroProjectileEntity>of((type, level) -> new AeroProjectileEntity(type, level, AeroProjectileEntity.Kind.BOMBER_LANCE), MobCategory.MISC)
+                    .sized(.4F, .4F).fireImmune().clientTrackingRange(8).updateInterval(1).noSave().noSummon().build("aero_bomber_lance"));
 
     public static final DeferredHolder<EntityType<?>, EntityType<CoinEntity>> COIN_ENTITY = ENTITIES.register("coin_entity",
             () -> EntityType.Builder.of(CoinEntity::new, MobCategory.MISC)
@@ -58,7 +77,7 @@ public class AcademyEntities {
 
     public static final DeferredHolder<EntityType<?>, EntityType<ExtraPaperPlaneEntity>> PAPER_PLANE = ENTITIES.register("paper_plane",
             () -> EntityType.Builder.of(ExtraPaperPlaneEntity::new, MobCategory.MISC)
-                    .sized(0.5F, 0.25F)
+                    .sized(0.5F, 0.5F)
                     .clientTrackingRange(64)
                     .updateInterval(1)
                     .build("paper_plane"));

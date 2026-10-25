@@ -1,22 +1,21 @@
 package com.mohistmc.academy.skill.ability.teleporter;
 
+import com.mohistmc.academy.skill.ability.LoadedRaycast;
+
 import com.mohistmc.academy.config.DynamicSkillRules;
 import com.mohistmc.academy.skill.ChargingSkillEffect;
 import com.mohistmc.academy.skill.PlayerAbilityData;
-import com.mohistmc.academy.world.AcademyParticles;
+import com.mohistmc.academy.skill.ability.teleporter.PenetrateTargeting.Destination;
 import com.mohistmc.academy.world.AcademySounds;
-import com.mohistmc.academy.world.effect.EffectHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.phys.Vec3;
 
 import static com.mohistmc.academy.utils.MathUtils.lerpf;
 
 /** Final 1.12.2 wall scanner: hold a marker, tune distance with the wheel, then release. */
 public final class PenetrateTeleportEffect implements ChargingSkillEffect {
-    private record Destination(Vec3 position, boolean available) {}
 
     @Override public String getId() { return "penetrate_teleport"; }
     @Override public boolean appliesBaseResourceCost() { return false; }
@@ -40,9 +39,9 @@ public final class PenetrateTeleportEffect implements ChargingSkillEffect {
     }
     @Override public boolean canRelease(ServerPlayer player, PlayerAbilityData data, int ticks) {
         Destination destination = destination(player, data);
-        BlockPos pos = BlockPos.containing(destination.position);
-        return destination.available && player.serverLevel().hasChunkAt(pos)
-                && TeleportDestinations.isSafe(player, player.serverLevel(), destination.position);
+        BlockPos pos = BlockPos.containing(destination.position());
+        return destination.available() && LoadedRaycast.isLoaded(player.serverLevel(), pos)
+                && TeleportDestinations.isSafe(player, player.serverLevel(), destination.position());
     }
 
     @Override
@@ -54,16 +53,16 @@ public final class PenetrateTeleportEffect implements ChargingSkillEffect {
     public boolean tryRelease(ServerPlayer player, PlayerAbilityData data, int ticks, float releaseValue) {
         float exp = data.getProficiency(getId());
         Destination destination = destination(player, data, releaseValue);
-        if (!destination.available) return false;
-        BlockPos pos = BlockPos.containing(destination.position);
-        if (!player.serverLevel().hasChunkAt(pos)
-                || !TeleportDestinations.isSafe(player, player.serverLevel(), destination.position)) return false;
-        double distance = player.position().distanceTo(destination.position);
+        if (!destination.available()) return false;
+        BlockPos pos = BlockPos.containing(destination.position());
+        if (!LoadedRaycast.isLoaded(player.serverLevel(), pos)
+                || !TeleportDestinations.isSafe(player, player.serverLevel(), destination.position())) return false;
+        double distance = player.position().distanceTo(destination.position());
         if (!DynamicSkillRules.payForced(data, getId(),
                 (float) (distance * lerpf(14, 9, exp)), lerpf(80, 50, exp))) return false;
 
         ServerLevel level = player.serverLevel();
-        TeleportSkillHelper.teleport(player, destination.position);
+        TeleportSkillHelper.teleport(player, destination.position());
         level.playSound(null, player.getX(), player.getY(), player.getZ(),
                 AcademySounds.TP_TP, SoundSource.PLAYERS, .5f, 1f);
         DynamicSkillRules.addExp(player, data, getId(), (float) (.00014 * distance));
@@ -82,33 +81,6 @@ public final class PenetrateTeleportEffect implements ChargingSkillEffect {
     }
 
     private Destination destination(ServerPlayer player, PlayerAbilityData data, float requestedDistance) {
-        float exp = data.getProficiency(getId());
-        double perBlock = Math.max(.0001, DynamicSkillRules.cp(getId(), lerpf(14, 9, exp)));
-        double maxDistance = lerpf(10, 35, exp);
-        if (!data.isDevMode()) maxDistance = Math.min(maxDistance, data.getCurrentCp() / perBlock);
-        if (Float.isFinite(requestedDistance)) maxDistance = Math.max(0, Math.min(requestedDistance, maxDistance));
-        final double step = .8;
-        int stage = 0, counter = 0;
-        double travelled = 0;
-        Vec3 direction = player.getLookAngle().normalize();
-        // The final 1.12.2 scanner and actual destination use player.posY
-        // (feet); its client marker alone is lifted by eye height.
-        Vec3 cursor = player.position();
-        Vec3 lastSafe = null;
-        while (travelled <= maxDistance) {
-            boolean free = TeleportDestinations.isSafe(player, player.serverLevel(), cursor);
-            if (free) lastSafe = cursor;
-            if (stage == 0) {
-                if (!free) stage = 1;
-            } else if (stage == 1) {
-                if (free) stage = 2;
-            } else if (!free || ++counter > 4) {
-                break;
-            }
-            travelled += step;
-            cursor = cursor.add(direction.scale(step));
-        }
-        // Never return the wall which ended stage two, or an untested step beyond the CP/range limit.
-        return new Destination(lastSafe == null ? player.position() : lastSafe, stage != 1 && lastSafe != null);
+        return PenetrateTargeting.destination(player, data, requestedDistance);
     }
 }

@@ -42,6 +42,7 @@ public record NodeConfigPacket(MenuActionToken actionToken, BlockPos pos, Option
     public static void handle(NodeConfigPacket packet, IPayloadContext context) {
         context.enqueueWork(() -> {
             if (context.player() instanceof ServerPlayer player) {
+                if (!PayloadRateLimiter.allow(player.getUUID(), "node_config", player.serverLevel().getGameTime(), 20, 4)) return;
                 if (!(player.containerMenu instanceof BaseNodeMenu menu)
                         || !packet.pos().equals(menu.pos) || !menu.stillValid(player) || !menu.acceptAction(packet.actionToken(), player)) {
                     player.sendSystemMessage(Component.literal("§c节点界面已失效，请重新打开"));
@@ -54,7 +55,7 @@ public record NodeConfigPacket(MenuActionToken actionToken, BlockPos pos, Option
                     reply(player, packet, false);
                     return;
                 }
-                if (!player.level().isLoaded(packet.pos())
+                if (!com.mohistmc.academy.skill.ability.LoadedRaycast.isLoaded(player.level(), packet.pos())
                         || player.distanceToSqr(packet.pos().getX() + 0.5, packet.pos().getY() + 0.5,
                         packet.pos().getZ() + 0.5) > 64.0
                         || !player.level().mayInteract(player, packet.pos())) {

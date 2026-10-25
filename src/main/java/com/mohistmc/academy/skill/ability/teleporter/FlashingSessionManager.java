@@ -41,7 +41,7 @@ public final class FlashingSessionManager {
         if (existing != null) return false;
         if (skill == null || !player.isAlive() || AbilityInterferenceService.isInterfered(player)
                 || !data.isAbilityActive()
-                || !data.hasLearnedSkill(skill.getId()) || data.isOnCooldown(skill.getId())) {
+                || !data.hasLearnedSkill(skill.getId()) || !data.canUseSkill(skill)) {
             SafePayloadSender.send(player, new FlashingStatePacket(false, 0)); return false;
         }
         float exp = data.getProficiency(skill.getId());
@@ -107,6 +107,7 @@ public final class FlashingSessionManager {
     private static boolean invalid(ServerPlayer player, PlayerAbilityData data, State state, long now) {
         return !player.isAlive() || player.isRemoved() || AbilityInterferenceService.isInterfered(player)
                 || !data.isAbilityActive() || !data.hasLearnedSkill("flashing")
+                || !data.canUseSkill(SkillRegistry.getSkill("flashing"))
                 || player.level().dimension() != state.dimension || now > state.expires;
     }
 

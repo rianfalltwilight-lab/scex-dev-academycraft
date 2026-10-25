@@ -34,10 +34,10 @@ public final class DropItemMagnetItem extends ExtraEnergyItem {
             return;
         }
         for (ItemEntity item : level.getEntitiesOfClass(ItemEntity.class,
-                player.getBoundingBox().inflate(8), entity -> entity.isAlive() && !entity.hasPickUpDelay())) {
-            Vec3 delta = player.position().add(0, 0.7, 0).subtract(item.position());
+                new net.minecraft.world.phys.AABB(player.position(),player.position()).inflate(8), ItemEntity::isAlive)) {
+            Vec3 delta = player.position().subtract(item.position());
             if (delta.lengthSqr() < 1) continue;
-            Vec3 velocity = item.getDeltaMovement().scale(0.82).add(delta.scale(0.02));
+            Vec3 velocity = item.getDeltaMovement().add(delta.scale(0.02));
             item.setDeltaMovement(velocity);
             item.hurtMarked = true;
         }

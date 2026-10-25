@@ -6,7 +6,6 @@ import com.mohistmc.academy.skill.PlayerAbilityData.TeleportLocation;
 import io.netty.buffer.ByteBuf;
 import java.util.Map;
 import java.util.UUID;
-import java.util.Comparator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 import net.minecraft.core.BlockPos;
@@ -19,8 +18,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.*;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.TamableAnimal;
@@ -32,8 +29,6 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 public record LocationTeleportActionPacket(int action, int index, String name) implements CustomPacketPayload {
     public static final int QUERY=0, ADD=1, REMOVE=2, PERFORM=3;
     private static final int MAX_DESTINATION_CHUNKS = 16;
-    private static final TicketType<UUID> LOCATION_TELEPORT_TICKET =
-            TicketType.create("academy_location_teleport", Comparator.<UUID>naturalOrder(), 20);
     public static final Type<LocationTeleportActionPacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(AcademyCraft.MODID,"location_teleport_action"));
     // Saved labels remain capped at 32; consent carries a canonical 36-character UUID.
     private static final StreamCodec<ByteBuf,String> NAME = ByteBufCodecs.stringUtf8(36);
@@ -56,12 +51,14 @@ public record LocationTeleportActionPacket(int action, int index, String name) i
     private static void cancel(CastConsent cast){if(cast==null)return;CASTS.remove(cast.caster,cast);cast.passengers.forEach(id->REQUESTS.remove(id,cast));}
     public Type<? extends CustomPacketPayload> type(){return TYPE;}
     public static void handle(LocationTeleportActionPacket p, IPayloadContext c){c.enqueueWork(()->{
-        if (!(c.player() instanceof ServerPlayer player) || p.action<QUERY || p.action>PERFORM) return;
+        if (!(c.player() instanceof ServerPlayer player) || !SkillInputSessionManager.isCurrentPlayer(player)
+                || p.action<QUERY || p.action>PERFORM) return;
         long now=player.serverLevel().getGameTime();
         if(!PayloadRateLimiter.allow(player.getUUID(),"location_teleport",now,10,5))return;
         PlayerAbilityData d=player.getData(AcademyAttachments.PLAYER_ABILITY);
         Skill skill=SkillRegistry.getSkill("location_teleport");
-        if(!d.isAbilityActive()||skill==null||!d.hasLearnedSkill(skill.getId()))return;
+        if(!d.isAbilityActive()||skill==null||!d.hasLearnedSkill(skill.getId())
+                ||d.getCurrentAbility()!=skill.getCategory()||d.getPlayerLevel()<skill.getLevel())return;
         if(p.action==PERFORM&&AbilityInterferenceService.isInterfered(player)){
             forgetPlayer(player.getUUID());
             AbilityInterferenceService.notifyBlocked(player);
@@ -77,7 +74,8 @@ public record LocationTeleportActionPacket(int action, int index, String name) i
         if(changed)d.syncTo(player);
     });}
     private static boolean perform(ServerPlayer p,PlayerAbilityData d,Skill skill,int index){
-        if(index<0||index>=d.getTeleportLocations().size()||d.isOnCooldown(skill.getId()))return false;
+        if(TeleportChunkRequests.isPending(p.getUUID())||index<0||index>=d.getTeleportLocations().size()
+                ||d.isOnCooldown(skill.getId()))return false;
         TeleportLocation l=PlayerAbilityData.sanitizeLocation(d.getTeleportLocations().get(index)); if(l==null)return false;
         ResourceLocation id=ResourceLocation.tryParse(l.dimension()); if(id==null)return false;
         ServerLevel target=p.server.getLevel(ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION,id)); if(target==null)return false;
@@ -114,8 +112,6 @@ public record LocationTeleportActionPacket(int action, int index, String name) i
             // Recompute immediately at the authorization/commit boundary. No accepted nonce can
             // survive a destination edit, entity add/remove/type/owner change, or riding reparent.
             if(!cast.scope.equals(scope(p,index,l,graph))){cancel(cast);return false;}
-            // One shot: consume before any fallible destination hook/move, so failure cannot reuse it.
-            CASTS.remove(p.getUUID(),cast);cast.passengers.forEach(REQUESTS::remove);
         }
         Vec3 origin=p.position();
         java.util.List<Move> moves=new java.util.ArrayList<>(graph.size());
@@ -128,7 +124,7 @@ public record LocationTeleportActionPacket(int action, int index, String name) i
             AABB box=m.entity.getBoundingBox().move(m.destination.subtract(m.entity.position()));
             if(!finite(box)||box.minY<target.getMinBuildHeight()||box.maxY>target.getMaxBuildHeight()
                     ||!insideBorder(target.getWorldBorder(),box)||!target.mayInteract(p,mp)
-                    ||!LocationTeleportChunkPlan.addBox(destinationChunks,box.minX,box.minZ,box.maxX,box.maxZ,
+                    ||!LocationTeleportChunkPlan.addBox(destinationChunks,box.minX-1,box.minZ-1,box.maxX+1,box.maxZ+1,
                     MAX_DESTINATION_CHUNKS))return false;
         }
         float distance=(float)Math.min(800,Math.sqrt(p.distanceToSqr(dest)));
@@ -138,36 +134,39 @@ public record LocationTeleportActionPacket(int action, int index, String name) i
         // 1.0.7's UI preflight checked CP only; performWithForce then clamped
         // overload instead of rejecting a valid saved-location cast.
         if(!d.isDevMode()&&d.getCurrentCp()<cp)return false;
-        UUID ticketKey=UUID.randomUUID();
-        java.util.ArrayList<ChunkPos> ticketed=new java.util.ArrayList<>(destinationChunks.size());
-        try {
-            // Previously visited saved locations may be unloaded. Load only the finite, fully
-            // validated destination set, keep it resident through commit, and release every ticket.
-            for(LocationTeleportChunkPlan.Chunk chunk:destinationChunks){
-                ChunkPos cpPos=new ChunkPos(chunk.x(),chunk.z());
-                target.getChunkSource().addRegionTicket(LOCATION_TELEPORT_TICKET,cpPos,1,ticketKey);
-                ticketed.add(cpPos);
-                if(target.getChunkSource().getChunk(chunk.x(),chunk.z(),ChunkStatus.FULL,true)==null)return false;
-            }
-            // Collision is checked only after all chunks intersecting every target AABB are FULL.
-            for(Move m:moves){
-                AABB box=m.entity.getBoundingBox().move(m.destination.subtract(m.entity.position()));
-                if(!target.noCollision(m.entity,box))return false;
-            }
-            boolean committed=commitMoves(moves,target);
-            if(!committed)return false;
-            com.mohistmc.academy.advancement.LegacyAdvancementBridge.teleported(p);
-            if(!d.consumeDynamicForced(cp,overload))return false;
-            // Final 1.12.2 commit 071b5db8 moved this measurement before the
-            // entity graph, restoring the intended long-distance reward.
-            com.mohistmc.academy.config.DynamicSkillRules.addExp(
-                    p,d,skill.getId(),legacyProficiencyIncrement(distance));
-            d.setCooldown(skill.getId(),(int)(30-10*d.getProficiency(skill.getId())));
-            return true;
-        } finally {
-            for(ChunkPos chunk:ticketed)
-                target.getChunkSource().removeRegionTicket(LOCATION_TELEPORT_TICKET,chunk,1,ticketKey);
+        // Tickets schedule normal asynchronous loading. Never call getChunkFuture here: on the
+        // server thread that API itself managedBlocks until ready in Minecraft 1.21.1.
+        boolean resident = destinationChunks.stream().allMatch(chunk ->
+                target.getChunkSource().getChunkNow(chunk.x(), chunk.z()) != null);
+        if (!resident) {
+            UUID inputSession = SkillInputSessionManager.sessionId(p);
+            return TeleportChunkRequests.request(p, target, destinationChunks,
+                    () -> p.getData(AcademyAttachments.PLAYER_ABILITY) == d
+                            && SkillInputSessionManager.sessionId(p).equals(inputSession)
+                            && d.isAbilityActive() && d.hasLearnedSkill(skill.getId())
+                            && d.getCurrentAbility() == skill.getCategory() && d.getPlayerLevel() >= skill.getLevel()
+                            && !d.isOnCooldown(skill.getId()) && !AbilityInterferenceService.isInterfered(p)
+                            && index < d.getTeleportLocations().size() && l.equals(d.getTeleportLocations().get(index)),
+                    () -> {
+                        // Rebuild geometry, permissions, consent scope and prices after the asynchronous gap.
+                        if (perform(p, d, skill, index)) d.syncTo(p);
+                    });
         }
+        // The single-use consent is consumed only at the final synchronous commit boundary.
+        CastConsent authorized = CASTS.get(p.getUUID());
+        if (!passengers.isEmpty()) cancel(authorized);
+        for(Move m:moves){
+            AABB box=m.entity.getBoundingBox().move(m.destination.subtract(m.entity.position()));
+            if(!target.noCollision(m.entity,box))return false;
+        }
+        boolean committed=commitMoves(moves,target);
+        if(!committed)return false;
+        com.mohistmc.academy.advancement.LegacyAdvancementBridge.teleported(p);
+        if(!d.consumeDynamicForced(cp,overload))return false;
+        com.mohistmc.academy.config.DynamicSkillRules.addExp(
+                p,d,skill.getId(),legacyProficiencyIncrement(distance));
+        d.setCooldown(skill.getId(),(int)(30-10*d.getProficiency(skill.getId())));
+        return true;
     }
     static float legacyProficiencyIncrement(float preTeleportDistance){
         return preTeleportDistance>=200f?.03f:.015f;

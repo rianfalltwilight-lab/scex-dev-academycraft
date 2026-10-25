@@ -104,10 +104,54 @@ public final class ExtraItemTextureVisualGate {
         var manifestId = ResourceLocation.fromNamespaceAndPath("academy", "extraacc-provenance.json");
         try (var reader = mc.getResourceManager().getResourceOrThrow(manifestId).openAsReader()) {
             var assets = JsonParser.parseReader(reader).getAsJsonObject().getAsJsonArray("assets");
-            if (assets.size() != 42) throw new IllegalStateException("expected 42 original PNGs");
+            var required = new java.util.HashSet<>(java.util.Set.of(
+                    "assets/academy/textures/item/extraacc/air_jet.png",
+                    "assets/academy/textures/item/extraacc/avalon.png",
+                    "assets/academy/textures/item/extraacc/cp_potion.png",
+                    "assets/academy/textures/item/extraacc/drop_item_magnet.png",
+                    "assets/academy/textures/item/extraacc/electricalibur.png",
+                    "assets/academy/textures/item/extraacc/energy_unit_group_0.png",
+                    "assets/academy/textures/item/extraacc/energy_unit_group_1.png",
+                    "assets/academy/textures/item/extraacc/energy_unit_group_2.png",
+                    "assets/academy/textures/item/extraacc/energy_unit_group_3.png",
+                    "assets/academy/textures/item/extraacc/energy_unit_group_4.png",
+                    "assets/academy/textures/item/extraacc/energy_unit_group_5.png",
+                    "assets/academy/textures/item/extraacc/etched_cobblestone.png",
+                    "assets/academy/textures/item/factor_aerohand.png",
+                    "assets/academy/textures/item/factor_telekinesis.png",
+                    "assets/academy/textures/item/extraacc/imag_boots.png",
+                    "assets/academy/textures/item/extraacc/imag_chestplate.png",
+                    "assets/academy/textures/item/extraacc/imag_helmet.png",
+                    "assets/academy/textures/item/extraacc/imag_leggings.png",
+                    "assets/academy/textures/item/extraacc/lasor_component.png",
+                    "assets/academy/textures/item/extraacc/lasor_gun.png",
+                    "assets/academy/textures/item/extraacc/optical_chip.png",
+                    "assets/academy/textures/item/extraacc/paper_boots.png",
+                    "assets/academy/textures/item/extraacc/paper_chestplate.png",
+                    "assets/academy/textures/item/extraacc/paper_helmet.png",
+                    "assets/academy/textures/item/extraacc/paper_leggings.png",
+                    "assets/academy/textures/item/extraacc/paper_plane.png",
+                    "assets/academy/textures/item/extraacc/ray_twister_active.png",
+                    "assets/academy/textures/item/extraacc/ray_twister.png",
+                    "assets/academy/textures/item/extraacc/reso_boots.png",
+                    "assets/academy/textures/item/extraacc/reso_chestplate.png",
+                    "assets/academy/textures/item/extraacc/reso_helmet.png",
+                    "assets/academy/textures/item/extraacc/reso_leggings.png",
+                    "assets/academy/textures/item/extraacc/teleporter_pos.png",
+                    "assets/academy/textures/item/extraacc/teleporter.png",
+                    "assets/academy/textures/models/armor/extraacc/energy_layer_1.png",
+                    "assets/academy/textures/models/armor/extraacc/energy_layer_2.png",
+                    "assets/academy/textures/models/armor/extraacc/noenergy_layer_1.png",
+                    "assets/academy/textures/models/armor/extraacc/noenergy_layer_2.png",
+                    "assets/academy/textures/models/armor/extraacc/paper_layer_1.png",
+                    "assets/academy/textures/models/armor/extraacc/paper_layer_2.png",
+                    "assets/academy/textures/models/armor/extraacc/reso_layer_1.png",
+                    "assets/academy/textures/models/armor/extraacc/reso_layer_2.png"));
+            required.add("assets/academy/textures/entity/extraacc/waterman.png");
             for (var value : assets) {
                 var asset = value.getAsJsonObject();
                 String destination = asset.get("destination").getAsString();
+                required.remove(destination);
                 var id = ResourceLocation.fromNamespaceAndPath("academy", destination.substring("assets/academy/".length()));
                 try (var stream = mc.getResourceManager().getResourceOrThrow(id).open()) {
                     String actual = HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(stream.readAllBytes()));
@@ -116,6 +160,7 @@ public final class ExtraItemTextureVisualGate {
                 }
                 record("RESOURCE_PASS " + id + " sha256=" + asset.get("sha256").getAsString());
             }
+            if (!required.isEmpty()) throw new IllegalStateException("missing required original resources: " + required);
         }
     }
 

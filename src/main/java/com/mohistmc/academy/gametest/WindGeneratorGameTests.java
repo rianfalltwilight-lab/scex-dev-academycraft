@@ -117,7 +117,10 @@ public final class WindGeneratorGameTests {
         ItemStack battery = new ItemStack(AcademyItems.ENERGY_UNIT.get());
         battery.setDamageValue(EnergyUnit.MAX_ENERGY);
         player.getInventory().setItem(9, battery);
-        WindGenBaseMenu baseMenu = new WindGenBaseMenu(1, player.getInventory(), menuPos(basePos));
+        FriendlyByteBuf baseData = menuPos(basePos);
+        WindGenBaseMenu baseMenu;
+        try { baseMenu = new WindGenBaseMenu(1, player.getInventory(), baseData); }
+        finally { baseData.release(); }
         if (baseMenu.quickMoveStack(player, 0).isEmpty()
                 || !baseMenu.getSlot(36).getItem().is(AcademyItems.ENERGY_UNIT.get())) {
             helper.fail("wind base shift-click did not insert its energy item"); return;
@@ -127,7 +130,10 @@ public final class WindGeneratorGameTests {
         // A malformed old-world stack is intentional: the menu must move one
         // fan only and leave the overflow in the player inventory.
         player.getInventory().setItem(9, new ItemStack(AcademyItems.WINDGEN_FAN.get(), 3));
-        WindGenMainMenu mainMenu = new WindGenMainMenu(2, player.getInventory(), menuPos(mainPos));
+        FriendlyByteBuf mainData = menuPos(mainPos);
+        WindGenMainMenu mainMenu;
+        try { mainMenu = new WindGenMainMenu(2, player.getInventory(), mainData); }
+        finally { mainData.release(); }
         if (mainMenu.quickMoveStack(player, 0).isEmpty()
                 || !mainMenu.getSlot(36).getItem().is(AcademyItems.WINDGEN_FAN.get())
                 || mainMenu.getSlot(36).getItem().getCount() != 1

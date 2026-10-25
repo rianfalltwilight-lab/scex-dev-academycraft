@@ -1,5 +1,7 @@
 package com.mohistmc.academy.skill.passive;
 
+import com.mohistmc.academy.skill.ability.LoadedRaycast;
+
 import com.mohistmc.academy.AcademyCraft;
 import com.mohistmc.academy.advancement.LegacyAdvancementBridge;
 import com.mohistmc.academy.config.DynamicSkillRules;
@@ -175,7 +177,7 @@ public final class PassiveSkillEventHandler {
         float floor = VecDefenseRuntime.overloadFloor(player.getUUID());
         if (!data.isDevMode() && data.getCurrentOverload() < floor) data.setCurrentOverload(floor);
 
-        Vec3 aim = player.pick(20, 0, false).getLocation();
+        Vec3 aim = LoadedRaycast.pick(player, 20).getLocation();
         for (Entity entity : player.level().getEntities(player, player.getBoundingBox().inflate(4),
                 candidate -> vectorEntity(player, candidate))) {
             if (!VecDefenseRuntime.visit(player.getUUID(), entity.getUUID())) continue;

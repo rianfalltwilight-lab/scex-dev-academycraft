@@ -1,0 +1,13 @@
+{
+  "screenshot": "screenshots/deep-audit-render.png",
+  "reviewed": true,
+  "reviewer": "Codex image inspection",
+  "observed": [
+    "cyan sphere",
+    "cyan crescent",
+    "cyan lance trail",
+    "blue cruise sphere",
+    "blue waterman humanoid"
+  ],
+  "scope": "registered rendering paths, not network-spawn or full animation fidelity"
+}

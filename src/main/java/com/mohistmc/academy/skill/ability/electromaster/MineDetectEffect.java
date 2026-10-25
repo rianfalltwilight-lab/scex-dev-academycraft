@@ -1,5 +1,7 @@
 package com.mohistmc.academy.skill.ability.electromaster;
 
+import com.mohistmc.academy.skill.ability.LoadedRaycast;
+
 import com.mohistmc.academy.config.DynamicSkillRules;
 import com.mohistmc.academy.skill.PlayerAbilityData;
 import com.mohistmc.academy.skill.SkillEffect;
@@ -116,7 +118,7 @@ public class MineDetectEffect implements SkillEffect {
                     if (dx*dx+dy*dy+dz*dz>rangeSq) continue;
                     pos.set(x,y,z);
                     // Detection must never force-load chunks around a player.
-                    if (!level.hasChunkAt(pos)) continue;
+                    if (!LoadedRaycast.isLoaded(level, pos)) continue;
                     BlockState state = level.getBlockState(pos);
                     if (isOre(state)) {
                         int harvestLevel = advanced ? getHarvestLevel(state) : 0;

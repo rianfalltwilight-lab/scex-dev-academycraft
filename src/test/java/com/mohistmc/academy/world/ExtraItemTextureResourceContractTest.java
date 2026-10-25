@@ -25,11 +25,11 @@ class ExtraItemTextureResourceContractTest {
             "imag_helmet", "imag_chestplate", "imag_leggings", "imag_boots",
             "paper_helmet", "paper_chestplate", "paper_leggings", "paper_boots");
 
-    @Test void allFortyTwoOriginalPngsRemainByteIdenticalAndDecodable() throws Exception {
+    @Test void allOriginalPngsIncludingWatermanRemainByteIdenticalAndDecodable() throws Exception {
         JsonObject manifest = manifest();
         assertEquals("d66a190e3ae00d9ca8c154b47fca0509d4c171f7", manifest.get("commit").getAsString());
         JsonArray assets = manifest.getAsJsonArray("assets");
-        assertEquals(42, assets.size());
+        assertEquals(43, assets.size());
         Set<String> paths = new HashSet<>();
         int sprites = 0, armorLayers = 0;
         for (var entry : assets) {
@@ -54,7 +54,7 @@ class ExtraItemTextureResourceContractTest {
                 assertFalse(Files.exists(Path.of(path + ".mcmeta")), "static upstream sprite acquired animation metadata");
             }
         }
-        assertEquals(34, sprites);
+        assertEquals(35, sprites);
         assertEquals(8, armorLayers);
     }
 

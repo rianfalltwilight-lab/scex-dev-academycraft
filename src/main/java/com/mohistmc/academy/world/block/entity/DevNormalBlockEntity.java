@@ -12,7 +12,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.Block;
 
-public class DevNormalBlockEntity extends BlockEntity implements IFEnergyStorage, IDevStructure, IWirelessReceiver {
+public class DevNormalBlockEntity extends AcademyContainerBlockEntity implements IFEnergyStorage, IDevStructure, IWirelessReceiver {
     public static final int MAX_ENERGY = 50_000;
     private static final int MAX_BANDWIDTH = 100;
     private int energy = 0;
@@ -21,6 +21,8 @@ public class DevNormalBlockEntity extends BlockEntity implements IFEnergyStorage
     public DevNormalBlockEntity(BlockPos pos, BlockState state) {
         super(AcademyBlockEntities.DEV_NORMAL.get(), pos, state);
     }
+
+    @Override public int getContainerSize() { return 0; }
 
     @Override
     public UUID getStructureId() {
@@ -45,10 +47,10 @@ public class DevNormalBlockEntity extends BlockEntity implements IFEnergyStorage
 
     @Override
     public void setEnergy(int energy) {
-        this.energy = Math.clamp(energy, 0, MAX_ENERGY);
-        setChanged();
-        if (level != null && !level.isClientSide)
-            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_CLIENTS);
+        int bounded = Math.clamp(energy, 0, MAX_ENERGY);
+        if (this.energy == bounded) return;
+        this.energy = bounded;
+        markMachineChanged(); // Open menus already use incremental ContainerData.
     }
 
     @Override public double getRequiredEnergy() {
@@ -89,5 +91,9 @@ public class DevNormalBlockEntity extends BlockEntity implements IFEnergyStorage
         if (structureId != null) {
             tag.putString("structureId", structureId.toString());
         }
+    }
+    @Override public void onLoad() {
+        super.onLoad();
+        if (level != null && !level.isClientSide()) level.scheduleTick(worldPosition, getBlockState().getBlock(), 1);
     }
 }

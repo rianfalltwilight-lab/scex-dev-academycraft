@@ -69,6 +69,8 @@ public record LearnSkillPacket(String skillId, int typeOrdinal, Optional<BlockPo
     public static void handle(LearnSkillPacket packet, IPayloadContext context) {
         context.enqueueWork(() -> {
             ServerPlayer player = (ServerPlayer) context.player();
+            if (!SkillInputSessionManager.isCurrentPlayer(player)
+                    || !PayloadRateLimiter.allow(player.getUUID(), "learn_skill", player.serverLevel().getGameTime(), 20, 4)) return;
             PlayerAbilityData data = player.getData(AcademyAttachments.PLAYER_ABILITY);
             if (packet.typeOrdinal() < 0 || packet.typeOrdinal() >= DevMachineType.values().length) {
                 return;
@@ -218,7 +220,8 @@ public record LearnSkillPacket(String skillId, int typeOrdinal, Optional<BlockPo
             if (stack.getItem() instanceof DeveloperPortable) {
                 energy = EnergyItemHelper.getEnergy(stack); maximum = DeveloperPortable.MAX_ENERGY;
             }
-        } else if (packet.devPos().isPresent()) {
+        } else if (packet.devPos().isPresent()
+                && validateEnergySource(player, type, 0, packet.devPos().get())) {
             BlockEntity be = player.level().getBlockEntity(packet.devPos().get());
             if (be instanceof IFEnergyStorage storage) {
                 energy = storage.getEnergyStored(); maximum = storage.getMaxEnergyStored();
@@ -242,7 +245,7 @@ public record LearnSkillPacket(String skillId, int typeOrdinal, Optional<BlockPo
         } else {
             if (devPos == null) return false;
             Level level = player.level();
-            if (!level.isLoaded(devPos)
+            if (!com.mohistmc.academy.skill.ability.LoadedRaycast.isLoaded(level, devPos)
                     || player.distanceToSqr(devPos.getX() + 0.5, devPos.getY() + 0.5, devPos.getZ() + 0.5) > 64.0
                     || !level.mayInteract(player, devPos)) {
                 return false;
@@ -279,7 +282,7 @@ public record LearnSkillPacket(String skillId, int typeOrdinal, Optional<BlockPo
         }
         if (devPos == null) return false;
         Level level = player.level();
-        if (!level.isLoaded(devPos)
+        if (!com.mohistmc.academy.skill.ability.LoadedRaycast.isLoaded(level, devPos)
                 || player.distanceToSqr(devPos.getX() + 0.5, devPos.getY() + 0.5, devPos.getZ() + 0.5) > 64.0
                 || !level.mayInteract(player, devPos)) return false;
         BlockEntity be = level.getBlockEntity(devPos);

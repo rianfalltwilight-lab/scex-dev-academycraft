@@ -1,5 +1,7 @@
 package com.mohistmc.academy.skill.ability.electromaster;
 
+import com.mohistmc.academy.skill.ability.LoadedRaycast;
+
 import com.mohistmc.academy.config.DynamicSkillRules;
 
 import com.mohistmc.academy.capability.EnergyItemHelper;
@@ -120,9 +122,9 @@ public class ChargingEffect implements ChargingSkillEffect {
                 }
             }
         } else {
-            BlockHitResult hit = (BlockHitResult) player.pick(15.0, 0, false);
+            BlockHitResult hit = (BlockHitResult) LoadedRaycast.pick(player, 15.0);
             ServerLevel level = player.serverLevel();
-            if (hit.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK && level.hasChunkAt(hit.getBlockPos())) {
+            if (hit.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK && LoadedRaycast.isLoaded(level, hit.getBlockPos())) {
                 visualEnd = hit.getLocation();
                 BlockPos pos = hit.getBlockPos();
                 BlockEntity be = level.getBlockEntity(pos);

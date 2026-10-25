@@ -27,6 +27,10 @@ class SkillExpMutationCoverageTest {
         assertFalse(codec.contains("ServerPlayer"));
         String service=Files.readString(Path.of("src/main/java/com/mohistmc/academy/skill/AbilityMutationService.java"));
         assertTrue(service.contains("player.getData(AcademyAttachments.PLAYER_ABILITY) != data"));
-        assertTrue(service.indexOf("new AbilityEvents.SkillExpChanged")<service.indexOf("new AbilityEvents.SkillExpAdded"));
+        int changedEvent = service.indexOf("new AbilityEvents.SkillExpChanged");
+        int addedEvent = service.indexOf("new AbilityEvents.SkillExpAdded");
+        assertTrue(changedEvent >= 0, "skill experience changed event is missing");
+        assertTrue(addedEvent >= 0, "skill experience added event is missing");
+        assertTrue(changedEvent < addedEvent);
     }
 }

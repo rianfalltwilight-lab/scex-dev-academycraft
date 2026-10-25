@@ -14,6 +14,8 @@ public final class PaperArmorItem extends ArmorItem {
         super(ExtraArmorMaterials.PAPER, type, new Item.Properties().stacksTo(1));
     }
 
+    @Override public boolean isBookEnchantable(ItemStack stack, ItemStack book) { return false; }
+
     @Override
     public void appendHoverText(ItemStack stack, Item.TooltipContext context,
                                 List<Component> tooltip, TooltipFlag flag) {

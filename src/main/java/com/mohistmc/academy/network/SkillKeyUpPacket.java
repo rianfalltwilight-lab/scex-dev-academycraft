@@ -60,7 +60,8 @@ public record SkillKeyUpPacket(int slotIndex, String skillId, long epoch, float 
 
             Skill skill = data.getSlotSkill(data.getCurrentPresetIndex(), state.slotIndex);
             if (skill == null || !skill.getId().equals(state.skillId)
-                    || !data.isAbilityActive() || !data.hasLearnedSkill(state.skillId)) {
+                    || !data.isAbilityActive() || !data.hasLearnedSkill(state.skillId)
+                        || !data.isDevMode() && data.getPlayerLevel() < skill.getLevel()) {
                 SkillChargingManager.cancel(player);
                 SafePayloadSender.send(player, new SyncChargingStatePacket(-1, 0, state.slotIndex, state.skillId, state.epoch, state.generation, true));
                 return;

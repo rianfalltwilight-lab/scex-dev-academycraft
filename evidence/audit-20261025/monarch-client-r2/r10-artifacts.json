@@ -1,0 +1,14 @@
+[
+  {
+    "name": "AcademyCraft-neoforge-1.21.1-0.0.29-scex-deep-audit-audit-tests.jar",
+    "bytes": 171436,
+    "sha256": "0972B1C177FC88564CCD61F837C2CE00FD1D21795019115C262FE59AD264E8A4",
+    "build": "r10"
+  },
+  {
+    "name": "AcademyCraft-neoforge-1.21.1-0.0.29-scex-deep-audit.jar",
+    "bytes": 27826489,
+    "sha256": "7A4A2510CF72DAE785DA2294F879A613B3BAAEE90FAF58138AC89383E9E33A5D",
+    "build": "r10"
+  }
+]

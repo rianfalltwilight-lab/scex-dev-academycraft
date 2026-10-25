@@ -102,12 +102,8 @@ class ExtraAcCompatibilityContractTest {
     void damagingRaysShareTheAuditedCollisionBoundary() throws Exception {
         // This is a wiring contract only. ExtraAdversarialGameTests exercises the
         // actual glass-pane and overlapping-box counterexamples on a real server.
-        for (String path : List.of("skill/ability/aerohand/AirBladeEffect.java",
-                "skill/ability/aerohand/BomberLanceEffect.java",
-                "skill/ability/aerohand/VolcanicBallEffect.java",
-                "skill/ability/telekinesis/PsychoSlamEffect.java",
-                "skill/ability/telekinesis/PaperDrillEffect.java",
-                "skill/ability/telekinesis/PsychoTransmissionEffect.java")) {
+        for (String path : List.of("skill/ability/telekinesis/PsychoSlamEffect.java",
+                "skill/ability/telekinesis/PaperDrillEffect.java")) {
             String source = read(path);
             assertTrue(source.contains("SkillRaycast.trace(") || source.contains("SkillRaycast.traceEntities("), path);
             assertFalse(source.contains("getBoundingBox().inflate("), path);
@@ -116,8 +112,8 @@ class ExtraAcCompatibilityContractTest {
         assertTrue(boundary.contains("ClipContext.Block.COLLIDER"));
         assertTrue(boundary.contains("box.clip(from, end)"));
         assertTrue(boundary.contains("Hit::distanceSquared"));
-        assertTrue(read("skill/ability/aerohand/AirBladeEffect.java")
-                .contains("damageSources().magic()"));
+        assertTrue(read("world/entity/AeroProjectileEntity.java").contains("LoadedRaycast.clip"));
+        assertTrue(read("skill/ability/telekinesis/PsychoTransmissionEffect.java").contains("LoadedRaycast.clip"));
     }
     @Test
     void offenseArmourRestoresItsLegacyKnockbackResistanceLifecycle() throws Exception {

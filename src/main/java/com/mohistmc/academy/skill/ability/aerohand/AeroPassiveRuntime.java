@@ -38,7 +38,7 @@ public final class AeroPassiveRuntime {
     private static final String AIRFLOW = "airflow";
     private static final String OFFENSE_ARMOUR = "offense_armour";
     private static final String FLYING = "flying";
-    private static final double ARMOUR_RADIUS = 2.75;
+    private static final double ARMOUR_RADIUS = 2;
     private static final ResourceLocation ARMOUR_KNOCKBACK_RESISTANCE =
             ResourceLocation.fromNamespaceAndPath(AcademyCraft.MODID,
                     "offense_armour_knockback_resistance");
@@ -144,11 +144,9 @@ public final class AeroPassiveRuntime {
                 return;
             }
             grantFlight(player);
+            DynamicSkillRules.addExp(player, data, FLYING, 0.0001F);
             if (player.getAbilities().flying) {
                 player.resetFallDistance();
-                if (player.tickCount % 20 == 0) {
-                    DynamicSkillRules.addExp(player, data, FLYING, 0.002F);
-                }
             }
             float p = data.getProficiency(FLYING);
             if (p >= 0.5F) player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED,
@@ -169,7 +167,8 @@ public final class AeroPassiveRuntime {
                 false, false, false));
         player.setAirSupply(player.getMaxAirSupply());
         for (Entity entity : player.serverLevel().getEntities(player,
-                player.getBoundingBox().inflate(ARMOUR_RADIUS), Entity::isAlive)) {
+                new net.minecraft.world.phys.AABB(player.position().add(0, player.getBbHeight() / 2, 0),
+                        player.position().add(0, player.getBbHeight() / 2, 0)).inflate(ARMOUR_RADIUS), Entity::isAlive)) {
             if (entity instanceof Projectile projectile) {
                 if (hostileProjectile(player, projectile)) {
                     if (!DynamicSkillRules.tryPay(data, OFFENSE_ARMOUR, 10F, 0)) {
@@ -213,7 +212,7 @@ public final class AeroPassiveRuntime {
         if (event.getSource().is(net.minecraft.world.damagesource.DamageTypes.FALL)
                 && passive(player, data, ASCENDING_AIR)) {
             float p = data.getProficiency(ASCENDING_AIR);
-            float capped = 10F - 5F * p;
+            float capped = AeroBehaviorMath.ascendingAirDamageCap(p);
             float saved = original - capped;
             if (saved > 0 && DynamicSkillRules.tryPay(data, ASCENDING_AIR,
                     (40F - 20F * p) * saved, 0)) {
@@ -241,7 +240,7 @@ public final class AeroPassiveRuntime {
             stopArmour(player, data, true);
             return;
         }
-        event.setAmount(original * (0.10F - 0.05F * proficiency));
+        event.setAmount(original * AeroBehaviorMath.offenseArmourDamageMultiplier(proficiency));
         Entity attacker = event.getSource().getEntity();
         if (attacker != null && attacker != player && !player.isAlliedTo(attacker)
                 && attacker.distanceToSqr(player) <= ARMOUR_RADIUS * ARMOUR_RADIUS) {

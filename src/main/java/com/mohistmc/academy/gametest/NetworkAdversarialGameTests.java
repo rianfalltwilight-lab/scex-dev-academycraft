@@ -134,8 +134,14 @@ public final class NetworkAdversarialGameTests {
         NodeConfigPacket.handle(new NodeConfigPacket(third, fixture.pos(), Optional.of("stolen"), Optional.empty()), immediateContext(other));
         require(helper, fixture.node().getNodeName().equals("latest"), "forged/cross-viewer token was accepted");
         NodeConfigPacket.handle(new NodeConfigPacket(third, fixture.pos(), Optional.of("valid-third"), Optional.empty()), immediateContext(player));
-        require(helper, fixture.node().getNodeName().equals("valid-third"), "invalid token poisoned a valid action stream");
-        helper.succeed();
+        require(helper, fixture.node().getNodeName().equals("latest"), "fifth request escaped the four-request window");
+        // Rejected traffic also consumes the bounded request budget, but a rate-limited
+        // packet must not consume its menu sequence. Retry that exact token next window.
+        helper.runAfterDelay(21, () -> {
+            NodeConfigPacket.handle(new NodeConfigPacket(third, fixture.pos(), Optional.of("valid-third"), Optional.empty()), immediateContext(player));
+            require(helper, fixture.node().getNodeName().equals("valid-third"), "invalid or rate-limited token poisoned a valid action stream");
+            helper.succeed();
+        });
     }
 
     @GameTest(template = "empty")

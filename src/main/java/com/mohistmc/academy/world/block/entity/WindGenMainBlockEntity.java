@@ -126,6 +126,7 @@ public class WindGenMainBlockEntity extends AcademyContainerBlockEntity {
 
     /** AcademyCraft 1.12.2 rechecked the 15x15 clearance plane every ten ticks. */
     public boolean refreshIfDue(Level level, BlockPos pos, Direction facing) {
+        if (level.isClientSide()) return working;
         long now = level.getGameTime();
         if (lastRefreshTick == Long.MIN_VALUE || now - lastRefreshTick >= 10) {
             lastRefreshTick = now;
@@ -195,6 +196,7 @@ public class WindGenMainBlockEntity extends AcademyContainerBlockEntity {
 
     private void updateProxyRunning(Level level, BlockPos mainPos, boolean running) {
         for (BlockPos proxy : WindGenMain.proxyPositions(mainPos, getBlockState())) {
+            if (!com.mohistmc.academy.world.block.LoadedMachineChunks.contains(level, proxy)) continue;
             BlockEntity fanEntity = level.getBlockEntity(proxy);
             if (fanEntity instanceof WindGenFanBlockEntity fan && fan.isRunning != running) {
                 fan.isRunning = running;
@@ -245,6 +247,7 @@ public class WindGenMainBlockEntity extends AcademyContainerBlockEntity {
                 for (int dz = -7; dz <= 7; dz++) {
                     if (dy == 0 && dz == 0) continue;
                     BlockPos checkPos = new BlockPos(x, y + dy, z + dz);
+                    if (!com.mohistmc.academy.world.block.LoadedMachineChunks.contains(level, checkPos)) return false;
                     BlockState state = level.getBlockState(checkPos);
                     if (!state.isAir()) {
                         return false;
@@ -256,6 +259,7 @@ public class WindGenMainBlockEntity extends AcademyContainerBlockEntity {
                 for (int dx = -7; dx <= 7; dx++) {
                     if (dy == 0 && dx == 0) continue;
                     BlockPos checkPos = new BlockPos(x + dx, y + dy, z);
+                    if (!com.mohistmc.academy.world.block.LoadedMachineChunks.contains(level, checkPos)) return false;
                     BlockState state = level.getBlockState(checkPos);
                     if (!state.isAir()) {
                         return false;
@@ -273,6 +277,7 @@ public class WindGenMainBlockEntity extends AcademyContainerBlockEntity {
         boolean sawBaseSubBlock = false;
         for (int i = 1; i <= WindGenBase.MAX_PILLARS + 2; i++) {
             BlockPos below = pos.below(i);
+            if (!com.mohistmc.academy.world.block.LoadedMachineChunks.contains(level, below)) return null;
             BlockEntity be = level.getBlockEntity(below);
             Block block = level.getBlockState(below).getBlock();
             if (!sawBaseSubBlock && block instanceof WindGenPillar) {
@@ -291,5 +296,9 @@ public class WindGenMainBlockEntity extends AcademyContainerBlockEntity {
             return null;
         }
         return null;
+    }
+    @Override public void onLoad() {
+        super.onLoad();
+        if (level != null && !level.isClientSide()) level.scheduleTick(worldPosition, getBlockState().getBlock(), 1);
     }
 }

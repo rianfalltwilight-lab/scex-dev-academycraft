@@ -1,0 +1,26 @@
+{
+  "basis": "Uncompressed ZIP entry SHA256 for all entries",
+  "comparisons": [
+    {
+      "name": "AcademyCraft-neoforge-1.21.1-0.0.29-scex-deep-audit-audit-tests.jar",
+      "tested_r11_sha256": "b0f67a8ffa551fb04aba33fc15888a7dff5baa25c82cb5ea759fdc20a05f816f",
+      "final_sha256": "b0f67a8ffa551fb04aba33fc15888a7dff5baa25c82cb5ea759fdc20a05f816f",
+      "changed_entries": [],
+      "all_executable_classes_and_resources_identical": true
+    },
+    {
+      "name": "AcademyCraft-neoforge-1.21.1-0.0.29-scex-deep-audit.jar",
+      "tested_r11_sha256": "9af4617d16eba2971b7cf111e365469f1419079f004f55d2c2de8dfb70335563",
+      "final_sha256": "b1ccdeb5f30505183a9b5978ce6554012852bda72bc50d1b5f1a0662329097ca",
+      "changed_entries": [
+        "BUILD-INFO.txt",
+        "META-INF/MANIFEST.MF"
+      ],
+      "all_executable_classes_and_resources_identical": true
+    }
+  ],
+  "audit_main_packages_disjoint": true,
+  "build_info_exact": true,
+  "license_notice_readme_present": true,
+  "extra_r2_behavior_applicability": "5 real key input and 1 passive case passed on r11; all runtime entries identical in final JARs; only metadata differs"
+}

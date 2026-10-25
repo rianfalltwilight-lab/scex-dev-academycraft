@@ -42,7 +42,11 @@ class JadeCompatibilityContractTest {
 
     @Test void tutorialKeyTagIsResolvedBeforeUnderscoreItalicFormatting() throws Exception {
         String parser=source("com/mohistmc/academy/client/gui/TutorialMdParser.java");
-        assertTrue(parser.indexOf("s = processKeyTags(s)") < parser.indexOf("ITALIC2_PAT.matcher"));
+        int keyTags = parser.indexOf("s = processKeyTags(s)");
+        int italics = parser.indexOf("ITALIC2_PAT.matcher");
+        assertTrue(keyTags >= 0, "key tag resolution is missing");
+        assertTrue(italics >= 0, "underscore italic formatting is missing");
+        assertTrue(keyTags < italics);
         assertTrue(source("com/mohistmc/academy/client/gui/DataTerminalGui.java")
                 .contains("OPEN_TERMINAL.matches(keyCode, scanCode)"));
     }

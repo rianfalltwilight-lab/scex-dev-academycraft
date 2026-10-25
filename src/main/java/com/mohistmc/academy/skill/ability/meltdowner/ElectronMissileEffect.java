@@ -30,7 +30,10 @@ public final class ElectronMissileEffect implements ChargingSkillEffect {
     private static final class State {
         final List<UUID> orbs = new ArrayList<>();
         final float overloadFloor;
-        State(float overloadFloor) { this.overloadFloor = overloadFloor; }
+        final net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> dimension;
+        State(float overloadFloor, ServerPlayer player) {
+            this.overloadFloor = overloadFloor; dimension = player.level().dimension();
+        }
     }
 
     private static final Map<UUID, State> STATES = new HashMap<>();
@@ -57,13 +60,13 @@ public final class ElectronMissileEffect implements ChargingSkillEffect {
     @Override
     public void onChargingStart(ServerPlayer player, PlayerAbilityData data) {
         if (!DynamicSkillRules.tryPay(data, getId(), 0, START_OVERLOAD)) return;
-        STATES.put(player.getUUID(), new State(data.getCurrentOverload()));
+        STATES.put(player.getUUID(), new State(data.getCurrentOverload(), player));
     }
 
     @Override
     public boolean onChargingTick(ServerPlayer player, PlayerAbilityData data, int ticks) {
         State state = STATES.get(player.getUUID());
-        if (state == null) return false;
+        if (state == null || !state.dimension.equals(player.level().dimension())) return false;
         float exp = data.getProficiency(getId());
         if (!DynamicSkillRules.tryPay(data, getId(), lerpf(12, 5, exp), 0)) return false;
         if (!data.isDevMode() && data.getCurrentOverload() < state.overloadFloor) {
@@ -127,8 +130,9 @@ public final class ElectronMissileEffect implements ChargingSkillEffect {
     }
 
     private static void clear(ServerPlayer player, State state) {
+        var original = player.server.getLevel(state.dimension);
         for (UUID id : state.orbs) {
-            Entity entity = player.serverLevel().getEntity(id);
+            Entity entity = original == null ? null : original.getEntity(id);
             if (entity != null) entity.discard();
         }
         state.orbs.clear();

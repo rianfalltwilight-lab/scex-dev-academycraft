@@ -140,6 +140,11 @@ public final class ClientModListener {
                 context -> new ThrownItemRenderer<>(context, 1.0F, true));
         event.registerEntityRenderer(AcademyEntities.PSYCHO_STONE.get(), com.mohistmc.academy.client.render.PsychoProjectileRenderer::new);
         event.registerEntityRenderer(AcademyEntities.PSYCHO_NEEDLE.get(), com.mohistmc.academy.client.render.PsychoProjectileRenderer::new);
+        event.registerEntityRenderer(AcademyEntities.AERO_VOLCANIC_BALL.get(), com.mohistmc.academy.client.renderer.AeroProjectileRenderer::new);
+        event.registerEntityRenderer(AcademyEntities.AERO_AIR_BLADE.get(), com.mohistmc.academy.client.renderer.AeroProjectileRenderer::new);
+        event.registerEntityRenderer(AcademyEntities.AERO_BOMBER_LANCE.get(), com.mohistmc.academy.client.renderer.AeroProjectileRenderer::new);
+        event.registerEntityRenderer(AcademyEntities.CRUISE_BOMB.get(), com.mohistmc.academy.client.renderer.CruiseBombRenderer::new);
+        event.registerEntityRenderer(AcademyEntities.LIQUID_SHADOW.get(), com.mohistmc.academy.client.renderer.LiquidShadowRenderer::new);
         event.registerEntityRenderer(AcademyEntities.PAPER_PLANE.get(),
                 context -> new ThrownItemRenderer<>(context, 1.0F, true));
         event.registerEntityRenderer(AcademyEntities.ORE_HIGHLIGHT.get(), OreHighlightRenderer::new);

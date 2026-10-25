@@ -12,6 +12,13 @@ public final class SkillInputClientState {
     private static int retryTicks;
     private SkillInputClientState() {}
     public static void clear() { session = null; retryTicks = 0; }
+    /** Drop transport ownership only on disconnect; dimension resets retain revision ordering. */
+    public static void disconnect() {
+        clear();
+        connection = null;
+        lastSession = null;
+        revision = 0;
+    }
     public static boolean ready() { return session != null; }
     public static void tick() {
         if (!ready() && retryTicks-- <= 0) { retryTicks = 20; PacketDistributor.sendToServer(RequestSkillInputSessionPacket.INSTANCE); }

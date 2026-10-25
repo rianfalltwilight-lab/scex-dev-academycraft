@@ -46,13 +46,17 @@ public final class VBlocks {
             return dx * dx + dy * dy + dz * dz;
         }
 
+        long chunkKey() { return net.minecraft.world.level.ChunkPos.asLong(x >> 4, z >> 4); }
+
         public boolean isLoaded(Level level) {
-            return level != null && level.isLoaded(new BlockPos(x, y, z));
+            return level != null && com.mohistmc.academy.world.block.LoadedMachineChunks.contains(level, new BlockPos(x, y, z));
         }
 
         @SuppressWarnings("unchecked")
         public T get(Level level) {
-            if (!ignoreChunk && !isLoaded(level))
+            // A registry lookup must never act as a chunk ticket. Even matrix
+            // and owning-node endpoints may be unloaded during UI/removal calls.
+            if (!isLoaded(level))
                 return null;
             if (level == null)
                 return null;

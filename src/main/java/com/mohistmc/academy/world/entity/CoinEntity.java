@@ -16,6 +16,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.server.level.ServerPlayer;
 
+@net.neoforged.fml.common.EventBusSubscriber(modid = "academy")
 public class CoinEntity extends Entity {
     private static final EntityDataAccessor<Float> SPIN_SPEED =
             SynchedEntityData.defineId(CoinEntity.class, EntityDataSerializers.FLOAT);
@@ -37,6 +38,8 @@ public class CoinEntity extends Entity {
     private double maximumY;
     private double initialVerticalVelocity = 0.92D;
     private boolean refundOnLoad;
+    private boolean refundItem = true;
+    private boolean settling;
 
     public CoinEntity(EntityType<?> entityType, Level level) {
         super(entityType, level);
@@ -108,9 +111,7 @@ public class CoinEntity extends Entity {
 
         if (!level().isClientSide) {
             if (refundOnLoad) {
-                level().addFreshEntity(new ItemEntity(level(),getX(),getY(),getZ(),
-                        new ItemStack(AcademyItems.COIN.get())));
-                discard();
+                if (returnTimer++ % 20 == 0) settleCoin(null);
                 return;
             }
             maximumY = Math.max(maximumY, getY());
@@ -130,9 +131,7 @@ public class CoinEntity extends Entity {
 
             if (isReturning()) {
                 returnTimer++;
-                if (returnTimer > 40) {
-                    this.discard();
-                }
+                if (returnTimer % 20 == 0) settleCoin(thrower);
             }
 
             if (!isReturning()) {
@@ -153,21 +152,33 @@ public class CoinEntity extends Entity {
     }
 
     private void returnCoinToPlayer(Player player) {
-        if (!player.getAbilities().instabuild) {
-            boolean added = player.getInventory().add(new ItemStack(AcademyItems.COIN.get()));
-            if (!added && !level().isClientSide) {
-                player.drop(new ItemStack(AcademyItems.COIN.get()), false);
-            }
-        }
-
-        if (player instanceof ServerPlayer serverPlayer) {
+        if (settleCoin(player) && player instanceof ServerPlayer serverPlayer) {
             com.mohistmc.academy.network.SafePayloadSender.send(serverPlayer,
                     new com.mohistmc.academy.network.CoinTossResultPacket(
                             (byte) level().random.nextInt(2)));
         }
 
-        playerCoins.remove(player.getUUID());
-        this.discard();
+    }
+
+    /** Keep the saved coin as the sole material owner until a return is accepted. */
+    private boolean settleCoin(Player player) {
+        if (settling || isRemoved()) return false;
+        settling = true;
+        startReturning();
+        try {
+            if (refundItem) {
+                ItemStack remainder = new ItemStack(AcademyItems.COIN.get());
+                if (player != null && player.isAlive()) player.getInventory().add(remainder);
+                if (!remainder.isEmpty()) {
+                    ItemEntity drop = new ItemEntity(level(), getX(), getY(), getZ(), remainder);
+                    drop.setDefaultPickUpDelay();
+                    if (!level().addFreshEntity(drop)) return false;
+                }
+                refundItem = false;
+            }
+            discard();
+            return true;
+        } finally { settling = false; }
     }
 
     private double getThrowerEyeHeight() {
@@ -190,6 +201,7 @@ public class CoinEntity extends Entity {
     public void setThrower(Player player) {
         this.entityData.set(THROWER_UUID, player.getUUID().toString());
         playerCoins.put(player.getUUID(), this);
+        refundItem = !player.getAbilities().instabuild;
         initialY = getY();
         maximumY = initialY;
     }
@@ -263,6 +275,7 @@ public class CoinEntity extends Entity {
         maximumY = compound.getDouble("MaximumY");
         if (compound.contains("InitialVerticalVelocity")) initialVerticalVelocity = compound.getDouble("InitialVerticalVelocity");
         refundOnLoad = true;
+        refundItem = !compound.contains("RefundItem") || compound.getBoolean("RefundItem");
     }
 
     @Override
@@ -279,15 +292,35 @@ public class CoinEntity extends Entity {
         compound.putDouble("InitialY", initialY);
         compound.putDouble("MaximumY", maximumY);
         compound.putDouble("InitialVerticalVelocity", initialVerticalVelocity);
+        compound.putBoolean("RefundItem", refundItem);
     }
 
     @Override
     public void remove(RemovalReason reason) {
-        Player thrower = getThrower();
-        if (thrower != null) {
-            playerCoins.remove(thrower.getUUID());
-        }
+        String id = entityData.get(THROWER_UUID);
+        if (!id.isEmpty()) try { playerCoins.remove(UUID.fromString(id), this); }
+        catch (IllegalArgumentException ignored) { }
         super.remove(reason);
+    }
+
+    @net.neoforged.bus.api.SubscribeEvent
+    public static void onLogout(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent event) {
+        releaseOwner(event.getEntity());
+    }
+
+    @net.neoforged.bus.api.SubscribeEvent
+    public static void onDimensionChange(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerChangedDimensionEvent event) {
+        releaseOwner(event.getEntity());
+    }
+
+    private static void releaseOwner(Player player) {
+        CoinEntity coin = playerCoins.remove(player.getUUID());
+        if (coin != null && !coin.level().isClientSide) coin.settleCoin(null);
+    }
+
+    @net.neoforged.bus.api.SubscribeEvent
+    public static void onStop(net.neoforged.neoforge.event.server.ServerStoppedEvent event) {
+        playerCoins.clear();
     }
 
     @Override

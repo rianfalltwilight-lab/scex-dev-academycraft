@@ -72,7 +72,7 @@ public record RequestNodesPacket(BlockPos machinePos) implements CustomPacketPay
                 ServerLevel level = player.serverLevel();
                 if (!(player.containerMenu instanceof AcademyMenu menu)
                         || !packet.machinePos().equals(menu.pos) || !menu.stillValid(player)) return;
-                if (!level.isLoaded(packet.machinePos())
+                if (!com.mohistmc.academy.skill.ability.LoadedRaycast.isLoaded(level, packet.machinePos())
                         || player.distanceToSqr(packet.machinePos().getX() + 0.5, packet.machinePos().getY() + 0.5,
                         packet.machinePos().getZ() + 0.5) > 64.0
                         || !level.mayInteract(player, packet.machinePos())) return;
@@ -106,21 +106,17 @@ public record RequestNodesPacket(BlockPos machinePos) implements CustomPacketPay
                 BlockPos center = packet.machinePos();
                 int range = 20;
 
-                for (int dx = -range; dx <= range; dx++) {
-                    for (int dz = -range; dz <= range; dz++) {
-                        int distXZ = dx * dx + dz * dz;
-                        if (distXZ > range * range) continue;
-                        int maxDy = (int) Math.sqrt(range * range - distXZ);
-                        for (int dy = -maxDy; dy <= maxDy; dy++) {
-                            BlockPos bp = center.offset(dx, dy, dz);
-                            if (!level.isLoaded(bp)) continue;
-                            BlockEntity be = level.getBlockEntity(bp);
-                            if (be instanceof IWirelessNode node) {
-                                double nodeRange = Math.max(0.0, Math.min(256.0, node.getRange()));
-                                if (center.distSqr(bp) <= nodeRange * nodeRange) {
-                                    foundNodes.add(bp.immutable());
-                                }
-                            }
+                for (int cx = (center.getX() - range) >> 4; cx <= (center.getX() + range) >> 4; cx++) {
+                    for (int cz = (center.getZ() - range) >> 4; cz <= (center.getZ() + range) >> 4; cz++) {
+                        var chunk = level.getChunkSource().getChunkNow(cx, cz);
+                        if (chunk == null) continue;
+                        for (BlockEntity be : chunk.getBlockEntities().values()) {
+                            if (be.isRemoved() || !(be instanceof IWirelessNode node)) continue;
+                            BlockPos bp = be.getBlockPos();
+                            double distance = center.distSqr(bp);
+                            double nodeRange = Math.max(0.0, Math.min(256.0, node.getRange()));
+                            if (distance <= range * range && distance <= nodeRange * nodeRange)
+                                foundNodes.add(bp.immutable());
                         }
                     }
                 }

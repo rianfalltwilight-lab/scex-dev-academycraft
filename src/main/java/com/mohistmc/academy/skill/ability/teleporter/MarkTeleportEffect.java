@@ -1,5 +1,7 @@
 package com.mohistmc.academy.skill.ability.teleporter;
 
+import com.mohistmc.academy.skill.ability.LoadedRaycast;
+
 import com.mohistmc.academy.skill.ChargingSkillEffect;
 import com.mohistmc.academy.skill.PlayerAbilityData;
 import com.mohistmc.academy.world.AcademySounds;
@@ -47,7 +49,7 @@ public final class MarkTeleportEffect implements ChargingSkillEffect {
         float exp=d.getProficiency(getId());double cpb=lerpf(12,4,exp);
         Vec3 dest=state.destination; // immutable last server-validated marker; do not release at a newer view ray
         BlockPos block=BlockPos.containing(dest);
-        if(!p.serverLevel().hasChunkAt(block)||!TeleportDestinations.isSafe(p,p.serverLevel(),dest))return false;
+        if(!LoadedRaycast.isLoaded(p.serverLevel(), block)||!TeleportDestinations.isSafe(p,p.serverLevel(),dest))return false;
         double distance=p.position().distanceTo(dest);if(distance<3||!com.mohistmc.academy.config.DynamicSkillRules.payForced(d,getId(),(float)(distance*cpb),lerpf(40,20,exp)))return false;
         ServerLevel level=p.serverLevel();
         TeleportSkillHelper.teleport(p,dest);

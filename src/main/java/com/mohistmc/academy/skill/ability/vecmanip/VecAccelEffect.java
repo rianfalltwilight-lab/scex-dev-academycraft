@@ -1,5 +1,7 @@
 package com.mohistmc.academy.skill.ability.vecmanip;
 
+import com.mohistmc.academy.skill.ability.LoadedRaycast;
+
 import com.mohistmc.academy.config.DynamicSkillRules;
 
 import com.mohistmc.academy.skill.ChargingSkillEffect;
@@ -122,7 +124,7 @@ public class VecAccelEffect implements ChargingSkillEffect {
 
     private static boolean hasGroundWithinTwoBlocks(ServerPlayer player) {
         Vec3 from = player.position();
-        return player.serverLevel().clip(new ClipContext(from, from.add(0, -2, 0),
+        return LoadedRaycast.clip(player.serverLevel(), new ClipContext(from, from.add(0, -2, 0),
                 ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player)).getType() == HitResult.Type.BLOCK;
     }
 }

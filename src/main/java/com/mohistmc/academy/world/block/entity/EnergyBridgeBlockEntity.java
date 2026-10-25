@@ -45,7 +45,7 @@ public abstract class EnergyBridgeBlockEntity extends AcademyContainerBlockEntit
         int bounded = Math.clamp(amount, 0, MAX_FE);
         if (bounded == storedFe) return;
         storedFe = bounded;
-        setChanged();
+        markMachineChanged();
     }
 
     @Override

@@ -18,11 +18,6 @@ public class WindGenBaseBlockEntity extends AcademyContainerBlockEntity
     private boolean middleComplete;
     private boolean working;
     private double generationRate;
-    /** Energy changes every working tick; coalesce client BE packets instead
-     * of broadcasting the complete inventory/update tag at 20 Hz per turbine. */
-    private long lastClientSyncTick = Long.MIN_VALUE;
-    private boolean pendingEnergySync;
-
     private static final double MIN_GENERATION_RATE = 7.5;
     private static final double MAX_GENERATION_RATE = 15.0;
     private static final int MAX_STORAGE = 20000;
@@ -73,25 +68,14 @@ public class WindGenBaseBlockEntity extends AcademyContainerBlockEntity
 
         // 无论结构是否有效，都尝试用存储池中的整数能量给能源单元充能
         int chargeAmount = Math.min((int) storedEnergy, (int) getBandwidth());
-        if (chargeAmount > 0) {
-            int charged = chargeEnergyUnit(chargeAmount);
-            storedEnergy -= charged;
-        }
-
-        boolean energyChanged = oldEnergy != storedEnergy;
-        if (energyChanged || stateChanged) {
-            setChanged();
-        }
-        if (energyChanged) pendingEnergySync = true;
-
-        long now = level.getGameTime();
-        boolean periodicEnergySync = pendingEnergySync
-                && (lastClientSyncTick == Long.MIN_VALUE || now < lastClientSyncTick
-                || now - lastClientSyncTick >= 10);
-        if (stateChanged || periodicEnergySync) {
+        int charged = chargeAmount > 0 ? chargeEnergyUnit(chargeAmount) : 0;
+        storedEnergy -= charged;
+        // A battery can change while generation keeps the buffer unchanged.
+        if (oldEnergy != storedEnergy || charged > 0 || stateChanged) markMachineChanged();
+        // Energy is synchronized by the open menu's ContainerData. Only the
+        // world-visible turbine status needs a block-entity broadcast.
+        if (stateChanged) {
             level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), Block.UPDATE_CLIENTS);
-            lastClientSyncTick = now;
-            pendingEnergySync = false;
         }
     }
 
@@ -134,7 +118,7 @@ public class WindGenBaseBlockEntity extends AcademyContainerBlockEntity
         if (!Double.isFinite(req) || req <= 0) return 0;
         double give = Math.min(Math.max(0, req), storedEnergy);
         storedEnergy -= (float) give;
-        if (give > 0) setChanged();
+        if (give > 0) markMachineChanged();
         return give;
     }
 
@@ -157,8 +141,22 @@ public class WindGenBaseBlockEntity extends AcademyContainerBlockEntity
 
     @Override
     public void setEnergy(int energy) {
-        this.storedEnergy = Math.min(MAX_STORAGE, Math.max(0, energy));
-        setChanged();
+        float bounded = Math.clamp(energy, 0, MAX_STORAGE);
+        if (storedEnergy == bounded) return;
+        storedEnergy = bounded;
+        markMachineChanged();
+    }
+
+    @Override public int receiveEnergy(int amount, boolean simulate) {
+        int accepted = Math.min(Math.max(0, amount), (int) (MAX_STORAGE - storedEnergy));
+        if (!simulate && accepted > 0) { storedEnergy += accepted; markMachineChanged(); }
+        return accepted;
+    }
+
+    @Override public int extractEnergy(int amount, boolean simulate) {
+        int extracted = Math.min(Math.max(0, amount), (int) storedEnergy);
+        if (!simulate && extracted > 0) { storedEnergy -= extracted; markMachineChanged(); }
+        return extracted;
     }
 
     @Override

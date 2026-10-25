@@ -150,7 +150,8 @@ public class SettingsAppGui extends AcademyScreen {
                 graphics.fill(guiLeft + 2, rowY, guiLeft + GUI_WIDTH - 2, rowY + ROW_HEIGHT, bgColor);
             }
 
-            boolean isHovered = isHovered(guiLeft + 2, rowY, GUI_WIDTH - 4, ROW_HEIGHT, mouseX, adjustedMouseY);
+            boolean isHovered = insideRows(mouseX, mouseY)
+                    && isHovered(guiLeft + 2, rowY, GUI_WIDTH - 4, ROW_HEIGHT, mouseX, adjustedMouseY);
             if (isHovered && row.type != RowType.HEADER) hoveredRow = i;
 
             if (isHovered && row.type != RowType.HEADER) {
@@ -184,7 +185,7 @@ public class SettingsAppGui extends AcademyScreen {
             Minecraft.getInstance().setScreen(new DataTerminalGui());
             return true;
         }
-        if (button == 0 && hoveredRow >= 0 && hoveredRow < rows.size()) {
+        if (button == 0 && insideRows(mouseX, mouseY) && hoveredRow >= 0 && hoveredRow < rows.size()) {
             SettingRow row = rows.get(hoveredRow);
             if (row.key != null) {
                 switch (row.key) {
@@ -223,6 +224,11 @@ public class SettingsAppGui extends AcademyScreen {
         int maxScroll = Math.max(0, contentHeight - visibleHeight);
         scrollOffset = (int) Math.clamp(scrollOffset - scrollY * 10, 0, maxScroll);
         return true;
+    }
+
+    private boolean insideRows(double mouseX, double mouseY) {
+        return mouseX >= guiLeft && mouseX < guiLeft + GUI_WIDTH
+                && mouseY >= guiTop + TOP_BAR + 1 && mouseY < guiTop + GUI_HEIGHT;
     }
 
     private enum RowType { HEADER, INFO, STATUS, TOGGLE, ACTION, SEPARATOR }

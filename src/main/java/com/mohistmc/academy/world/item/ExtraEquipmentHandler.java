@@ -112,7 +112,7 @@ public final class ExtraEquipmentHandler {
             if (!data.hasLearnedSkill("perfect_paper")
                     || !DynamicSkillRules.tryPay(data, "perfect_paper", cp, 0)) {
                 player.setItemSlot(slot, ItemStack.EMPTY);
-                player.drop(new ItemStack(Items.PAPER, paperCount(armor.getType())), false);
+                ExtraPaperReturns.give(player,paperCount(armor.getType()));
             } else {
                 DynamicSkillRules.addExp(player, data, "perfect_paper", 0.000001F);
             }

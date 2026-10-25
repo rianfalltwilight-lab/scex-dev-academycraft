@@ -56,7 +56,7 @@ public record RequestMatrixNetworksPacket(BlockPos nodePos) implements CustomPac
             ServerLevel level = player.serverLevel();
             if (!(player.containerMenu instanceof BaseNodeMenu menu)
                     || !packet.nodePos().equals(menu.pos) || !menu.stillValid(player)
-                    || !level.isLoaded(packet.nodePos())
+                    || !com.mohistmc.academy.skill.ability.LoadedRaycast.isLoaded(level, packet.nodePos())
                     || player.distanceToSqr(packet.nodePos().getX() + 0.5,
                     packet.nodePos().getY() + 0.5, packet.nodePos().getZ() + 0.5) > 64.0
                     || !level.mayInteract(player, packet.nodePos())
@@ -104,7 +104,7 @@ public record RequestMatrixNetworksPacket(BlockPos nodePos) implements CustomPac
                 var matrixEndpoint = network.getMatrix();
                 if (!(matrixEndpoint instanceof MatrixBlockEntity matrix)) continue;
                 BlockPos matrixPos = matrix.getBlockPos();
-                if (!level.isLoaded(matrixPos) || !level.mayInteract(player, matrixPos)) continue;
+                if (!com.mohistmc.academy.skill.ability.LoadedRaycast.isLoaded(level, matrixPos) || !level.mayInteract(player, matrixPos)) continue;
                 boolean connected = network == linked;
                 if (!connected && (!matrix.isOperational()
                         || network.getLoad() >= network.getCapacity())) continue;

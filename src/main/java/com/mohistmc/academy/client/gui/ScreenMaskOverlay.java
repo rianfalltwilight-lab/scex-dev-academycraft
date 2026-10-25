@@ -91,7 +91,7 @@ public class ScreenMaskOverlay {
         com.mojang.blaze3d.systems.RenderSystem.enableBlend();
         com.mojang.blaze3d.systems.RenderSystem.defaultBlendFunc();
         com.mojang.blaze3d.systems.RenderSystem.setShaderColor((float) r, (float) g, (float) b, (float) a);
-        gg.blit(TEX_MASK, 0, 0, 0, 0, w, h, 512, 288);
+        gg.blit(TEX_MASK, 0, 0, w, h, 0f, 0f, 512, 288, 512, 288);
         com.mojang.blaze3d.systems.RenderSystem.setShaderColor(1, 1, 1, 1);
         com.mojang.blaze3d.systems.RenderSystem.disableBlend();
     }

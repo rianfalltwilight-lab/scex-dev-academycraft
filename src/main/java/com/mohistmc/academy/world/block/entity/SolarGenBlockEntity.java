@@ -38,10 +38,6 @@ public class SolarGenBlockEntity extends AcademyContainerBlockEntity
 
     public void tick(Level level, BlockPos pos, BlockState state) {
         if (level.isClientSide) return;
-        // The generator itself occupies pos.  Legacy checks the cell above it;
-        // checking pos makes a normally placed opaque generator shadow itself.
-        if (!level.canSeeSky(pos.above())) return;
-
         float rate = switch (getStatus()) {
             case STRONG -> STRONG_RATE;
             case WEAK -> WEAK_RATE;
@@ -53,18 +49,10 @@ public class SolarGenBlockEntity extends AcademyContainerBlockEntity
             storedEnergy = Math.min(MAX_STORAGE, storedEnergy + rate);
         }
 
-        int chargeAmount = (int) storedEnergy;
-        if (chargeAmount > 0) {
-            int charged = chargeEnergyUnit(chargeAmount);
-            storedEnergy -= charged;
-        }
-
-        if (oldEnergy != storedEnergy || rate > 0.0f) {
-            setChanged();
-            if (oldEnergy != storedEnergy) {
-                level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), Block.UPDATE_ALL);
-            }
-        }
+        int chargeAmount = Math.min((int) storedEnergy, (int) getBandwidth());
+        int charged = chargeAmount > 0 ? chargeEnergyUnit(chargeAmount) : 0;
+        storedEnergy -= charged;
+        if (oldEnergy != storedEnergy || charged > 0) markMachineChanged();
     }
 
     private int chargeEnergyUnit(int amount) {
@@ -83,8 +71,22 @@ public class SolarGenBlockEntity extends AcademyContainerBlockEntity
 
     @Override
     public void setEnergy(int energy) {
-        this.storedEnergy = Math.min(MAX_STORAGE, Math.max(0, energy));
-        setChanged();
+        float bounded = Math.clamp(energy, 0, MAX_STORAGE);
+        if (storedEnergy == bounded) return;
+        this.storedEnergy = bounded;
+        markMachineChanged();
+    }
+
+    @Override public int receiveEnergy(int amount, boolean simulate) {
+        int accepted = Math.min(Math.max(0, amount), (int) (MAX_STORAGE - storedEnergy));
+        if (!simulate && accepted > 0) { storedEnergy += accepted; markMachineChanged(); }
+        return accepted;
+    }
+
+    @Override public int extractEnergy(int amount, boolean simulate) {
+        int extracted = Math.min(Math.max(0, amount), (int) storedEnergy);
+        if (!simulate && extracted > 0) { storedEnergy -= extracted; markMachineChanged(); }
+        return extracted;
     }
 
     public float getStoredEnergy() { return storedEnergy; }
@@ -96,7 +98,7 @@ public class SolarGenBlockEntity extends AcademyContainerBlockEntity
         if (!Double.isFinite(req) || req <= 0) return 0;
         double give = Math.min(Math.max(0, req), storedEnergy);
         storedEnergy -= (float) give;
-        if (give > 0) setChanged();
+        if (give > 0) markMachineChanged();
         return give;
     }
 
@@ -113,7 +115,9 @@ public class SolarGenBlockEntity extends AcademyContainerBlockEntity
         if (tag.contains("storedEnergy")) {
             this.storedEnergy = MachineStateSanitizer.clampFinite(tag.getFloat("storedEnergy"), MAX_STORAGE);
         }
-        deserializeEnergy(tag);
+        // The fractional value is authoritative; accept the old integer key
+        // only when loading a save without it.
+        else if (tag.contains("if_energy")) storedEnergy = Math.clamp(tag.getInt("if_energy"), 0, MAX_STORAGE);
     }
 
     @Override
@@ -137,7 +141,7 @@ public class SolarGenBlockEntity extends AcademyContainerBlockEntity
     public SolarStatus getStatus() {
         if (level == null) return SolarStatus.STOPPED;
         long time = level.getDayTime() % 24000;
-        if (time > 12500) return SolarStatus.STOPPED;
+        if (time < 0 || time > 12500 || !level.canSeeSky(worldPosition.above())) return SolarStatus.STOPPED;
         if (level.isRaining() || level.isThundering()) return SolarStatus.WEAK;
         return SolarStatus.STRONG;
     }

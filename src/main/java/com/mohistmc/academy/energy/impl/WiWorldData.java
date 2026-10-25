@@ -46,14 +46,14 @@ public class WiWorldData extends SavedData {
         );
         // Callers may create/link a network before the next server tick. Every
         // virtual block lookup requires the owning level immediately.
-        data.level = level;
+        data.bindLevel(level);
         return data;
     }
 
     public static WiWorldData getNonCreate(ServerLevel level) {
         var existing = level.getDataStorage().get(FACTORY, DATA_ID);
         if (existing != null) {
-            existing.level = level;
+            existing.bindLevel(level);
         }
         return existing;
     }
@@ -71,7 +71,36 @@ public class WiWorldData extends SavedData {
 
     Level level;
 
+    private final Map<Long, Set<WirelessNet>> networksByChunk = new HashMap<>();
+    private final Map<Long, Set<NodeConn>> nodesByChunk = new HashMap<>();
+    private final Set<WirelessNet> activeNetworks = new HashSet<>();
+    private final Set<NodeConn> activeNodes = new HashSet<>();
+
     public WiWorldData() {}
+
+    private void bindLevel(ServerLevel owner) {
+        if (level == owner) return;
+        level = owner;
+        activeNetworks.clear();
+        activeNodes.clear();
+        for (WirelessNet net : netList) {
+            net.level = owner;
+            if (net.ownerLoaded()) activeNetworks.add(net);
+        }
+        for (NodeConn conn : nodeList) if (conn.ownerLoaded()) activeNodes.add(conn);
+    }
+
+    /** Chunk lifecycle changes only visit the owners indexed in that chunk. */
+    void chunkStateChanged(long key, boolean loaded) {
+        var nets = networksByChunk.get(key);
+        if (nets != null) { if (loaded) activeNetworks.addAll(nets); else activeNetworks.removeAll(nets); }
+        var nodes = nodesByChunk.get(key);
+        if (nodes != null) { if (loaded) activeNodes.addAll(nodes); else activeNodes.removeAll(nodes); }
+    }
+
+    void queueRemoval(WirelessNet net) { toRemove.add(net); }
+    void queueRemoval(NodeConn conn) { nToRemove.add(conn); }
+
 
     private void load(CompoundTag tag, HolderLookup.Provider provider) {
         if (tag.contains("net")) {
@@ -88,7 +117,7 @@ public class WiWorldData extends SavedData {
 
     final Map<Object, WirelessNet> netLookup = new HashMap<>();
     final Set<WirelessNet> netList = new HashSet<>();
-    private final List<WirelessNet> toRemove = new ArrayList<>();
+    private final Set<WirelessNet> toRemove = new HashSet<>();
 
     boolean createNetwork(IWirelessMatrix matrix, String ssid, String password) {
         VWMatrix vm = new VWMatrix(matrix);
@@ -99,6 +128,7 @@ public class WiWorldData extends SavedData {
 
         WirelessNet net = new WirelessNet(this, vm, ssid, password);
         doAddNetwork(net);
+        setDirty();
         return true;
     }
 
@@ -164,12 +194,18 @@ public class WiWorldData extends SavedData {
 
     private void doRemoveNetwork(WirelessNet net) {
         netList.remove(net);
+        activeNetworks.remove(net);
+        var owners = networksByChunk.get(net.ownerChunk());
+        if (owners != null && owners.remove(net) && owners.isEmpty()) networksByChunk.remove(net.ownerChunk());
         net.onCleanup(this);
+        setDirty();
     }
 
     private void doAddNetwork(WirelessNet net) {
         net.level = level;
         netList.add(net);
+        networksByChunk.computeIfAbsent(net.ownerChunk(), key -> new HashSet<>()).add(net);
+        if (net.ownerLoaded()) activeNetworks.add(net);
         net.onCreate(this);
     }
 
@@ -196,7 +232,7 @@ public class WiWorldData extends SavedData {
 
     final Map<Object, NodeConn> nodeLookup = new HashMap<>();
     final Set<NodeConn> nodeList = new HashSet<>();
-    private final List<NodeConn> nToRemove = new ArrayList<>();
+    private final Set<NodeConn> nToRemove = new HashSet<>();
 
     public NodeConn getNodeConnection(IWirelessNode node) {
         if (!(node instanceof BlockEntity)) return null;
@@ -204,6 +240,7 @@ public class WiWorldData extends SavedData {
         NodeConn ret = privateGetNodeConn(vnn);
         if (ret == null) {
             doAddNode(ret = new NodeConn(this, vnn));
+            setDirty();
         }
         return ret;
     }
@@ -235,12 +272,18 @@ public class WiWorldData extends SavedData {
 
     private void doAddNode(NodeConn conn) {
         nodeList.add(conn);
+        nodesByChunk.computeIfAbsent(conn.ownerChunk(), key -> new HashSet<>()).add(conn);
+        if (conn.ownerLoaded()) activeNodes.add(conn);
         conn.onAdded(this);
     }
 
     private void doRemoveNode(NodeConn conn) {
         nodeList.remove(conn);
+        activeNodes.remove(conn);
+        var owners = nodesByChunk.get(conn.ownerChunk());
+        if (owners != null && owners.remove(conn) && owners.isEmpty()) nodesByChunk.remove(conn.ownerChunk());
         conn.onCleanup(this);
+        setDirty();
     }
 
     private void loadNode(CompoundTag tag) {
@@ -274,7 +317,7 @@ public class WiWorldData extends SavedData {
         }
         toRemove.clear();
 
-        for (WirelessNet net : netList) {
+        for (WirelessNet net : new ArrayList<>(activeNetworks)) {
             if (net.isDisposed()) {
                 toRemove.add(net);
             } else {
@@ -291,7 +334,7 @@ public class WiWorldData extends SavedData {
         nToRemove.clear();
 
         // A provider callback may create a connection while this tick runs.
-        for (NodeConn conn : new ArrayList<>(nodeList)) {
+        for (NodeConn conn : new ArrayList<>(activeNodes)) {
             if (conn.isDisposed()) {
                 nToRemove.add(conn);
             } else {
@@ -315,8 +358,4 @@ public class WiWorldData extends SavedData {
         return tag;
     }
 
-    @Override
-    public boolean isDirty() {
-        return true;
-    }
 }

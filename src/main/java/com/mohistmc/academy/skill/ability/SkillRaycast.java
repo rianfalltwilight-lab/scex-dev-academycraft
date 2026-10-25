@@ -35,7 +35,7 @@ public final class SkillRaycast {
     public static <T extends Entity> Trace<T> traceEntities(ServerPlayer player, Class<T> type,
             Vec3 from, Vec3 intendedEnd, Predicate<? super T> eligible) {
         var level = player.serverLevel();
-        var block = level.clip(new ClipContext(from, intendedEnd, ClipContext.Block.COLLIDER,
+        var block = LoadedRaycast.clip(level, new ClipContext(from, intendedEnd, ClipContext.Block.COLLIDER,
                 ClipContext.Fluid.NONE, player));
         boolean blocked = block.getType() == HitResult.Type.BLOCK;
         Vec3 end = blocked ? block.getLocation() : intendedEnd;
@@ -61,7 +61,7 @@ public final class SkillRaycast {
 
     /** Melee requires both entities in the same level and an unobstructed eye-to-eye segment. */
     public static boolean hasClearPath(LivingEntity from, LivingEntity to) {
-        return from.level() == to.level() && from.level().clip(new ClipContext(
+        return from.level() == to.level() && LoadedRaycast.clip(from.level(), new ClipContext(
                 from.getEyePosition(), to.getEyePosition(), ClipContext.Block.COLLIDER,
                 ClipContext.Fluid.NONE, from)).getType() == HitResult.Type.MISS;
     }

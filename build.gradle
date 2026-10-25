@@ -28,6 +28,7 @@ sourceSets.main.resources {
 }
 
 repositories {
+    mavenCentral()
     // Official JEI Maven. JEI remains compile-only and optional at runtime.
     maven { url = 'https://maven.blamejared.com' }
 }
@@ -199,7 +200,7 @@ configurations {
 }
 
 dependencies {
-    testImplementation platform('org.junit:junit-bom:5.9.2')
+    testImplementation platform('org.junit:junit-bom:5.11.4')
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testImplementation 'com.google.code.gson:gson:2.10.1'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
@@ -248,6 +249,24 @@ tasks.register('auditTestJar', Jar) {
     archiveClassifier = 'audit-tests'
     from sourceSets.auditTest.output
 }
+
+// NeoForge loads each mod as a Java module: a probe cannot share a package with the release mod.
+tasks.register('verifyAuditPackageIsolation') {
+    dependsOn tasks.named('classes'), tasks.named('auditTestClasses')
+    doLast {
+        def packages = { dirs ->
+            dirs.files.collectMany { dir ->
+                fileTree(dir).matching { include '**/*.class' }.files.collect { file ->
+                    dir.toPath().relativize(file.parentFile.toPath()).toString()
+                }
+            }.toSet()
+        }
+        def overlap = packages(sourceSets.main.output.classesDirs).intersect(packages(sourceSets.auditTest.output.classesDirs))
+        if (!overlap.empty) throw new GradleException("Audit probe JAR has split module packages: ${overlap}")
+    }
+}
+tasks.named('auditTestJar').configure { dependsOn tasks.named('verifyAuditPackageIsolation') }
+tasks.named('check').configure { dependsOn tasks.named('verifyAuditPackageIsolation') }
 
 // Legacy 1.0.7 achievement graph. Every generated criterion is awarded only by
 // LegacyAdvancementBridge after its authoritative server-side condition succeeds.

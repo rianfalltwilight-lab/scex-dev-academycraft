@@ -207,6 +207,7 @@ public abstract class DevMachineBase extends BaseEntityBlock implements IDevMach
             List<SubBlockPos> subList = getRotatedSubBlocks(dir);
             for (SubBlockPos sub : subList) {
                 BlockPos subPos = pos.offset(sub.dx, sub.dy, sub.dz);
+                if (!com.mohistmc.academy.world.block.LoadedMachineChunks.contains(level, subPos)) continue;
                 BlockEntity subBe = level.getBlockEntity(subPos);
                 if (subBe instanceof IDevSubStructure s) {
                     UUID subId = s.getStructureId();
@@ -245,11 +246,29 @@ public abstract class DevMachineBase extends BaseEntityBlock implements IDevMach
 
         for (SubBlockPos sub : subList) {
             BlockPos subPos = pos.offset(sub.dx, sub.dy, sub.dz);
-            if (!context.getLevel().isEmptyBlock(subPos)) {
+            if (!com.mohistmc.academy.world.block.LoadedMachineChunks.contains(context.getLevel(), subPos) || !context.getLevel().isEmptyBlock(subPos)) {
                 return null;
             }
         }
 
         return state;
+    }
+    @Override
+    public void tick(BlockState state, net.minecraft.server.level.ServerLevel level, BlockPos pos,
+                     net.minecraft.util.RandomSource random) {
+        if (!(level.getBlockEntity(pos) instanceof IDevStructure main) || main.getStructureId() == null) return;
+        for (var offset : getRotatedSubBlocks(state.getValue(FACING).getOpposite())) {
+            BlockPos part = pos.offset(offset.dx(), offset.dy(), offset.dz());
+            if (!com.mohistmc.academy.world.block.LoadedMachineChunks.contains(level, part)) { level.scheduleTick(pos, this, 20); return; }
+        }
+        for (var offset : getRotatedSubBlocks(state.getValue(FACING).getOpposite())) {
+            BlockPos part = pos.offset(offset.dx(), offset.dy(), offset.dz());
+            if (!(level.getBlockEntity(part) instanceof IDevSubStructure sub)
+                    || DevMachineSubBase.validatedMainForProxy(level, part, getStructureSubBlock(), sub)
+                    != level.getBlockEntity(pos)) {
+                level.destroyBlock(pos, true);
+                return;
+            }
+        }
     }
 }

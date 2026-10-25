@@ -25,7 +25,12 @@ import net.minecraft.world.phys.Vec3;
 
 /** Eight-block continuous IF mining beam with server-side permission checks. */
 public final class LaserGunItem extends ExtraEnergyItem {
+    private static final java.util.Set<java.util.UUID> BREAKING = new java.util.HashSet<>();
     public LaserGunItem() { super(100_000, 200); }
+
+    @Override public boolean isCorrectToolForDrops(ItemStack stack, BlockState state) {
+        return !state.is(net.minecraft.tags.BlockTags.INCORRECT_FOR_DIAMOND_TOOL);
+    }
 
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
@@ -45,6 +50,7 @@ public final class LaserGunItem extends ExtraEnergyItem {
             stop(stack);
             return;
         }
+        if (BREAKING.contains(player.getUUID())) return;
         if (!player.getAbilities().instabuild && !consume(stack, 2)) {
             stop(stack);
             return;
@@ -53,32 +59,56 @@ public final class LaserGunItem extends ExtraEnergyItem {
         Vec3 start = player.getEyePosition();
         Vec3 direction = player.getLookAngle().normalize();
         Vec3 end = start.add(direction.scale(8));
-        BlockHitResult result = level.clip(new ClipContext(start, end,
+        BlockHitResult result = com.mohistmc.academy.skill.ability.LoadedRaycast.clip(level, new ClipContext(start, end,
                 ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, player));
         double beamLength = result.getType() == HitResult.Type.MISS ? 8 : start.distanceTo(result.getLocation());
         ExtraItemActions.beam((ServerLevel) level, start, direction, beamLength);
-        if (result.getType() != HitResult.Type.BLOCK) {
+        if (result.getType() != HitResult.Type.BLOCK || !level.isLoaded(result.getBlockPos())) {
             ExtraItemData.setHarvest(stack, null, 0);
             return;
         }
         BlockPos pos = result.getBlockPos();
         BlockState state = level.getBlockState(pos);
         float hardness = state.getDestroySpeed(level, pos);
-        if (hardness < 0 || state.isAir() || !player.mayUseItemAt(pos, result.getDirection(), stack)) {
+        if (hardness < 0 || state.isAir() || !isCorrectToolForDrops(stack, state)
+                || !player.getAbilities().mayBuild || !player.mayInteract(level,pos) || !level.mayInteract(player,pos)
+                || !player.mayUseItemAt(pos, result.getDirection(), stack)) {
             ExtraItemData.setHarvest(stack, null, 0);
             return;
         }
-        float progress = pos.equals(ExtraItemData.harvestPos(stack))
+        float progress = pos.equals(ExtraItemData.harvestPos(stack)) && state.toString().equals(ExtraItemData.harvestState(stack))
                 ? ExtraItemData.harvestProgress(stack) + 0.2F : 0.2F;
         if (progress + 1.0e-5F < hardness) {
-            ExtraItemData.setHarvest(stack, pos, progress);
+            ExtraItemData.setHarvest(stack, pos, progress, state.toString());
             return;
         }
-        if (player.gameMode.destroyBlock(pos)) {
-            level.playSound(null, pos, SoundEvents.GENERIC_EXPLODE.value(),
-                    SoundSource.BLOCKS, 0.18F, 1.8F);
-        }
         ExtraItemData.setHarvest(stack, null, 0);
+        BREAKING.add(player.getUUID());
+        try {
+            if (harvest((ServerLevel)level, player, stack, pos, state)) {
+                level.playSound(null, pos, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.BLOCKS, 0.18F, 1.8F);
+            }
+        } finally { BREAKING.remove(player.getUUID()); }
+    }
+
+    /** Vanilla harvest callbacks with a state/ownership recheck after the cancellable break event. */
+    private boolean harvest(ServerLevel level, ServerPlayer player, ItemStack stack, BlockPos pos, BlockState expected) {
+        var event=net.neoforged.neoforge.common.CommonHooks.fireBlockBreak(level,player.gameMode.getGameModeForPlayer(),player,pos,expected);
+        if(event.isCanceled()||!player.isAlive()||player.level()!=level||player.getMainHandItem()!=stack
+                ||!ExtraItemData.isActive(stack)||!level.isLoaded(pos)||level.getBlockState(pos)!=expected
+                ||!player.getAbilities().mayBuild||!player.mayInteract(level,pos)||!level.mayInteract(player,pos)
+                ||player.blockActionRestricted(level,pos,player.gameMode.getGameModeForPlayer()))return false;
+        var block=expected.getBlock();
+        if(block instanceof net.minecraft.world.level.block.GameMasterBlock&&!player.canUseGameMasterBlocks())return false;
+        var blockEntity=level.getBlockEntity(pos);
+        BlockState state=block.playerWillDestroy(level,pos,expected,player);
+        if(level.getBlockState(pos)!=expected||state.getDestroySpeed(level,pos)<0)return false;
+        boolean drops=!player.hasInfiniteMaterials()&&state.canHarvestBlock(level,pos,player);
+        ItemStack tool=stack.copy();
+        if(!state.onDestroyedByPlayer(level,pos,player,drops,level.getFluidState(pos)))return false;
+        block.destroy(level,pos,state);
+        if(drops)block.playerDestroy(level,player,pos,state,blockEntity,tool);
+        return true;
     }
 
     private static void stop(ItemStack stack) {

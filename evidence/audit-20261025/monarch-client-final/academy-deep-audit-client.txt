@@ -1,0 +1,20 @@
+status=PASS
+PASS phase liquid still/flow atlas sprite=academy:block/black
+PASS dynamic cover owns pixels before invalidation, closes pixels and clears registry afterward
+PASS railgun arcs: 144 renders in one tick preserve alpha; 10 game ticks consume 10 lifetime ticks
+PASS client session: dimension reset rejects stale ack; actual logout releases connection/session/revision and preserves request sequence
+PASS shared penetration preview: positive/negative coordinates, actual thin-pane shapes, last-safe wall exit and one-block range; local fixture restored, no player move or packet
+PASS AIM actual renderLabels: ContainerData 37 -> 12400 -> 8 renders 37/10000 IF -> 10000/10000 IF -> 8/10000 IF, including capacity clamp and next discharge without config responses
+PASS actual HUD render: four icons remain inside bottom edge; screen mask maps full 512x288 source to current GUI dimensions
+PASS actual media row clicks: external file accepted without disc unlock; locked builtin row remains rejected; zero-volume stream guard used
+PASS actual JOrbis construction: corrupt Ogg closes input; valid bundled Ogg stays open until AudioStream.close
+PASS developer client: 24-byte energy codec, current nonce accepted, stale nonce/spent session rejected, tick preserves authority over stale BE
+PASS actual settings render/click: clipped HUD row cannot toggle; same row in viewport toggles
+PASS actual skill selector at 320x180: first/last of 11 entries reachable through wheel hit boxes; viewport stays inside window
+PASS terminal actual skill click/render: learned and unlearned details display without developer type; no learning button
+PASS cat: 144 actual renders preserve pose/state; 500/0/200 IF/t produce 250/0/100 degrees per tick
+PASS real tutorial parser preserves text before/after nonempty and empty code fences
+PASS tutorial actual back-button draw/click share scaled bounds at 0.5x and 2x; outside point rejected
+PASS location actual 320x180 render/click/wheel: rows avoid footer, controls separate, all eight entries reachable
+PASS alive loop exists; death clears actual loop owner and HUD before server abort
+PASS 13 actual render frames; managed text requests=416; five restored entity renderers completed, caller pose preserved

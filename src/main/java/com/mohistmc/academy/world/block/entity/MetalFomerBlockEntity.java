@@ -40,6 +40,7 @@ public class MetalFomerBlockEntity extends AcademyContainerBlockEntity implement
     private double energy = 0;
     private Mode mode = Mode.PLATE;
     private MetalFormingRecipe current;
+    private net.minecraft.resources.ResourceLocation currentRecipeId;
     private int workCounter;
 
     private boolean clientWorking = false;
@@ -104,7 +105,7 @@ public class MetalFomerBlockEntity extends AcademyContainerBlockEntity implement
         if (!Double.isFinite(amt) || amt <= 0) return amt;
         double give = Math.min(amt, MAX_ENERGY - energy);
         energy += give;
-        setChanged();
+        if (give > 0) markMachineChanged();
         return amt - give;
     }
 
@@ -113,7 +114,7 @@ public class MetalFomerBlockEntity extends AcademyContainerBlockEntity implement
         if (!Double.isFinite(amt) || amt <= 0) return 0;
         double a = Math.min(amt, energy);
         energy -= a;
-        setChanged();
+        if (a > 0) markMachineChanged();
         return a;
     }
 
@@ -132,7 +133,7 @@ public class MetalFomerBlockEntity extends AcademyContainerBlockEntity implement
 
         current = null;
         workCounter = 0;
-        setChanged();
+        markMachineChanged();
     }
 
     // ==================== Tick ====================
@@ -140,6 +141,13 @@ public class MetalFomerBlockEntity extends AcademyContainerBlockEntity implement
     public void serverTick() {
         if (level == null || level.isClientSide) return;
 
+        // A datapack reload can replace the manager's recipe object while a
+        // job is in progress. Re-resolve before debiting or producing output.
+        if (current != null && (currentRecipeId == null || level.getRecipeManager().byKey(currentRecipeId)
+                .map(RecipeHolder::value).orElse(null) != current)) {
+            current = null;
+            workCounter = 0;
+        }
         if (current != null) {
             if (!isActionBlocked() && pullEnergy(CONSUME_PER_TICK) == CONSUME_PER_TICK) {
                 ++workCounter;
@@ -152,9 +160,11 @@ public class MetalFomerBlockEntity extends AcademyContainerBlockEntity implement
             }
         } else {
             if (++workCounter >= SEARCH_TICKS) {
-                current = level.getRecipeManager().getRecipeFor(AcademyRecipeTypes.METAL_FORMING.get(),
+                var selected = level.getRecipeManager().getRecipeFor(AcademyRecipeTypes.METAL_FORMING.get(),
                         new MetalFormingRecipeInput(getItems().get(SLOT_IN), mode), level)
-                        .map(RecipeHolder::value).orElse(null);
+                        .orElse(null);
+                current = selected == null ? null : selected.value();
+                currentRecipeId = selected == null ? null : selected.id();
                 workCounter = 0;
             }
         }
@@ -165,7 +175,7 @@ public class MetalFomerBlockEntity extends AcademyContainerBlockEntity implement
         if (w != lastWorking) {
             lastWorking = w;
             clientWorking = w;
-            setChanged();
+            markMachineChanged();
             level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), Block.UPDATE_ALL);
         }
     }
@@ -186,7 +196,7 @@ public class MetalFomerBlockEntity extends AcademyContainerBlockEntity implement
         }
         current = null;
         workCounter = 0;
-        setChanged();
+        markMachineChanged();
     }
 
     public boolean isActionBlocked() {
@@ -197,9 +207,7 @@ public class MetalFomerBlockEntity extends AcademyContainerBlockEntity implement
 
         ItemStack result = current.getOutput(level.registryAccess());
         if (result.isEmpty()) return true;
-        return !(out.isEmpty()
-                || (out.getItem() == result.getItem()
-                    && out.getCount() + result.getCount() <= out.getMaxStackSize()));
+        return !ImagFusorBlockEntity.canAcceptOutput(out, result);
     }
 
     private void chargeFromSlot() {
@@ -235,27 +243,28 @@ public class MetalFomerBlockEntity extends AcademyContainerBlockEntity implement
         @NotNull
         @Override
         public ItemStack getStackInSlot(int slot) {
-            return getItems().get(slots[slot]);
+            return validIndex(slot) ? getItems().get(slots[slot]) : ItemStack.EMPTY;
         }
 
         @NotNull
         @Override
         public ItemStack insertItem(int slot, @NotNull ItemStack stack, boolean simulate) {
-            if (stack.isEmpty() || !isItemValid(slot, stack)) return stack;
+            if (!validIndex(slot) || stack.isEmpty() || !isItemValid(slot, stack)) return stack;
             ItemStack existing = getItems().get(slots[slot]);
             if (existing.isEmpty()) {
-                if (!simulate) {
-                    getItems().set(slots[slot], stack.copy());
-                    setChanged();
+                int moved = Math.min(stack.getCount(), Math.min(stack.getMaxStackSize(), getSlotLimit(slot)));
+                if (!simulate && moved > 0) {
+                    getItems().set(slots[slot], stack.copyWithCount(moved));
+                    markMachineChanged();
                 }
-                return ItemStack.EMPTY;
+                return stack.copyWithCount(stack.getCount() - moved);
             }
             if (ItemStack.isSameItemSameComponents(existing, stack)) {
                 int canAdd = Math.min(stack.getCount(), existing.getMaxStackSize() - existing.getCount());
                 if (canAdd <= 0) return stack;
                 if (!simulate) {
                     existing.grow(canAdd);
-                    setChanged();
+                    markMachineChanged();
                 }
                 ItemStack left = stack.copy();
                 left.shrink(canAdd);
@@ -267,7 +276,7 @@ public class MetalFomerBlockEntity extends AcademyContainerBlockEntity implement
         @NotNull
         @Override
         public ItemStack extractItem(int slot, int amount, boolean simulate) {
-            if (!canExtract) return ItemStack.EMPTY;
+            if (!validIndex(slot) || !canExtract || amount <= 0) return ItemStack.EMPTY;
             ItemStack existing = getItems().get(slots[slot]);
             if (existing.isEmpty()) return ItemStack.EMPTY;
             int n = Math.min(amount, existing.getCount());
@@ -276,20 +285,22 @@ public class MetalFomerBlockEntity extends AcademyContainerBlockEntity implement
             if (!simulate) {
                 existing.shrink(n);
                 if (existing.isEmpty()) getItems().set(slots[slot], ItemStack.EMPTY);
-                setChanged();
+                markMachineChanged();
             }
             return out;
         }
 
         @Override
         public int getSlotLimit(int slot) {
-            return getItems().get(slots[slot]).getMaxStackSize();
+            return validIndex(slot) ? 64 : 0;
         }
 
         @Override
         public boolean isItemValid(int slot, @NotNull ItemStack stack) {
-            return MetalFomerBlockEntity.isSlotValid(MetalFomerBlockEntity.this.level, slots[slot], stack);
+            return validIndex(slot) && MetalFomerBlockEntity.isSlotValid(MetalFomerBlockEntity.this.level, slots[slot], stack);
         }
+
+        private boolean validIndex(int slot) { return slot >= 0 && slot < slots.length; }
     }
 
     /** 供 RegisterCapabilitiesEvent 按朝向返回物品栏能力 */

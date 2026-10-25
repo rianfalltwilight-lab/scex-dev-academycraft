@@ -120,7 +120,7 @@ public abstract class BaseNodeBlockEntity extends AcademyContainerBlockEntity im
         if (chargingIn || chargingOut) {
             // ItemStack energy can change while the node's net energy stays
             // constant (direct pass-through), so persist the inventory too.
-            setChanged();
+            markMachineChanged();
         }
         // The numbered node side textures are energy quarters, not a transfer
         // animation.  This distinction was fixed in the final 1.12.2 branch.
@@ -149,13 +149,11 @@ public abstract class BaseNodeBlockEntity extends AcademyContainerBlockEntity im
 
     @Override
     public void setEnergy(double value) {
-        this.energy = com.mohistmc.academy.energy.impl.EnergyBoundary.bounded(value, maxEnergy);
-        setChanged();
+        double bounded = com.mohistmc.academy.energy.impl.EnergyBoundary.bounded(value, maxEnergy);
+        if (Double.compare(energy, bounded) == 0) return;
+        this.energy = bounded;
+        markMachineChanged();
         updateEnergyModel();
-        // 节流同步到客户端，最多每秒刷新一次
-        if (level != null && !level.isClientSide() && level.getGameTime() % 20 == 0) {
-            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
-        }
     }
 
     @Override

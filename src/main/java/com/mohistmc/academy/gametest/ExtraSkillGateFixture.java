@@ -24,7 +24,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.Drowned;
+import com.mohistmc.academy.skill.ability.telekinesis.LiquidShadowEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -83,7 +83,7 @@ public final class ExtraSkillGateFixture {
         Entity projectile;
         ItemEntity incoming;
         boolean armed, activated, everSustained, everCharging, projectileGone, markedVictim, hardenHit;
-        boolean flightGranted, slowApplied;
+        boolean flightGranted, slowApplied, paperAction;
         int age, cooldownMax, paperMin = Integer.MAX_VALUE, airMin = 300, airMax, maxShadows;
         float cpStart, cpMin, cpMax, olStart, olMin, olMax, hpStart, hpMin, profStart;
         float targetStart, targetMin, targetEarly = Float.NaN, targetPreBurst = Float.NaN;
@@ -224,7 +224,7 @@ public final class ExtraSkillGateFixture {
                     f.environmentDamage = f.hpStart - player.getHealth();
                 } finally { player.serverLevel().getServer().setPvpAllowed(vanillaPvp); ACConfig.Server.PVP_ENABLED.set(acPvp); }
             }
-            case "perfect_paper" -> { /* Real held paper and normal PlayerTickEvent train the passive. */ }
+            case "perfect_paper" -> { /* First verify holding paper does not grant free training. */ }
         }
         sample(f); publish(f, null);
     }
@@ -234,6 +234,18 @@ public final class ExtraSkillGateFixture {
         Fixture f = fixture;
         try {
             f.age = (int) (f.player.serverLevel().getGameTime() - f.gameStart);
+            if (f.id.equals("perfect_paper") && !f.paperAction && f.age >= 20) {
+                require(Math.abs(f.data().getProficiency(f.skill) - f.profStart) < 0.000001,
+                        "holding paper granted free proficiency");
+                f.player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,
+                        new ItemStack(AcademyItems.PAPER_PLANE.get(), 2));
+                float before = f.data().getCurrentCp();
+                AcademyItems.PAPER_PLANE.get().use(f.player.level(), f.player,
+                        net.minecraft.world.InteractionHand.MAIN_HAND);
+                require(f.player.getMainHandItem().getCount() == 1 && f.data().getCurrentCp() < before - 200,
+                        "reinforced paper action did not consume one plane and pay CP");
+                f.paperAction = true;
+            }
             if (f.id.equals("psycho_harden") && f.sustained() && !f.hardenHit && f.age >= 8) {
                 f.hardenHit = true; float hp = f.player.getHealth(); f.player.invulnerableTime = 0;
                 // Explicit scripted self-damage follows the same Academy damage boundary as production skills.
@@ -271,10 +283,10 @@ public final class ExtraSkillGateFixture {
             if (f.age >= 65 && Float.isNaN(f.targetPreBurst)) f.targetPreBurst = f.target.getHealth();
         }
         if (f.id.equals("liquid_shadow")) {
-            var shadows = player.serverLevel().getEntitiesOfClass(Drowned.class, player.getBoundingBox().inflate(16),
+            var shadows = player.serverLevel().getEntitiesOfClass(LiquidShadowEntity.class, player.getBoundingBox().inflate(16),
                     e -> e.getTags().contains("academy_liquid_shadow_owner_" + player.getUUID()));
             f.maxShadows = Math.max(f.maxShadows, shadows.size());
-            for (Drowned shadow : shadows) require(Math.abs(shadow.getMaxHealth() - 100) < .01, "shadow max health differed");
+            for (LiquidShadowEntity shadow : shadows) require(Math.abs(shadow.getMaxHealth() - 100) < .01, "shadow max health differed");
         }
         f.activated |= switch (f.id) {
             case "perfect_paper" -> data.getProficiency(f.skill) > f.profStart;
@@ -293,7 +305,7 @@ public final class ExtraSkillGateFixture {
         require(f.activated, "production input/environment never activated: " + metrics(f));
         if (!passive(f.id) && !toggle(f.id) && !f.id.equals("paper_drill")) require(f.cooldownMax > 0, "no authoritative cooldown");
         switch (f.id) {
-            case "volcanic_ball", "air_blade", "bomber_lance" -> require(f.targetMin < f.targetStart, "ray did not hurt aligned target");
+            case "volcanic_ball", "air_blade", "bomber_lance" -> require(f.targetMin < f.targetStart, "flying projectile did not hurt aligned target");
             case "ascending_air" -> require(player.onGround() && f.hpStart-f.hpMin > 0 && f.hpStart-f.hpMin <= 7.55, "real landing was not capped at p=.5");
             case "airflow" -> require(f.airMin <= 20 && f.airMax >= 290 && f.cpMin < f.cpStart-20, "underwater low air was not replenished with CP");
             case "air_cooling" -> require(f.olMin < 160 && player.getHealth() <= f.hpStart, "cooling did not lower overload without healing");
@@ -322,8 +334,9 @@ public final class ExtraSkillGateFixture {
             case "cruise_bomb" -> require(count(player, Items.WATER_BUCKET) == 0 && count(player, Items.BUCKET) == 1
                     && f.targetMin < f.targetStart && data.getCooldownTicks(f.skill) > 0, "cruise material/acquisition/hit/toggle missing");
             case "overload_thinking" -> require(f.cpMax > f.cpStart+1000 && f.olMax >= 80, "thinking conversion missing");
-            case "perfect_paper" -> require(player.getMainHandItem().is(Items.PAPER)
-                    && data.getProficiency(f.skill) > f.profStart, "held-paper training missing");
+            case "perfect_paper" -> require(f.paperAction
+                    && Math.abs(data.getProficiency(f.skill) - f.profStart - .001F) < .00001,
+                    "paid paper action must grant exactly one proficiency increment");
             case "psycho_slam" -> require(f.targetMaxY > f.origin.y+.25 && f.targetMin < f.targetEarly-10,
                     "slam lift/second damage missing");
             case "psycho_harden" -> require(f.everSustained && f.slowApplied && f.hardenHit && f.hardenDamage == 0
@@ -372,12 +385,13 @@ public final class ExtraSkillGateFixture {
     }
     private static String metrics(Fixture f) {
         return String.format(Locale.ROOT,
-                "age=%d category=%s level=5 proficiency=%.5f->%.5f cp=%.2f[min=%.2f,max=%.2f,current=%.2f] ol=%.2f[min=%.2f,max=%.2f,current=%.2f] cooldownMax=%d hp=%.2f->%.2f target=%.2f->%.2f targetMove=%.3f targetMaxY=%.3f playerMove=%.3f air=%d..%d paperMin=%d paperNow=%d sustained=%s charging=%s projectilesCleared=%s shadowsMax=%d",
+                "age=%d category=%s level=5 proficiency=%.5f->%.5f cp=%.2f[min=%.2f,max=%.2f,current=%.2f] ol=%.2f[min=%.2f,max=%.2f,current=%.2f] cooldownMax=%d hp=%.2f->%.2f target=%.2f->%.2f targetMove=%.3f targetMaxY=%.3f playerMove=%.3f air=%d..%d paperMin=%d paperNow=%d sustained=%s charging=%s projectilesCleared=%s shadowsMax=%d yaw=%.2f pitch=%.2f",
                 f.age, category(f.id), f.profStart, f.data().getProficiency(f.skill), f.cpStart, f.cpMin, f.cpMax,
                 f.data().getCurrentCp(), f.olStart, f.olMin, f.olMax, f.data().getCurrentOverload(), f.cooldownMax,
                 f.hpStart, f.hpMin, f.targetStart, f.targetMin, f.targetMove, f.targetMaxY, f.playerMove,
                 f.airMin, f.airMax, f.paperMin, count(f.player, Items.PAPER), f.sustained(),
-                SkillChargingManager.isCharging(f.player.getUUID()), f.projectileGone, f.maxShadows);
+                SkillChargingManager.isCharging(f.player.getUUID()), f.projectileGone, f.maxShadows,
+                f.player.getYRot(), f.player.getXRot());
     }
     private static void require(boolean condition, String reason) { if (!condition) throw new IllegalStateException(reason); }
 }

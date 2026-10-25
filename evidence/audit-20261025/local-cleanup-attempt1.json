@@ -1,0 +1,1077 @@
+{
+  "root": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback",
+  "checked_utc": "2026-10-25T08:22:43.9518684Z",
+  "process_check": {
+    "exclusive_lock_acquired": true,
+    "checked_utc": "2026-10-25T08:22:48.8822651Z",
+    "recorded_processes": [
+      {
+        "pid_reused": false,
+        "run": "client-r1",
+        "started": "2026-10-25T16:54:01.0110101+09:00",
+        "pid": 24800,
+        "owned_process_alive": false
+      },
+      {
+        "pid_reused": false,
+        "run": "client-r2",
+        "started": "2026-10-25T16:56:10.5228983+09:00",
+        "pid": 85576,
+        "owned_process_alive": false
+      },
+      {
+        "pid_reused": false,
+        "run": "extra-r1",
+        "started": "2026-10-25T17:01:23.6477663+09:00",
+        "pid": 16924,
+        "owned_process_alive": false
+      },
+      {
+        "pid_reused": false,
+        "run": "extra-r2",
+        "started": "2026-10-25T17:10:26.6208777+09:00",
+        "pid": 73996,
+        "owned_process_alive": false
+      },
+      {
+        "pid_reused": false,
+        "run": "gt-r1",
+        "started": "2026-10-25T16:59:18.3882838+09:00",
+        "pid": 81648,
+        "owned_process_alive": false
+      },
+      {
+        "pid_reused": false,
+        "run": "gt-final",
+        "started": "2026-10-25T17:16:09.1919151+09:00",
+        "pid": 80084,
+        "owned_process_alive": false
+      },
+      {
+        "pid_reused": false,
+        "run": "client-final",
+        "started": "2026-10-25T17:18:47.6319326+09:00",
+        "pid": 83524,
+        "owned_process_alive": false
+      }
+    ],
+    "command_path_matches": 0
+  },
+  "error": "You do not have sufficient access rights to perform this operation or the item is hidden, system, or read only.",
+  "finished_utc": "2026-10-25T08:22:51.6497211Z",
+  "net_free_change_bytes": 1402187776,
+  "authorization": "Root message: 客户端证据已收齐，可以清理",
+  "files": 12457,
+  "logical_bytes": 1388177219.0,
+  "path_check": {
+    "resolved_root": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback",
+    "ancestor_reparse_points": 0,
+    "protected": [
+      "D:/Minecraft-Projects/academycraft-deep-audit-0.0.29-20261025",
+      "C:/Users/Win10/.gradle/caches",
+      "C:/Users/Win10/.cache/codex-runtimes",
+      "C:/Users/Win10/Documents/Codex/2026-09-29/gradle-ai-claude-maven-central-neoforge/work/jdk21"
+    ],
+    "base_manifest_sha256": "031019B874738C2ABA2723C15B9E8B9E2CCEFDD9D31F951909C9F44D505E033B",
+    "tree_reparse_points": 0,
+    "created_utc": "2026-10-25T07:44:58.4214901Z",
+    "runs": [
+      "client-final",
+      "client-r1",
+      "client-r2",
+      "extra-r1",
+      "extra-r2",
+      "gt-final",
+      "gt-r1"
+    ]
+  },
+  "removed": [
+    {
+      "logical_bytes": 1388177219.0,
+      "path": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback",
+      "kind": "owned-rebuildable-fallback"
+    }
+  ],
+  "host": "MONARCH",
+  "status": "FAILED",
+  "free_after": 54287794176,
+  "evidence": [
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\client-r1\\academy-deep-audit-client.txt",
+      "run": "client-r1",
+      "bytes": 679,
+      "sha256": "1907807EA5C2C25BB7D662F159116B8432E821A5BFD2AC9E05881CBE116A840D",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-r1\\academy-deep-audit-client.txt"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\client-r1\\client.classpath",
+      "run": "client-r1",
+      "bytes": 12447,
+      "sha256": "8BAC76E7F36D0EA903E346F50A716231A9F0D3511155C451DC920F016C8100DD",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-r1\\client.classpath"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\client-r1\\client.programargs",
+      "run": "client-r1",
+      "bytes": 431,
+      "sha256": "BA7EFEAAD20CD9BEB6DBCEB94E3D41AB4F0AE611D1FE6981252F82B350F67AE4",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-r1\\client.programargs"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\client-r1\\client.vmargs",
+      "run": "client-r1",
+      "bytes": 1643,
+      "sha256": "06D9DAFE77B8705A17723BC10F3A691D40498F9DD32C9110B1C8A9617697D385",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-r1\\client.vmargs"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\client-r1\\derived-launch.json",
+      "run": "client-r1",
+      "bytes": 13820,
+      "sha256": "4457789F9DF240F05A2EC5530FE209C7BEC71B76D2512777B1FC8C2D380B5C73",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-r1\\derived-launch.json"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\client-r1\\logs\\latest.log",
+      "run": "client-r1",
+      "bytes": 13380,
+      "sha256": "B1A4C498D4C2070EFD49F8EE481FB9008936A232222B1BF158DF7AC623DCBF4E",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-r1\\latest.log"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\client-r1\\memory-samples.json",
+      "run": "client-r1",
+      "bytes": 896,
+      "sha256": "5980624E99E7B3DBCA897BD6510288906010FF40EFA48E6218B87773001BED97",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-r1\\memory-samples.json"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\client-r1\\options.txt",
+      "run": "client-r1",
+      "bytes": 162,
+      "sha256": "4180E4ECB45E0F36EBC13F8162CAEE2FC81788EB9407D92FC5A134A5AA2FDD78",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-r1\\options.txt"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\client-r1\\process.json",
+      "run": "client-r1",
+      "bytes": 112,
+      "sha256": "A6A78D97EDA5B766E7DF41A396FE1F3D43C6857DCB7B837AE217DFAD30A44FFF",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-r1\\process.json"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\client-r1\\r9-artifacts.json",
+      "run": "client-r1",
+      "bytes": 433,
+      "sha256": "F1EB1F698D4D107171D7484B0A8D76696442148CDDDF7D9B275A6D8C78A0ACB5",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-r1\\r9-artifacts.json"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\client-r1\\result.json",
+      "run": "client-r1",
+      "bytes": 198,
+      "sha256": "DC2F663CD73D8E2BC66BE8A306CED2C975F7FE4776D168B934DD5C704353565F",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-r1\\result.json"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\client-r1\\runner.log",
+      "run": "client-r1",
+      "bytes": 423,
+      "sha256": "5AF94D150BF9BB317D152CC743CDC3052C0E5240392A4099F93C1BE267F3FFB7",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-r1\\runner.log"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\client-r1\\stderr.log",
+      "run": "client-r1",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-r1\\stderr.log"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\client-r1\\stdout.log",
+      "run": "client-r1",
+      "bytes": 10736,
+      "sha256": "F568608BB47A7A5DEB1276C439AEFFC417C6CA9347EC4EB75A429C0BEE38DC79",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-r1\\stdout.log"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\client-r1\\usercache.json",
+      "run": "client-r1",
+      "bytes": 112,
+      "sha256": "FF846202B48836B1BA0879C1C41FE1D68BA4AB9E9E4FD5F808C8D6DE78243439",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-r1\\usercache.json"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\client-r1\\usernamecache.json",
+      "run": "client-r1",
+      "bytes": 61,
+      "sha256": "950E485215F82A51A3C1F3F555A3AE11102DEECC83B612ED81A5431A2E953FE9",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-r1\\usernamecache.json"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\client-r2\\academy-deep-audit-client.txt",
+      "run": "client-r2",
+      "bytes": 2605,
+      "sha256": "C7A8E12C33C223EFBA44709F009422E72ED44985E9577F0A7559FAA0155896E5",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-r2\\academy-deep-audit-client.txt"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\client-r2\\client.classpath",
+      "run": "client-r2",
+      "bytes": 12447,
+      "sha256": "8BAC76E7F36D0EA903E346F50A716231A9F0D3511155C451DC920F016C8100DD",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-r2\\client.classpath"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\client-r2\\client.programargs",
+      "run": "client-r2",
+      "bytes": 431,
+      "sha256": "BA7EFEAAD20CD9BEB6DBCEB94E3D41AB4F0AE611D1FE6981252F82B350F67AE4",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-r2\\client.programargs"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\client-r2\\client.vmargs",
+      "run": "client-r2",
+      "bytes": 1643,
+      "sha256": "1C2062D77DE038440E57DFE4C428A39D9226EB1BBCF4E6EEBF0E0852C59495F9",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-r2\\client.vmargs"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\client-r2\\derived-launch.json",
+      "run": "client-r2",
+      "bytes": 13820,
+      "sha256": "A1C42AD7E59CE75C8E35C021E232FF8F78E10035E2AD81C7940FCBF93EB48252",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-r2\\derived-launch.json"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\client-r2\\logs\\latest.log",
+      "run": "client-r2",
+      "bytes": 13380,
+      "sha256": "9892371586CFC341A2608093A55DB735CA2BA2255E8A63B4D66CC8AB15FE7842",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-r2\\latest.log"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\client-r2\\memory-samples.json",
+      "run": "client-r2",
+      "bytes": 895,
+      "sha256": "6A9C3FA1F3546B627B50E1C289409C602B896045A4AC5554A5CD941208711655",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-r2\\memory-samples.json"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\client-r2\\options.txt",
+      "run": "client-r2",
+      "bytes": 162,
+      "sha256": "4180E4ECB45E0F36EBC13F8162CAEE2FC81788EB9407D92FC5A134A5AA2FDD78",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-r2\\options.txt"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\client-r2\\process.json",
+      "run": "client-r2",
+      "bytes": 112,
+      "sha256": "7D5727C9E4A9718E3BCDAEBE428FBF78EC08BFD2BEEC258516922AD5E230070F",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-r2\\process.json"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\client-r2\\r10-artifacts.json",
+      "run": "client-r2",
+      "bytes": 435,
+      "sha256": "1BD6CAAA2258B2643A1B43572B9F88CBE95304917331A54F978DA1567EAF081C",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-r2\\r10-artifacts.json"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\client-r2\\result.json",
+      "run": "client-r2",
+      "bytes": 197,
+      "sha256": "0DD3414CCAEAF587297A3F932CB707F51995436E01C593BC03BBF5720112B808",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-r2\\result.json"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\client-r2\\runner.log",
+      "run": "client-r2",
+      "bytes": 78,
+      "sha256": "F0E0EA44F2B86828E3781F63CFAF3200B0A201CEC43A8F2565BF3623A4C7050B",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-r2\\runner.log"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\client-r2\\stderr.log",
+      "run": "client-r2",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-r2\\stderr.log"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\client-r2\\stdout.log",
+      "run": "client-r2",
+      "bytes": 10736,
+      "sha256": "D0708ED54B756AE5A31B16651EB39BB653004A5B2CE4AE7AC7DA8DADB7010F47",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-r2\\stdout.log"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\client-r2\\usercache.json",
+      "run": "client-r2",
+      "bytes": 112,
+      "sha256": "9EAF98FC73A69597819EB41E8AD31A2F19DB76E7E1500E5ADC116FDD6EA5856C",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-r2\\usercache.json"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\client-r2\\usernamecache.json",
+      "run": "client-r2",
+      "bytes": 61,
+      "sha256": "950E485215F82A51A3C1F3F555A3AE11102DEECC83B612ED81A5431A2E953FE9",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-r2\\usernamecache.json"
+    },
+    {
+      "source": "coordinator visual review",
+      "run": "client-r2",
+      "bytes": 354,
+      "sha256": "A2809661F55972DD39B5274D7D26F332DFCB86127CFFF9EBD8648007C613EB5A",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-r2\\visual-review.json"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\client-r2\\screenshots\\deep-audit-render.png",
+      "run": "client-r2",
+      "bytes": 425899,
+      "sha256": "61887D906E4F38E2C1996A28EC4BD1DB2FCF8B7AE7A05CDEC14BE5ABA5956330",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-r2\\screenshots\\deep-audit-render.png"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\extra-r1\\academy-extra-skill-gate-result.txt",
+      "run": "extra-r1",
+      "bytes": 1765,
+      "sha256": "6465359C9E8E78A7865DD93F9A9B1C6460F033E05C8D3C302E41609683D52D58",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-extra-r1\\academy-extra-skill-gate-result.txt"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\extra-r1\\client.classpath",
+      "run": "extra-r1",
+      "bytes": 12447,
+      "sha256": "8BAC76E7F36D0EA903E346F50A716231A9F0D3511155C451DC920F016C8100DD",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-extra-r1\\client.classpath"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\extra-r1\\client.programargs",
+      "run": "extra-r1",
+      "bytes": 431,
+      "sha256": "BA7EFEAAD20CD9BEB6DBCEB94E3D41AB4F0AE611D1FE6981252F82B350F67AE4",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-extra-r1\\client.programargs"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\extra-r1\\client.vmargs",
+      "run": "extra-r1",
+      "bytes": 1642,
+      "sha256": "EA7BC8F358E4B3698981F3549EF0DC4CC147F953F2ACD1BE61FB413EDF392A18",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-extra-r1\\client.vmargs"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\extra-r1\\derived-launch.json",
+      "run": "extra-r1",
+      "bytes": 14112,
+      "sha256": "14C36BA4A8D358F196AE3FDF2428F7A58E6C4FCC0D54C4E7122FB27ED02B8A8C",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-extra-r1\\derived-launch.json"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\extra-r1\\logs\\latest.log",
+      "run": "extra-r1",
+      "bytes": 23685,
+      "sha256": "1D633C3D857C58D2CA84A11A104D2169E7EE494D090992A59CA3C5E79B4FD093",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-extra-r1\\latest.log"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\extra-r1\\memory-samples.json",
+      "run": "extra-r1",
+      "bytes": 1286,
+      "sha256": "40B7E953B6D3A5766F743E759C344A2CA7A99BD590C06528FC178321CAF714AE",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-extra-r1\\memory-samples.json"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\extra-r1\\options.txt",
+      "run": "extra-r1",
+      "bytes": 162,
+      "sha256": "4180E4ECB45E0F36EBC13F8162CAEE2FC81788EB9407D92FC5A134A5AA2FDD78",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-extra-r1\\options.txt"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\extra-r1\\process.json",
+      "run": "extra-r1",
+      "bytes": 112,
+      "sha256": "5DE48A9202F7BCA0CD4A7FD82FBA024CC3D80FBD15E84490824E164A3605A7F9",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-extra-r1\\process.json"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\extra-r1\\r10-artifacts.json",
+      "run": "extra-r1",
+      "bytes": 435,
+      "sha256": "1BD6CAAA2258B2643A1B43572B9F88CBE95304917331A54F978DA1567EAF081C",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-extra-r1\\r10-artifacts.json"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\extra-r1\\result.json",
+      "run": "extra-r1",
+      "bytes": 198,
+      "sha256": "6B6519A915B9D50F634F7A13DCA3ED5FF97A0E509A1E56C81B0D23972CE09EAB",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-extra-r1\\result.json"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\extra-r1\\runner.log",
+      "run": "extra-r1",
+      "bytes": 423,
+      "sha256": "5AF94D150BF9BB317D152CC743CDC3052C0E5240392A4099F93C1BE267F3FFB7",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-extra-r1\\runner.log"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\extra-r1\\stderr.log",
+      "run": "extra-r1",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-extra-r1\\stderr.log"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\extra-r1\\stdout.log",
+      "run": "extra-r1",
+      "bytes": 21323,
+      "sha256": "5C7462448E7994F8AA2DA4F1CE724119D8287A47AB172DB8667FD75BE24D3055",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-extra-r1\\stdout.log"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\extra-r1\\usercache.json",
+      "run": "extra-r1",
+      "bytes": 112,
+      "sha256": "AC220F278AE9B5E831B96A3D9F0F195597DEB7FBA35D79E91618FBBCAA413481",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-extra-r1\\usercache.json"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\extra-r1\\usernamecache.json",
+      "run": "extra-r1",
+      "bytes": 61,
+      "sha256": "950E485215F82A51A3C1F3F555A3AE11102DEECC83B612ED81A5431A2E953FE9",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-extra-r1\\usernamecache.json"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\extra-r1\\screenshots\\extra-01-volcanic_ball-early.png",
+      "run": "extra-r1",
+      "bytes": 262459,
+      "sha256": "B8B08C0D10FCACD62536AEA1B7F39E144D3E6ADFE6BFC7E39DE257B09BE044BC",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-extra-r1\\screenshots\\extra-01-volcanic_ball-early.png"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\extra-r1\\screenshots\\extra-01-volcanic_ball-end.png",
+      "run": "extra-r1",
+      "bytes": 201551,
+      "sha256": "BEC0B96D21F452507BB987651923EC359797CEBBE54D9A5F258557FFF278B81C",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-extra-r1\\screenshots\\extra-01-volcanic_ball-end.png"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\extra-r2\\academy-extra-skill-gate-result.txt",
+      "run": "extra-r2",
+      "bytes": 11310,
+      "sha256": "1E96716928E3F663473BDEE03BB3E05962E2A919D56E3805CEB4FFAEFDBDADB0",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-extra-r2\\academy-extra-skill-gate-result.txt"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\extra-r2\\client.classpath",
+      "run": "extra-r2",
+      "bytes": 12447,
+      "sha256": "8BAC76E7F36D0EA903E346F50A716231A9F0D3511155C451DC920F016C8100DD",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-extra-r2\\client.classpath"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\extra-r2\\client.programargs",
+      "run": "extra-r2",
+      "bytes": 431,
+      "sha256": "BA7EFEAAD20CD9BEB6DBCEB94E3D41AB4F0AE611D1FE6981252F82B350F67AE4",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-extra-r2\\client.programargs"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\extra-r2\\client.vmargs",
+      "run": "extra-r2",
+      "bytes": 1642,
+      "sha256": "6E0A7B07934C28520ACEEB4D14D1F2092D71F6E8D3CD4CB40B591633F9AF6924",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-extra-r2\\client.vmargs"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\extra-r2\\derived-launch.json",
+      "run": "extra-r2",
+      "bytes": 14112,
+      "sha256": "EBBB61AC24F7718323DFC1C4F6E6000DC9CF8DA5D0DFAF8EEF87444BFD1C5095",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-extra-r2\\derived-launch.json"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\extra-r2\\logs\\latest.log",
+      "run": "extra-r2",
+      "bytes": 36128,
+      "sha256": "0A378CD748A83CC835FE38E65A23B0369C598C089FEF7B0B3E46F1F84B2B379C",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-extra-r2\\latest.log"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\extra-r2\\memory-samples.json",
+      "run": "extra-r2",
+      "bytes": 2096,
+      "sha256": "3986B325AA200A6355EB51DA59207D100B9352A6B6F159A8AA25EA07859AC5E9",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-extra-r2\\memory-samples.json"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\extra-r2\\options.txt",
+      "run": "extra-r2",
+      "bytes": 162,
+      "sha256": "4180E4ECB45E0F36EBC13F8162CAEE2FC81788EB9407D92FC5A134A5AA2FDD78",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-extra-r2\\options.txt"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\extra-r2\\process.json",
+      "run": "extra-r2",
+      "bytes": 112,
+      "sha256": "CA2804084427AA64678339413C31B779D405A3685989B5FE5F098652CBF334AA",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-extra-r2\\process.json"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\extra-r2\\r11-artifacts.json",
+      "run": "extra-r2",
+      "bytes": 435,
+      "sha256": "DB3EF79539923D749D780D37386FD33A900F60DA3F138700B9A408FA7D2C2340",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-extra-r2\\r11-artifacts.json"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\extra-r2\\result.json",
+      "run": "extra-r2",
+      "bytes": 197,
+      "sha256": "89BECE9B09A5F1A2B498955E25DFC76F30B3E73A37C307BF65E18B05CF464CCD",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-extra-r2\\result.json"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\extra-r2\\runner.log",
+      "run": "extra-r2",
+      "bytes": 78,
+      "sha256": "F0E0EA44F2B86828E3781F63CFAF3200B0A201CEC43A8F2565BF3623A4C7050B",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-extra-r2\\runner.log"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\extra-r2\\stderr.log",
+      "run": "extra-r2",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-extra-r2\\stderr.log"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\extra-r2\\stdout.log",
+      "run": "extra-r2",
+      "bytes": 30594,
+      "sha256": "93034BDC33A04C0CD62DA40021E94C9F537E38DDD5DE24CCA315B3602609A9A1",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-extra-r2\\stdout.log"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\extra-r2\\usercache.json",
+      "run": "extra-r2",
+      "bytes": 112,
+      "sha256": "2693ECF04559B12D5F3736CCE3057948BB0752DF1A365071C1BB95BC6AE92B3F",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-extra-r2\\usercache.json"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\extra-r2\\usernamecache.json",
+      "run": "extra-r2",
+      "bytes": 61,
+      "sha256": "950E485215F82A51A3C1F3F555A3AE11102DEECC83B612ED81A5431A2E953FE9",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-extra-r2\\usernamecache.json"
+    },
+    {
+      "source": "coordinator visual review",
+      "run": "extra-r2",
+      "bytes": 649,
+      "sha256": "DE9A76282B1BD7F182988DA72E10D8D5CAEAF182561165285C5CC367142B77FA",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-extra-r2\\visual-review.json"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\extra-r2\\screenshots\\extra-01-volcanic_ball-early.png",
+      "run": "extra-r2",
+      "bytes": 241266,
+      "sha256": "336F9DCB608CDC70A2F22F536034BC73931D7910A5F65EB4A038BA1C3BC54168",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-extra-r2\\screenshots\\extra-01-volcanic_ball-early.png"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\extra-r2\\screenshots\\extra-01-volcanic_ball-end.png",
+      "run": "extra-r2",
+      "bytes": 231091,
+      "sha256": "796554FC61ECA2C372FBFD8F65B5A4468184583CC1E4DC7A1A11FCC5F00A0998",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-extra-r2\\screenshots\\extra-01-volcanic_ball-end.png"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\extra-r2\\screenshots\\extra-02-air_blade-early.png",
+      "run": "extra-r2",
+      "bytes": 210343,
+      "sha256": "D4ADE8561B59925B15B81B59EA77FE7EDECBBB4CFF9ECEF846A107C2D51A092C",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-extra-r2\\screenshots\\extra-02-air_blade-early.png"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\extra-r2\\screenshots\\extra-02-air_blade-end.png",
+      "run": "extra-r2",
+      "bytes": 201796,
+      "sha256": "5E2A072FC47D120F538B8D0BBCC171FEFA816B6CE97DA06E7CBA6822990E3621",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-extra-r2\\screenshots\\extra-02-air_blade-end.png"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\extra-r2\\screenshots\\extra-03-bomber_lance-early.png",
+      "run": "extra-r2",
+      "bytes": 168190,
+      "sha256": "1BA23FFB730DC33FF1CF67A63FCEBFBFE90D78F8E60F59935D523E03A10763C1",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-extra-r2\\screenshots\\extra-03-bomber_lance-early.png"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\extra-r2\\screenshots\\extra-03-bomber_lance-end.png",
+      "run": "extra-r2",
+      "bytes": 185044,
+      "sha256": "3454020664B8A37D958264F39F7932C6C12D590FF458DE0AD9283C45F7758A7F",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-extra-r2\\screenshots\\extra-03-bomber_lance-end.png"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\extra-r2\\screenshots\\extra-04-cruise_bomb-early.png",
+      "run": "extra-r2",
+      "bytes": 168951,
+      "sha256": "1D14D044F354CD9F9503145351EC76521E35E6A2E3D1E0A9D1EDE8A5983AB49D",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-extra-r2\\screenshots\\extra-04-cruise_bomb-early.png"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\extra-r2\\screenshots\\extra-04-cruise_bomb-end.png",
+      "run": "extra-r2",
+      "bytes": 167184,
+      "sha256": "2B9082765844EB1F1732876C4127A52D38C0E5E88DCDEDD126B2F4254A2B18CE",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-extra-r2\\screenshots\\extra-04-cruise_bomb-end.png"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\extra-r2\\screenshots\\extra-04-cruise_bomb-middle.png",
+      "run": "extra-r2",
+      "bytes": 168309,
+      "sha256": "F06591763ECED4CE096246075EAC2836B9E77AB4D284DED0B1658258800EB0D8",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-extra-r2\\screenshots\\extra-04-cruise_bomb-middle.png"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\extra-r2\\screenshots\\extra-05-liquid_shadow-early.png",
+      "run": "extra-r2",
+      "bytes": 174749,
+      "sha256": "72A40A8F58E2036D63DD3F90E9D242EA929FCC9A9E170CCB83E6515749A695B5",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-extra-r2\\screenshots\\extra-05-liquid_shadow-early.png"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\extra-r2\\screenshots\\extra-05-liquid_shadow-end.png",
+      "run": "extra-r2",
+      "bytes": 170260,
+      "sha256": "4C5B9FF6C1C426F05479FB1B544DA820A9C5DFCBEF36C4CBF6067A6572AF84B6",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-extra-r2\\screenshots\\extra-05-liquid_shadow-end.png"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\extra-r2\\screenshots\\extra-05-liquid_shadow-middle.png",
+      "run": "extra-r2",
+      "bytes": 167930,
+      "sha256": "008986FBF369ACB2474F79EF815F55C54B7125C8B7479F63C78B340511DDD8DE",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-extra-r2\\screenshots\\extra-05-liquid_shadow-middle.png"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\extra-r2\\screenshots\\extra-06-perfect_paper-early.png",
+      "run": "extra-r2",
+      "bytes": 163144,
+      "sha256": "B726B1411A1C9F0895BD7755C911EB148AD86BD33C039E7CB32E5AFA8DC778D6",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-extra-r2\\screenshots\\extra-06-perfect_paper-early.png"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\extra-r2\\screenshots\\extra-06-perfect_paper-end.png",
+      "run": "extra-r2",
+      "bytes": 164733,
+      "sha256": "00D3917D63C2958906BF960C24FF57DB336DF74D3F09B17B42794B87E0B5B027",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-extra-r2\\screenshots\\extra-06-perfect_paper-end.png"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\extra-r2\\screenshots\\extra-06-perfect_paper-middle.png",
+      "run": "extra-r2",
+      "bytes": 164734,
+      "sha256": "85A32EED93195631BBEA03589284AD3FC75ACCC38D885C221333B42A617D3EDC",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-extra-r2\\screenshots\\extra-06-perfect_paper-middle.png"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\gt-r1\\derived-launch.json",
+      "run": "gt-r1",
+      "bytes": 13700,
+      "sha256": "D8AF145D268AEADD865FE797B41B3A24248E4D716F964D07F3EFD5848159AEBC",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-gt-r1\\derived-launch.json"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\gt-r1\\eula.txt",
+      "run": "gt-r1",
+      "bytes": 9,
+      "sha256": "94169D86BECDFCCBB25AB7800C7FFEC69ABA470FBC1A7E4604E36833AB2EEB8F",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-gt-r1\\eula.txt"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\gt-r1\\logs\\latest.log",
+      "run": "gt-r1",
+      "bytes": 209991,
+      "sha256": "B935A9A754D66828FCBE55AAB861356F362D982CB1A72C41E418A8768447D026",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-gt-r1\\latest.log"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\gt-r1\\memory-samples.json",
+      "run": "gt-r1",
+      "bytes": 3386,
+      "sha256": "AB3D090EAF046CAFEEAF75590D5A0F675449A31CE301D09FFC849240C4800ED1",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-gt-r1\\memory-samples.json"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\gt-r1\\process.json",
+      "run": "gt-r1",
+      "bytes": 207,
+      "sha256": "5EF645C022BB9BED5D072E865AC8CAAB6496D38E2C240CF9300025D41065F90B",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-gt-r1\\process.json"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\gt-r1\\r10-artifacts.json",
+      "run": "gt-r1",
+      "bytes": 435,
+      "sha256": "1BD6CAAA2258B2643A1B43572B9F88CBE95304917331A54F978DA1567EAF081C",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-gt-r1\\r10-artifacts.json"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\gt-r1\\result.json",
+      "run": "gt-r1",
+      "bytes": 407,
+      "sha256": "10C00FF1D1064B8075B9DD254115D703A33F028CD69DDDA108433B14543FA8A8",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-gt-r1\\result.json"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\gt-r1\\runner.log",
+      "run": "gt-r1",
+      "bytes": 78,
+      "sha256": "F0E0EA44F2B86828E3781F63CFAF3200B0A201CEC43A8F2565BF3623A4C7050B",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-gt-r1\\runner.log"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\gt-r1\\server.classpath",
+      "run": "gt-r1",
+      "bytes": 12447,
+      "sha256": "8BAC76E7F36D0EA903E346F50A716231A9F0D3511155C451DC920F016C8100DD",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-gt-r1\\server.classpath"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\gt-r1\\server.programargs",
+      "run": "gt-r1",
+      "bytes": 215,
+      "sha256": "954FF74BFC077A1C9279480FFFEE8EC5741B4E617B1119AFB0259C8604BFA340",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-gt-r1\\server.programargs"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\gt-r1\\server.vmargs",
+      "run": "gt-r1",
+      "bytes": 1817,
+      "sha256": "BAA937D9ADC3D429E4CB4DEFDD826AF6146E7A59865E642D218E0D417F14F7F6",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-gt-r1\\server.vmargs"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\gt-r1\\stderr.log",
+      "run": "gt-r1",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-gt-r1\\stderr.log"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\gt-r1\\stdout.log",
+      "run": "gt-r1",
+      "bytes": 174934,
+      "sha256": "57FFD496913662382AD86FDDFD19AC4CD512D8792F08472F6C58B65A361BFDD5",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-gt-r1\\stdout.log"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\gt-r1\\usernamecache.json",
+      "run": "gt-r1",
+      "bytes": 18251,
+      "sha256": "3EDB73E93324B2E5FE0E59DE7812DEB0157FB0CE8C5F95C7A1C6B6A7FAC8AEF9",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-gt-r1\\usernamecache.json"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\gt-final\\artifacts-final.json",
+      "run": "gt-final",
+      "bytes": 439,
+      "sha256": "8CC1A46D38AC79A28A6C264243C865B87FA737E221A29E92E82E5ABCA392613D",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-gt-final\\artifacts-final.json"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\gt-final\\derived-launch.json",
+      "run": "gt-final",
+      "bytes": 13709,
+      "sha256": "2933BC19B9A6E14B44A9F9BFF2937A459265F004FF6C3156764B7A79197E9A67",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-gt-final\\derived-launch.json"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\gt-final\\eula.txt",
+      "run": "gt-final",
+      "bytes": 9,
+      "sha256": "94169D86BECDFCCBB25AB7800C7FFEC69ABA470FBC1A7E4604E36833AB2EEB8F",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-gt-final\\eula.txt"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\gt-final\\logs\\latest.log",
+      "run": "gt-final",
+      "bytes": 210781,
+      "sha256": "685B04F1CD41124DB67CD8A348004056E808A1B0543BD3D5D5C8E8608DCA97DF",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-gt-final\\latest.log"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\gt-final\\memory-samples.json",
+      "run": "gt-final",
+      "bytes": 3786,
+      "sha256": "4788FD19D62538ED9C806E9FDF44C6AA0A08FE533B795506EA39DA0652028323",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-gt-final\\memory-samples.json"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\gt-final\\process.json",
+      "run": "gt-final",
+      "bytes": 210,
+      "sha256": "FE067F14A26C38975883A99DB77566F16CB3DBE96B4FCD9171136B009584B2D1",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-gt-final\\process.json"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\gt-final\\result.json",
+      "run": "gt-final",
+      "bytes": 407,
+      "sha256": "6EAF792B6F48CE92EB461F05F4EAE2751ACF1317396671331CBB92415A342CF3",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-gt-final\\result.json"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\gt-final\\runner.log",
+      "run": "gt-final",
+      "bytes": 78,
+      "sha256": "F0E0EA44F2B86828E3781F63CFAF3200B0A201CEC43A8F2565BF3623A4C7050B",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-gt-final\\runner.log"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\gt-final\\server.classpath",
+      "run": "gt-final",
+      "bytes": 12447,
+      "sha256": "8BAC76E7F36D0EA903E346F50A716231A9F0D3511155C451DC920F016C8100DD",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-gt-final\\server.classpath"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\gt-final\\server.programargs",
+      "run": "gt-final",
+      "bytes": 215,
+      "sha256": "954FF74BFC077A1C9279480FFFEE8EC5741B4E617B1119AFB0259C8604BFA340",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-gt-final\\server.programargs"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\gt-final\\server.properties",
+      "run": "gt-final",
+      "bytes": 1445,
+      "sha256": "F4C43D859B44AF44DFA5C40CDE25310C7071DCCD4ABB2A2F7ED9A1B76F9D2E88",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-gt-final\\server.properties"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\gt-final\\server.vmargs",
+      "run": "gt-final",
+      "bytes": 1820,
+      "sha256": "A29F241AF18C7AFD7709D5582BCFCBC78729FC9464E305DB99C115A11CF30331",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-gt-final\\server.vmargs"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\gt-final\\stderr.log",
+      "run": "gt-final",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-gt-final\\stderr.log"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\gt-final\\stdout.log",
+      "run": "gt-final",
+      "bytes": 175468,
+      "sha256": "A2E81F3A43FB54C9DBF8FB8C812B80CB50C84F57C1E9E575C16E0864C74746E5",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-gt-final\\stdout.log"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\gt-final\\usernamecache.json",
+      "run": "gt-final",
+      "bytes": 18251,
+      "sha256": "76DAD4E18ACEDD2AA047D4AE2018F7E39DFAD83D8FF3CA7167D4B3F253D9EABE",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-gt-final\\usernamecache.json"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\client-final\\academy-deep-audit-client.txt",
+      "run": "client-final",
+      "bytes": 2242,
+      "sha256": "8D504B11AC964ADAD35563BCA6635788485F83800811D338F03195620D8C74FA",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-final\\academy-deep-audit-client.txt"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\client-final\\artifacts-final.json",
+      "run": "client-final",
+      "bytes": 439,
+      "sha256": "8CC1A46D38AC79A28A6C264243C865B87FA737E221A29E92E82E5ABCA392613D",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-final\\artifacts-final.json"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\client-final\\client.classpath",
+      "run": "client-final",
+      "bytes": 12447,
+      "sha256": "8BAC76E7F36D0EA903E346F50A716231A9F0D3511155C451DC920F016C8100DD",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-final\\client.classpath"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\client-final\\client.programargs",
+      "run": "client-final",
+      "bytes": 431,
+      "sha256": "BA7EFEAAD20CD9BEB6DBCEB94E3D41AB4F0AE611D1FE6981252F82B350F67AE4",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-final\\client.programargs"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\client-final\\client.vmargs",
+      "run": "client-final",
+      "bytes": 1646,
+      "sha256": "7B15BBE6980091CFA317E72C9C0AE8C4F4B6311729EE9BEE23DD8CF3E3124382",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-final\\client.vmargs"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\client-final\\derived-launch.json",
+      "run": "client-final",
+      "bytes": 13829,
+      "sha256": "D3D2E785473D805F3A79B5311E83D1A981DF3239FACB3E5A2D77F25B0F5A4AC3",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-final\\derived-launch.json"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\client-final\\logs\\latest.log",
+      "run": "client-final",
+      "bytes": 13381,
+      "sha256": "F96BEC77CC86D3A1E63B32CFC6A1C7D3849AA2CD63AF5AB023B3C7E1D24A9C38",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-final\\latest.log"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\client-final\\memory-samples.json",
+      "run": "client-final",
+      "bytes": 995,
+      "sha256": "2AB0ADFE97C8BFB1689ACBE7789A301815EFADF219E41CD7614A050DFA43826D",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-final\\memory-samples.json"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\client-final\\options.txt",
+      "run": "client-final",
+      "bytes": 162,
+      "sha256": "4180E4ECB45E0F36EBC13F8162CAEE2FC81788EB9407D92FC5A134A5AA2FDD78",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-final\\options.txt"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\client-final\\process.json",
+      "run": "client-final",
+      "bytes": 112,
+      "sha256": "F060999B9D088D7425F19C3F510B6F4B21768E5A0D1F1B56263364A56172340B",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-final\\process.json"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\client-final\\result.json",
+      "run": "client-final",
+      "bytes": 197,
+      "sha256": "08E6DE8107C347382B7E9871843A692BC4BE9334D3C30E526E716A194F8B00B1",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-final\\result.json"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\client-final\\runner.log",
+      "run": "client-final",
+      "bytes": 78,
+      "sha256": "F0E0EA44F2B86828E3781F63CFAF3200B0A201CEC43A8F2565BF3623A4C7050B",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-final\\runner.log"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\client-final\\stderr.log",
+      "run": "client-final",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-final\\stderr.log"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\client-final\\stdout.log",
+      "run": "client-final",
+      "bytes": 10737,
+      "sha256": "029A057B4798D1AFF78466B5F82898CBE2D8E2AD7D11B52FEE44127326D0CC7B",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-final\\stdout.log"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\client-final\\usercache.json",
+      "run": "client-final",
+      "bytes": 112,
+      "sha256": "CD72544612F64D986F615FCA410F0328512BA8A3516F603D92C0D0073C2FBD29",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-final\\usercache.json"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\client-final\\usernamecache.json",
+      "run": "client-final",
+      "bytes": 61,
+      "sha256": "950E485215F82A51A3C1F3F555A3AE11102DEECC83B612ED81A5431A2E953FE9",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-final\\usernamecache.json"
+    },
+    {
+      "source": "coordinator visual review",
+      "run": "client-final",
+      "bytes": 544,
+      "sha256": "85895F47BFEF36EC5FE090761CB40F0D24C128235DAEEC7B9B59A84806C0F71A",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-final\\visual-review.json"
+    },
+    {
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runs\\client-final\\screenshots\\deep-audit-render.png",
+      "run": "client-final",
+      "bytes": 424710,
+      "sha256": "AF5EA2B86E2EE078A09A930A3F6ADAA0C404D5DA9740C8C2A93C5489BC4389CC",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\monarch-client-final\\screenshots\\deep-audit-render.png"
+    },
+    {
+      "bytes": 217,
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\asset-cache-copy.json",
+      "sha256": "0F497DC90E0C6926D5CFC7F6B0AB4DBC92AFB2671134410CF8B792DA612B207E",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\runtime\\asset-cache-copy.json"
+    },
+    {
+      "bytes": 9802,
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\asset-cache-validation.json",
+      "sha256": "47EBE48DA7E97619F12C5BAC9F29E644116B110857615F8ECD7D2CC5B9488753",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\runtime\\asset-cache-validation.json"
+    },
+    {
+      "bytes": 335,
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\base-validation.json",
+      "sha256": "BB358B6FE3D3AB0C1344FF9DA73B65BA7195E2774F5352204355496FF8A230D9",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\runtime\\base-validation.json"
+    },
+    {
+      "bytes": 501,
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\runner-preparation-validation.json",
+      "sha256": "94133A24A3807D503CE127E3467E9CBB82939372B2D1B1FAAB835A931F902DB6",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\runtime\\runner-preparation-validation.json"
+    },
+    {
+      "bytes": 310,
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\gametest-runner-preparation-validation.json",
+      "sha256": "6387D5EA035FC791BE66DCDF65C546FB6887A3DC14773656D69A39E7C86A6C75",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\runtime\\gametest-runner-preparation-validation.json"
+    },
+    {
+      "bytes": 127,
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\transfer-cleanup.json",
+      "sha256": "AF7B03FAC2E4A4A4B98D1098D03EF0EE00E6FE6654F87AADEFBA86E978E44F6D",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\runtime\\transfer-cleanup.json"
+    },
+    {
+      "bytes": 1897,
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\PREPARATION.md",
+      "sha256": "6F8E429A58E028F621F7FAA7ED88A6A5F8CF5A1A34BB7FBFF7F27AB9C05B10B7",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\runtime\\PREPARATION.md"
+    },
+    {
+      "bytes": 8079,
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\run-audit-gametests-monarch.ps1",
+      "sha256": "5839DD51D6C79E585AB76C198BF8F4D2FD98347587BD04CD740E681827FC0ED6",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\runtime\\run-audit-gametests-monarch.ps1"
+    },
+    {
+      "bytes": 6978,
+      "source": "D:\\SCEX-Work\\academycraft-deep-audit\\20261025-local-fallback\\run-deep-audit-client-monarch.ps1",
+      "sha256": "BC54966DA95D1D42B43CC8B926B97DB5F8DC4605D4BA9AB4B706141BB6C9E4CD",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\runtime\\run-deep-audit-client-monarch.ps1"
+    },
+    {
+      "source": "compact original transfer plan summary",
+      "sha256": "14392E0D4122704B952AF66D9E83F560606F407237D2C7BB7F0B4B78D78832D6",
+      "path": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\evidence\\audit-20261025\\runtime\\fallback-transfer-summary.json"
+    }
+  ],
+  "free_before": 52885606400
+}

@@ -27,7 +27,8 @@ final class TeleporterLegacySourceContractTest {
 
     @Test
     void penetrateAndMarkKeepTheirExactLegacyScanners() throws Exception {
-        String penetrate = source("skill/ability/teleporter/PenetrateTeleportEffect.java");
+        String penetrate = source("skill/ability/teleporter/PenetrateTargeting.java");
+        String release = source("skill/ability/teleporter/PenetrateTeleportEffect.java");
         String input = source("client/KeyInputHandler.java");
         String renderer = source("client/render/LegacyAbilityPresentationRenderer.java");
         String mark = source("skill/ability/teleporter/MarkTeleportEffect.java");
@@ -37,6 +38,11 @@ final class TeleporterLegacySourceContractTest {
         assertTrue(penetrate.contains("stage != 1"));
         assertTrue(penetrate.contains("Vec3 cursor = player.position()"),
                 "final 1.12.2 penetration scan starts at the player's feet");
+        assertTrue(release.contains("PenetrateTargeting.destination(player, data, requestedDistance)")
+                        && renderer.contains("PenetrateTargeting.destination(mc.player,data,"),
+                "authority and preview must use the same collision/last-safe scan");
+        assertTrue(penetrate.contains("TeleportDestinations.isSafe") && penetrate.contains("lastSafe"));
+        assertFalse(renderer.contains("clientHasPlace"), "preview must not reintroduce truncated block-only coordinates");
         assertTrue(input.contains("MouseScrollingEvent")
                         && input.contains("getPenetrateDistance")
                         && renderer.contains("KeyInputHandler.getPenetrateDistance(data)"),

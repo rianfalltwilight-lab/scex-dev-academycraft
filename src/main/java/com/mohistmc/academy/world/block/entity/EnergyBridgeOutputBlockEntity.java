@@ -7,11 +7,16 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.capabilities.BlockCapabilityCache;
+import net.minecraft.server.level.ServerLevel;
+import java.util.EnumMap;
 import net.neoforged.neoforge.energy.IEnergyStorage;
 
 /** IF output bridge: receives wireless IF and pushes/exposes wired FE. */
 public final class EnergyBridgeOutputBlockEntity extends EnergyBridgeBlockEntity
         implements IWirelessReceiver {
+    private final EnumMap<Direction, BlockCapabilityCache<IEnergyStorage, Direction>> neighbors =
+            new EnumMap<>(Direction.class);
     private final IEnergyStorage external = new IEnergyStorage() {
         @Override public int receiveEnergy(int amount, boolean simulate) { return 0; }
         @Override public int extractEnergy(int amount, boolean simulate) {
@@ -30,16 +35,29 @@ public final class EnergyBridgeOutputBlockEntity extends EnergyBridgeBlockEntity
     public IEnergyStorage externalEnergy() { return external; }
 
     public void serverTick() {
-        if (level == null || level.isClientSide() || getStoredFe() <= 0) return;
+        if (!(level instanceof ServerLevel server) || isRemoved() || getStoredFe() <= 0) return;
         for (Direction direction : Direction.values()) {
             if (getStoredFe() <= 0) break;
-            IEnergyStorage target = level.getCapability(Capabilities.EnergyStorage.BLOCK,
-                    worldPosition.relative(direction), direction.getOpposite());
+            if (!com.mohistmc.academy.world.block.LoadedMachineChunks.contains(server, worldPosition.relative(direction))) continue;
+            IEnergyStorage target = neighbors.computeIfAbsent(direction, side ->
+                    BlockCapabilityCache.create(Capabilities.EnergyStorage.BLOCK, server,
+                            worldPosition.relative(side), side.getOpposite(),
+                            () -> !isRemoved() && getLevel() == server, () -> {})).getCapability();
             if (target == null || !target.canReceive()) continue;
             int offered = getStoredFe();
             int accepted = Math.clamp(target.receiveEnergy(offered, false), 0, offered);
             if (accepted > 0) extractExternalFe(accepted, false);
         }
+    }
+
+    @Override public void setRemoved() {
+        neighbors.clear();
+        super.setRemoved();
+    }
+
+    @Override public void onChunkUnloaded() {
+        neighbors.clear();
+        super.onChunkUnloaded();
     }
 
     @Override public double getRequiredEnergy() {

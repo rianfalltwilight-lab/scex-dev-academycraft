@@ -13,7 +13,7 @@ public interface IFEnergyStorage {
 
     default int extractEnergy(int maxExtract, boolean simulate) {
         int stored = getEnergyStored();
-        int extracted = Math.min(stored, maxExtract);
+        int extracted = Math.min(Math.max(0, stored), Math.max(0, maxExtract));
         if (!simulate && extracted > 0) {
             setEnergy(stored - extracted);
         }
@@ -23,7 +23,7 @@ public interface IFEnergyStorage {
     default int receiveEnergy(int maxReceive, boolean simulate) {
         int stored = getEnergyStored();
         int max = getMaxEnergyStored();
-        int received = Math.min(max - stored, maxReceive);
+        int received = Math.min(Math.max(0, max - stored), Math.max(0, maxReceive));
         if (!simulate && received > 0) {
             setEnergy(stored + received);
         }

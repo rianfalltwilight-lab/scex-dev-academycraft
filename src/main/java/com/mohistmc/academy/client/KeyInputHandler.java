@@ -491,8 +491,8 @@ public class KeyInputHandler {
         float maximum = penetrateMaximum(data);
         float selected = Float.isFinite(penetrateDistance)
                 ? Math.clamp(penetrateDistance, .5f, maximum) : maximum;
-        if (!data.isDevMode()) selected = Math.min(selected,
-                data.getCurrentCp() / Math.max(.0001f, 14 - 5 * data.getProficiency("penetrate_teleport")));
+        selected = (float) Math.min(selected,
+                com.mohistmc.academy.skill.ability.teleporter.PenetrateTargeting.maximumDistance(data));
         return Math.max(0, selected);
     }
 

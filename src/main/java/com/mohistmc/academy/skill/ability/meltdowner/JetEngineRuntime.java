@@ -1,5 +1,7 @@
 package com.mohistmc.academy.skill.ability.meltdowner;
 
+import com.mohistmc.academy.skill.ability.LoadedRaycast;
+
 import com.mohistmc.academy.AcademyCraft;
 import com.mohistmc.academy.skill.AbilityInterferenceService;
 import com.mohistmc.academy.skill.AcademyAttachments;
@@ -109,8 +111,7 @@ public final class JetEngineRuntime {
         // Also require neighboring chunks consulted for protruding block shapes. Refuse an
         // unexpected long jump instead of letting a changed player position trigger an unbounded scan.
         if (swept.getXsize() > 32 || swept.getZsize() > 32
-                || !level.hasChunksAt(BlockPos.containing(swept.minX - 1, swept.minY - 1, swept.minZ - 1),
-                        BlockPos.containing(swept.maxX + 1, swept.maxY + 1, swept.maxZ + 1))) return false;
+                || !LoadedRaycast.isAreaLoaded(level, swept.inflate(1))) return false;
         Vec3 center = box.getCenter();
         Vec3 end = center.add(movement);
         // Sweep the player's full box along the straight teleport segment against each voxel box.
@@ -126,7 +127,7 @@ public final class JetEngineRuntime {
     }
 
     private static LivingEntity firstLiving(ServerPlayer player, Vec3 from, Vec3 to) {
-        HitResult block = player.serverLevel().clip(new ClipContext(from, to,
+        HitResult block = LoadedRaycast.clip(player.serverLevel(), new ClipContext(from, to,
                 ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
         double best = block.getType() == HitResult.Type.MISS
                 ? from.distanceToSqr(to) : from.distanceToSqr(block.getLocation());

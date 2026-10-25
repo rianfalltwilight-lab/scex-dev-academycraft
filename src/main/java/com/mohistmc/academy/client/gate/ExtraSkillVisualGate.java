@@ -39,7 +39,7 @@ public final class ExtraSkillVisualGate {
     private static long began = System.nanoTime();
     private static volatile boolean busy;
     private static volatile String failure, serverLine;
-    private static boolean early, middle, burst, end, projectileView;
+    private static boolean early, middle, burst, end, projectileView, trackedClientEntity;
     private static String pendingCapture;
     private static volatile boolean captured;
     private static final List<String> CASES = selectedCases();
@@ -67,6 +67,10 @@ public final class ExtraSkillVisualGate {
                 if (mc.player == null || mc.level == null || mc.getOverlay() != null || mc.getSingleplayerServer() == null) return;
                 if (++worldTicks < 120) return; // Exceed actual fresh-player damage protection before any scenario.
                 if (mc.screen != null) mc.player.closeContainer();
+                // This isolated camera fixture must not inherit physical mouse deltas
+                // while the user continues working in another desktop window.
+                mc.options.pauseOnLostFocus = false;
+                mc.mouseHandler.releaseMouse();
                 evidence("fixture=isolated integrated survival player; level5/prelearned skills; devMode=false; not an unlock/progression proof");
                 evidence("input=programmatically injected KeyMapping state handled by normal client key edges, not physical keyboard operation");
                 enter(Stage.PREPARE); return;
@@ -89,6 +93,17 @@ public final class ExtraSkillVisualGate {
             if (stage == Stage.DOWN || stage == Stage.OBSERVE) {
                 var current = ExtraSkillGateFixture.observation();
                 if (current != null && current.testCase().equals(id()) && current.activated()) {
+                    String expectedType = trackedEntityType();
+                    if (!trackedClientEntity && expectedType != null) {
+                        var tracked = mc.level.getEntitiesOfClass(net.minecraft.world.entity.Entity.class,
+                                mc.player.getBoundingBox().inflate(32), entity -> expectedType.equals(
+                                        net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).toString()));
+                        if (!tracked.isEmpty()) {
+                            trackedClientEntity = true;
+                            evidence("TRACKED_CLIENT_ENTITY " + expectedType + " id=" + tracked.getFirst().getId()
+                                    + " tick=" + tracked.getFirst().tickCount + " position=" + tracked.getFirst().position());
+                        }
+                    }
                     if (activatedAt < 0) activatedAt = ticks;
                     if (projectileCase() && !projectileView) {
                         // Direction is already fixed at launch. Observe the flight off axis, clear
@@ -117,12 +132,15 @@ public final class ExtraSkillVisualGate {
                 case PREPARE -> {
                     release(mc);
                     if (mc.screen != null) mc.player.closeContainer();
-                    early = middle = burst = end = projectileView = false; activatedAt = -1; serverLine = null;
+                    early = middle = burst = end = projectileView = trackedClientEntity = false; activatedAt = -1; serverLine = null;
                     mc.options.setCameraType(selfView(id()) ? CameraType.THIRD_PERSON_BACK : CameraType.FIRST_PERSON);
                     server(mc, player -> ExtraSkillGateFixture.prepare(player, id())); enter(Stage.WAIT_PREPARE);
                 }
                 case WAIT_PREPARE -> { if (!busy) enter(Stage.SYNC); }
                 case SYNC -> {
+                    // Allow normal player movement packets to carry the fixed aim before
+                    // sending the skill edge; setting it only on the arming tick raced it.
+                    mc.player.setYRot(0); mc.player.setXRot(id().equals("air_jet") ? -20 : 0);
                     var data = mc.player.getData(AcademyAttachments.PLAYER_ABILITY);
                     String skill = ExtraSkillGateFixture.skill(id());
                     if (age < 20 || mc.screen != null || mc.getOverlay() != null
@@ -132,7 +150,14 @@ public final class ExtraSkillVisualGate {
                     mc.player.setYRot(0); mc.player.setXRot(id().equals("air_jet") ? -20 : 0);
                     evidence("SYNC " + id() + " category=" + data.getCurrentAbility() + " level=" + data.getPlayerLevel()
                             + " slot=" + (ExtraSkillGateFixture.passive(id()) ? "passive" : slot()) + " skill=" + skill);
-                    server(mc, ExtraSkillGateFixture::arm); enter(Stage.WAIT_ARM);
+                    server(mc, player -> {
+                        float pitch = id().equals("air_jet") ? -20 : 0;
+                        require(Math.abs(net.minecraft.util.Mth.wrapDegrees(player.getYRot())) < .05
+                                        && Math.abs(player.getXRot() - pitch) < .05,
+                                "server has not received fixed fixture aim: yaw=" + player.getYRot() + " pitch=" + player.getXRot());
+                        ExtraSkillGateFixture.arm(player);
+                    });
+                    enter(Stage.WAIT_ARM);
                 }
                 case WAIT_ARM -> {
                     if (busy) return;
@@ -177,6 +202,7 @@ public final class ExtraSkillVisualGate {
                     }
                     if (pendingCapture != null) return;
                     require(!projectileCase() || middle, "moving client projectile was not captured");
+                    require(trackedEntityType() == null || trackedClientEntity, "server entity never reached client tracking");
                     server(mc, player -> serverLine = ExtraSkillGateFixture.finish(player)); enter(Stage.WAIT_FINISH);
                 }
                 case WAIT_FINISH -> {
@@ -195,6 +221,13 @@ public final class ExtraSkillVisualGate {
         }
     }
     private static String id() { return CASES.get(index); }
+    private static String trackedEntityType() {
+        return switch (id()) {
+            case "volcanic_ball", "air_blade", "bomber_lance" -> "academy:aero_" + id();
+            case "cruise_bomb", "liquid_shadow" -> "academy:" + id();
+            default -> null;
+        };
+    }
     private static boolean projectileCase() {
         return List.of("psycho_throwing", "psycho_throwing_plain", "psycho_needling").contains(id());
     }

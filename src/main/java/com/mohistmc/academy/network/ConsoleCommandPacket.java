@@ -45,6 +45,7 @@ public record ConsoleCommandPacket(BlockPos pos, String command) implements Cust
     public static void handle(ConsoleCommandPacket packet, IPayloadContext context) {
         context.enqueueWork(() -> {
             if (!(context.player() instanceof ServerPlayer player)) return;
+            if (!PayloadRateLimiter.allow(player.getUUID(), "dev_console", player.serverLevel().getGameTime(), 20, 4)) return;
 
             Level level = player.level();
             DevAdvancedMenu advancedMenu = player.containerMenu instanceof DevAdvancedMenu candidate
@@ -56,7 +57,7 @@ public record ConsoleCommandPacket(BlockPos pos, String command) implements Cust
             boolean matchingNormal = normalMenu != null && normalMenu.pos != null
                     && packet.pos().equals(normalMenu.pos) && normalMenu.stillValid(player);
             if ((!matchingAdvanced && !matchingNormal)
-                    || !level.isLoaded(packet.pos())
+                    || !com.mohistmc.academy.skill.ability.LoadedRaycast.isLoaded(level, packet.pos())
                     || player.distanceToSqr(packet.pos().getX() + 0.5, packet.pos().getY() + 0.5,
                     packet.pos().getZ() + 0.5) > 64.0
                     || !level.mayInteract(player, packet.pos())) {

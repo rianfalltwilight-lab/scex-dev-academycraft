@@ -22,7 +22,6 @@ public class WirelessNet {
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    private static final int UPDATE_INTERVAL = 40;
     private static final double BUFFER_MAX = 2000;
 
     private final WiWorldData data;
@@ -82,12 +81,17 @@ public class WirelessNet {
     // ==================== Accessors ====================
 
     public String getSSID() { return ssid; }
-    public void setSSID(String ssid) { if (ssid != null && ssid.length() <= 64) this.ssid = ssid; }
+    public void setSSID(String ssid) {
+        if (ssid != null && ssid.length() <= 64 && !ssid.equals(this.ssid)) {
+            this.ssid = ssid;
+            data.setDirty();
+        }
+    }
     public String getPassword() { return password; }
 
     public boolean resetPassword(String np) {
         if (np == null || np.length() > 64) return false;
-        password = np;
+        if (!np.equals(password)) { password = np; data.setDirty(); }
         return true;
     }
 
@@ -96,6 +100,8 @@ public class WirelessNet {
     }
 
     public boolean isDisposed() { return disposed; }
+    long ownerChunk() { return matrix.chunkKey(); }
+    boolean ownerLoaded() { return matrix.isLoaded(level); }
 
     public int getLoad() { return nodes.size(); }
 
@@ -111,7 +117,10 @@ public class WirelessNet {
     // ==================== 生命周期 ====================
 
     void dispose() {
+        if (disposed) return;
         disposed = true;
+        data.queueRemoval(this);
+        data.setDirty();
     }
 
     void onCreate(WiWorldData data) {
@@ -196,7 +205,7 @@ public class WirelessNet {
 
     void removeNodeImmediately(VWNode node) {
         data.netLookup.remove(node, this);
-        nodes.remove(node);
+        if (nodes.remove(node)) data.setDirty();
         toRemoveNodes.remove(node);
     }
 
@@ -206,7 +215,7 @@ public class WirelessNet {
         if (matrix.isLoaded(level)) {
             IWirelessMatrix mat = matrix.get(level);
             if (mat == null) {
-                disposed = true;
+                dispose();
             }
         }
         return !disposed;
@@ -280,7 +289,7 @@ public class WirelessNet {
         for (VWNode node : toRemoveNodes) {
             data.netLookup.remove(node, this);
         }
-        nodes.removeAll(toRemoveNodes);
+        if (nodes.removeAll(toRemoveNodes)) data.setDirty();
         toRemoveNodes.clear();
 
         // Buffered energy remains available even when every node has drained.
@@ -306,8 +315,11 @@ public class WirelessNet {
             delta = Math.clamp(delta, buffer - BUFFER_MAX, buffer);
 
             transferLeft -= Math.abs(delta);
-            buffer = EnergyBoundary.bounded(buffer - delta, BUFFER_MAX);
-            node.setEnergy(cur + delta);
+            if (delta != 0) {
+                buffer = EnergyBoundary.bounded(buffer - delta, BUFFER_MAX);
+                node.setEnergy(cur + delta);
+                data.setDirty();
+            }
 
             if (transferLeft == 0) break;
         }
