@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "minVersion": "0.8.7",
+  "package": "com.mohistmc.academy.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "LivingEntityAbilityBoundaryMixin",
+    "CommonHooksAbilityDeathMixin"
+  ],
+  "client": [],
+  "injectors": { "defaultRequire": 1 }
+}
