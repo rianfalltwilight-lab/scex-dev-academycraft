@@ -57,7 +57,8 @@ public record SetSkillSlotPacket(int presetIndex, int slotIndex, String skillId)
             } else {
                 com.mohistmc.academy.skill.Skill skill = SkillRegistry.getSkill(data.getCurrentAbility(), skillId);
                 if (skill == null || skill.getType() != com.mohistmc.academy.skill.SkillType.ACTIVE
-                        || !data.hasLearnedSkill(skillId)) return;
+                        || !data.hasLearnedSkill(skillId)
+                        || !PlayerAbilityData.skillEnabled(skillId)) return;
                 // Legacy PresetEditUI never offered a skill the preset already holds; the
                 // client list mirrors that, but a raced or crafted packet must not bind one
                 // skill to two keys.
