@@ -825,9 +825,12 @@ public final class AcademyServerGameTests {
         base.getItems().set(0, unit);
         base.setEnergy(1000);
         base.tick(false, false, false, basePos.getY());
-        if (com.mohistmc.academy.capability.EnergyItemHelper.getEnergy(unit) != 300
-                || base.getEnergyStored() != 700) {
-            helper.fail("wind base exceeded 1.0.7 300 IF/t item-charge bandwidth"); return;
+        // The base offers its 300 IF/t bandwidth, but the energy unit itself
+        // accepts only its legacy 20 IF per charge call (ItemEnergyBase(10000, 20)).
+        if (com.mohistmc.academy.capability.EnergyItemHelper.getEnergy(unit)
+                != com.mohistmc.academy.world.item.EnergyUnit.BANDWIDTH
+                || base.getEnergyStored() != 1000 - com.mohistmc.academy.world.item.EnergyUnit.BANDWIDTH) {
+            helper.fail("wind base item charge ignored the base or energy-unit bandwidth"); return;
         }
         helper.succeed();
     }
@@ -850,11 +853,23 @@ public final class AcademyServerGameTests {
             com.mohistmc.academy.capability.EnergyItemHelper.setEnergy(input,
                     com.mohistmc.academy.world.item.EnergyUnit.MAX_ENERGY); // explicit full creative fixture
             node.getItems().set(0, input);
+            // Energy units carry the legacy 20 IF per-call bandwidth, so every
+            // node tier moves min(node bandwidth, room, 20) per tick.
+            int unitBandwidth = com.mohistmc.academy.world.item.EnergyUnit.BANDWIDTH;
             node.setEnergy(capacities[tier] - 50);
+            node.serverTick();
+            if ((int) node.getEnergy() != capacities[tier] - 50 + unitBandwidth
+                    || com.mohistmc.academy.capability.EnergyItemHelper.getEnergy(input)
+                    != com.mohistmc.academy.world.item.EnergyUnit.MAX_ENERGY - unitBandwidth) {
+                helper.fail("Node input transfer ignored item bandwidth at tier " + tier); return;
+            }
+            node.setEnergy(capacities[tier] - 10);
+            com.mohistmc.academy.capability.EnergyItemHelper.setEnergy(input,
+                    com.mohistmc.academy.world.item.EnergyUnit.MAX_ENERGY);
             node.serverTick();
             if ((int) node.getEnergy() != capacities[tier]
                     || com.mohistmc.academy.capability.EnergyItemHelper.getEnergy(input)
-                    != com.mohistmc.academy.world.item.EnergyUnit.MAX_ENERGY - 50) {
+                    != com.mohistmc.academy.world.item.EnergyUnit.MAX_ENERGY - 10) {
                 helper.fail("Node input transfer ignored max-energy boundary at tier " + tier); return;
             }
 
@@ -863,8 +878,9 @@ public final class AcademyServerGameTests {
             com.mohistmc.academy.capability.EnergyItemHelper.setEnergy(output, 0);
             node.getItems().set(1, output);
             node.serverTick();
-            if ((int) node.getEnergy() != capacities[tier] - bandwidths[tier]
-                    || com.mohistmc.academy.capability.EnergyItemHelper.getEnergy(output) != bandwidths[tier]) {
+            int pushedOut = Math.min(bandwidths[tier], unitBandwidth);
+            if ((int) node.getEnergy() != capacities[tier] - pushedOut
+                    || com.mohistmc.academy.capability.EnergyItemHelper.getEnergy(output) != pushedOut) {
                 helper.fail("Node output transfer ignored legacy bandwidth at tier " + tier); return;
             }
         }
@@ -1536,7 +1552,7 @@ public final class AcademyServerGameTests {
         var manager = helper.getLevel().getRecipeManager();
         var former = manager.getAllRecipesFor(AcademyRecipeTypes.METAL_FORMING.get());
         var fusor = manager.getAllRecipesFor(AcademyRecipeTypes.IMAG_FUSING.get());
-        if (former.size() != 28 || fusor.size() != 7) {
+        if (former.size() != 31 || fusor.size() != 7) {
             helper.fail("RecipeManager loaded " + former.size() + " Metal Former and " + fusor.size() + " Imag Fusor recipes");
             return;
         }
@@ -1599,8 +1615,9 @@ public final class AcademyServerGameTests {
             Set<String> extra = new HashSet<>(loadedOfficial); extra.removeAll(expectedOfficial);
             helper.fail("Official 1.0.7 recipe load drift; missing=" + missing + ", extra=" + extra); return;
         }
-        if (loadedOfficial.size() + former.size() + fusor.size() != 89) {
-            helper.fail("Academy RecipeManager total is not 89 after ExtraAcC machine recipes"); return;
+        // 89 + the legacy MFIFRecipes aluminum/iridium/mithril refine recipes.
+        if (loadedOfficial.size() + former.size() + fusor.size() != 92) {
+            helper.fail("Academy RecipeManager total is not 92 after ExtraAcC machine recipes"); return;
         }
         helper.succeed();
     }

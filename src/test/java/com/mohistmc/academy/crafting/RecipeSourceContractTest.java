@@ -19,12 +19,12 @@ class RecipeSourceContractTest {
         try (var files = Files.list(ROOT)) {
             json = files.filter(p -> p.toString().endsWith(".json")).toList();
         }
-        assertEquals(112, json.size(), "83 AcademyCraft recipes plus 29 clean-room ExtraAcC compatibility recipes are required");
+        assertEquals(115, json.size(), "86 AcademyCraft recipes plus 29 clean-room ExtraAcC compatibility recipes are required");
         long former = json.stream().filter(p -> read(p).contains("\"academy:metal_forming\"")).count();
         Pattern fusorType = Pattern.compile(
                 "\\\"type\\\"\\s*:\\s*\\\"academy:imag_fus(?:or|ing)\\\"");
         long fusor = json.stream().filter(p -> fusorType.matcher(read(p)).find()).count();
-        assertEquals(28, former);
+        assertEquals(31, former);
         assertEquals(7, fusor);
         for (String name : List.of("fuse_crystal_normal.json", "fuse_crystal_pure.json")) {
             String recipe = read(ROOT.resolve(name));
@@ -37,7 +37,9 @@ class RecipeSourceContractTest {
     }
 
     @Test void restoresLegacyCrossModOreDictionaryRefiningThroughCommonTags() {
-        for (String metal : List.of("copper", "tin", "lead", "platinum", "silver", "nickel")) {
+        // MFIFRecipes 1.0.7 also registered Aluminum, Iridium and Mithril ore-dictionary refining.
+        for (String metal : List.of("copper", "tin", "lead", "platinum", "silver", "nickel",
+                "aluminum", "iridium", "mithril")) {
             String recipe = read(ROOT.resolve("refine_common_" + metal + ".json"));
             assertTrue(recipe.contains("\"type\":\"academy:metal_forming\""), metal);
             assertTrue(recipe.contains("\"mode\":\"refine\""), metal);
@@ -153,6 +155,15 @@ class RecipeSourceContractTest {
             assertTrue(recipe.contains("\"count\": 1"), name + " must respect non-stackable EnergyUnit");
             assertFalse(recipe.contains("\"count\": 2"));
             assertFalse(recipe.contains("\"count\": 4"));
+        }
+    }
+
+    @Test void basicNodeAndWindBaseUseLegacyConstraintIngots() {
+        // default.recipe 1.0.7: node_basic middle row and windgen_base top use academy:constraint_ingot.
+        for (String name : List.of("official_node0.json", "official_windgen_base.json")) {
+            String recipe = read(ROOT.resolve(name));
+            assertTrue(recipe.contains("\"item\": \"academy:constraint_ingot\""), name);
+            assertFalse(recipe.contains("minecraft:iron_ingot"), name);
         }
     }
 

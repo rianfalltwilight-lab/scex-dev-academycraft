@@ -132,6 +132,11 @@ public class ImagFusorBlockEntity extends AcademyContainerBlockEntity implements
                 .map(net.minecraft.world.item.crafting.RecipeHolder::value).orElse(null);
         // CachedCheck resolves its last ID in the current RecipeManager and checks
         // matches again. A changed input or datapack replacement starts a new job.
+        if (recipe == null && processingRecipe != null && processingRecipe.input().test(input)) {
+            // Legacy TileImagFusor.isActionBlocked: the same input item, merely
+            // below the recipe count, pauses the job instead of aborting it.
+            return;
+        }
         if (processingRecipe != null && processingRecipe != recipe) processingTime = 0;
         processingRecipe = recipe;
         if (recipe == null) {
@@ -139,14 +144,22 @@ public class ImagFusorBlockEntity extends AcademyContainerBlockEntity implements
             return;
         }
 
+        // Legacy updateWork aborted (reset) on missing liquid, missing energy or a
+        // different item occupying the output slot.
         if (tank.getFluidAmount() < recipe.phaseLiquid()) {
             processingTime = 0;
             return;
         }
 
         ItemStack result = recipe.output().copy();
-        if (!canAcceptOutput(output, result)) {
+        if (!output.isEmpty() && !output.is(result.getItem())) {
             processingTime = 0;
+            return;
+        }
+        if (!canAcceptOutput(output, result)) {
+            // Same output item but no room (or differing components): legacy
+            // isActionBlocked kept workProgress paused. Unlike 1.0.7 the paused
+            // machine draws no energy.
             return;
         }
 

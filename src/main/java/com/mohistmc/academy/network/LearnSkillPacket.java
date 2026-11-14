@@ -236,10 +236,13 @@ public record LearnSkillPacket(String skillId, int typeOrdinal, Optional<BlockPo
             ItemStack mainHand = player.getMainHandItem();
             if (mainHand.getItem() instanceof DeveloperPortable) {
                 int energy = EnergyItemHelper.getEnergy(mainHand);
-                if (energy < cost) {
+                if (cost < 0 || energy < cost) {
                     return false;
                 }
-                return EnergyItemHelper.extractEnergy(mainHand, cost, false) == cost;
+                // Legacy PortableDevData pulled with ignoreBandwidth=true: the 50 IF
+                // item bandwidth limits charging, not the developer's own debit.
+                EnergyItemHelper.setEnergy(mainHand, energy - cost);
+                return true;
             }
             return false;
         } else {

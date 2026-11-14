@@ -22,6 +22,8 @@ import net.neoforged.neoforge.network.PacketDistributor;
 public class DeveloperPortable extends AcademyItem implements IEnergyItem {
 
     public static final int MAX_ENERGY = 10000;
+    /** Legacy 1.12.2 per-call IF transfer limit: DeveloperType.PORTABLE bandwidth (LATENCY_MK1). */
+    public static final int BANDWIDTH = 50;
 
     public DeveloperPortable() {
         super(new Properties().stacksTo(1).setNoRepair());
@@ -45,7 +47,7 @@ public class DeveloperPortable extends AcademyItem implements IEnergyItem {
     @Override
     public int extractEnergy(ItemStack stack, int maxExtract, boolean simulate) {
         int energy = getEnergyStored(stack);
-        int extracted = Math.min(energy, Math.max(0, maxExtract));
+        int extracted = Math.min(energy, Math.min(Math.max(0, maxExtract), BANDWIDTH));
         if (!simulate && extracted > 0) {
             setEnergy(stack, energy - extracted);
         }
@@ -56,7 +58,7 @@ public class DeveloperPortable extends AcademyItem implements IEnergyItem {
     public int receiveEnergy(ItemStack stack, int maxReceive, boolean simulate) {
         int energy = getEnergyStored(stack);
         int maxEnergy = getMaxEnergyStored(stack);
-        int received = Math.min(maxEnergy - energy, Math.max(0, maxReceive));
+        int received = Math.min(maxEnergy - energy, Math.min(Math.max(0, maxReceive), BANDWIDTH));
         if (!simulate && received > 0) {
             setEnergy(stack, energy + received);
         }

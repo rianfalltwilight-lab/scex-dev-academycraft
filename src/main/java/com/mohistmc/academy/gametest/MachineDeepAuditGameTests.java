@@ -52,14 +52,15 @@ public final class MachineDeepAuditGameTests {
         // before testing the synchronous energy transaction in a single tick.
         h.startSequence().thenWaitUntil(() -> h.assertTrue(!level.canSeeSky(solar.getBlockPos().above()),
                 "roof sky-light update has not reached the covered panel")).thenExecute(() -> {
-            solar.setEnergy(500);
+            // The 100 IF/t solar bandwidth is capped by the energy unit's legacy 20 IF/call.
+            solar.setEnergy(420);
             ItemStack battery = battery(0);
             solar.getItems().set(0, battery);
             solar.tick(level, solar.getBlockPos(), solar.getBlockState());
             check(solar.getStatus() == SolarGenBlockEntity.SolarStatus.STOPPED,
                     "covered panel still advertises generation");
-            check(solar.getEnergyStored() == 400 && EnergyItemHelper.getEnergy(battery) == 100,
-                    "covered stored energy must charge exactly the 100 IF/t bandwidth");
+            check(solar.getEnergyStored() == 400 && EnergyItemHelper.getEnergy(battery) == 20,
+                    "covered stored energy must charge exactly the 20 IF energy-unit bandwidth");
             solar.getItems().set(0, ItemStack.EMPTY);
             solar.getProvidedEnergy(0.4);
             CompoundTag saved = solar.saveWithoutMetadata(level.registryAccess());
@@ -361,7 +362,7 @@ public final class MachineDeepAuditGameTests {
 
     private static ItemStack battery(int energy) {
         ItemStack stack = new ItemStack(AcademyItems.ENERGY_UNIT.get());
-        EnergyItemHelper.receiveEnergy(stack, energy, false);
+        EnergyItemHelper.setEnergy(stack, energy); // fixture fill, not a bandwidth-limited charge
         return stack;
     }
 
