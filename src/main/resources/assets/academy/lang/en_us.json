@@ -846,5 +846,7 @@
   "gui.academy.wireless.no_matrices": "No initialized matrices nearby",
   "gui.academy.wireless.scanning_matrices": "Scanning for matrix networks…",
   "gui.academy.wireless.password_hint": "Password: Enter to connect / Esc to cancel",
-  "ac.ui.info.rate": "Rate"
+  "ac.ui.info.rate": "Rate",
+  "attribute.name.academy.skill_damage": "Skill Damage",
+  "attribute.name.academy.skill_resistance": "Skill Resistance"
 }

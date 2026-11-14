@@ -846,5 +846,7 @@
   "gui.academy.wireless.no_matrices": "近くに初期化済みのマトリックスがありません",
   "gui.academy.wireless.scanning_matrices": "マトリックスネットワークをスキャン中…",
   "gui.academy.wireless.password_hint": "パスワード：Enterで接続 / Escでキャンセル",
-  "ac.ui.info.rate": "レート"
+  "ac.ui.info.rate": "レート",
+  "attribute.name.academy.skill_damage": "スキルダメージ",
+  "attribute.name.academy.skill_resistance": "スキル耐性"
 }

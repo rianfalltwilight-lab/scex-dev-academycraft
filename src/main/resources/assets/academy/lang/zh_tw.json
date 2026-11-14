@@ -846,5 +846,7 @@
     "ac.ui.info.liquid": "液體",
     "ac.ui.info.capacity": "容量",
     "ac.ui.info.information": "資訊",
-    "ac.ui.info.mode": "模式"
+    "ac.ui.info.mode": "模式",
+    "attribute.name.academy.skill_damage": "技能傷害",
+    "attribute.name.academy.skill_resistance": "技能抗性"
 }

@@ -92,6 +92,7 @@ public class AcademyCraft {
     public AcademyCraft(IEventBus modEventBus, ModContainer modContainer) {
 
         AcademyMenus.MENUS.register(modEventBus);
+        com.mohistmc.academy.world.AcademyAttributes.ATTRIBUTES.register(modEventBus);
         com.mohistmc.academy.world.item.AcademyDataComponents.TYPES.register(modEventBus);
         AcademyItems.ITEMS.register(modEventBus);
         AcademyItems.TABS.register(modEventBus);

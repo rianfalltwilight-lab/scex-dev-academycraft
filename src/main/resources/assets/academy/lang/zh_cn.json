@@ -846,5 +846,7 @@
   "gui.academy.wireless.no_matrices": "附近没有已初始化矩阵",
   "gui.academy.wireless.scanning_matrices": "正在扫描矩阵网络…",
   "gui.academy.wireless.password_hint": "密码：Enter 连接 / Esc 取消",
-  "ac.ui.info.rate": "速率"
+  "ac.ui.info.rate": "速率",
+  "attribute.name.academy.skill_damage": "技能伤害",
+  "attribute.name.academy.skill_resistance": "技能抗性"
 }

@@ -61,6 +61,7 @@ public record UseSkillPacket(int slotIndex, SkillInputToken actionToken) impleme
             }
 
             if (!effect.canActivate(player, data)) return;
+            if (!com.mohistmc.academy.skill.SkillCastGate.allow(player, skill)) return;
 
             float preActivationProficiency = data.getProficiency(skill.getId());
             boolean executed;

@@ -846,5 +846,7 @@
     "ac.ui.info.liquid": "Жидкость",
     "ac.ui.info.capacity": "Ёмкость",
     "ac.ui.info.information": "Информация",
-    "ac.ui.info.mode": "Режим"
+    "ac.ui.info.mode": "Режим",
+    "attribute.name.academy.skill_damage": "Урон навыков",
+    "attribute.name.academy.skill_resistance": "Сопротивление навыкам"
 }

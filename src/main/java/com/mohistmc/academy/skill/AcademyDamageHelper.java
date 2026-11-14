@@ -68,6 +68,18 @@ public final class AcademyDamageHelper {
 
     private static boolean apply(ServerPlayer attacker, Entity target, DamageSource source,
                                  float amount, boolean ability) {
+        if (ability) {
+            // Attribute stage (the per-skill and global config stage already ran in the effect), then the
+            // public SkillDamage event. The attacker is the caster when known, else the source's owner.
+            net.minecraft.world.entity.LivingEntity owner = attacker != null ? attacker
+                    : source.getEntity() instanceof net.minecraft.world.entity.LivingEntity living
+                    && living != target ? living : null;
+            float scaled = SkillDamageMath.applyAttributes(amount, owner, target);
+            var event = net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(
+                    new com.mohistmc.academy.api.event.AbilityEvents.SkillDamage(owner, target, source, scaled));
+            if (event.isCanceled() || !(event.getAmount() > 0)) return false;
+            amount = event.getAmount();
+        }
         var calls = CALLS.get();
         calls.push(new Call(attacker, target, source, ability));
         try {

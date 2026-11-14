@@ -193,6 +193,13 @@ public final class PlasmaOrbEntity extends Entity implements ItemSupplier {
         private final ServerPlayer player;
         private final java.util.Map<BlockPos, Boolean> permissions = new java.util.HashMap<>();
         private ProtectedBlast(ServerLevel level, ServerPlayer player) { this.level = level; this.player = player; }
+        /** The vanilla explosion bypasses AcademyDamageHelper; apply the same config and attribute stages. */
+        @Override public float getEntityDamageAmount(net.minecraft.world.level.Explosion explosion,
+                net.minecraft.world.entity.Entity entity) {
+            float vanilla = super.getEntityDamageAmount(explosion, entity);
+            return com.mohistmc.academy.skill.SkillDamageMath.applyAttributes(
+                    DynamicSkillRules.damage("plasma_cannon", vanilla), player, entity);
+        }
         @Override public boolean shouldBlockExplode(net.minecraft.world.level.Explosion explosion,
                 net.minecraft.world.level.BlockGetter getter, BlockPos pos,
                 net.minecraft.world.level.block.state.BlockState state, float power) {

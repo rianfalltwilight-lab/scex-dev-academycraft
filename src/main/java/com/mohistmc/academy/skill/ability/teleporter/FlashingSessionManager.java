@@ -44,6 +44,9 @@ public final class FlashingSessionManager {
                 || !data.hasLearnedSkill(skill.getId()) || !data.canUseSkill(skill)) {
             SafePayloadSender.send(player, new FlashingStatePacket(false, 0)); return false;
         }
+        if (!com.mohistmc.academy.skill.SkillCastGate.allow(player, skill)) {
+            SafePayloadSender.send(player, new FlashingStatePacket(false, 0)); return false;
+        }
         float exp = data.getProficiency(skill.getId());
         if (!TeleportSkillHelper.consume(data,"flashing", 80 - 20 * exp, 250 - 70 * exp)) {
             // Legacy serverMadeAlive terminated on a failed start debit, and

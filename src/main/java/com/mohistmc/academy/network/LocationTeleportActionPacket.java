@@ -163,6 +163,7 @@ public record LocationTeleportActionPacket(int action, int index, String name) i
             AABB box=m.entity.getBoundingBox().move(m.destination.subtract(m.entity.position()));
             if(!target.noCollision(m.entity,box))return false;
         }
+        if(!com.mohistmc.academy.skill.SkillCastGate.allow(p,skill))return false;
         boolean committed=commitMoves(moves,target);
         if(!committed)return false;
         com.mohistmc.academy.advancement.LegacyAdvancementBridge.teleported(p);

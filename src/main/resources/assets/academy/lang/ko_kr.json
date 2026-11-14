@@ -846,5 +846,7 @@
     "ac.ui.info.liquid": "액체",
     "ac.ui.info.capacity": "용량",
     "ac.ui.info.information": "정보",
-    "ac.ui.info.mode": "모드"
+    "ac.ui.info.mode": "모드",
+    "attribute.name.academy.skill_damage": "스킬 피해",
+    "attribute.name.academy.skill_resistance": "스킬 저항"
 }
