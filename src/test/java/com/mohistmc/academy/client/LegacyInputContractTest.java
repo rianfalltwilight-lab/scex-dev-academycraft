@@ -16,10 +16,13 @@ class LegacyInputContractTest {
         String source = Files.readString(INPUT).replace("\r\n", "\n");
         assertTrue(source.contains("InputConstants.Type.MOUSE,\n            GLFW.GLFW_MOUSE_BUTTON_LEFT"));
         assertTrue(source.contains("InputConstants.Type.MOUSE,\n            GLFW.GLFW_MOUSE_BUTTON_RIGHT"));
-        assertTrue(source.contains("GLFW.GLFW_KEY_R"));
-        assertTrue(source.contains("GLFW.GLFW_KEY_F"));
         assertTrue(source.contains("GLFW.GLFW_KEY_V"));
-        assertTrue(source.contains("GLFW.GLFW_KEY_C"));
+        // MZ1 (UX-1): new-install defaults avoid vanilla F/C and Iron's Spells R/Left Alt.
+        for (String[] binding : new String[][]{{"skill_3", "Z"}, {"skill_4", "X"}, {"switch_preset", "H"},
+                {"open_terminal", "K"}}) {
+            assertTrue(source.contains("\"key.academy." + binding[0] + "\",\n            KeyConflictContext.IN_GAME,\n"
+                    + "            InputConstants.Type.KEYSYM,\n            GLFW.GLFW_KEY_" + binding[1] + ","), binding[0]);
+        }
         assertTrue(source.contains("activateOneShot(mc, i, skillId)"),
                 "mouse buttons do not emit InputEvent.Key and must use tick edge detection");
         assertTrue(source.contains("held < 300"),

@@ -71,11 +71,14 @@ public class KeyInputHandler {
             "key.categories.academy"
     );
 
+    // 1.0.7 used R / F / C / Left Alt for skill 3, skill 4, preset and terminal. They clash with vanilla
+    // (F swap offhand, C hotbar activator) and Iron's Spells (R wheel, Left Alt), so new installs get
+    // Z / X / H / K. Existing key bindings are kept as saved; there is no migration.
     public static final KeyMapping SKILL_3 = new KeyMapping(
             "key.academy.skill_3",
             KeyConflictContext.IN_GAME,
             InputConstants.Type.KEYSYM,
-            GLFW.GLFW_KEY_R,
+            GLFW.GLFW_KEY_Z,
             "key.categories.academy"
     );
 
@@ -83,7 +86,7 @@ public class KeyInputHandler {
             "key.academy.skill_4",
             KeyConflictContext.IN_GAME,
             InputConstants.Type.KEYSYM,
-            GLFW.GLFW_KEY_F,
+            GLFW.GLFW_KEY_X,
             "key.categories.academy"
     );
 
@@ -91,7 +94,7 @@ public class KeyInputHandler {
             "key.academy.switch_preset",
             KeyConflictContext.IN_GAME,
             InputConstants.Type.KEYSYM,
-            GLFW.GLFW_KEY_C,
+            GLFW.GLFW_KEY_H,
             "key.categories.academy"
     );
 
@@ -99,7 +102,7 @@ public class KeyInputHandler {
             "key.academy.open_terminal",
             KeyConflictContext.IN_GAME,
             InputConstants.Type.KEYSYM,
-            GLFW.GLFW_KEY_LEFT_ALT,
+            GLFW.GLFW_KEY_K,
             "key.categories.academy"
     );
 
@@ -313,6 +316,14 @@ public class KeyInputHandler {
                     .withStyle(net.minecraft.ChatFormatting.GRAY), true);
             ClientSoundUtils.playClient(AcademySounds.ABILITY_PRESET_SWITCH, SoundSource.MASTER, 0.5f, 1.0f);
         }
+    }
+
+    /** The Penetrate Teleport distance the wheel sets while it charges, or NaN when it is not charging. */
+    public static float penetrateHintDistance() {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null || chargingSlot("penetrate_teleport") < 0) return Float.NaN;
+        return Float.isFinite(penetrateDistance) ? penetrateDistance
+                : penetrateMaximum(mc.player.getData(AcademyAttachments.PLAYER_ABILITY));
     }
 
     /** Final 1.12.2 Penetrate Teleport owns the wheel while its marker is active. */
