@@ -67,66 +67,68 @@ public final class AcademyCommands {
     private enum Op { SET, ADD }
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        var root = Commands.literal("academy").requires(source -> source.hasPermission(REQUIRED_PERMISSION));
+        // The root is open so players can run /academy info; every other branch needs REQUIRED_PERMISSION.
+        var root = Commands.literal("academy");
+        root.then(Commands.literal("info").executes(AcademyCommands::info));
 
-        root.then(Commands.literal("learn").then(targets().then(skillArg()
+        root.then(admin("learn").then(targets().then(skillArg()
                 .executes(c -> learn(c, false))
                 .then(Commands.argument("respectPrerequisites", BoolArgumentType.bool())
                         .executes(c -> learn(c, BoolArgumentType.getBool(c, "respectPrerequisites")))))));
-        root.then(Commands.literal("unlearn").then(targets().then(skillArg()
+        root.then(admin("unlearn").then(targets().then(skillArg()
                 .executes(AcademyCommands::unlearn))));
-        root.then(Commands.literal("learn_all").then(targets().executes(AcademyCommands::learnAll)));
+        root.then(admin("learn_all").then(targets().executes(AcademyCommands::learnAll)));
 
-        root.then(Commands.literal("category").then(targets()
+        root.then(admin("category").then(targets()
                 .then(Commands.literal("clear").executes(AcademyCommands::clearCategory))
                 .then(Commands.argument("category", StringArgumentType.word()).suggests(CATEGORY_SUGGESTIONS)
                         .executes(AcademyCommands::setCategory))));
 
-        root.then(Commands.literal("level").then(targets()
+        root.then(admin("level").then(targets()
                 .then(Commands.argument("level", IntegerArgumentType.integer(1, 5))
                         .executes(AcademyCommands::setLevel))));
 
-        root.then(Commands.literal("proficiency").then(targets().then(skillArg()
+        root.then(admin("proficiency").then(targets().then(skillArg()
                 .then(Commands.literal("set").then(Commands.argument("value", FloatArgumentType.floatArg())
                         .executes(c -> proficiency(c, Op.SET))))
                 .then(Commands.literal("add").then(Commands.argument("value", FloatArgumentType.floatArg())
                         .executes(c -> proficiency(c, Op.ADD)))))));
 
-        root.then(Commands.literal("cp").then(targets()
+        root.then(admin("cp").then(targets()
                 .then(Commands.literal("set").then(Commands.argument("value", FloatArgumentType.floatArg(0))
                         .executes(c -> cp(c, Op.SET, FloatArgumentType.getFloat(c, "value")))))
                 .then(Commands.literal("add").then(Commands.argument("value", FloatArgumentType.floatArg())
                         .executes(c -> cp(c, Op.ADD, FloatArgumentType.getFloat(c, "value")))))
                 .then(Commands.literal("fill").executes(c -> cp(c, Op.SET, Float.POSITIVE_INFINITY)))));
 
-        root.then(Commands.literal("overload").then(targets()
+        root.then(admin("overload").then(targets()
                 .then(Commands.literal("set").then(Commands.argument("value", FloatArgumentType.floatArg(0))
                         .executes(c -> overload(c, Op.SET))))
                 .then(Commands.literal("add").then(Commands.argument("value", FloatArgumentType.floatArg())
                         .executes(c -> overload(c, Op.ADD))))
                 .then(Commands.literal("unlock").executes(AcademyCommands::unlockOverload))));
 
-        root.then(Commands.literal("cooldown").then(targets()
+        root.then(admin("cooldown").then(targets()
                 .then(Commands.literal("clear").executes(c -> clearCooldown(c, null))
                         .then(skillArg().executes(c -> clearCooldown(c, skillId(c)))))
                 .then(Commands.literal("set").then(skillArg()
                         .then(Commands.argument("ticks", IntegerArgumentType.integer(1, MAX_COOLDOWN_TICKS))
                                 .executes(AcademyCommands::setCooldown))))));
 
-        root.then(Commands.literal("active").then(targets()
+        root.then(admin("active").then(targets()
                 .then(Commands.literal("on").executes(c -> active(c, true)))
                 .then(Commands.literal("off").executes(c -> active(c, false)))));
 
-        root.then(Commands.literal("query").then(Commands.argument("target", EntityArgument.entity())
+        root.then(admin("query").then(Commands.argument("target", EntityArgument.entity())
                 .executes(AcademyCommands::query)));
 
-        root.then(Commands.literal("debug").then(Commands.literal("damage")
+        root.then(admin("debug").then(Commands.literal("damage")
                 .then(Commands.argument("attacker", EntityArgument.entity())
                         .then(Commands.argument("target", EntityArgument.entity())
                                 .then(skillArg().then(Commands.argument("raw", FloatArgumentType.floatArg(0))
                                         .executes(AcademyCommands::debugDamage)))))));
 
-        root.then(AcademyMobCommands.build());
+        root.then(AcademyMobCommands.build().requires(AcademyCommands::isAdmin));
 
         dispatcher.register(root);
     }
@@ -427,9 +429,28 @@ public final class AcademyCommands {
 
     // ==================== inspection ====================
 
+    private static boolean isAdmin(CommandSourceStack source) {
+        return source.hasPermission(REQUIRED_PERMISSION);
+    }
+
+    private static com.mojang.brigadier.builder.LiteralArgumentBuilder<CommandSourceStack> admin(String name) {
+        return Commands.literal(name).requires(AcademyCommands::isAdmin);
+    }
+
+    /** Permission 0: the caller's own ability state, the same lines as {@code query}. */
+    private static int info(CommandContext<CommandSourceStack> c) throws CommandSyntaxException {
+        int result = report(c, c.getSource().getPlayerOrException());
+        send(c, "info.profile", com.mohistmc.academy.config.BalanceProfile.current().id());
+        return result;
+    }
+
     private static int query(CommandContext<CommandSourceStack> c) throws CommandSyntaxException {
         Entity entity = EntityArgument.getEntity(c, "target");
         if (!(entity instanceof ServerPlayer player)) throw NOT_PLAYER.create(entity.getDisplayName());
+        return report(c, player);
+    }
+
+    private static int report(CommandContext<CommandSourceStack> c, ServerPlayer player) {
         PlayerAbilityData data = data(player);
         send(c, "query.header", player.getDisplayName());
         send(c, "query.category", categoryName(data.getCurrentAbility()), data.getPlayerLevel(),
