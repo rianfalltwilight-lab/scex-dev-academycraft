@@ -98,6 +98,8 @@ public class SkillTreeGui extends AcademyScreen {
     private boolean sessionSpent = false;
     private int actionLeft, actionTop, actionWidth;
     private int networkActionLeft, networkActionTop, networkActionWidth;
+    /** Clickable twin of the typed `learn` / `reset` console command (MZ5 / UX-8); width 0 = hidden. */
+    private int consoleButtonLeft, consoleButtonTop, consoleButtonWidth, consoleButtonHeight;
     private boolean detailOpen = false;
     private boolean levelDetailOpen = false;
     private String consoleInput = "";
@@ -684,11 +686,34 @@ public class SkillTreeGui extends AcademyScreen {
             graphics.drawString(font, output.get(i), treeAreaLeft + scaled(5), y, 0xFFDDDDDD, false);
             y += 10;
         }
+        drawConsoleButton(graphics, resetMode);
         String cursor = (System.currentTimeMillis() / 500L & 1L) == 0 ? "_" : "";
         String prompt = "OS >" + (pendingSkillId == null ? consoleInput + cursor
                 : Component.translatable("ac.skill_tree.dev_developing").getString());
         graphics.drawString(font, font.plainSubstrByWidth(prompt, treeAreaWidth - scaled(10)),
                 treeAreaLeft + scaled(5), treeAreaTop + treeAreaHeight - scaled(12), 0xFFFFFFFF, false);
+    }
+
+    /** The "Awaken" / "Reset" button at the right end of the prompt row; typing the command still works. */
+    private void drawConsoleButton(GuiGraphics graphics, boolean resetMode) {
+        consoleButtonWidth = 0;
+        if (devType == null || readOnly || pendingSkillId != null) return;
+        Component label = Component.translatable(resetMode ? "ac.skill_tree.console.reset_button"
+                : "ac.skill_tree.console.learn_button");
+        consoleButtonHeight = scaled(14);
+        consoleButtonWidth = font.width(label) + scaled(12);
+        consoleButtonLeft = treeAreaLeft + treeAreaWidth - consoleButtonWidth - scaled(5);
+        consoleButtonTop = treeAreaTop + treeAreaHeight - consoleButtonHeight - scaled(3);
+        Minecraft mc = Minecraft.getInstance();
+        double mouseX = mc.mouseHandler.xpos() * width / mc.getWindow().getScreenWidth();
+        double mouseY = mc.mouseHandler.ypos() * height / mc.getWindow().getScreenHeight();
+        boolean hover = inside(mouseX, mouseY, consoleButtonLeft, consoleButtonTop, consoleButtonWidth, consoleButtonHeight);
+        graphics.fill(consoleButtonLeft, consoleButtonTop, consoleButtonLeft + consoleButtonWidth,
+                consoleButtonTop + consoleButtonHeight, hover ? AcademyColors.ACCENT_DARK : AcademyColors.BG_CARD);
+        graphics.renderOutline(consoleButtonLeft, consoleButtonTop, consoleButtonWidth, consoleButtonHeight,
+                hover ? AcademyColors.ACCENT_LIGHT : AcademyColors.ACCENT);
+        graphics.drawString(font, label, consoleButtonLeft + (consoleButtonWidth - font.width(label)) / 2,
+                consoleButtonTop + (consoleButtonHeight - font.lineHeight) / 2 + 1, AcademyColors.TEXT, false);
     }
 
     private void addConsoleLines(List<FormattedCharSequence> output, String text) {
@@ -928,6 +953,12 @@ public class SkillTreeGui extends AcademyScreen {
                 : clickMinecraft.player.getData(AcademyAttachments.PLAYER_ABILITY);
         boolean resetMode = isResetMode(clickData);
 
+        if (button == 0 && consoleButtonWidth > 0 && isLegacyConsole(clickData) && pendingSkillId == null
+                && inside(mouseX, mouseY, consoleButtonLeft, consoleButtonTop, consoleButtonWidth, consoleButtonHeight)) {
+            consoleInput = "";
+            beginAction(resetMode ? LearnSkillPacket.RESET_ACTION : LearnSkillPacket.INDUCTION_ACTION, clickData);
+            return true;
+        }
         if (button == 0 && (detailOpen || levelDetailOpen)) {
             if (!readOnly && devType != null && inside(mouseX, mouseY, actionLeft, actionTop, actionWidth, scaled(16))) {
                 if (levelDetailOpen && clickData != null && clickData.canLevelUp()) {
