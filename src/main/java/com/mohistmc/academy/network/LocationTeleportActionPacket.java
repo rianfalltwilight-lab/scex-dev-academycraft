@@ -75,7 +75,9 @@ public record LocationTeleportActionPacket(int action, int index, String name) i
     });}
     private static boolean perform(ServerPlayer p,PlayerAbilityData d,Skill skill,int index){
         if(TeleportChunkRequests.isPending(p.getUUID())||index<0||index>=d.getTeleportLocations().size()
-                ||d.isOnCooldown(skill.getId()))return false;
+                ||d.isOnCooldown(skill.getId())
+                // The debit runs after the move, so the overload lockout must be checked up front.
+                ||!d.isDevMode()&&d.isOverloadLocked())return false;
         TeleportLocation l=PlayerAbilityData.sanitizeLocation(d.getTeleportLocations().get(index)); if(l==null)return false;
         ResourceLocation id=ResourceLocation.tryParse(l.dimension()); if(id==null)return false;
         ServerLevel target=p.server.getLevel(ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION,id)); if(target==null)return false;
@@ -146,6 +148,8 @@ public record LocationTeleportActionPacket(int action, int index, String name) i
                             && d.isAbilityActive() && d.hasLearnedSkill(skill.getId())
                             && d.getCurrentAbility() == skill.getCategory() && d.getPlayerLevel() >= skill.getLevel()
                             && !d.isOnCooldown(skill.getId()) && !AbilityInterferenceService.isInterfered(p)
+                            && (d.isDevMode() || !d.isOverloadLocked())
+                            && com.mohistmc.academy.config.DynamicSkillRules.enabled(skill.getId())
                             && index < d.getTeleportLocations().size() && l.equals(d.getTeleportLocations().get(index)),
                     () -> {
                         // Rebuild geometry, permissions, consent scope and prices after the asynchronous gap.

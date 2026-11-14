@@ -542,6 +542,9 @@ public class PlayerAbilityData {
      */
     public boolean consumeDynamicForced(float cpCost, float overloadCost) {
         if (isDevMode()) return true;
+        // A forced debit only skips the CP/overload preflight. While overloaded no context could
+        // start in 1.12.2 (canUseAbility), so no forced payment may succeed either.
+        if (overloadLocked) return false;
         LegacyResourceProgression.ForcedResources result = LegacyResourceProgression.consumeWithForce(
                 currentCp, currentOverload, maxOverload, cpCost, overloadCost);
         if (result == null) return false;
