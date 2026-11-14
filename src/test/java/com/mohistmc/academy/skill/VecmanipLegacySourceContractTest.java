@@ -18,7 +18,7 @@ class VecmanipLegacySourceContractTest {
         assertTrue(source.contains("distanceToSqr(finalPos) <= AOE_RANGE * AOE_RANGE"));
         assertTrue(source.contains("for (int dx = -3; dx < 3; dx++)"));
         assertTrue(source.contains("e.setPos(e.getX(), e.getY() + .1"));
-        assertTrue(source.contains("waveRings(level,player.getEyePosition().lerp(finalPos,.7)"));
+        assertTrue(source.contains("waveRings(level,caster.getEyePosition().lerp(finalPos,.7)"));
         assertFalse(source.contains("EffectHelper.glowBurst"));
     }
 
@@ -26,7 +26,7 @@ class VecmanipLegacySourceContractTest {
         String source = source("skill/ability/vecmanip/GroundShockEffect.java");
         assertTrue(source.contains("Math.cos(90.0)"));
         assertTrue(source.contains("Math.sin(90.0)"));
-        assertTrue(source.contains("SoundSource.PLAYERS, 2.0f, 1.0f"));
+        assertTrue(source.contains("SoundSource.PLAYERS : SoundSource.HOSTILE, 2.0f, 1.0f"));
     }
 
     @Test void stormWingDoesNotEnableASecondVanillaFlightController() throws Exception {

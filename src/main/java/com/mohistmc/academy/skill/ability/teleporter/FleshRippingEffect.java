@@ -2,6 +2,8 @@ package com.mohistmc.academy.skill.ability.teleporter;
 
 import com.mohistmc.academy.skill.ability.LoadedRaycast;
 
+import com.mohistmc.academy.api.mob.MobCastContext;
+import com.mohistmc.academy.api.mob.MobCastable;
 import com.mohistmc.academy.config.DynamicSkillRules;
 import com.mohistmc.academy.skill.AcademyDamageHelper;
 import com.mohistmc.academy.skill.ChargingSkillEffect;
@@ -22,6 +24,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.boss.EnderDragonPart;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
@@ -30,9 +33,15 @@ import net.minecraft.world.phys.Vec3;
 import static com.mohistmc.academy.utils.MathUtils.lerpf;
 
 /** 1.0.7 Flesh Ripping: continuously mark a living target and settle on key-up. */
-public final class FleshRippingEffect implements ChargingSkillEffect {
+public final class FleshRippingEffect implements ChargingSkillEffect, MobCastable {
     private record Target(Vec3 destination, Entity entity) {}
     private static final Map<UUID, Target> ACTIVE = new ConcurrentHashMap<>();
+    /** Mob casters' current marks, kept apart from the player sessions. */
+    private static final Map<UUID, Target> MOB_ACTIVE = new ConcurrentHashMap<>();
+    /** Server stop: forget mob marks. */
+    public static void clearMobSessions() { MOB_ACTIVE.clear(); }
+    /** A mob keeps marking for half a second before it rips. */
+    private static final int MOB_MARK_TICKS = 10;
 
     @Override public String getId() { return "flesh_ripping"; }
     @Override public boolean appliesBaseResourceCost() { return false; }
@@ -49,14 +58,16 @@ public final class FleshRippingEffect implements ChargingSkillEffect {
     }
 
     @Override public void onChargingStart(ServerPlayer player, PlayerAbilityData data) {
-        ACTIVE.put(player.getUUID(), findTarget(player, lerpf(6, 14, data.getProficiency(getId()))));
+        ACTIVE.put(player.getUUID(), findTarget(player, player.getEyePosition(), player.getLookAngle(),
+                lerpf(6, 14, data.getProficiency(getId()))));
     }
 
     @Override
     public boolean onChargingTick(ServerPlayer player, PlayerAbilityData data, int ticks) {
         float rawCp = lerpf(130, 270, data.getProficiency(getId()));
         if (!data.isDevMode() && data.getCurrentCp() < DynamicSkillRules.cp(getId(), rawCp)) return false;
-        Target target = findTarget(player, lerpf(6, 14, data.getProficiency(getId())));
+        Target target = findTarget(player, player.getEyePosition(), player.getLookAngle(),
+                lerpf(6, 14, data.getProficiency(getId())));
         ACTIVE.put(player.getUUID(), target);
         return true;
     }
@@ -81,9 +92,43 @@ public final class FleshRippingEffect implements ChargingSkillEffect {
 
         ServerLevel level = player.serverLevel();
         Entity target = marked.entity;
-        AcademyDamageHelper.hurt(player, target,
-                com.mohistmc.academy.skill.SkillDamageSource.magic(player),
+        rip(player, level, target,
                 PassiveDamageHelper.teleporter(player, data, target, getId(), lerpf(5, 12, exp)).damage());
+        if (level.random.nextFloat() < .05f)
+            player.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 100));
+        DynamicSkillRules.addExp(player, data, getId(), .005f);
+        return true;
+    }
+
+    /** Mob path: mark along the aim each tick, then rip the last marked entity on release. */
+    @Override public int mobChargeTicks(float proficiency) { return MOB_MARK_TICKS; }
+
+    @Override
+    public boolean mobChargeTick(MobCastContext context, int tick) {
+        if (context.target() == null) return false;
+        MOB_ACTIVE.put(context.caster().getUUID(), findTarget(context.caster(), context.eye(), context.look(),
+                lerpf(6, 14, context.proficiency())));
+        return true;
+    }
+
+    @Override public void mobChargeAborted(MobCastContext context) { MOB_ACTIVE.remove(context.caster().getUUID()); }
+
+    @Override
+    public boolean mobCast(MobCastContext context) {
+        LivingEntity caster = context.caster();
+        Target marked = MOB_ACTIVE.remove(caster.getUUID());
+        if (context.target() == null || marked == null || marked.entity == null || !marked.entity.isAlive()
+                || marked.entity.level() != caster.level()) return false;
+        rip(caster, context.level(), marked.entity, context.damage(lerpf(5, 12, context.proficiency())));
+        return true;
+    }
+
+    @Override public int mobCooldownTicks(float proficiency) { return getCooldownTicks(proficiency); }
+
+    /** The rip after payment, shared by players and mob casters; {@code damage} is already config-scaled. */
+    private static void rip(LivingEntity caster, ServerLevel level, Entity target, float damage) {
+        AcademyDamageHelper.hurt(caster, target,
+                com.mohistmc.academy.skill.SkillDamageSource.magic(caster), damage);
         int splashes = 5 + level.random.nextInt(2);
         for (int i = 0; i < splashes; i++) {
             double theta = level.random.nextDouble() * Math.PI * 2;
@@ -95,11 +140,7 @@ public final class FleshRippingEffect implements ChargingSkillEffect {
                     .8f + level.random.nextFloat() * .5f);
         }
         level.playSound(null, target.getX(), target.getY(), target.getZ(),
-                AcademySounds.TP_GUTS, SoundSource.PLAYERS, .6f, 1f);
-        if (level.random.nextFloat() < .05f)
-            player.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 100));
-        DynamicSkillRules.addExp(player, data, getId(), .005f);
-        return true;
+                AcademySounds.TP_GUTS, caster instanceof Player ? SoundSource.PLAYERS : SoundSource.HOSTILE, .6f, 1f);
     }
 
     @Override public void onChargingRelease(ServerPlayer player, PlayerAbilityData data, int ticks) {
@@ -111,14 +152,13 @@ public final class FleshRippingEffect implements ChargingSkillEffect {
     @Override public void execute(ServerPlayer player, PlayerAbilityData data) {}
     @Override public int getCooldownTicks(float proficiency) { return (int) lerpf(90, 40, proficiency); }
 
-    private static Target findTarget(ServerPlayer player, double range) {
-        Vec3 start = player.getEyePosition();
-        Vec3 intended = start.add(player.getLookAngle().scale(range));
-        HitResult wall = LoadedRaycast.clip(player.serverLevel(), new ClipContext(start, intended,
+    private static Target findTarget(LivingEntity player, Vec3 start, Vec3 look, double range) {
+        Vec3 intended = start.add(look.scale(range));
+        HitResult wall = LoadedRaycast.clip(player.level(), new ClipContext(start, intended,
                 ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
         Vec3 end = wall.getType() == HitResult.Type.MISS ? intended : wall.getLocation();
         AABB search = new AABB(start, end).inflate(1);
-        List<Entity> entities = player.serverLevel().getEntities(player, search,
+        List<Entity> entities = player.level().getEntities(player, search,
                 entity -> entity != player && entity.isAlive() && entity.isPickable()
                         && (entity instanceof LivingEntity || entity instanceof EnderDragonPart));
         Entity closest = null;

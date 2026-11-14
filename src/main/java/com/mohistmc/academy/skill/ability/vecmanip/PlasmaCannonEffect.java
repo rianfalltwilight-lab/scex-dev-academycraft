@@ -4,6 +4,8 @@ import com.mohistmc.academy.skill.ability.LoadedRaycast;
 
 import static com.mohistmc.academy.utils.MathUtils.lerpf;
 
+import com.mohistmc.academy.api.mob.MobCastContext;
+import com.mohistmc.academy.api.mob.MobCastable;
 import com.mohistmc.academy.config.DynamicSkillRules;
 import com.mohistmc.academy.entity.PlasmaOrbEntity;
 import com.mohistmc.academy.skill.ChargingSkillEffect;
@@ -20,14 +22,19 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.boss.EnderDragonPart;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 /** 1.0.7 PlasmaCannonContext: a visible fixed overhead body while held, then a 1-block/tick projectile. */
-public final class PlasmaCannonEffect implements ChargingSkillEffect {
+public final class PlasmaCannonEffect implements ChargingSkillEffect, MobCastable {
     private record State(float overloadFloor, UUID orbId,
             net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> dimension) {}
     private static final Map<UUID, State> STATES = new ConcurrentHashMap<>();
+    /** Mob casters' charging bodies, kept apart from the player sessions. */
+    private static final Map<UUID, State> MOB_STATES = new ConcurrentHashMap<>();
+    /** Server stop: forget mob charges (their orbs went with the world). */
+    public static void clearMobSessions() { MOB_STATES.clear(); }
 
     @Override public String getId() { return "plasma_cannon"; }
     @Override public boolean appliesBaseResourceCost() { return false; }
@@ -107,7 +114,7 @@ public final class PlasmaCannonEffect implements ChargingSkillEffect {
         if (orb == null) return false;
 
         float exp = data.getProficiency(getId());
-        Vec3 destination = lookingDestination(player, 100);
+        Vec3 destination = lookingDestination(player, player.getEyePosition(), player.getLookAngle(), 100);
         if (!orb.arm(destination, DynamicSkillRules.damage(getId(), lerpf(80, 150, exp)), lerpf(12, 15, exp))) {
             orb.discard();
             return false;
@@ -128,8 +135,62 @@ public final class PlasmaCannonEffect implements ChargingSkillEffect {
     @Override public void execute(ServerPlayer player, PlayerAbilityData data) {}
     @Override public int getCooldownTicks(float proficiency) { return (int) lerpf(1000, 600, proficiency); }
 
+    /** Mob path: the player's full charge time, with the body overhead from the first charging tick. */
+    @Override public int mobChargeTicks(float proficiency) { return chargeTime(proficiency); }
+
+    @Override
+    public boolean mobChargeTick(MobCastContext context, int tick) {
+        LivingEntity caster = context.caster();
+        ServerLevel level = context.level();
+        if (tick == 1) {
+            discard(level, MOB_STATES.remove(caster.getUUID()));
+            PlasmaOrbEntity orb = AcademyEntities.PLASMA_ORB.get().create(level);
+            if (orb == null) return false;
+            orb.configureCharging(caster, caster.position().add(0, 15, 0));
+            if (!level.addFreshEntity(orb)) return false;
+            MOB_STATES.put(caster.getUUID(), new State(0, orb.getUUID(), level.dimension()));
+            AcademySounds.playSound(level, caster.getX(), caster.getY(), caster.getZ(),
+                    AcademySounds.VM_PLASMA_CANNON, SoundSource.HOSTILE, .5f, 1f);
+            return true;
+        }
+        State state = MOB_STATES.get(caster.getUUID());
+        PlasmaOrbEntity orb = resolve(level, state);
+        if (state == null || !state.dimension().equals(level.dimension()) || orb == null || orb.isArmed()) return false;
+        if (tick == chargeTime(context.proficiency()))
+            AcademySounds.playSound(level, caster.getX(), caster.getY(), caster.getZ(),
+                    AcademySounds.VM_PLASMA_CANNON_T, SoundSource.HOSTILE, .5f, 1f);
+        return true;
+    }
+
+    @Override
+    public void mobChargeAborted(MobCastContext context) {
+        discard(context.level(), MOB_STATES.remove(context.caster().getUUID()));
+    }
+
+    @Override
+    public boolean mobCast(MobCastContext context) {
+        LivingEntity caster = context.caster();
+        State state = MOB_STATES.remove(caster.getUUID());
+        PlasmaOrbEntity orb = resolve(context.level(), state);
+        if (orb == null) return false;
+        float exp = context.proficiency();
+        Vec3 destination = lookingDestination(caster, context.eye(), context.look(), 100);
+        orb.setMobBreaksBlocks(context.mayDestroyBlocks());
+        if (!orb.arm(destination, context.damage(lerpf(80, 150, exp)), lerpf(12, 15, exp))) {
+            orb.discard();
+            return false;
+        }
+        return true;
+    }
+
+    @Override public int mobCooldownTicks(float proficiency) { return getCooldownTicks(proficiency); }
+
     private int chargeTime(PlayerAbilityData data) {
-        return (int) lerpf(60, 30, data.getProficiency(getId()));
+        return chargeTime(data.getProficiency(getId()));
+    }
+
+    private static int chargeTime(float proficiency) {
+        return (int) lerpf(60, 30, proficiency);
     }
 
     private float overloadToKeep(PlayerAbilityData data) {
@@ -148,12 +209,13 @@ public final class PlasmaCannonEffect implements ChargingSkillEffect {
         if (orb != null) orb.discard();
     }
 
-    /** Equivalent to Raytrace.getLookingPos(player, 100, EntitySelectors.living). */
-    private static Vec3 lookingDestination(ServerPlayer player, double range) {
-        ServerLevel level = player.serverLevel();
-        Vec3 eye = player.getEyePosition();
-        Vec3 end = eye.add(player.getLookAngle().scale(range));
-        HitResult blockHit = LoadedRaycast.pick(player, range);
+    /** Equivalent to Raytrace.getLookingPos(player, 100, EntitySelectors.living), along the given aim. */
+    private static Vec3 lookingDestination(LivingEntity player, Vec3 eye, Vec3 look, double range) {
+        ServerLevel level = (ServerLevel) player.level();
+        Vec3 end = eye.add(look.scale(range));
+        // Same clip as LoadedRaycast.pick(player, range) for a player's own eye and look.
+        HitResult blockHit = LoadedRaycast.clip(level, new ClipContext(eye, end,
+                ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
         double nearest = blockHit.getType() == HitResult.Type.MISS
                 ? range : eye.distanceTo(blockHit.getLocation());
         Vec3 destination = blockHit.getType() == HitResult.Type.MISS ? end : blockHit.getLocation();

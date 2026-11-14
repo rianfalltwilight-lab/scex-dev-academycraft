@@ -82,5 +82,7 @@ final class MobChargingManager {
     @SubscribeEvent
     static void stopped(ServerStoppedEvent event) {
         SESSIONS.clear();
+        com.mohistmc.academy.skill.ability.vecmanip.PlasmaCannonEffect.clearMobSessions();
+        com.mohistmc.academy.skill.ability.teleporter.FleshRippingEffect.clearMobSessions();
     }
 }

@@ -5,6 +5,8 @@ import com.mohistmc.academy.skill.AcademyDamageHelper;
 
 import com.mohistmc.academy.config.DynamicSkillRules;
 
+import com.mohistmc.academy.api.mob.MobCastContext;
+import com.mohistmc.academy.api.mob.MobCastable;
 import com.mohistmc.academy.world.effect.EffectHelper;
 import com.mohistmc.academy.skill.ChargingSkillEffect;
 import com.mohistmc.academy.skill.PlayerAbilityData;
@@ -19,6 +21,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.boss.EnderDragonPart;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.ClipContext;
@@ -29,10 +32,12 @@ import com.mohistmc.academy.entity.BloodSprayDecalEntity;
 import static com.mohistmc.academy.utils.MathUtils.lerpf;
 
 /** 血液回流 —— 操纵目标血液，造成高额伤害 */
-public class BloodRetroEffect implements ChargingSkillEffect {
+public class BloodRetroEffect implements ChargingSkillEffect, MobCastable {
     private static final ResourceLocation SLOW_ID = ResourceLocation.fromNamespaceAndPath("academy", "blood_retro_slow");
 
     private static final int AUTO_RELEASE_TICKS = 30;
+    /** A mob holds for most of the legacy auto-release window. */
+    private static final int MOB_HOLD_TICKS = 20;
     private static final double RANGE = 2.0;
 
     @Override
@@ -73,7 +78,7 @@ public class BloodRetroEffect implements ChargingSkillEffect {
         float cp = lerpf(280, 350, data.getProficiency(getId()));
         float overload = lerpf(55, 40, data.getProficiency(getId()));
         return ChargingSkillEffect.super.canRelease(player, data, ticks)
-                && rayTraceEntity(player, RANGE) != null
+                && rayTraceEntity(player, player.getEyePosition(), player.getLookAngle(), RANGE) != null
                 && DynamicSkillRules.canPay(data, getId(), cp, overload);
     }
 
@@ -81,20 +86,55 @@ public class BloodRetroEffect implements ChargingSkillEffect {
     public void onChargingRelease(ServerPlayer player, PlayerAbilityData data, int ticks) {
         cleanupSlow(player);
         float exp = data.getProficiency(getId());
-        float damage = lerpf(30, 60, exp);
         float cp = lerpf(280, 350, exp);
         float overload = lerpf(55, 40, exp);
 
         ServerLevel level = player.serverLevel();
-        EntityHitResult hit = rayTraceEntity(player, RANGE);
+        EntityHitResult hit = rayTraceEntity(player, player.getEyePosition(), player.getLookAngle(), RANGE);
         if (hit == null || !(hit.getEntity() instanceof LivingEntity || hit.getEntity() instanceof EnderDragonPart)) return;
         if (!DynamicSkillRules.tryPay(data,getId(),cp,overload)) return;
 
         Entity target = hit.getEntity();
+        bleed(player, level, target, exp, player.getLookAngle(), player.getYHeadRot());
+
+        DynamicSkillRules.addExp(player,data, getId(), 0.002f);
+        if (data.getProficiency(getId()) >= 1.0f) {
+            com.mohistmc.academy.advancement.LegacyAdvancementBridge.award(player,"vecmanip/blood_retro");
+        }
+    }
+
+    /** Mob path: a held charge (slowing the caster like a player's), then the strike if the target is in reach. */
+    @Override public int mobChargeTicks(float proficiency) { return MOB_HOLD_TICKS; }
+
+    @Override
+    public boolean mobChargeTick(MobCastContext context, int tick) {
+        if (context.target() == null) return false;
+        applyLegacySlow(context.caster(), tick);
+        return true;
+    }
+
+    @Override public void mobChargeAborted(MobCastContext context) { cleanupSlow(context.caster()); }
+
+    @Override
+    public boolean mobCast(MobCastContext context) {
+        LivingEntity caster = context.caster();
+        cleanupSlow(caster);
+        if (context.target() == null) return false;
+        EntityHitResult hit = rayTraceEntity(caster, context.eye(), context.look(), RANGE);
+        if (hit == null) return false;
+        bleed(caster, context.level(), hit.getEntity(), context.proficiency(), context.look(), caster.getYHeadRot());
+        return true;
+    }
+
+    @Override public int mobCooldownTicks(float proficiency) { return getCooldownTicks(proficiency); }
+
+    /** The strike after payment, shared by players and mob casters. */
+    private void bleed(LivingEntity caster, ServerLevel level, Entity target, float exp, Vec3 lookAngle, float headYaw) {
+        float damage = lerpf(30, 60, exp);
         {
-            AcademyDamageHelper.hurt(player,target,com.mohistmc.academy.skill.SkillDamageSource.attack(player), DynamicSkillRules.damage(getId(),damage));
+            AcademyDamageHelper.hurt(caster,target,com.mohistmc.academy.skill.SkillDamageSource.attack(caster), DynamicSkillRules.damage(getId(),damage));
             int splashes = 6 + level.random.nextInt(4);
-            Vec3 lookOffset = player.getLookAngle().scale(.2);
+            Vec3 lookOffset = lookAngle.scale(.2);
             for (int i = 0; i < splashes; i++) {
                 double ox = (level.random.nextDouble() * 2 - 1) * target.getBbWidth();
                 double oy = level.random.nextDouble() * target.getBbHeight();
@@ -105,7 +145,7 @@ public class BloodRetroEffect implements ChargingSkillEffect {
             }
             Vec3 head = target.position().add(0, target.getBbHeight() * .6, 0);
             for (int pitch : new int[]{0,30,45,60,80,-30,-45,-60,-80}) {
-                float yaw = player.getYHeadRot() + level.random.nextFloat() * 40 - 20;
+                float yaw = headYaw + level.random.nextFloat() * 40 - 20;
                 Vec3 look = Vec3.directionFromRotation(pitch, yaw);
                 BlockHitResult decalHit = LoadedRaycast.clip(level, new ClipContext(head.subtract(look.scale(.5)),
                         head.add(look.scale(5)), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, target));
@@ -115,13 +155,9 @@ public class BloodRetroEffect implements ChargingSkillEffect {
                 }
             }
 
-            DynamicSkillRules.addExp(player,data, getId(), 0.002f);
-            if (data.getProficiency(getId()) >= 1.0f) {
-                com.mohistmc.academy.advancement.LegacyAdvancementBridge.award(player,"vecmanip/blood_retro");
-            }
-
-            AcademySounds.playSound(level, player.getX(), player.getY(), player.getZ(),
-                    AcademySounds.VM_BLOOD_RETRO, SoundSource.PLAYERS, 1.0f, 1.0f);
+            AcademySounds.playSound(level, caster.getX(), caster.getY(), caster.getZ(),
+                    AcademySounds.VM_BLOOD_RETRO, caster instanceof Player ? SoundSource.PLAYERS : SoundSource.HOSTILE,
+                    1.0f, 1.0f);
         }
     }
 
@@ -141,12 +177,12 @@ public class BloodRetroEffect implements ChargingSkillEffect {
     public void execute(ServerPlayer player, PlayerAbilityData data) {
     }
 
-    private static void cleanupSlow(ServerPlayer player) {
+    private static void cleanupSlow(LivingEntity player) {
         var movement = player.getAttribute(Attributes.MOVEMENT_SPEED);
         if (movement != null) movement.removeModifier(SLOW_ID);
     }
 
-    private static void applyLegacySlow(ServerPlayer player, int ticks) {
+    private static void applyLegacySlow(LivingEntity player, int ticks) {
         var movement = player.getAttribute(Attributes.MOVEMENT_SPEED);
         if (movement == null) return;
         movement.removeModifier(SLOW_ID);
@@ -156,9 +192,8 @@ public class BloodRetroEffect implements ChargingSkillEffect {
                 AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
     }
 
-    private EntityHitResult rayTraceEntity(ServerPlayer player, double range) {
-        Vec3 start = player.getEyePosition();
-        Vec3 end = start.add(player.getLookAngle().scale(range));
+    private EntityHitResult rayTraceEntity(LivingEntity player, Vec3 start, Vec3 look, double range) {
+        Vec3 end = start.add(look.scale(range));
         var block=LoadedRaycast.clip(player.level(), new ClipContext(start,end,ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,player));
         double wallDist=block.getType()==HitResult.Type.MISS?Double.MAX_VALUE:start.distanceTo(block.getLocation());
         List<Entity> entities = player.level().getEntities(player,
