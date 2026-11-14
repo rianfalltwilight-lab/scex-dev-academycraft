@@ -67,7 +67,8 @@ public class AbilityCastGoal extends Goal {
         if (distance <= reach) mob.getLookControl().setLookAt(target, 30F, 30F);
 
         long now = mob.level().getGameTime();
-        if (now < nextAttempt) return;
+        // A charging skill releases on its own; don't start another meanwhile.
+        if (now < nextAttempt || AcademyMobAbilities.isCharging(mob)) return;
         if (profile.needsLineOfSight() && !mob.getSensing().hasLineOfSight(target)) {
             nextAttempt = now + RETRY_TICKS;
             return;
@@ -98,6 +99,8 @@ public class AbilityCastGoal extends Goal {
                     after.setCooldown(pick.skill(), now, pick.cooldownTicks());
                 nextAttempt = now + profile.castInterval();
             }
+            // The release applies the skill's cooldown; the per-entry extra cooldown only covers instant casts.
+            case CHARGING -> nextAttempt = now + profile.castInterval();
             case BUSY -> nextAttempt = now + 1 + mob.getRandom().nextInt(5);
             default -> nextAttempt = now + Math.min(RETRY_TICKS, profile.castInterval());
         }

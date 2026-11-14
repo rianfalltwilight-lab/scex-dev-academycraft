@@ -63,7 +63,7 @@ public final class MobCastElectromasterGameTests {
         return true;
     }
 
-    @GameTest(template = EMPTY)
+    @GameTest(template = EMPTY, batch = "mob_cast_electromaster")
     public static void mobThunderBoltHitsTargetAndAoeButSparesSameType(GameTestHelper helper) {
         Mob caster = caster(helper);
         Mob pig = target(helper);
@@ -78,7 +78,7 @@ public final class MobCastElectromasterGameTests {
         helper.succeed();
     }
 
-    @GameTest(template = EMPTY)
+    @GameTest(template = EMPTY, batch = "mob_cast_electromaster")
     public static void mobArcGenHitsTarget(GameTestHelper helper) {
         Mob caster = caster(helper);
         Mob pig = target(helper);
@@ -88,7 +88,7 @@ public final class MobCastElectromasterGameTests {
         helper.succeed();
     }
 
-    @GameTest(template = EMPTY)
+    @GameTest(template = EMPTY, batch = "mob_cast_electromaster")
     public static void mobArcGenSparesSameTypeTarget(GameTestHelper helper) {
         Mob caster = caster(helper);
         Mob other = spawn(helper, EntityType.HUSK, 2.5, 2, 6.5);
@@ -99,7 +99,7 @@ public final class MobCastElectromasterGameTests {
         helper.succeed();
     }
 
-    @GameTest(template = EMPTY, timeoutTicks = 60)
+    @GameTest(template = EMPTY, batch = "mob_cast_electromaster", timeoutTicks = 60)
     public static void mobElectronBombKeepsItsBallAndHitsTarget(GameTestHelper helper) {
         Mob caster = caster(helper);
         Mob pig = target(helper);
@@ -120,7 +120,7 @@ public final class MobCastElectromasterGameTests {
                 "mob Electron Bomb did not damage its target"));
     }
 
-    @GameTest(template = EMPTY, timeoutTicks = 40)
+    @GameTest(template = EMPTY, batch = "mob_cast_electromaster", timeoutTicks = 40)
     public static void mobRayBarrageHitsTargetAndKeepsItsRay(GameTestHelper helper) {
         Mob caster = caster(helper);
         Mob pig = target(helper);

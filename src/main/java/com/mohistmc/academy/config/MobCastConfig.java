@@ -10,6 +10,7 @@ public final class MobCastConfig {
     private static ModConfigSpec.BooleanValue sameTypeFriendly;
     private static ModConfigSpec.IntValue castsPerTick;
     private static ModConfigSpec.IntValue minCooldown;
+    private static ModConfigSpec.BooleanValue movementSkills;
 
     static void define(ModConfigSpec.Builder builder) {
         builder.push("mobs");
@@ -26,6 +27,10 @@ public final class MobCastConfig {
         minCooldown = builder
                 .comment("Lowest cooldown in ticks applied after any mob cast.")
                 .defineInRange("minCooldownTicks", 10, 0, 72000);
+        movementSkills = builder
+                .comment("Whether mob skills may move or teleport the caster itself (dashes, blinks). Entity types "
+                        + "in the academy:immobile_casters tag are never moved.")
+                .define("movementSkills", true);
         builder.pop();
     }
 
@@ -33,6 +38,7 @@ public final class MobCastConfig {
     public static boolean sameTypeFriendly() { return read(sameTypeFriendly, true); }
     public static int castsPerTick() { return read(castsPerTick, 20); }
     public static int minCooldown() { return read(minCooldown, 10); }
+    public static boolean movementSkills() { return read(movementSkills, true); }
 
     private static <T> T read(ModConfigSpec.ConfigValue<T> value, T fallback) {
         if (value == null) return fallback;

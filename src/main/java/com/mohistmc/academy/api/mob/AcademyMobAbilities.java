@@ -35,7 +35,8 @@ public final class AcademyMobAbilities {
     }
 
     /** Why a cast did or did not happen. */
-    public enum Result { CAST, FAILED, UNKNOWN_SKILL, UNSUPPORTED, DISABLED, NOT_KNOWN, ON_COOLDOWN, BUSY, CANCELLED, INVALID_CASTER }
+    public enum Result { CAST, CHARGING, FAILED, UNKNOWN_SKILL, UNSUPPORTED, DISABLED, NOT_KNOWN, ON_COOLDOWN,
+        ALREADY_CHARGING, BUSY, CANCELLED, INVALID_CASTER }
 
     private record Budget(long tick, int used) {}
     private static final Map<ResourceKey<Level>, Budget> BUDGETS = new ConcurrentHashMap<>();
@@ -74,6 +75,7 @@ public final class AcademyMobAbilities {
         float proficiency = Math.clamp(chosen, 0F, 1F);
         long now = level.getGameTime();
         if (!options.ignoreCooldown() && data.isOnCooldown(skillId, now)) return Result.ON_COOLDOWN;
+        if (MobChargingManager.isCharging(caster)) return Result.ALREADY_CHARGING;
         if (!takeBudget(level, now)) return Result.BUSY;
         LivingEntity target = options.target() != null && options.target().isAlive() ? options.target() : null;
         if (NeoForge.EVENT_BUS.post(new AbilityEvents.MobSkillCast(caster, skill, proficiency, target)).isCanceled())
@@ -82,12 +84,32 @@ public final class AcademyMobAbilities {
         Vec3 look = target == null ? caster.getLookAngle()
                 : target.getEyePosition().subtract(eye).normalize();
         if (look.lengthSqr() < 1.0e-8) look = caster.getLookAngle();
-        boolean done = castable.mobCast(new MobCastContext(caster, level, skillId, proficiency, target, eye, look));
-        if (!done) return Result.FAILED;
+        MobCastContext context = new MobCastContext(caster, level, skillId, proficiency, target, eye, look);
+        int charge = Math.max(0, castable.mobChargeTicks(proficiency));
+        if (charge > 0) {
+            MobChargingManager.start(context, castable, charge);
+            return Result.CHARGING;
+        }
+        if (!castable.mobCast(context)) return Result.FAILED;
+        applyCooldown(caster, skillId, castable, proficiency, now);
+        return Result.CAST;
+    }
+
+    /** Cooldown after a released cast: the skill's tuned cooldown, at least {@code mobs.minCooldownTicks}. */
+    static void applyCooldown(LivingEntity caster, String skillId, MobCastable castable, float proficiency, long now) {
         int cooldown = Math.max(MobCastConfig.minCooldown(),
                 DynamicSkillRules.cooldown(skillId, castable.mobCooldownTicks(proficiency)));
-        data.setCooldown(skillId, now, cooldown);
-        return Result.CAST;
+        data(caster).setCooldown(skillId, now, cooldown);
+    }
+
+    /** Whether the entity is currently charging a mob skill. */
+    public static boolean isCharging(LivingEntity caster) {
+        return MobChargingManager.isCharging(caster);
+    }
+
+    /** Ends a running charge without releasing it (no cooldown). */
+    public static boolean abortCharge(LivingEntity caster) {
+        return MobChargingManager.abort(caster);
     }
 
     private static boolean takeBudget(ServerLevel level, long now) {

@@ -79,36 +79,36 @@ public final class MobCastAerohandGameTests {
         });
     }
 
-    @GameTest(template = EMPTY)
+    @GameTest(template = EMPTY, batch = "mob_cast_aerohand")
     public static void mobCastsVolcanicBall(GameTestHelper helper) {
         projectile(helper, "volcanic_ball", AeroProjectileEntity.class, 2);
     }
 
-    @GameTest(template = EMPTY)
+    @GameTest(template = EMPTY, batch = "mob_cast_aerohand")
     public static void mobCastsAirBlade(GameTestHelper helper) {
         projectile(helper, "academy:air_blade", AeroProjectileEntity.class, 3);
     }
 
-    @GameTest(template = EMPTY)
+    @GameTest(template = EMPTY, batch = "mob_cast_aerohand")
     public static void mobCastsBomberLance(GameTestHelper helper) {
         projectile(helper, "bomber_lance", AeroProjectileEntity.class, 4);
     }
 
-    @GameTest(template = EMPTY)
+    @GameTest(template = EMPTY, batch = "mob_cast_aerohand")
     public static void mobCastsStormCore(GameTestHelper helper) {
         castAt(helper, "storm_core", 4, 5, caster -> {
             if (!StormCoreEffect.hasActiveCore(caster.getUUID())) helper.fail("storm core did not start for the mob");
         });
     }
 
-    @GameTest(template = EMPTY)
+    @GameTest(template = EMPTY, batch = "mob_cast_aerohand")
     public static void mobCastsAirWall(GameTestHelper helper) {
         castAt(helper, "air_wall", 3, 6, caster -> {
             if (!AirWallEffect.hasActiveRing(caster.getUUID())) helper.fail("air wall did not start for the mob");
         });
     }
 
-    @GameTest(template = EMPTY)
+    @GameTest(template = EMPTY, batch = "mob_cast_aerohand")
     public static void mobPsychoNeedleIsVirtualAndDropsNothing(GameTestHelper helper) {
         Mob caster = mob(helper, EntityType.VILLAGER, 2.5, 2.5);
         Mob target = mob(helper, EntityType.PIG, 2.5, 7.5);
@@ -136,7 +136,7 @@ public final class MobCastAerohandGameTests {
         });
     }
 
-    @GameTest(template = EMPTY)
+    @GameTest(template = EMPTY, batch = "mob_cast_aerohand")
     public static void mobStormCoreAndAirWallEndWithTheirCaster(GameTestHelper helper) {
         Mob coreCaster = mob(helper, EntityType.VILLAGER, 2.5, 2.5);
         Mob wallCaster = mob(helper, EntityType.VILLAGER, 12.5, 2.5);

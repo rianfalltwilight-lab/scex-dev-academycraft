@@ -53,7 +53,7 @@ public final class MobSkillAiGameTests {
         return MobSkills.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(json)).isSuccess();
     }
 
-    @GameTest(template = EMPTY)
+    @GameTest(template = EMPTY, batch = "mob_skill_ai")
     public static void dataMapCodecRoundTripsAndValidates(GameTestHelper helper) {
         String json = "{\"skills\":[{\"skill\":\"thunder_bolt\"},"
                 + "{\"skill\":\"academy:arc_gen\",\"proficiency\":0.9,\"weight\":3,\"min_range\":2,\"max_range\":8,"
@@ -90,7 +90,7 @@ public final class MobSkillAiGameTests {
         helper.succeed();
     }
 
-    @GameTest(template = EMPTY)
+    @GameTest(template = EMPTY, batch = "mob_skill_ai")
     public static void weightedPickFollowsWeights(GameTestHelper helper) {
         record W(String id, double w) {}
         List<W> items = List.of(new W("a", 1), new W("zero", 0), new W("b", 3), new W("nan", Double.NaN));
@@ -108,7 +108,7 @@ public final class MobSkillAiGameTests {
         helper.succeed();
     }
 
-    @GameTest(template = EMPTY)
+    @GameTest(template = EMPTY, batch = "mob_skill_ai")
     public static void goalAttachesOnJoinOnceForAttachmentSkills(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
         BlockPos pos = helper.absolutePos(new BlockPos(1, 2, 1));
@@ -153,7 +153,7 @@ public final class MobSkillAiGameTests {
         }
     }
 
-    @GameTest(template = EMPTY)
+    @GameTest(template = EMPTY, batch = "mob_skill_ai")
     public static void mobCommandsReturnCounts(GameTestHelper helper) {
         ServerPlayer player = helper.makeMockServerPlayerInLevel();
         Mob zombie = helper.spawnWithNoFreeWill(EntityType.ZOMBIE, new BlockPos(1, 2, 1));

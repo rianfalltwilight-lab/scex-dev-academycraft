@@ -18,7 +18,7 @@ import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 public final class MobCastFoundationGameTests {
     private MobCastFoundationGameTests() {}
 
-    @GameTest(template = "empty")
+    @GameTest(template = "empty", batch = "mob_cast_foundation")
     public static void castRefusesPlayersUnknownAndUnsupportedSkills(GameTestHelper helper) {
         var player = helper.makeMockServerPlayerInLevel();
         LivingEntity zombie = helper.spawnWithNoFreeWill(EntityType.ZOMBIE, 1, 2, 1);
@@ -34,7 +34,7 @@ public final class MobCastFoundationGameTests {
         helper.succeed();
     }
 
-    @GameTest(template = "empty")
+    @GameTest(template = "empty", batch = "mob_cast_foundation")
     public static void mobAbilityDataRoundTripsThroughItsCodec(GameTestHelper helper) {
         MobAbilityData data = new MobAbilityData();
         data.setSkill("thunder_bolt", 0.75F);
@@ -49,7 +49,7 @@ public final class MobCastFoundationGameTests {
         helper.succeed();
     }
 
-    @GameTest(template = "empty")
+    @GameTest(template = "empty", batch = "mob_cast_foundation")
     public static void mobCastersSpareThemselvesTheirKindAndTheirTeam(GameTestHelper helper) {
         LivingEntity zombie = helper.spawnWithNoFreeWill(EntityType.ZOMBIE, 1, 2, 1);
         LivingEntity otherZombie = helper.spawnWithNoFreeWill(EntityType.ZOMBIE, 3, 2, 1);
