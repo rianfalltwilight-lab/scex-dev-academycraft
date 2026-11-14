@@ -132,6 +132,11 @@ public final class CruiseBombEffect implements SkillEffect {
     private static void terminate(ServerPlayer player,PlayerAbilityData data,boolean cooldown) {
         if(clear(player)&&cooldown&&!data.isDevMode())data.setCooldown("cruise_bomb",40);
     }
+    /** Activation-key "end special": recalls the orbs like a second cast. */
+    public static boolean endFromActivateKey(ServerPlayer player,PlayerAbilityData data) {
+        if(!SESSIONS.containsKey(player.getUUID()))return false;
+        terminate(player,data,true);return true;
+    }
     private static boolean clear(Entity entity) {
         Session session=SESSIONS.remove(entity.getUUID());
         if(session==null)return false;

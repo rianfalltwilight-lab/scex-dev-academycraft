@@ -156,6 +156,13 @@ public final class PsychoTransmissionEffect implements SkillEffect {
         }
     }
 
+    /** Activation-key "end special": terminates a live transmission like a second cast. */
+    public static boolean endFromActivateKey(ServerPlayer player, PlayerAbilityData data) {
+        if (!SESSIONS.containsKey(player.getUUID())) return false;
+        terminate(player, data, true);
+        return true;
+    }
+
     private static void clear(Entity entity) { SESSIONS.remove(entity.getUUID()); }
     @SubscribeEvent public static void logout(PlayerEvent.PlayerLoggedOutEvent event) { clear(event.getEntity()); }
     @SubscribeEvent public static void dimension(PlayerEvent.PlayerChangedDimensionEvent event) { clear(event.getEntity()); }

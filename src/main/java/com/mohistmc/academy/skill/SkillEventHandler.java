@@ -193,6 +193,38 @@ public class SkillEventHandler {
         data.syncTo(player);
     }
 
+    /**
+     * Legacy activation-key priority: while the ability is on, a short V press first ends a
+     * live special mode or held skill ({@code terminatesContext} / {@code abortDelegates}),
+     * and only toggles the ability when nothing is running.  Returns whether anything ended.
+     */
+    public static boolean endSpecialFromActivateKey(ServerPlayer player, PlayerAbilityData data) {
+        boolean ended = false;
+        SkillChargingManager.ChargingState state = SkillChargingManager.getState(player.getUUID());
+        if (state != null) {
+            // Storm Wing, Vector Deviation/Reflection and every held charge are charging sessions.
+            SkillChargingManager.cancel(player);
+            notifyCharging(player, state, -1, 0);
+            ended = true;
+        }
+        ended |= FlashingSessionManager.endFromActivateKey(player, data);
+        if (com.mohistmc.academy.skill.ability.aerohand.AeroPassiveRuntime.isOffenseArmourEngaged(player)
+                || com.mohistmc.academy.skill.ability.aerohand.AeroPassiveRuntime.isFlyingActive(player)) {
+            com.mohistmc.academy.skill.ability.aerohand.AeroPassiveRuntime.terminateSustained(player, data);
+            ended = true;
+        }
+        if (com.mohistmc.academy.skill.ability.telekinesis.TelekinesisPassiveHandler.isHardened(player)) {
+            com.mohistmc.academy.skill.ability.telekinesis.TelekinesisPassiveHandler.togglePsychoHarden(player, data);
+            ended = true;
+        }
+        if (com.mohistmc.academy.skill.ability.telekinesis.TelekinesisPassiveHandler.hasLiquidShadow(player)) {
+            ended |= com.mohistmc.academy.skill.ability.telekinesis.TelekinesisPassiveHandler.toggleLiquidShadow(player);
+        }
+        ended |= com.mohistmc.academy.skill.ability.telekinesis.PsychoTransmissionEffect.endFromActivateKey(player, data);
+        ended |= com.mohistmc.academy.skill.ability.telekinesis.CruiseBombEffect.endFromActivateKey(player, data);
+        return ended;
+    }
+
     /** ContextManager.__onOverload: reaching maximum overload disposes every live context. */
     private static void onOverloaded(ServerPlayer player, PlayerAbilityData data) {
         SkillChargingManager.ChargingState state = SkillChargingManager.getState(player.getUUID());

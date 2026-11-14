@@ -97,6 +97,12 @@ public final class FlashingSessionManager {
     public static void abort(ServerPlayer player) {
         State state = ACTIVE.remove(player.getUUID()); if (state != null) SafePayloadSender.send(player, new FlashingStatePacket(false, state.epoch));
     }
+    /** Activation-key "end special" (legacy terminatesContext): ends Flashing with its normal cooldown. */
+    public static boolean endFromActivateKey(ServerPlayer player, PlayerAbilityData data) {
+        if (!ACTIVE.containsKey(player.getUUID())) return false;
+        endNow(player, data);
+        return true;
+    }
     private static boolean matches(State state, int direction, long epoch) { return state != null && state.epoch == epoch && direction >= 0 && direction < 4; }
     private static State copyHeld(State s, int direction, long now) { return new State(s.epoch,s.expires,s.exp,s.overloadKeep,s.lastBlink,s.dimension,direction,now); }
     private static State clearHeld(State s) { return new State(s.epoch,s.expires,s.exp,s.overloadKeep,s.lastBlink,s.dimension,-1,-1); }
