@@ -1,0 +1,57 @@
+{
+	"keys": [
+		{
+			"name": "output",
+			"role": "output",
+			"type": "item_stack",
+			"default_optional": true
+		},
+		{
+			"name": "input",
+			"role": "input",
+			"type": "ingredient"
+		},
+		{
+			"name": "mode",
+			"type": "string"
+		},
+		{
+			"name": "count",
+			"role": "input",
+			"type": "int",
+			"function_names": ["count", "inputCount"],
+			"default_optional": true
+		},
+		{
+			"name": "output_tag",
+			"role": "output",
+			"type": "item_tag",
+			"function_names": ["outputTag"],
+			"default_optional": true
+		},
+		{
+			"name": "output_count",
+			"role": "output",
+			"type": "int",
+			"function_names": ["outputCount"],
+			"default_optional": true
+		},
+		{
+			"name": "time",
+			"type": "ticks",
+			"function_names": ["time"],
+			"default_optional": true
+		},
+		{
+			"name": "energy",
+			"type": "float",
+			"function_names": ["energy"],
+			"default_optional": true
+		}
+	],
+	"constructors": [
+		{
+			"keys": ["output", "input", "mode"]
+		}
+	]
+}

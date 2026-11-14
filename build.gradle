@@ -31,6 +31,11 @@ repositories {
     mavenCentral()
     // Official JEI Maven. JEI remains compile-only and optional at runtime.
     maven { url = 'https://maven.blamejared.com' }
+    // KubeJS and Rhino, compile-only: the KubeJS plugin loads only when KubeJS is installed.
+    maven {
+        url = 'https://maven.latvian.dev/releases'
+        content { includeGroup 'dev.latvian.mods' }
+    }
 }
 
 base {
@@ -213,6 +218,14 @@ dependencies {
     // without this optional client mod.
     if (providers.gradleProperty('withJei').map(String::toBoolean).orElse(false).get()) {
         localRuntime "mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
+    }
+    // Optional KubeJS integration (compat/kubejs). Run with -PwithKubeJS=true to load KubeJS in dev runs.
+    compileOnly("dev.latvian.mods:kubejs-neoforge:${kubejs_version}") { transitive = false }
+    compileOnly("dev.latvian.mods:rhino:${rhino_version}") { transitive = false }
+    if (providers.gradleProperty('withKubeJS').map(String::toBoolean).orElse(false).get()) {
+        // KubeJS ships its own libraries as jar-in-jar, so no transitive resolution is needed.
+        localRuntime("dev.latvian.mods:kubejs-neoforge:${kubejs_version}") { transitive = false }
+        localRuntime("dev.latvian.mods:rhino:${rhino_version}") { transitive = false }
     }
 
     // Example mod dependency using a mod jar from ./libs with a flat dir repository

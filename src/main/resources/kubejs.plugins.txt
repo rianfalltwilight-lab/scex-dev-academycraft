@@ -1,0 +1,1 @@
+com.mohistmc.academy.compat.kubejs.AcademyKubeJSPlugin
