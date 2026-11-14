@@ -31,10 +31,16 @@ public class SkillEventHandler {
     @SubscribeEvent
     public static void onPlayerTick(PlayerTickEvent.Post event) {
         PlayerAbilityData data = event.getEntity().getData(AcademyAttachments.PLAYER_ABILITY);
+        if (event.getEntity() instanceof ServerPlayer player) data.setCreativeExempt(player.isCreative());
         data.tick(); // 服务端和客户端都递减冷却
 
 
         if (event.getEntity() instanceof ServerPlayer player) {
+            if (data.consumeOverloadTrigger()) {
+                onOverloaded(player, data);
+                player.setData(AcademyAttachments.PLAYER_ABILITY, data);
+                return;
+            }
             DevLearningSessionManager.tick(player);
             DevLearningSessionManager.clearExpired(player);
             LocationTeleportActionPacket.clearExpired(player);
@@ -162,7 +168,44 @@ public class SkillEventHandler {
             cancelChargingAndNotify(player);
             LocationTeleportActionPacket.forgetPlayer(player.getUUID());
             DevLearningSessionManager.clear(player.getUUID());
+            // CPData.Events.playerDeath + CooldownData.onPlayerDead. This runs before the
+            // copyOnDeath attachment is cloned, so the respawned player inherits the reset.
+            PlayerAbilityData data = player.getData(AcademyAttachments.PLAYER_ABILITY);
+            data.recoverAll();
+            data.clearCooldowns();
+            if (data.isAbilityActive()) {
+                data.setAbilityActive(false);
+                net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(
+                        new com.mohistmc.academy.api.event.AbilityEvents.Deactivate(player));
+            }
+            data.syncTo(player);
         }
+    }
+
+    /** CPData.Events.playerWakeup: only a full night's sleep (the server waking everyone) restores. */
+    @SubscribeEvent
+    public static void onPlayerWakeUp(net.neoforged.neoforge.event.entity.player.PlayerWakeUpEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)
+                || event.wakeImmediately() || event.updateLevel()) return;
+        PlayerAbilityData data = player.getData(AcademyAttachments.PLAYER_ABILITY);
+        if (!data.hasAbility()) return;
+        data.recoverAll();
+        data.syncTo(player);
+    }
+
+    /** ContextManager.__onOverload: reaching maximum overload disposes every live context. */
+    private static void onOverloaded(ServerPlayer player, PlayerAbilityData data) {
+        SkillChargingManager.ChargingState state = SkillChargingManager.getState(player.getUUID());
+        if (state != null) {
+            SkillChargingManager.finalizeCharging(player, state, SkillChargingManager.FinalResult.ABORTED);
+            notifyCharging(player, state, -1, 0);
+        }
+        FlashingSessionManager.abort(player);
+        LocationTeleportActionPacket.forgetPlayer(player.getUUID());
+        com.mohistmc.academy.skill.ability.aerohand.AeroPassiveRuntime.terminateSustained(player, data);
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new com.mohistmc.academy.api.event.AbilityEvents.Overloaded(
+                player, data.getCurrentOverload(), data.getMaxOverload()));
+        data.syncTo(player);
     }
 
     @SubscribeEvent

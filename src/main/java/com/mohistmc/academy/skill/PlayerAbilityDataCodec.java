@@ -37,6 +37,8 @@ public class PlayerAbilityDataCodec implements IAttachmentSerializer<CompoundTag
         data.setUsageResourceGrowth(tag.getFloat("usage_max_cp"), tag.getFloat("usage_max_overload"));
         data.setCurrentCp(tag.getFloat("cp"));
         data.setCurrentOverload(tag.getFloat("overload"));
+        // Legacy CPData serialized overloadFine; a relog must not lift the lockout.
+        data.setOverloadLocked(tag.getBoolean("overload_locked"));
 
         if (tag.contains("obtained")) {
             ListTag list = tag.getList("obtained", Tag.TAG_STRING);
@@ -149,6 +151,7 @@ public class PlayerAbilityDataCodec implements IAttachmentSerializer<CompoundTag
         tag.putFloat("max_cp", data.getMaxCp());
         tag.putFloat("overload", data.getCurrentOverload());
         tag.putFloat("max_overload", data.getMaxOverload());
+        tag.putBoolean("overload_locked", data.isOverloadLocked());
         tag.putFloat("usage_max_cp", data.getUsageMaxCp());
         tag.putFloat("usage_max_overload", data.getUsageMaxOverload());
         tag.putFloat("cp_regen", data.getCpRegenRate());

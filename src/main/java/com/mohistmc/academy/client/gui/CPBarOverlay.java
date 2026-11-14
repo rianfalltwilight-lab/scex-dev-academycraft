@@ -78,13 +78,15 @@ public class CPBarOverlay {
         g.pose().translate(hudX, hudY, 0);
         g.pose().scale(SCALE, SCALE, 1.0f);
 
-        boolean overloaded = data.getMaxOverload() > 0
-                && data.getCurrentOverload() >= data.getMaxOverload();
-        if (overloaded) {
+        // Legacy CPBar: overload art during the recovery delay, then the normal bar
+        // drawn faint (alpha .3) until overload drains to zero and the lock lifts.
+        if (data.isOverloaded()) {
             drawOverload(g);
         } else {
+            barAlpha = data.isOverloadLocked() ? 0.3f : 1.0f;
             drawNormal(g, data);
             drawCPBar(g, data);
+            barAlpha = 1.0f;
         }
 
         g.pose().popPose();
@@ -134,11 +136,14 @@ public class CPBarOverlay {
         return above >= 0 ? above : y;
     }
 
+    /** Alpha multiplier for the normal bar; lowered while the overload lockout drains. */
+    private static float barAlpha = 1.0f;
+
     /** 正常模式：背景 + OL 条（背景 alpha 0.8，与 Return setColor(1,1,1,.8) 一致） */
     private static void drawNormal(GuiGraphics g, PlayerAbilityData data) {
         com.mojang.blaze3d.systems.RenderSystem.enableBlend();
         com.mojang.blaze3d.systems.RenderSystem.defaultBlendFunc();
-        g.setColor(1, 1, 1, 0.8f);
+        g.setColor(1, 1, 1, 0.8f * barAlpha);
         g.blit(TEX_BACK_NORMAL, 0, 0, 0, 0, (int) WIDTH, (int) HEIGHT, (int) WIDTH, (int) HEIGHT);
         g.setColor(1, 1, 1, 1);
 
@@ -149,7 +154,7 @@ public class CPBarOverlay {
             float len = OL_W * olRatio;
             float x = OL_X0 + OL_W - len;
             g.fill((int) x, (int) OL_Y0, (int) (x + len), (int) (OL_Y0 + OL_H),
-                    colorOf(col[1], col[2], col[3], 0.8f));
+                    colorOf(col[1], col[2], col[3], 0.8f * barAlpha));
         }
         com.mojang.blaze3d.systems.RenderSystem.disableBlend();
     }
@@ -168,7 +173,7 @@ public class CPBarOverlay {
         // 用 cp.png 纹理按比例右对齐绘制,叠加渐变着色
         com.mojang.blaze3d.systems.RenderSystem.enableBlend();
         com.mojang.blaze3d.systems.RenderSystem.defaultBlendFunc();
-        g.setColor(col[1], col[2], col[3], 1.0f);
+        g.setColor(col[1], col[2], col[3], barAlpha);
         g.blit(TEX_CP, (int) x, (int) CP_Y0, (int) x, (int) CP_Y0,
                 (int) len, (int) CP_H, (int) WIDTH, (int) HEIGHT);
         g.setColor(1, 1, 1, 1);
@@ -180,7 +185,7 @@ public class CPBarOverlay {
             float iconSize = 64;
             float iconX = CP_X0 + CP_W - iconSize;
             float iconY = CP_Y0 + (CP_H - iconSize) / 2;
-            g.setColor(1, 1, 1, 0.8f);
+            g.setColor(1, 1, 1, 0.8f * barAlpha);
             g.blit(ability.getOverlayIcon(), (int) iconX, (int) iconY,
                     0, 0, (int) iconSize, (int) iconSize, 64, 64);
             g.setColor(1, 1, 1, 1);
