@@ -28,6 +28,8 @@ public class ClientListener {
     public static void onLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
         ClientSessionState.reset();
         com.mohistmc.academy.client.SkillInputClientState.disconnect();
+        if (event.getConnection() != null && !event.getConnection().isMemoryConnection())
+            com.mohistmc.academy.data.AcademyDataManager.resetClient();
     }
 
     @SubscribeEvent

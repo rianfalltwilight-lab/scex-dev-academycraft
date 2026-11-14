@@ -3,6 +3,7 @@ package com.mohistmc.academy.client.gui;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.math.Axis;
 import com.mohistmc.academy.AcademyCraft;
+import com.mohistmc.academy.data.ProgressionData;
 import com.mohistmc.academy.network.LearnSkillPacket;
 import com.mohistmc.academy.network.CloseDevLearningSessionPacket;
 import com.mohistmc.academy.network.DevLearningResultPacket;
@@ -440,14 +441,14 @@ public class SkillTreeGui extends AcademyScreen {
                     centerX, textY + scaled(39), scaled(200), 0xFFE8E8E8);
             return;
         }
-        int stimulations = (int) (3 + node.skill.getLevel() * node.skill.getLevel() * .5f);
+        int stimulations = ProgressionData.learnStimulations(node.skill.getLevel());
         int cost = devType.actualEnergyPerStimulation() * stimulations;
         // SkillTree.scala refused to start (hint "noenergy") unless the whole estimate was available.
         Component prompt = pendingSkillId != null ? serverFeedback
                 : energy < cost ? Component.translatable("ac.skill_tree.noenergy")
                 : Component.translatable("ac.skill_tree.learn_question", cost);
         graphics.drawCenteredString(font, prompt, centerX, textY + scaled(39), 0xFFDDDDDD);
-        boolean learnable = node.canLearn && node.skill.getLevel() <= devType.maxLevel
+        boolean learnable = node.canLearn && node.skill.getLevel() <= devType.maxLevel()
                 && energy >= cost && pendingSkillId == null
                 && sessionNonce != null && !sessionSpent;
         actionWidth = scaled(36);
@@ -514,7 +515,7 @@ public class SkillTreeGui extends AcademyScreen {
         String next = "Lv." + (data.getPlayerLevel() + 1);
         graphics.drawCenteredString(font, Component.translatable("ac.skill_tree.uplevel", next),
                 centerX, iconY + iconSize + scaled(4), 0xFFFFFFFF);
-        int stimulations = 5 * (data.getPlayerLevel() + 1);
+        int stimulations = ProgressionData.levelUpStimulations(data.getPlayerLevel());
         int cost = devType.actualEnergyPerStimulation() * stimulations;
         graphics.drawCenteredString(font, energy < cost && pendingSkillId == null
                         ? Component.translatable("ac.skill_tree.noenergy").getString()
@@ -645,7 +646,7 @@ public class SkillTreeGui extends AcademyScreen {
         graphics.drawString(font, Component.translatable("ac.skill_tree.sync_rate"),
                 lineLeft, guiTop + scaled((187 - 12) / 2.0 + 66), 0xFFFFFFFF, false);
         drawLegacyBar(graphics, barLeft, guiTop + scaled((187 - 8) / 2.0 + 77.5), scaled(97),
-                devType.syncRate / 100.0, 0xFF32A4FC);
+                devType.syncRate() / 100.0, 0xFF32A4FC);
     }
 
     private void drawLegacyBar(GuiGraphics graphics, int x, int y, int width, double progress, int color) {
@@ -872,13 +873,13 @@ public class SkillTreeGui extends AcademyScreen {
             // 可学习状态
             if (readOnly) {
                 tooltip.add(Component.translatable("ac.skill_tree.tooltip.read_only").withStyle(ChatFormatting.GRAY));
-            } else if (skill.getLevel() > devType.maxLevel) {
+            } else if (skill.getLevel() > devType.maxLevel()) {
                 tooltip.add(Component.translatable("ac.skill_tree.tooltip.sync_rate").withStyle(ChatFormatting.RED));
             } else if (!fromTerminal && devType != null && energy <= 0) {
                 // 能量不足时优先提示
                 tooltip.add(Component.translatable("ac.skill_tree.tooltip.no_energy").withStyle(ChatFormatting.RED));
             } else {
-                int stimulations = (int) (3 + skill.getLevel() * skill.getLevel() * .5f);
+                int stimulations = ProgressionData.learnStimulations(skill.getLevel());
                 int cost = devType.actualEnergyPerStimulation() * stimulations;
                 float seconds = stimulations * devType.developmentTicksPerStimulation() / 20f;
                 tooltip.add(Component.translatable("ac.skill_tree.tooltip.estimate", cost, String.format("%.1f", seconds))
@@ -934,7 +935,7 @@ public class SkillTreeGui extends AcademyScreen {
                 if (levelDetailOpen && clickData != null && clickData.canLevelUp()) {
                     beginAction(LearnSkillPacket.LEVEL_UP_ACTION, clickData);
                 } else if (detailOpen && selectedNode != null && !selectedNode.learned
-                        && selectedNode.canLearn && selectedNode.skill.getLevel() <= devType.maxLevel) {
+                        && selectedNode.canLearn && selectedNode.skill.getLevel() <= devType.maxLevel()) {
                     beginAction(selectedNode.skill.getId(), clickData);
                 }
             } else if (pendingSkillId == null) {

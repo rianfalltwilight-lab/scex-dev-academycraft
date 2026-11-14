@@ -41,7 +41,7 @@ class DevInductionContractTest {
         String packet = source("com/mohistmc/academy/network/LearnSkillPacket.java");
         String sessions = source("com/mohistmc/academy/network/DevLearningSessionManager.java");
         assertTrue(packet.contains("data.getPlayerLevel() < 3"));
-        assertTrue(sessions.contains("selection.expectedLevel() * 10"));
+        assertTrue(sessions.contains("ProgressionData.resetStimulations(selection.expectedLevel())"));
         assertTrue(sessions.contains("player.getMainHandItem().is(AcademyItems.MAGNETIC_COIL.get())"));
         assertTrue(packet.contains("new AbilityEvents.CategoryChanged"));
         assertTrue(packet.contains("new AbilityEvents.LevelChanged"));

@@ -3,6 +3,7 @@ package com.mohistmc.academy.network;
 import com.mohistmc.academy.AcademyCraft;
 import com.mohistmc.academy.capability.EnergyItemHelper;
 import com.mohistmc.academy.capability.IFEnergyStorage;
+import com.mohistmc.academy.data.ProgressionData;
 import com.mohistmc.academy.skill.AbilityCategory;
 import com.mohistmc.academy.skill.AcademyAttachments;
 import com.mohistmc.academy.skill.PlayerAbilityData;
@@ -89,7 +90,7 @@ public record LearnSkillPacket(String skillId, int typeOrdinal, Optional<BlockPo
                 BlockPos inductionPos = packet.devPos().orElse(null);
                 // SkillTree.scala refused to start unless the developer held the whole estimated cost.
                 if (!validateEnergySource(player, devType, devType.actualEnergyPerStimulation()
-                        * DevLearningSessionManager.INDUCTION_STIMULATIONS, inductionPos)) {
+                        * ProgressionData.inductionStimulations(), inductionPos)) {
                     result(player, packet, devType, false, Component.translatable("ac.skill_tree.result.unavailable"));
                     return;
                 }
@@ -100,7 +101,7 @@ public record LearnSkillPacket(String skillId, int typeOrdinal, Optional<BlockPo
                     return;
                 }
                 int totalCost = devType.actualEnergyPerStimulation()
-                        * DevLearningSessionManager.INDUCTION_STIMULATIONS;
+                        * ProgressionData.inductionStimulations();
                 player.sendSystemMessage(Component.translatable("ac.skill_tree.msg.induct_start",
                         Component.translatable(selection.category().getTranslationKey()),
                         Component.translatable(selection.factorBacked()
@@ -115,7 +116,7 @@ public record LearnSkillPacket(String skillId, int typeOrdinal, Optional<BlockPo
                     return;
                 }
                 int level = data.getPlayerLevel();
-                int stimulations = 5 * (level + 1);
+                int stimulations = ProgressionData.levelUpStimulations(level);
                 int totalCost = devType.actualEnergyPerStimulation() * stimulations;
                 if (!validateEnergySource(player, devType, totalCost, packet.devPos().orElse(null))) {
                     result(player, packet, devType, false, Component.translatable("ac.skill_tree.result.level_unavailable"));
@@ -152,7 +153,7 @@ public record LearnSkillPacket(String skillId, int typeOrdinal, Optional<BlockPo
                 }
                 int resetLevel = data.getPlayerLevel();
                 if (!validateEnergySource(player, devType,
-                        devType.actualEnergyPerStimulation() * resetLevel * 10,
+                        devType.actualEnergyPerStimulation() * ProgressionData.resetStimulations(resetLevel),
                         packet.devPos().orElse(null))) {
                     result(player, packet, devType, false,
                             Component.translatable("ac.skill_tree.result.reset_unavailable"));
@@ -165,7 +166,7 @@ public record LearnSkillPacket(String skillId, int typeOrdinal, Optional<BlockPo
                             Component.translatable("ac.skill_tree.result.reset_busy"));
                     return;
                 }
-                int stimulations = selection.expectedLevel() * 10;
+                int stimulations = ProgressionData.resetStimulations(selection.expectedLevel());
                 int totalCost = devType.actualEnergyPerStimulation() * stimulations;
                 player.sendSystemMessage(Component.translatable("ac.skill_tree.msg.reset_start",
                         Component.translatable(selection.oldCategory().getTranslationKey()),
@@ -195,7 +196,7 @@ public record LearnSkillPacket(String skillId, int typeOrdinal, Optional<BlockPo
                 return;
             }
 
-            if (skill.getLevel() > devType.maxLevel) {
+            if (skill.getLevel() > devType.maxLevel()) {
                 player.sendSystemMessage(Component.translatable("ac.skill_tree.msg.sync_rate", skill.getLevel())
                         .withStyle(ChatFormatting.RED));
                 result(player, packet, devType, false, Component.translatable("ac.skill_tree.result.sync_rate"));
@@ -203,7 +204,7 @@ public record LearnSkillPacket(String skillId, int typeOrdinal, Optional<BlockPo
             }
 
             BlockPos devPos = packet.devPos().orElse(null);
-            int stimulations = (int) (3 + skill.getLevel() * skill.getLevel() * .5f);
+            int stimulations = ProgressionData.learnStimulations(skill.getLevel());
             // The UI and the session both use the real per-stimulation drain.
             int totalCost = devType.actualEnergyPerStimulation() * stimulations;
             if (!validateEnergySource(player, devType, totalCost, devPos)) {

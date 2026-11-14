@@ -395,7 +395,7 @@ public final class AcademyCommands {
             PlayerAbilityData data = data(player);
             // setCooldown keeps the longer cooldown; an explicit set replaces it.
             data.clearCooldown(skillId);
-            data.setCooldown(skillId, ticks);
+            data.setCooldownRaw(skillId, ticks);
             data.syncTo(player);
             send(c, "cooldown.set", player.getDisplayName(), skillId, data.getCooldownTicks(skillId));
             changed++;

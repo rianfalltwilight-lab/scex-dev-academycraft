@@ -1,5 +1,6 @@
 package com.mohistmc.academy.network;
 
+import com.mohistmc.academy.data.ProgressionData;
 import com.mohistmc.academy.skill.AbilityCategory;
 import com.mohistmc.academy.world.block.DevMachineType;
 import com.mohistmc.academy.world.AcademyItems;
@@ -25,8 +26,6 @@ public final class DevLearningSessionManager {
     // and exact-machine checks, but allow a normal five-minute UI session so
     // legitimate actions do not silently expire while the screen is open.
     private static final long LIFETIME_TICKS = 20L * 60L * 5L;
-    /** AcademyCraft 1.0.7 DevelopActionLevel used five stimulations at level zero. */
-    public static final int INDUCTION_STIMULATIONS = 5;
     private static final OneShotSessionLedger<SessionContext> SESSIONS = new OneShotSessionLedger<>();
     private static final Map<UUID, Development> ACTIVE = new ConcurrentHashMap<>();
     private static final Map<UUID, EnergyView> ENERGY_VIEWS = new ConcurrentHashMap<>();
@@ -195,7 +194,7 @@ public final class DevLearningSessionManager {
     public static boolean start(ServerPlayer player, UUID nonce, DevMachineType type,
                                 Optional<BlockPos> pos, String skillId, AbilityCategory skillCategory, int level) {
         if (ACTIVE.containsKey(player.getUUID()) || !commit(player, nonce, type, pos)) return false;
-        int stimulations = (int) (3 + level * level * .5f);
+        int stimulations = ProgressionData.learnStimulations(level);
         ACTIVE.put(player.getUUID(), new Development(nonce, type, pos, skillId, skillCategory, stimulations));
         LearnSkillPacket.progress(player, nonce, type, pos, 0, stimulations, Component.translatable("ac.skill_tree.developing.learn", 0, stimulations));
         return true;
@@ -207,10 +206,11 @@ public final class DevLearningSessionManager {
         if (ACTIVE.containsKey(player.getUUID())) return null;
         InductionSelection selection = captureInductionSelection(player, type, pos);
         if (selection == null || !commit(player, nonce, type, pos)) return null;
+        int stimulations = ProgressionData.inductionStimulations();
         ACTIVE.put(player.getUUID(), new Development(nonce, type, pos,
-                LearnSkillPacket.INDUCTION_ACTION, selection.category(), INDUCTION_STIMULATIONS, selection));
-        LearnSkillPacket.progress(player, nonce, type, pos, 0, INDUCTION_STIMULATIONS,
-                Component.translatable("ac.skill_tree.developing.induct", 0, INDUCTION_STIMULATIONS));
+                LearnSkillPacket.INDUCTION_ACTION, selection.category(), stimulations, selection));
+        LearnSkillPacket.progress(player, nonce, type, pos, 0, stimulations,
+                Component.translatable("ac.skill_tree.developing.induct", 0, stimulations));
         return selection;
     }
 
@@ -218,7 +218,7 @@ public final class DevLearningSessionManager {
     static boolean startLevelUp(ServerPlayer player, UUID nonce, DevMachineType type,
                                 Optional<BlockPos> pos, AbilityCategory category, int expectedLevel) {
         if (ACTIVE.containsKey(player.getUUID()) || !commit(player, nonce, type, pos)) return false;
-        int stimulations = 5 * (expectedLevel + 1);
+        int stimulations = ProgressionData.levelUpStimulations(expectedLevel);
         ACTIVE.put(player.getUUID(), new Development(nonce, type, pos,
                 LearnSkillPacket.LEVEL_UP_ACTION, category, stimulations, expectedLevel));
         LearnSkillPacket.progress(player, nonce, type, pos, 0, stimulations,
@@ -232,7 +232,7 @@ public final class DevLearningSessionManager {
         if (type != DevMachineType.ADVANCED || ACTIVE.containsKey(player.getUUID())) return null;
         ResetSelection selection = captureResetSelection(player);
         if (selection == null || !commit(player, nonce, type, pos)) return null;
-        int stimulations = selection.expectedLevel() * 10;
+        int stimulations = ProgressionData.resetStimulations(selection.expectedLevel());
         ACTIVE.put(player.getUUID(), new Development(nonce, type, pos,
                 LearnSkillPacket.RESET_ACTION, selection.newCategory(), stimulations, selection));
         LearnSkillPacket.progress(player, nonce, type, pos, 0, stimulations,
@@ -253,7 +253,8 @@ public final class DevLearningSessionManager {
         }
         ArrayList<AbilityCategory> categories = new ArrayList<>(AbilityCategory.all());
         if (categories.isEmpty()) return null;
-        AbilityCategory random = categories.get(player.getRandom().nextInt(categories.size()));
+        // Datapack induction.category_weights; equal weights keep the legacy uniform nextInt draw.
+        AbilityCategory random = ProgressionData.pickInductionCategory(categories, player.getRandom());
         return new InductionSelection(random, InductionSelection.Source.NONE, -1, ItemStack.EMPTY);
     }
 

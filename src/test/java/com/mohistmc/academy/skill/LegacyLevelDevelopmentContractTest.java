@@ -27,7 +27,7 @@ class LegacyLevelDevelopmentContractTest {
         assertTrue(packet.contains("LEVEL_UP_ACTION = \"__level_up__\""));
         assertTrue(packet.contains("completeLevelUp") && packet.contains("data.canLevelUp()"));
         assertFalse(packet.contains("computeEffectiveLevel"), "learning a skill must never auto-promote the ability");
-        assertTrue(session.contains("5 * (expectedLevel + 1)"));
+        assertTrue(session.contains("ProgressionData.levelUpStimulations(expectedLevel)"));
         assertTrue(session.contains("LearnSkillPacket.completeLevelUp"));
         assertTrue(ui.contains("LearnSkillPacket.LEVEL_UP_ACTION"));
         assertTrue(ui.contains("data.getLevelProgress() * 100"));

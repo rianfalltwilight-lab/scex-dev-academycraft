@@ -1,5 +1,6 @@
 package com.mohistmc.academy.config;
 
+import com.mohistmc.academy.data.SkillTuningData;
 import java.util.List;
 
 /** Pure, reload-safe interpretation of the 1.0.7 ability tuning matrix. */
@@ -9,10 +10,29 @@ public final class LegacyAbilityRules {
     public record Snapshot(int cpDelay, float cpSpeed, int overloadDelay, float overloadSpeed,
                            float maxCpGrowth, float maxOverloadGrowth, float proficiencyGrowth) {}
     public record SkillTuning(boolean enabled, float damage, float cp, float overload, float exp,
-                              boolean destroyBlocks) {}
+                              boolean destroyBlocks, float cooldown) {}
 
+    /**
+     * Effective tuning: the server config {@code skill.overrides} lines merged with the datapack
+     * {@code academy_skills/<id>.json} override (multipliers multiply, a skill disabled in either is disabled).
+     */
     public static SkillTuning parseSkill(String skillId, List<? extends String> entries) {
-        boolean enabled=true, destroy=true; float damage=1, cp=1, overload=1, exp=1;
+        return merge(parseConfig(skillId, entries), SkillTuningData.override(skillId));
+    }
+
+    public static SkillTuning merge(SkillTuning config, SkillTuningData.SkillOverride data) {
+        if (data == null) return config;
+        return new SkillTuning(config.enabled() && (data.enabled() == null || data.enabled()),
+                product(config.damage(), data.damage()), product(config.cp(), data.cp()),
+                product(config.overload(), data.overload()), product(config.exp(), data.exp()),
+                config.destroyBlocks() && (data.destroyBlocks() == null || data.destroyBlocks()),
+                product(config.cooldown(), data.cooldown()));
+    }
+    private static float product(float a, float b) { float v=a*b; return Float.isFinite(v)&&v>=0?v:1; }
+
+    /** The config lines alone ({@code <id>.<key>=<value>}). */
+    public static SkillTuning parseConfig(String skillId, List<? extends String> entries) {
+        boolean enabled=true, destroy=true; float damage=1, cp=1, overload=1, exp=1, cooldown=1;
         String prefix=skillId+".";
         for (String raw : entries) {
             if (raw == null || !raw.startsWith(prefix)) continue;
@@ -26,10 +46,11 @@ public final class LegacyAbilityRules {
                     case "cp" -> cp=positive(value,cp);
                     case "overload" -> overload=positive(value,overload);
                     case "exp" -> exp=positive(value,exp);
+                    case "cooldown" -> cooldown=positive(value,cooldown);
                 }
             } catch (RuntimeException ignored) { }
         }
-        return new SkillTuning(enabled,damage,cp,overload,exp,destroy);
+        return new SkillTuning(enabled,damage,cp,overload,exp,destroy,cooldown);
     }
     private static float positive(String text,float fallback){float v=Float.parseFloat(text);return Float.isFinite(v)&&v>=0?v:fallback;}
     /**

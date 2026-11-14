@@ -118,7 +118,7 @@ public class PlayerAbilityDataCodec implements IAttachmentSerializer<CompoundTag
             CompoundTag cdTag = tag.getCompound("cooldowns");
             for (String key : cdTag.getAllKeys()) {
                 int cd = cdTag.getInt(key);
-                if (cd > 0) data.setCooldown(key, cd);
+                if (cd > 0) data.setCooldownRaw(key, cd);
             }
         }
         data.setRecoveryDelays(tag.getInt("cp_recovery_delay"), tag.getInt("overload_recovery_delay"));

@@ -86,7 +86,7 @@ public class AcademyCraft {
     public static final String MODID = "academy";
     /** Strict and mandatory on both peers: NeoForge rejects any unequal protocol before play payloads. */
     /** Payload layout generation; bump whenever any play payload or synced data schema changes. */
-    public static final String NETWORK_PROTOCOL = "academy-1.21.1-payload-v23-data-v4";
+    public static final String NETWORK_PROTOCOL = "academy-1.21.1-payload-v24-data-v4";
     private static final Logger LOGGER = LogUtils.getLogger();
 
     public AcademyCraft(IEventBus modEventBus, ModContainer modContainer) {
@@ -236,6 +236,8 @@ public class AcademyCraft {
         );
         registrar.playToServer(AbilityInterfererConfigPacket.TYPE,
                 AbilityInterfererConfigPacket.STREAM_CODEC, AbilityInterfererConfigPacket::handle);
+        registrar.playToClient(com.mohistmc.academy.data.DataSyncPacket.TYPE,
+                com.mohistmc.academy.data.DataSyncPacket.STREAM_CODEC, com.mohistmc.academy.data.DataSyncPacket::handle);
         registrar.playToClient(AbilityInterfererStatePacket.TYPE,
                 AbilityInterfererStatePacket.STREAM_CODEC, AbilityInterfererStatePacket::handle);
         registrar.playToClient(DevLearningResultPacket.TYPE,

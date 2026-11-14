@@ -432,9 +432,15 @@ public class PlayerAbilityData {
     /**
      * 设置技能冷却（tick）。1.0.7 CooldownData.doSet keeps the LONGER of the running and the new
      * cooldown, so a shorter value never cuts an existing cooldown. Use {@link #clearCooldowns()}
-     * to drop cooldowns.
+     * to drop cooldowns. Starts a cooldown, so the {@code cooldown} skill tuning multiplier applies;
+     * restoring stored/synced remaining ticks must use {@link #setCooldownRaw}.
      */
     public void setCooldown(String skillId, int ticks) {
+        setCooldownRaw(skillId, ticks > 0 ? com.mohistmc.academy.config.DynamicSkillRules.cooldown(skillId, ticks) : ticks);
+    }
+
+    /** As {@link #setCooldown} but without the tuning multiplier (persistence, sync, commands). */
+    public void setCooldownRaw(String skillId, int ticks) {
         if (validKey(skillId) && ticks > 0) {
             cooldowns.merge(skillId, Math.min(ticks, 20 * 60 * 60), Math::max);
         }
@@ -1008,7 +1014,7 @@ public class PlayerAbilityData {
         if (tag.contains("cooldowns")) {
             cooldowns.clear();
             CompoundTag values = tag.getCompound("cooldowns");
-            for (String key : values.getAllKeys()) setCooldown(key, values.getInt(key));
+            for (String key : values.getAllKeys()) setCooldownRaw(key, values.getInt(key));
         }
     }
 
@@ -1112,7 +1118,7 @@ public class PlayerAbilityData {
         if (tag.contains("cooldowns")) {
             CompoundTag cdTag = tag.getCompound("cooldowns");
             for (String key : cdTag.getAllKeys()) {
-                data.setCooldown(key, cdTag.getInt(key));
+                data.setCooldownRaw(key, cdTag.getInt(key));
             }
         }
 
