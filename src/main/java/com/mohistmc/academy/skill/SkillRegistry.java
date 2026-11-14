@@ -245,7 +245,7 @@ public class SkillRegistry {
         // 电磁牵引
         registerSkill(new Skill.Builder("mag_movement", cat, 2)
                 .position(137, 35)
-                .prereq("arc_gen", 1.0f)
+                .prereq("arc_gen", 0.0f)
                 .prereq("charging", 0.7f)
                 .cpCost(8).overload(15).build());
 
@@ -270,7 +270,7 @@ public class SkillRegistry {
         // 雷击之枪
         registerSkill(new Skill.Builder("thunder_bolt", cat, 4)
                 .position(86, 67)
-                .prereq("arc_gen", 1.0f)
+                .prereq("arc_gen", 0.0f)
                 .prereq("charging", 0.7f)
                 .cpCost(40).overload(30).build());
 

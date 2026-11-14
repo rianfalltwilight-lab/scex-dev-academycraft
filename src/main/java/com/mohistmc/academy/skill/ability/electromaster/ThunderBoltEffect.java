@@ -130,7 +130,9 @@ public class ThunderBoltEffect implements SkillEffect {
     private EntityHitResult rayTraceEntities(ServerPlayer player, Vec3 start, Vec3 end) {
         AABB searchArea = new AABB(start,end).inflate(1.0);
         List<Entity> entities = player.level().getEntities(player, searchArea,
-                e -> e != player && e.isAlive() && e.isPickable());
+                e -> e != player && e.isAlive() && e.isPickable()
+                        // Legacy Raytrace.traceLiving: only living entities are targets.
+                        && e instanceof net.minecraft.world.entity.LivingEntity);
 
         Entity closest = null;
         double closestDist = Double.MAX_VALUE;

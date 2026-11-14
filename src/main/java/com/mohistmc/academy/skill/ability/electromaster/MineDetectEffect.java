@@ -139,8 +139,11 @@ public class MineDetectEffect implements SkillEffect {
         return (int) lerpf(900, 400, proficiency);
     }
 
-    private static boolean isOre(BlockState state) {
-        return state.is(BlockTags.COAL_ORES)
+    // Legacy isOreBlock: BlockOre / redstone ore or any ore-dictionary "ore*" entry,
+    // i.e. every vanilla and modded ore. c:ores is the modern equivalent.
+    public static boolean isOre(BlockState state) {
+        return state.is(net.neoforged.neoforge.common.Tags.Blocks.ORES)
+                || state.is(BlockTags.COAL_ORES)
                 || state.is(BlockTags.IRON_ORES)
                 || state.is(BlockTags.COPPER_ORES)
                 || state.is(BlockTags.GOLD_ORES)
