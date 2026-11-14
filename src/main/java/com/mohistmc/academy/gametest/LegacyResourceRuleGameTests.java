@@ -89,7 +89,7 @@ public final class LegacyResourceRuleGameTests {
         data.setCurrentOverload(data.getMaxOverload());
         data.setOverloadLocked(true);
         data.setCooldown("railgun", 400);
-        SkillEventHandler.onConfirmedDeath(player);
+        com.mohistmc.academy.skill.ConfirmedAbilityDeath.accept(player);
         if (data.getCurrentCp() != data.getMaxCp() || data.getCurrentOverload() != 0
                 || data.isOverloadLocked() || data.isAbilityActive() || data.isOnCooldown("railgun")) {
             helper.fail("death kept CP " + data.getCurrentCp() + ", overload " + data.getCurrentOverload()

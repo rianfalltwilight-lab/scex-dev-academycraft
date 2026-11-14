@@ -24,7 +24,10 @@ public final class ConfirmedAbilityDeath {
         CruiseBombEffect.onConfirmedDeath(entity);
         JetEngineRuntime.onConfirmedDeath(entity);
         FlashingSessionManager.onConfirmedDeath(entity);
-        if (entity instanceof ServerPlayer player)
+        if (entity instanceof ServerPlayer player) {
             com.mohistmc.academy.network.SkillInputSessionManager.onConfirmedDeath(player);
+            // Last: runtime cleanups above may set cooldowns that death must clear.
+            SkillEventHandler.resetOnDeath(player);
+        }
     }
 }
