@@ -23,6 +23,12 @@ The config values below are the 1.0.7 baseline. The balance profile multiplies t
 
 Each machine's FE face moves at most its IF bandwidth (× `fePerIf` FE) per tick in each direction. Consumers (developers, ability interferer, imaginary fusor, metal former) only receive; generators (solar, wind base, phase generator) only give; nodes do both. The RF output bridge never pushes into AcademyCraft's own machines (they use the wireless network), so no loop forms.
 
+## 比较器 / Comparators
+
+节点、开发机、能力干扰器、虚数融合器、金属成型机、太阳能、风力底座和相位发电机都输出比较器信号：按储能比例 0–15（有电即至少 1）。
+
+Nodes, developers, the ability interferer, imaginary fusor, metal former, solar generator, wind base and phase generator drive comparators by their stored energy, 0–15 (at least 1 when not empty).
+
 ## 配置项 / Keys
 
 | 键 / Key | 默认 / Default | 说明 / Meaning |
