@@ -13,6 +13,30 @@
   Invalid fields (array length not 6, non-finite, negative, wrong type) are logged and keep the previous
   value; some values are clamped.
 
+## 平衡档位 / Balance profile
+
+服务端配置 `balance.profile`（默认 `MODERN`）选择档位层 `data/<命名空间>/academy_balance/<modern|legacy>/progression/*.json`，格式与本页相同。层次：内置 1.0.7 数值 → 当前档位的文件 → `academy_progression/` 文件，后者逐字段覆盖前者。切换档位立即生效。
+
+Server config `balance.profile` (default `MODERN`) picks the layer `data/<namespace>/academy_balance/<modern|legacy>/progression/*.json`, in the format below. Layers: built-in 1.0.7 values → the profile's files → the `academy_progression/` files, each overriding single fields. Switching applies at once.
+
+本模组附带的 `modern` 档位 / the shipped `modern` profile (`academy_balance/modern/progression/modern.json`)：
+
+| 字段 / Field | 1.0.7（legacy） | modern |
+|---|---|---|
+| `cp.initial` | 1800, 1800, 2800, 4000, 5800, 8000 | 2000, 2000, 3500, 6000, 10000, 16000 |
+| `cp.max_added` | 0, 900, 1000, 1500, 1700, 12000 | 0, 1000, 1750, 3000, 5000, 8000 |
+| `overload.initial` | 100, 100, 150, 240, 350, 500 | 150, 150, 240, 380, 560, 800 |
+| `overload.max_added` | 0, 40, 70, 80, 100, 500 | 0, 60, 105, 120, 150, 750 |
+| `level_up.threshold_per_skill` | 0.666 ×4, 1.333, 0.666 | 0.4 ×4, 0.8, 0.4 |
+| `rules.cp_recovery_multiplier` | 1（空到满约 115 秒 / ~115 s empty to full） | 2.25（约 51 秒 / ~51 s） |
+| `rules.usage_growth_multiplier` | 1 | 8 |
+| `rules.proficiency_gain_multiplier` | 1 | 2 |
+| `rules.keep_usage_growth_on_level_up` | false | true |
+| `rules.overload_unlock_fraction` | 0 | 0.5 |
+| `rules.proficiency_cp_discount` | 0 | 0.5 |
+| `rules.prerequisite_proficiency_cap` | 1 | 0.75 |
+| `cp_potion.max_restore` | 2000 | 1000000000 |
+
 ## Schema（括号内为默认值 / defaults in brackets）
 
 | 字段 Field | 说明 Meaning |
@@ -36,6 +60,17 @@
 | `stimulations.reset_per_level` | 重置能力刺激次数 = 该值 × 当前等级，`10` |
 | `stimulations.induction` | 初次觉醒刺激次数 `5` |
 | `induction.category_weights.<id>` | 无因子觉醒时随机选择类别的权重，默认每类 `1`；`0` = 永不随机到（因子仍可强制该类别）；全为 0 时退回均匀随机。类别 id: `electromaster`, `meltdowner`, `teleporter`, `vecmanip`, `aerohand`, `telekinesis` |
+
+| `rules.cp_recovery_multiplier` | 乘在配置 `cpRecoverSpeed` 上 `1` / multiplies the config `cpRecoverSpeed` |
+| `rules.overload_recovery_multiplier` | 乘在配置 `overloadRecoverSpeed` 上 `1` |
+| `rules.usage_growth_multiplier` | 乘在配置 `maxCpIncreaseRate` 与 `maxOverloadIncreaseRate` 上 `1` |
+| `rules.proficiency_gain_multiplier` | 乘在配置 `proficiencyIncreaseRate` 上 `1` |
+| `rules.keep_usage_growth_on_level_up` | 升级时保留用量增长（仍受新等级上限约束）`false`；1.0.7 升级时清零 / keep usage growth on level-up (still capped by the new level); 1.0.7 cleared it |
+| `rules.overload_unlock_fraction` | 过载降到上限的这一比例以下即解除锁定 `0`（1.0.7：降到 0）/ the lock lifts at or below this fraction of max overload |
+| `rules.proficiency_cp_discount` | 满熟练度时 CP 消耗减少的比例，按熟练度线性 `0`（0..0.9）/ CP cost cut at full proficiency, linear in proficiency |
+| `rules.prerequisite_proficiency_cap` | 高于此值的前置熟练度要求降到此值 `1` / prerequisite proficiency requirements above this are lowered to it |
+| `cp_potion.restore_fraction` | CP 药水最多回复到最大 CP 的此比例 `0.5` / a CP potion refills up to this fraction of max CP |
+| `cp_potion.max_restore` | 单瓶最多回复的 CP `2000` / at most this much CP per potion |
 
 刺激次数被夹取到 1..1000。/ Stimulation counts are clamped to 1..1000.
 
