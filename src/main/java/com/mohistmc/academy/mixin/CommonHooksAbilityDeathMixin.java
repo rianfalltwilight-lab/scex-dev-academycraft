@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 /** Runs after every public death veto and before vanilla drops/saves the dying player's inventory. */
 @Mixin(value = CommonHooks.class, remap = false)
 public abstract class CommonHooksAbilityDeathMixin {
-    @Inject(method = "onLivingDeath", at = @At("RETURN"), remap = false, require = 1)
+    @Inject(method = "onLivingDeath", at = @At("RETURN"), remap = false, require = 0)
     private static void academy$confirmedDeath(LivingEntity entity, DamageSource source,
                                                CallbackInfoReturnable<Boolean> result) {
         if (!result.getReturnValueZ()) ConfirmedAbilityDeath.accept(entity);
