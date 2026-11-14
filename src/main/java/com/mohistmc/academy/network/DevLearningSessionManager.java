@@ -351,7 +351,7 @@ public final class DevLearningSessionManager {
         if (!LearnSkillPacket.validateEnergySource(player, context.type, 0, context.pos.orElse(null))) return null;
         if (context.type == DevMachineType.PORTABLE)
             return new DevEnergyPacket(nonce, com.mohistmc.academy.capability.EnergyItemHelper.getEnergy(
-                    player.getMainHandItem()), DeveloperPortable.MAX_ENERGY);
+                    player.getMainHandItem()), DeveloperPortable.maxEnergy());
         if (player.level().getBlockEntity(context.pos.orElseThrow()) instanceof com.mohistmc.academy.capability.IFEnergyStorage storage)
             return new DevEnergyPacket(nonce, storage.getEnergyStored(), storage.getMaxEnergyStored());
         return null;

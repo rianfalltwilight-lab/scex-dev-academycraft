@@ -232,7 +232,7 @@ public record LearnSkillPacket(String skillId, int typeOrdinal, Optional<BlockPo
         if (type == DevMachineType.PORTABLE) {
             ItemStack stack = player.getMainHandItem();
             if (stack.getItem() instanceof DeveloperPortable) {
-                energy = EnergyItemHelper.getEnergy(stack); maximum = DeveloperPortable.MAX_ENERGY;
+                energy = EnergyItemHelper.getEnergy(stack); maximum = DeveloperPortable.maxEnergy();
             }
         } else if (packet.devPos().isPresent()
                 && validateEnergySource(player, type, 0, packet.devPos().get())) {

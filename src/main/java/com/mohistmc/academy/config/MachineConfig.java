@@ -21,6 +21,7 @@ public final class MachineConfig {
         private final double max;
         private final String comment;
         private ModConfigSpec.DoubleValue value;
+        private Scale scale = Scale.NONE;
 
         Num(String key, double fallback, double min, double max, String comment) {
             this.key = key;
@@ -34,7 +35,16 @@ public final class MachineConfig {
             value = builder.comment(comment).defineInRange(key, fallback, min, max);
         }
 
+        Num scaled(Scale category) { this.scale = category; return this; }
+
+        /** The configured value times the balance profile's multiplier for its category. */
         public double get() {
+            double v = configured() * com.mohistmc.academy.data.ProgressionData.machineScale(scale);
+            return Double.isFinite(v) ? v : configured();
+        }
+
+        /** The configured value alone. */
+        public double configured() {
             if (value == null) return fallback;
             try {
                 double read = value.get();
@@ -58,6 +68,7 @@ public final class MachineConfig {
         private final int max;
         private final String comment;
         private ModConfigSpec.IntValue value;
+        private Scale scale = Scale.NONE;
 
         Int(String key, int fallback, int min, int max, String comment) {
             this.key = key;
@@ -71,7 +82,19 @@ public final class MachineConfig {
             value = builder.comment(comment).defineInRange(key, fallback, min, max);
         }
 
+        Int scaled(Scale category) { this.scale = category; return this; }
+
+        /** The configured value times the balance profile's multiplier for its category (saturating). */
         public int get() {
+            int configured = configured();
+            float multiplier = com.mohistmc.academy.data.ProgressionData.machineScale(scale);
+            if (multiplier == 1f) return configured;
+            double v = (double) configured * multiplier;
+            return Double.isFinite(v) ? (int) Math.clamp(Math.round(v), 0, Integer.MAX_VALUE) : configured;
+        }
+
+        /** The configured value alone. */
+        public int configured() {
             if (value == null) return fallback;
             try {
                 return Math.clamp(value.get(), min, max);
@@ -86,6 +109,17 @@ public final class MachineConfig {
         public void set(int wanted) { if (value != null) value.set(wanted); }
     }
 
+    /** A fixed legacy number times the balance profile's multiplier for {@code scale} (saturating). */
+    public static int scale(int legacy, Scale scale) {
+        float multiplier = com.mohistmc.academy.data.ProgressionData.machineScale(scale);
+        if (multiplier == 1f) return legacy;
+        double v = (double) legacy * multiplier;
+        return Double.isFinite(v) ? (int) Math.clamp(Math.round(v), 0, Integer.MAX_VALUE) : legacy;
+    }
+
+    /** Which balance-profile multiplier ({@code machines.*_multiplier}) a value takes. */
+    public enum Scale { NONE, STORAGE, BANDWIDTH, GENERATION, RANGE, ITEM }
+
     /** One wireless node tier. */
     public static final class NodeTier {
         public final Int maxEnergy;
@@ -94,10 +128,12 @@ public final class MachineConfig {
         public final Int maxConnections;
 
         NodeTier(int maxEnergy, int bandwidth, double range, int maxConnections) {
-            this.maxEnergy = new Int("maxEnergy", maxEnergy, 1, 1_000_000_000, "IF buffer of the node.");
+            this.maxEnergy = new Int("maxEnergy", maxEnergy, 1, 1_000_000_000, "IF buffer of the node.")
+                    .scaled(Scale.STORAGE);
             this.bandwidth = new Int("bandwidth", bandwidth, 0, 1_000_000,
-                    "IF per tick moved between the node and its connected machines / battery slots.");
-            this.range = new Num("range", range, 0.0, 256.0, "Connection range in blocks.");
+                    "IF per tick moved between the node and its connected machines / battery slots.")
+                    .scaled(Scale.BANDWIDTH);
+            this.range = new Num("range", range, 0.0, 256.0, "Connection range in blocks.").scaled(Scale.RANGE);
             this.maxConnections = new Int("maxConnections", maxConnections, 0, 1024,
                     "Maximum number of generators plus receivers linked to this node.");
         }
@@ -117,7 +153,8 @@ public final class MachineConfig {
     public static final Int FE_PER_IF = new Int("fePerIf", 4, 1, 1_000,
             "FE (RF) per 1 IF at every Forge-energy boundary (energy bridges, FE item/block views).");
     public static final Int WIRELESS_NETWORK_BUFFER = new Int("networkBuffer", 2000, 0, 1_000_000_000,
-            "Shared IF buffer of one wireless matrix network.");
+            "Shared IF buffer of one wireless matrix network.")
+            .scaled(Scale.STORAGE);
 
     public static final NodeTier NODE_BASIC = new NodeTier(15000, 150, 9.0, 5);
     public static final NodeTier NODE_STANDARD = new NodeTier(50000, 300, 12.0, 10);
@@ -126,52 +163,75 @@ public final class MachineConfig {
     public static final Num MATRIX_CAPACITY_PER_LEVEL = new Num("capacityPerLevel", 8.0, 0.0, 1024.0,
             "Matrix node capacity = capacityPerLevel * L (L = core level 1..3), rounded down.");
     public static final Num MATRIX_BANDWIDTH_PER_LEVEL_SQUARED = new Num("bandwidthPerLevelSquared", 60.0, 0.0, 1_000_000.0,
-            "Matrix bandwidth (IF/t) = bandwidthPerLevelSquared * L^2.");
+            "Matrix bandwidth (IF/t) = bandwidthPerLevelSquared * L^2.")
+            .scaled(Scale.BANDWIDTH);
     public static final Num MATRIX_RANGE_PER_SQRT_LEVEL = new Num("rangePerSqrtLevel", 24.0, 0.0, 256.0,
             "Matrix range (blocks) = rangePerSqrtLevel * sqrt(L), capped at 256.");
 
-    public static final Int SOLAR_BUFFER = new Int("buffer", 1000, 1, 1_000_000_000, "IF buffer.");
-    public static final Num SOLAR_DAY_RATE = new Num("dayRate", 3.0, 0.0, 1_000_000.0, "IF per tick in clear daylight.");
-    public static final Num SOLAR_RAIN_RATE = new Num("rainRate", 0.6, 0.0, 1_000_000.0, "IF per tick in daylight while raining.");
-    public static final Num SOLAR_BANDWIDTH = new Num("bandwidth", 100.0, 0.0, 1_000_000.0, "IF per tick output.");
+    public static final Int SOLAR_BUFFER = new Int("buffer", 1000, 1, 1_000_000_000, "IF buffer.")
+            .scaled(Scale.STORAGE);
+    public static final Num SOLAR_DAY_RATE = new Num("dayRate", 3.0, 0.0, 1_000_000.0, "IF per tick in clear daylight.")
+            .scaled(Scale.GENERATION);
+    public static final Num SOLAR_RAIN_RATE = new Num("rainRate", 0.6, 0.0, 1_000_000.0, "IF per tick in daylight while raining.")
+            .scaled(Scale.GENERATION);
+    public static final Num SOLAR_BANDWIDTH = new Num("bandwidth", 100.0, 0.0, 1_000_000.0, "IF per tick output.")
+            .scaled(Scale.BANDWIDTH);
 
-    public static final Int WIND_BUFFER = new Int("buffer", 20000, 1, 1_000_000_000, "IF buffer of the base.");
-    public static final Num WIND_MIN_RATE = new Num("minRate", 7.5, 0.0, 1_000_000.0, "IF per tick at or below minHeight.");
-    public static final Num WIND_MAX_RATE = new Num("maxRate", 15.0, 0.0, 1_000_000.0, "IF per tick at or above maxHeight.");
+    public static final Int WIND_BUFFER = new Int("buffer", 20000, 1, 1_000_000_000, "IF buffer of the base.")
+            .scaled(Scale.STORAGE);
+    public static final Num WIND_MIN_RATE = new Num("minRate", 7.5, 0.0, 1_000_000.0, "IF per tick at or below minHeight.")
+            .scaled(Scale.GENERATION);
+    public static final Num WIND_MAX_RATE = new Num("maxRate", 15.0, 0.0, 1_000_000.0, "IF per tick at or above maxHeight.")
+            .scaled(Scale.GENERATION);
     public static final Int WIND_MIN_HEIGHT = new Int("minHeight", 70, -2048, 4096, "Y of the turbine head where minRate applies.");
     public static final Int WIND_MAX_HEIGHT = new Int("maxHeight", 160, -2048, 4096,
             "Y of the turbine head where maxRate applies (linear in between).");
-    public static final Num WIND_BANDWIDTH = new Num("bandwidth", 300.0, 0.0, 1_000_000.0, "IF per tick output.");
+    public static final Num WIND_BANDWIDTH = new Num("bandwidth", 300.0, 0.0, 1_000_000.0, "IF per tick output.")
+            .scaled(Scale.BANDWIDTH);
 
-    public static final Int PHASE_BUFFER = new Int("buffer", 6000, 1, 1_000_000_000, "IF buffer.");
-    public static final Num PHASE_ENERGY_PER_MB = new Num("energyPerMb", 0.5, 0.0, 1_000_000.0, "IF generated per mB of phase liquid.");
+    public static final Int PHASE_BUFFER = new Int("buffer", 6000, 1, 1_000_000_000, "IF buffer.")
+            .scaled(Scale.STORAGE);
+    public static final Num PHASE_ENERGY_PER_MB = new Num("energyPerMb", 0.5, 0.0, 1_000_000.0, "IF generated per mB of phase liquid.")
+            .scaled(Scale.GENERATION);
     public static final Int PHASE_MAX_DRAIN = new Int("maxDrainPerTick", 100, 0, 1_000_000, "Most phase liquid (mB) burned per tick.");
-    public static final Num PHASE_BANDWIDTH = new Num("bandwidth", 50.0, 0.0, 1_000_000.0, "IF per tick output.");
+    public static final Num PHASE_BANDWIDTH = new Num("bandwidth", 50.0, 0.0, 1_000_000.0, "IF per tick output.")
+            .scaled(Scale.BANDWIDTH);
 
-    public static final Int CAT_BUFFER = new Int("buffer", 2000, 1, 1_000_000_000, "IF buffer.");
-    public static final Num CAT_GENERATION = new Num("generation", 500.0, 0.0, 1_000_000.0, "IF generated per tick.");
-    public static final Num CAT_BANDWIDTH = new Num("bandwidth", 200.0, 0.0, 1_000_000.0, "IF per tick output.");
+    public static final Int CAT_BUFFER = new Int("buffer", 2000, 1, 1_000_000_000, "IF buffer.")
+            .scaled(Scale.STORAGE);
+    public static final Num CAT_GENERATION = new Num("generation", 500.0, 0.0, 1_000_000.0, "IF generated per tick.")
+            .scaled(Scale.GENERATION);
+    public static final Num CAT_BANDWIDTH = new Num("bandwidth", 200.0, 0.0, 1_000_000.0, "IF per tick output.")
+            .scaled(Scale.BANDWIDTH);
 
-    public static final Num FUSOR_BUFFER = new Num("buffer", 2000.0, 1.0, 1_000_000_000.0, "IF buffer.");
-    public static final Num FUSOR_BANDWIDTH = new Num("bandwidth", 50.0, 0.0, 1_000_000.0, "IF per tick input.");
+    public static final Num FUSOR_BUFFER = new Num("buffer", 2000.0, 1.0, 1_000_000_000.0, "IF buffer.")
+            .scaled(Scale.STORAGE);
+    public static final Num FUSOR_BANDWIDTH = new Num("bandwidth", 50.0, 0.0, 1_000_000.0, "IF per tick input.")
+            .scaled(Scale.BANDWIDTH);
     public static final Int FUSOR_PROCESS_TIME = new Int("processTime", 120, 1, 72_000,
             "Ticks per craft for recipes without their own \"time\".");
     public static final Num FUSOR_ENERGY_PER_TICK = new Num("energyPerTick", 12.0, 0.0, 1_000_000.0,
             "IF per tick while crafting, for recipes without their own \"energy\".");
 
-    public static final Num FORMER_BUFFER = new Num("buffer", 3000.0, 1.0, 1_000_000_000.0, "IF buffer.");
-    public static final Num FORMER_BANDWIDTH = new Num("bandwidth", 50.0, 0.0, 1_000_000.0, "IF per tick input.");
+    public static final Num FORMER_BUFFER = new Num("buffer", 3000.0, 1.0, 1_000_000_000.0, "IF buffer.")
+            .scaled(Scale.STORAGE);
+    public static final Num FORMER_BANDWIDTH = new Num("bandwidth", 50.0, 0.0, 1_000_000.0, "IF per tick input.")
+            .scaled(Scale.BANDWIDTH);
     public static final Int FORMER_PROCESS_TIME = new Int("processTime", 60, 1, 72_000,
             "Ticks per craft for recipes without their own \"time\".");
     public static final Num FORMER_ENERGY_PER_TICK = new Num("energyPerTick", 13.3, 0.0, 1_000_000.0,
             "IF per tick while crafting, for recipes without their own \"energy\".");
 
     public static final Int BRIDGE_BUFFER_IF = new Int("bufferIf", 2000, 1, 100_000_000,
-            "IF buffer of each RF/FE bridge (stored as bufferIf * fePerIf FE).");
-    public static final Num BRIDGE_BANDWIDTH = new Num("bandwidth", 100.0, 0.0, 1_000_000.0, "IF per tick to/from the wireless node.");
+            "IF buffer of each RF/FE bridge (stored as bufferIf * fePerIf FE).")
+            .scaled(Scale.STORAGE);
+    public static final Num BRIDGE_BANDWIDTH = new Num("bandwidth", 100.0, 0.0, 1_000_000.0, "IF per tick to/from the wireless node.")
+            .scaled(Scale.BANDWIDTH);
 
-    public static final Int INTERFERER_BUFFER = new Int("buffer", 10_000, 1, 1_000_000_000, "IF buffer.");
-    public static final Int INTERFERER_BANDWIDTH = new Int("bandwidth", 50, 0, 1_000_000, "IF per tick drawn from the battery slot.");
+    public static final Int INTERFERER_BUFFER = new Int("buffer", 10_000, 1, 1_000_000_000, "IF buffer.")
+            .scaled(Scale.STORAGE);
+    public static final Int INTERFERER_BANDWIDTH = new Int("bandwidth", 50, 0, 1_000_000, "IF per tick drawn from the battery slot.")
+            .scaled(Scale.BANDWIDTH);
     public static final Num INTERFERER_COST_PER_RANGE_SQUARED = new Num("costPerRangeSquared", 1.0, 0.0, 10_000.0,
             "IF paid every 10 ticks = ceil(costPerRangeSquared * range^2).");
 

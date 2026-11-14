@@ -90,6 +90,21 @@ public final class ProgressionData extends SyncedJsonData {
         INSTANCE.accept(Map.of());
     }
 
+    // ---- machines (balance profile multipliers over the [machines] config; 1 in 1.0.7) -------------
+
+    /** Multiplier for one category of machine numbers; see {@code MachineConfig.Scale}. */
+    public static float machineScale(com.mohistmc.academy.config.MachineConfig.Scale scale) {
+        Values v = values();
+        return switch (scale) {
+            case NONE -> 1;
+            case STORAGE -> v.machineStorage;
+            case BANDWIDTH -> v.machineBandwidth;
+            case GENERATION -> v.machineGeneration;
+            case RANGE -> v.machineRange;
+            case ITEM -> v.itemEnergy;
+        };
+    }
+
     // ---- combat (balance profile knobs; all neutral in 1.0.7) --------------------------------------
 
     /** Ability damage a player deals is multiplied by this per ability level L0..L5. */
@@ -243,7 +258,9 @@ public final class ProgressionData extends SyncedJsonData {
                           float[] levelDamageMultiplier, float bossMaxHealthFraction, float bossBonusCap,
                           float armorPierce, boolean mobAttackScaling, float mobHitCapVsPlayers,
                           float defenseCostExponent, float deviationCostPerDamage, float lightShieldAbsorbFraction,
-                          boolean reflectionUsesOffenseScaling, float[] levelMaxHealth) {}
+                          boolean reflectionUsesOffenseScaling, float[] levelMaxHealth,
+                          float machineStorage, float machineBandwidth, float machineGeneration, float machineRange,
+                          float itemEnergy) {}
 
     /** Holds the built-in defaults; each file overrides the fields it names. */
     private static final class Builder {
@@ -284,6 +301,7 @@ public final class ProgressionData extends SyncedJsonData {
         float lightShieldAbsorbFraction = 0;
         boolean reflectionUsesOffenseScaling = true;
         float[] levelMaxHealth = {0, 0, 0, 0, 0, 0};
+        float machineStorage = 1, machineBandwidth = 1, machineGeneration = 1, machineRange = 1, itemEnergy = 1;
 
         private ResourceLocation file;
 
@@ -300,7 +318,8 @@ public final class ProgressionData extends SyncedJsonData {
                     cpPotionRestoreFraction, cpPotionMaxRestore, levelDamageMultiplier.clone(),
                     bossMaxHealthFraction, bossBonusCap, armorPierce, mobAttackScaling, mobHitCapVsPlayers,
                     defenseCostExponent, deviationCostPerDamage, lightShieldAbsorbFraction,
-                    reflectionUsesOffenseScaling, levelMaxHealth.clone());
+                    reflectionUsesOffenseScaling, levelMaxHealth.clone(), machineStorage, machineBandwidth,
+                    machineGeneration, machineRange, itemEnergy);
         }
 
         void apply(ResourceLocation id, JsonObject root) {
@@ -388,6 +407,14 @@ public final class ProgressionData extends SyncedJsonData {
                 reflectionUsesOffenseScaling = bool(combat, "combat.", "reflection_uses_offense_scaling",
                         reflectionUsesOffenseScaling);
                 levelMaxHealth = levels(combat, "combat.", "level_max_health", levelMaxHealth);
+            }
+            JsonObject machines = object(root, "", "machines");
+            if (machines != null) {
+                machineStorage = number(machines, "machines.", "storage_multiplier", machineStorage, 1000);
+                machineBandwidth = number(machines, "machines.", "bandwidth_multiplier", machineBandwidth, 1000);
+                machineGeneration = number(machines, "machines.", "generation_multiplier", machineGeneration, 1000);
+                machineRange = number(machines, "machines.", "range_multiplier", machineRange, 10);
+                itemEnergy = number(machines, "machines.", "item_energy_multiplier", itemEnergy, 1000);
             }
             JsonObject induct = object(root, "", "induction");
             if (induct != null) {

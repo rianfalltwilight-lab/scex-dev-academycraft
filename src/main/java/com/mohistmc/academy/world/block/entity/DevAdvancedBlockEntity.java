@@ -23,7 +23,9 @@ public class DevAdvancedBlockEntity extends AcademyContainerBlockEntity
         implements IFEnergyStorage, IDevStructure, IWirelessReceiver {
 
     public static final int MAX_ENERGY = 200_000;
+    public static int maxEnergy() { return com.mohistmc.academy.config.MachineConfig.scale(MAX_ENERGY, com.mohistmc.academy.config.MachineConfig.Scale.STORAGE); }
     private static final double MAX_BANDWIDTH = 300;
+    private static double maxBandwidth() { return com.mohistmc.academy.config.MachineConfig.scale((int) MAX_BANDWIDTH, com.mohistmc.academy.config.MachineConfig.Scale.BANDWIDTH); }
 
     private int energy = 0;
     private UUID structureId;
@@ -106,12 +108,12 @@ public class DevAdvancedBlockEntity extends AcademyContainerBlockEntity
 
     @Override
     public int getMaxEnergyStored() {
-        return MAX_ENERGY;
+        return maxEnergy();
     }
 
     @Override
     public void setEnergy(int energy) {
-        int bounded = Math.clamp(energy, 0, MAX_ENERGY);
+        int bounded = Math.clamp(energy, 0, maxEnergy());
         if (this.energy == bounded) return;
         this.energy = bounded;
         markMachineChanged(); // Open menus already use incremental ContainerData.
@@ -121,13 +123,13 @@ public class DevAdvancedBlockEntity extends AcademyContainerBlockEntity
 
     @Override
     public double getRequiredEnergy() {
-        return energy < MAX_ENERGY ? Math.min(MAX_BANDWIDTH, MAX_ENERGY - energy) : 0;
+        return energy < maxEnergy() ? Math.min(maxBandwidth(), maxEnergy() - energy) : 0;
     }
 
     @Override
     public double injectEnergy(double amt) {
         if (!Double.isFinite(amt) || amt <= 0) return amt;
-        int accepted = (int) Math.floor(Math.min(amt, MAX_ENERGY - energy));
+        int accepted = (int) Math.floor(Math.min(amt, maxEnergy() - energy));
         if (accepted > 0) setEnergy(energy + accepted);
         return amt - accepted;
     }
@@ -139,7 +141,7 @@ public class DevAdvancedBlockEntity extends AcademyContainerBlockEntity
 
     @Override
     public double getBandwidth() {
-        return MAX_BANDWIDTH;
+        return maxBandwidth();
     }
 
     // ==================== NBT ====================
@@ -148,7 +150,7 @@ public class DevAdvancedBlockEntity extends AcademyContainerBlockEntity
     public void loadAdditional(CompoundTag tag, HolderLookup.Provider provider) {
         super.loadAdditional(tag, provider);
         if (tag.contains("energy")) {
-            this.energy = Math.clamp(tag.getInt("energy"), 0, MAX_ENERGY);
+            this.energy = Math.clamp(tag.getInt("energy"), 0, maxEnergy());
         }
         if (tag.contains("structureId")) {
             this.structureId = com.mohistmc.academy.world.block.IDevStructure

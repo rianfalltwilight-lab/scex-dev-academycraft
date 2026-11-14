@@ -35,5 +35,17 @@
     "light_shield_absorb_fraction": 0.3,
     "reflection_uses_offense_scaling": false,
     "level_max_health": [0, 0, 2, 4, 8, 12]
+  },
+  "machines": {
+    "storage_multiplier": 10,
+    "bandwidth_multiplier": 10,
+    "generation_multiplier": 4,
+    "range_multiplier": 1.5,
+    "item_energy_multiplier": 10
+  },
+  "developer": {
+    "portable": { "energy_per_stimulation": 3000 },
+    "normal": { "energy_per_stimulation": 2800 },
+    "advanced": { "energy_per_stimulation": 2400 }
   }
 }
