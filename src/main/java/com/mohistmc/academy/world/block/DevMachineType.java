@@ -1,22 +1,27 @@
 package com.mohistmc.academy.world.block;
 
 public enum DevMachineType {
-    PORTABLE(2, 30, "便携", 25, 750),
-    NORMAL(3, 70, "基础", 20, 700),
-    ADVANCED(Integer.MAX_VALUE, 100, "高级", 15, 600);
+    PORTABLE(2, 30, "ac.developer.type.portable", 25, 750),
+    NORMAL(3, 70, "ac.developer.type.normal", 20, 700),
+    ADVANCED(Integer.MAX_VALUE, 100, "ac.developer.type.advanced", 15, 600);
 
     public final int maxLevel;
     public final int syncRate;
-    public final String displayName;
+    /** Translation key of the short tier name (Portable / Normal / Advanced). */
+    public final String translationKey;
     public final int stimulationTicks;
     public final int energyPerStimulation;
 
-    DevMachineType(int maxLevel, int syncRate, String displayName, int stimulationTicks, int energyPerStimulation) {
+    DevMachineType(int maxLevel, int syncRate, String translationKey, int stimulationTicks, int energyPerStimulation) {
         this.maxLevel = maxLevel;
         this.syncRate = syncRate;
-        this.displayName = displayName;
+        this.translationKey = translationKey;
         this.stimulationTicks = stimulationTicks;
         this.energyPerStimulation = energyPerStimulation;
+    }
+
+    public net.minecraft.network.chat.Component displayName() {
+        return net.minecraft.network.chat.Component.translatable(translationKey);
     }
 
     public int energyPerTick() { return energyPerStimulation / stimulationTicks; }

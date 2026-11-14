@@ -6,6 +6,7 @@ import com.mohistmc.academy.network.NetworkInputLimits;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
@@ -34,13 +35,13 @@ public class FreqTransmitterGui extends Screen {
 
     private static UUID activeNonce = NO_NONCE;
     private static int targetingState = FreqTransmitterStatePacket.CLOSED;
-    private static String targetingMessage = "";
+    private static Component targetingMessage = Component.empty();
     private static final Set<UUID> LOCALLY_CANCELED = new HashSet<>();
 
     private final boolean opening;
     private final UUID nonce;
-    private final String sourceLabel;
-    private final String statusMessage;
+    private final Component sourceLabel;
+    private final Component statusMessage;
     private final StringBuilder password = new StringBuilder();
     private boolean requestSent;
     private boolean serverTransition;
@@ -49,15 +50,16 @@ public class FreqTransmitterGui extends Screen {
 
     /** Opened from Data Terminal: request a fresh server session. */
     public FreqTransmitterGui() {
-        this(true, UUID.randomUUID(), "", "正在建立服务器会话……");
+        this(true, UUID.randomUUID(), Component.empty(),
+                Component.translatable("ac.freq_transmitter.connecting"));
     }
 
-    private FreqTransmitterGui(boolean opening, UUID nonce, String sourceLabel, String statusMessage) {
+    private FreqTransmitterGui(boolean opening, UUID nonce, Component sourceLabel, Component statusMessage) {
         super(Component.translatable("item.academy.app_freq_transmitter"));
         this.opening = opening;
         this.nonce = nonce == null ? NO_NONCE : nonce;
-        this.sourceLabel = sourceLabel == null ? "" : sourceLabel;
-        this.statusMessage = statusMessage == null ? "" : statusMessage;
+        this.sourceLabel = sourceLabel == null ? Component.empty() : sourceLabel;
+        this.statusMessage = statusMessage == null ? Component.empty() : statusMessage;
     }
 
     @Override
@@ -76,18 +78,20 @@ public class FreqTransmitterGui extends Screen {
         super.render(graphics, mouseX, mouseY, partialTick);
         graphics.fill(guiLeft, guiTop, guiLeft + GUI_WIDTH, guiTop + GUI_HEIGHT, COLOR_BG);
         drawBorder(graphics, guiLeft, guiTop, GUI_WIDTH, GUI_HEIGHT, COLOR_ACCENT);
-        graphics.drawString(font, "§l频率变送器", guiLeft + 10, guiTop + 10, COLOR_TITLE, false);
+        graphics.drawString(font, Component.translatable("item.academy.app_freq_transmitter")
+                .withStyle(ChatFormatting.BOLD), guiLeft + 10, guiTop + 10, COLOR_TITLE, false);
 
         int y = guiTop + 34;
         if (opening) {
-            graphics.drawString(font, "正在由服务器创建一次性选择会话", guiLeft + 12, y, COLOR_TEXT, false);
-            graphics.drawString(font, "会话建立后界面会自动关闭", guiLeft + 12, y + 14, COLOR_DIM, false);
-            graphics.drawString(font, "随后右击矩阵或节点作为源设备", guiLeft + 12, y + 28, COLOR_DIM, false);
+            graphics.drawString(font, Component.translatable("ac.freq_transmitter.opening.0"), guiLeft + 12, y, COLOR_TEXT, false);
+            graphics.drawString(font, Component.translatable("ac.freq_transmitter.opening.1"), guiLeft + 12, y + 14, COLOR_DIM, false);
+            graphics.drawString(font, Component.translatable("ac.freq_transmitter.opening.2"), guiLeft + 12, y + 28, COLOR_DIM, false);
         } else {
-            graphics.drawString(font, sourceLabel.isEmpty() ? "已选择源设备" : sourceLabel,
+            graphics.drawString(font, sourceLabel.getString().isEmpty()
+                            ? Component.translatable("ac.freq_transmitter.source_selected") : sourceLabel,
                     guiLeft + 12, y, COLOR_TEXT, false);
             graphics.drawString(font, statusMessage, guiLeft + 12, y + 14, COLOR_DIM, false);
-            graphics.drawString(font, "密码", guiLeft + 12, y + 40, COLOR_TEXT, false);
+            graphics.drawString(font, Component.translatable("ac.gui.common.prop.password"), guiLeft + 12, y + 40, COLOR_TEXT, false);
             int inputX = guiLeft + 52;
             int inputY = y + 34;
             graphics.fill(inputX, inputY, guiLeft + GUI_WIDTH - 12, inputY + 18, 0xCC101828);
@@ -98,13 +102,14 @@ public class FreqTransmitterGui extends Screen {
 
             int authorizeX = guiLeft + 52;
             int authorizeY = guiTop + 116;
-            drawButton(graphics, authorizeX, authorizeY, 96, 20, "验证并选择目标",
+            drawButton(graphics, authorizeX, authorizeY, 96, 20,
+                    Component.translatable("ac.freq_transmitter.authorize"),
                     inside(mouseX, mouseY, authorizeX, authorizeY, 96, 20));
             int cancelX = guiLeft + 154;
-            drawButton(graphics, cancelX, authorizeY, 54, 20, "取消",
+            drawButton(graphics, cancelX, authorizeY, 54, 20, Component.translatable("gui.cancel"),
                     inside(mouseX, mouseY, cancelX, authorizeY, 54, 20));
         }
-        graphics.drawString(font, "服务器校验：密码 / 距离 / 维度 / 权限",
+        graphics.drawString(font, Component.translatable("ac.freq_transmitter.server_checks"),
                 guiLeft + 12, guiTop + GUI_HEIGHT - 20, COLOR_DIM, false);
     }
 
@@ -202,8 +207,7 @@ public class FreqTransmitterGui extends Screen {
                 || packet.state() == FreqTransmitterStatePacket.SELECT_TARGET) {
             minecraft.setScreen(null);
             if (minecraft.player != null) {
-                minecraft.player.displayClientMessage(Component.literal(
-                        "§7[频率变送器] §b" + packet.message()), true);
+                minecraft.player.displayClientMessage(prefixed(packet.message(), ChatFormatting.AQUA), true);
             }
             return;
         }
@@ -211,9 +215,8 @@ public class FreqTransmitterGui extends Screen {
         activeNonce = NO_NONCE;
         targetingState = FreqTransmitterStatePacket.CLOSED;
         if (minecraft.screen instanceof FreqTransmitterGui) minecraft.setScreen(null);
-        if (minecraft.player != null && !packet.message().isEmpty()) {
-            minecraft.player.displayClientMessage(Component.literal(
-                    "§7[频率变送器] §e" + packet.message()), true);
+        if (minecraft.player != null && !packet.message().getString().isEmpty()) {
+            minecraft.player.displayClientMessage(prefixed(packet.message(), ChatFormatting.YELLOW), true);
         }
     }
 
@@ -223,7 +226,7 @@ public class FreqTransmitterGui extends Screen {
                 || targetingState == FreqTransmitterStatePacket.SELECT_TARGET);
     }
 
-    public static String getTargetingMessage() { return targetingMessage; }
+    public static Component getTargetingMessage() { return targetingMessage; }
 
     public static void cancelActiveSession() {
         if (!activeNonce.equals(NO_NONCE)) {
@@ -232,20 +235,29 @@ public class FreqTransmitterGui extends Screen {
         resetClientSession();
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.player != null) {
-            minecraft.player.displayClientMessage(Component.literal(
-                    "§7[频率变送器] §e已取消选择"), true);
+            minecraft.player.displayClientMessage(prefixed(
+                    Component.translatable("item.academy.app_freq_transmitter.e4"), ChatFormatting.YELLOW), true);
         }
     }
 
     public static void resetClientSession() {
         activeNonce = NO_NONCE;
         targetingState = FreqTransmitterStatePacket.CLOSED;
-        targetingMessage = "";
+        targetingMessage = Component.empty();
         LOCALLY_CANCELED.clear();
     }
 
+    /** "[Frequency Transmitter] message" action-bar line; colours live in styles, not translations. */
+    private static Component prefixed(Component message, ChatFormatting color) {
+        return Component.literal("[")
+                .append(Component.translatable("item.academy.app_freq_transmitter"))
+                .append("] ")
+                .withStyle(ChatFormatting.GRAY)
+                .append(message.copy().withStyle(color));
+    }
+
     private void drawButton(GuiGraphics graphics, int x, int y, int w, int h,
-                            String text, boolean hovered) {
+                            Component text, boolean hovered) {
         int color = hovered ? 0xFF3498DB : 0xFF2775AE;
         graphics.fill(x, y, x + w, y + h, color);
         graphics.drawCenteredString(font, text, x + w / 2, y + 6, 0xFFFFFFFF);

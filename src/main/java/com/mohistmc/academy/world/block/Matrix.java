@@ -68,11 +68,11 @@ public class Matrix extends BaseEntityBlock {
                     var recovery = com.mohistmc.academy.energy.impl.WirelessSystem
                             .reconcileMatrixNetwork(server, matrix);
                     if (recovery == com.mohistmc.academy.energy.impl.WirelessSystem.MatrixNetworkState.RECOVERED) {
-                        player.sendSystemMessage(Component.literal("§a已恢复无线矩阵网络；请重新连接需要的节点"));
+                        player.sendSystemMessage(Component.translatable("message.academy.matrix.recovered_relink").withStyle(net.minecraft.ChatFormatting.GREEN));
                     } else if (recovery == com.mohistmc.academy.energy.impl.WirelessSystem.MatrixNetworkState.NEEDS_REINITIALIZATION) {
-                        player.sendSystemMessage(Component.literal("§e矩阵网络数据缺失且组件不完整，请补齐组件后重新初始化"));
+                        player.sendSystemMessage(Component.translatable("message.academy.matrix.data_missing").withStyle(net.minecraft.ChatFormatting.YELLOW));
                     } else if (recovery == com.mohistmc.academy.energy.impl.WirelessSystem.MatrixNetworkState.RECOVERY_FAILED) {
-                        player.sendSystemMessage(Component.literal("§c矩阵网络恢复被拒绝或失败，请稍后重试"));
+                        player.sendSystemMessage(Component.translatable("message.academy.matrix.recovery_rejected").withStyle(net.minecraft.ChatFormatting.RED));
                     }
                 }
                 if (player instanceof ServerPlayer serverPlayer) {

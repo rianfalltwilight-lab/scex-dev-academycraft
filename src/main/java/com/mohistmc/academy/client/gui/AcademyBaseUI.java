@@ -607,15 +607,17 @@ public abstract class AcademyBaseUI<T extends AcademyMenu> extends AbstractConta
         renderPanelElement(stack, -(160 / 2) + 16, 39, 11, 11, IC_MATRIX);
 
         String connectedName = activeNode != -1 && activeNode < serverNodes.size()
-                ? "已连接"
-                : "未连接";
+                ? Component.translatable("gui.academy.wireless.connected").getString()
+                : Component.translatable("ac.skill_tree.not_connected").getString();
         RenderUtils.renderText(stack, connectedName, this.leftPos + 13, this.topPos + 30);
-        RenderUtils.renderText(stack, "可用", this.leftPos + 13, this.topPos + 55);
+        RenderUtils.renderText(stack, Component.translatable("gui.academy.wireless.available").getString(), this.leftPos + 13, this.topPos + 55);
 
         if (serverNodes.isEmpty()) {
-            RenderUtils.renderText(stack, nodeResponseReceived ? "附近没有可用节点" : "正在扫描附近节点…",
+            RenderUtils.renderText(stack, nodeResponseReceived
+                            ? Component.translatable("gui.academy.wireless.no_nodes").getString()
+                            : Component.translatable("gui.academy.wireless.scanning_nodes").getString(),
                     this.leftPos + 28, this.topPos + 78);
-            if (nodeResponseReceived) RenderUtils.renderText(stack, "放置无线节点即可连接；矩阵仅用于扩展网络",
+            if (nodeResponseReceived) RenderUtils.renderText(stack, Component.translatable("gui.academy.wireless.node_hint").getString(),
                     this.leftPos + 13, this.topPos + 94);
         }
 
@@ -641,7 +643,7 @@ public abstract class AcademyBaseUI<T extends AcademyMenu> extends AbstractConta
         } else {
             renderPanelElement(stack, (160 / 2) - 16, 39, 11, 11, IC_UNCONNECTED);
             RenderSystem.disableBlend();
-            RenderUtils.renderText(stack, "未连接", this.leftPos + 32, this.topPos + 41);
+            RenderUtils.renderText(stack, Component.translatable("ac.skill_tree.not_connected").getString(), this.leftPos + 32, this.topPos + 41);
         }
 
         // 可用节点列表。保留服务端原始索引，使翻页后密码输入和连接
@@ -690,15 +692,16 @@ public abstract class AcademyBaseUI<T extends AcademyMenu> extends AbstractConta
         renderPanelElement(stack, 0, 37, 160, 16, ELEMENT_BG_300_32);
         renderPanelElement(stack, -(160 / 2) + 16, 39, 11, 11, IC_MATRIX);
 
-        RenderUtils.renderText(stack, "已连接网络", this.leftPos + 13, this.topPos + 30);
-        RenderUtils.renderText(stack, "可用网络", this.leftPos + 13, this.topPos + 55);
+        RenderUtils.renderText(stack, Component.translatable("gui.academy.wireless.connected_network").getString(), this.leftPos + 13, this.topPos + 30);
+        RenderUtils.renderText(stack, Component.translatable("gui.academy.wireless.available_networks").getString(), this.leftPos + 13, this.topPos + 55);
 
         if (matrixNetworkAccessDenied) {
-            RenderUtils.renderText(stack, "仅所有者或管理员可管理节点网络",
+            RenderUtils.renderText(stack, Component.translatable("gui.academy.wireless.owner_only").getString(),
                     this.leftPos + 18, this.topPos + 78);
         } else if (serverMatrixNetworks.isEmpty()) {
             RenderUtils.renderText(stack, matrixNetworkResponseReceived
-                            ? "附近没有已初始化矩阵" : "正在扫描矩阵网络…",
+                            ? Component.translatable("gui.academy.wireless.no_matrices").getString()
+                            : Component.translatable("gui.academy.wireless.scanning_matrices").getString(),
                     this.leftPos + 28, this.topPos + 78);
         }
 
@@ -715,7 +718,7 @@ public abstract class AcademyBaseUI<T extends AcademyMenu> extends AbstractConta
         } else {
             renderPanelElement(stack, (160 / 2) - 16, 39, 11, 11, IC_UNCONNECTED);
             RenderSystem.disableBlend();
-            RenderUtils.renderText(stack, "未连接", this.leftPos + 32, this.topPos + 41);
+            RenderUtils.renderText(stack, Component.translatable("ac.skill_tree.not_connected").getString(), this.leftPos + 32, this.topPos + 41);
         }
 
         float upAlpha = isHoveringButton(this.leftPos + 155, this.topPos + 65,
@@ -774,7 +777,7 @@ public abstract class AcademyBaseUI<T extends AcademyMenu> extends AbstractConta
         int caretX = leftPos + 84 + font.width(masked);
         graphics.fill(caretX, y, caretX + 1, y + 8, 0xFF73DFFF);
         String coordinates = target == null ? "" : target.getX() + ", " + target.getY() + ", " + target.getZ();
-        graphics.drawString(font, "密码：Enter 连接 / Esc 取消", leftPos + 13, topPos + 171, 0xFFFFFFFF, false);
+        graphics.drawString(font, Component.translatable("gui.academy.wireless.password_hint"), leftPos + 13, topPos + 171, 0xFFFFFFFF, false);
         if (target != null) {
             // Coordinates stay readable even when a long name needs truncation.
             graphics.renderTooltip(font, Component.literal(name + " [" + coordinates + "]"),
@@ -792,14 +795,15 @@ public abstract class AcademyBaseUI<T extends AcademyMenu> extends AbstractConta
         InfoArea info = new InfoArea();
         if (be instanceof IFEnergyStorage storage) {
             info.histogram(InfoArea.histEnergy(storage.getEnergyStored(), Math.max(1, storage.getMaxEnergyStored())));
-            info.property("速率", getEnergyRateText(be));
+            info.property(Component.translatable("ac.ui.info.rate").getString(), getEnergyRateText(be));
         } else if (be instanceof MetalFomerBlockEntity former) {
             info.histogram(InfoArea.histEnergy(former.getEnergy(), Math.max(1, former.getMaxEnergy())));
-            info.property("模式", former.getMode().name());
+            info.property(Component.translatable("ac.ui.info.mode").getString(), former.getMode().name());
         } else if (be instanceof BaseNodeBlockEntity nodeBe) {
             info.histogram(InfoArea.histEnergy(nodeBe.getEnergy(), Math.max(1, nodeBe.getMaxEnergy())));
-            info.property("带宽", (int) nodeBe.getBandwidth() + " IF/t");
-            info.property("范围", (int) nodeBe.getRange() + " 格");
+            info.property(Component.translatable("ac.gui.common.prop.bandwidth").getString(), (int) nodeBe.getBandwidth() + " IF/t");
+            info.property(Component.translatable("ac.gui.common.prop.range").getString(),
+                    Component.translatable("ac.gui.common.blocks", (int) nodeBe.getRange()).getString());
         } else {
             return;
         }

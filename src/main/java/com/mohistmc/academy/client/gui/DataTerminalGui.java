@@ -151,7 +151,7 @@ public class DataTerminalGui extends Screen {
 
             String abilityStr = data.hasAbility()
                     ? Component.translatable("item.academy.factor_" + data.getCurrentAbility().id()).getString()
-                    : "无能力";
+                    : Component.translatable("ac.settings.ability.none").getString();
             int abW = this.font.width(abilityStr);
             graphics.drawString(this.font, abilityStr, guiLeft + GUI_WIDTH - abW - 8, guiTop + 18, COLOR_TEXT_DIM);
         }
@@ -220,10 +220,10 @@ public class DataTerminalGui extends Screen {
         PlayerAbilityData data = Minecraft.getInstance().player != null
                 ? Minecraft.getInstance().player.getData(AcademyAttachments.PLAYER_ABILITY) : null;
         int appCount = data != null ? data.getInstalledApps().size() : 0;
-        String status = "APP: " + appCount + " 已安装";
+        String status = Component.translatable("ac.gui.terminal.appcount", appCount).getString();
         graphics.drawString(this.font, status, guiLeft + 8, guiTop + GUI_HEIGHT - BOTTOM_BAR_HEIGHT + 5, COLOR_TEXT_DIM);
 
-        String hint = "点击APP打开  |  ESC关闭终端";
+        String hint = Component.translatable("gui.academy.data_terminal.hint").getString();
         int hw = this.font.width(hint);
         graphics.drawString(this.font, hint, guiLeft + GUI_WIDTH - hw - 8, guiTop + GUI_HEIGHT - BOTTOM_BAR_HEIGHT + 5, COLOR_TEXT_DIM);
     }
@@ -287,7 +287,9 @@ public class DataTerminalGui extends Screen {
             app.open();
         } else if (mc.player != null) {
             mc.player.displayClientMessage(
-                    Component.literal("§7[数据终端] §c该APP暂未实现: " + appId), true);
+                    com.mohistmc.academy.world.item.BaseApp.terminalMessage(Component.translatable(
+                            "message.academy.terminal.app_unavailable", appId)
+                            .withStyle(net.minecraft.ChatFormatting.RED)), true);
         }
     }
 

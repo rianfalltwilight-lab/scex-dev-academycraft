@@ -277,7 +277,8 @@ public class KeyInputHandler {
                 if (data.isTerminalInstalled()) {
                     mc.setScreen(new DataTerminalGui());
                 } else {
-                    mc.player.displayClientMessage(Component.literal("§7[数据终端] §c尚未安装数据终端，请使用数据终端安装。"), true);
+                    mc.player.displayClientMessage(com.mohistmc.academy.world.item.BaseApp.terminalMessage(
+                            Component.translatable("ac.terminal.notinstalled").withStyle(net.minecraft.ChatFormatting.RED)), true);
                 }
             }
             return;
@@ -298,7 +299,8 @@ public class KeyInputHandler {
 
         if (!data.isAbilityActive()) {
             if (SWITCH_PRESET.consumeClick()) {
-                mc.player.displayClientMessage(Component.literal("§c能力未激活"), true);
+                mc.player.displayClientMessage(Component.translatable("message.academy.ability.inactive")
+                        .withStyle(net.minecraft.ChatFormatting.RED), true);
                 return;
             }
             return;
@@ -307,7 +309,8 @@ public class KeyInputHandler {
         if (SWITCH_PRESET.consumeClick()) {
             int next = (data.getCurrentPresetIndex() + 1) % PlayerAbilityData.PRESET_COUNT;
             PacketDistributor.sendToServer(new SwitchPresetPacket(next));
-            mc.player.displayClientMessage(Component.literal("§7请求切换预设: " + (next + 1)), true);
+            mc.player.displayClientMessage(Component.translatable("message.academy.preset.switch_requested", next + 1)
+                    .withStyle(net.minecraft.ChatFormatting.GRAY), true);
             ClientSoundUtils.playClient(AcademySounds.ABILITY_PRESET_SWITCH, SoundSource.MASTER, 0.5f, 1.0f);
         }
     }
@@ -427,9 +430,11 @@ public class KeyInputHandler {
                         activateOneShot(mc, i, skillId);
                     }
                 } else if (data.isAbilityActive() && skillId == null) {
-                    mc.player.displayClientMessage(Component.literal("§7槽位 " + (i + 1) + " 未装备技能"), true);
+                    mc.player.displayClientMessage(Component.translatable("message.academy.skill.slot_empty", i + 1)
+                            .withStyle(net.minecraft.ChatFormatting.GRAY), true);
                 } else if (data.isAbilityActive()) {
-                    mc.player.displayClientMessage(Component.literal("§c技能无法使用"), true);
+                    mc.player.displayClientMessage(Component.translatable("message.academy.skill.unavailable")
+                            .withStyle(net.minecraft.ChatFormatting.RED), true);
                     ClientSoundUtils.playClient(AcademySounds.ABILITY_DENY,
                             SoundSource.MASTER, 0.4f, 1.0f);
                 }

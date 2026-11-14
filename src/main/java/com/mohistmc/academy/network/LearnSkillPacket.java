@@ -19,6 +19,7 @@ import com.mohistmc.academy.world.item.BaseFactor;
 import io.netty.buffer.ByteBuf;
 import java.util.Optional;
 import java.util.UUID;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -77,56 +78,56 @@ public record LearnSkillPacket(String skillId, int typeOrdinal, Optional<BlockPo
             }
             DevMachineType devType = DevMachineType.fromOrdinal(packet.typeOrdinal());
             if (!DevLearningSessionManager.validate(player, packet.nonce(), devType, packet.devPos())) {
-                result(player, packet, devType, false, "开发会话已失效，请重新打开机器"); return;
+                result(player, packet, devType, false, Component.translatable("ac.skill_tree.result.session_expired")); return;
             }
 
             if (INDUCTION_ACTION.equals(packet.skillId())) {
                 if (data.hasAbility()) {
-                    result(player, packet, devType, false, "能力诱导失败：你已经拥有能力");
+                    result(player, packet, devType, false, Component.translatable("ac.skill_tree.result.induct_has_ability"));
                     return;
                 }
                 BlockPos inductionPos = packet.devPos().orElse(null);
                 // SkillTree.scala refused to start unless the developer held the whole estimated cost.
                 if (!validateEnergySource(player, devType, devType.actualEnergyPerStimulation()
                         * DevLearningSessionManager.INDUCTION_STIMULATIONS, inductionPos)) {
-                    result(player, packet, devType, false, "无法开始：开发机当前不可用或能量不足");
+                    result(player, packet, devType, false, Component.translatable("ac.skill_tree.result.unavailable"));
                     return;
                 }
                 DevLearningSessionManager.InductionSelection selection =
                         DevLearningSessionManager.startInduction(player, packet.nonce(), devType, packet.devPos());
                 if (selection == null) {
-                    result(player, packet, devType, false, "已有开发正在进行，或请求已处理");
+                    result(player, packet, devType, false, Component.translatable("ac.skill_tree.result.busy"));
                     return;
                 }
                 int totalCost = devType.actualEnergyPerStimulation()
                         * DevLearningSessionManager.INDUCTION_STIMULATIONS;
-                player.sendSystemMessage(Component.literal("§b开始能力诱导：")
-                        .append(Component.translatable(selection.category().getTranslationKey()))
-                        .append(Component.literal(selection.factorBacked()
-                                ? "（已锁定诱导因子）" : "（无因子，随机结果已锁定）"))
-                        .append(Component.literal("，预计 " + totalCost + " IF")));
+                player.sendSystemMessage(Component.translatable("ac.skill_tree.msg.induct_start",
+                        Component.translatable(selection.category().getTranslationKey()),
+                        Component.translatable(selection.factorBacked()
+                                ? "ac.skill_tree.msg.induct_factor" : "ac.skill_tree.msg.induct_random"),
+                        totalCost).withStyle(ChatFormatting.AQUA));
                 return;
             }
 
             if (LEVEL_UP_ACTION.equals(packet.skillId())) {
                 if (!data.hasAbility() || !data.canLevelUp()) {
-                    result(player, packet, devType, false, "等级进度尚未完成，或已达到 Lv.5");
+                    result(player, packet, devType, false, Component.translatable("ac.skill_tree.result.level_not_ready"));
                     return;
                 }
                 int level = data.getPlayerLevel();
                 int stimulations = 5 * (level + 1);
                 int totalCost = devType.actualEnergyPerStimulation() * stimulations;
                 if (!validateEnergySource(player, devType, totalCost, packet.devPos().orElse(null))) {
-                    result(player, packet, devType, false, "无法升级：开发机当前不可用或能量不足");
+                    result(player, packet, devType, false, Component.translatable("ac.skill_tree.result.level_unavailable"));
                     return;
                 }
                 if (!DevLearningSessionManager.startLevelUp(player, packet.nonce(), devType,
                         packet.devPos(), data.getCurrentAbility(), level)) {
-                    result(player, packet, devType, false, "已有开发正在进行，或请求已处理");
+                    result(player, packet, devType, false, Component.translatable("ac.skill_tree.result.busy"));
                     return;
                 }
-                player.sendSystemMessage(Component.literal("§b开始能力等级提升：Lv." + level
-                        + " → Lv." + (level + 1) + "，预计 " + totalCost + " IF"));
+                player.sendSystemMessage(Component.translatable("ac.skill_tree.msg.level_start",
+                        level, level + 1, totalCost).withStyle(ChatFormatting.AQUA));
                 return;
             }
 
@@ -134,11 +135,11 @@ public record LearnSkillPacket(String skillId, int typeOrdinal, Optional<BlockPo
                 if (devType != DevMachineType.ADVANCED || !data.hasAbility()
                         || data.getPlayerLevel() < 3) {
                     result(player, packet, devType, false,
-                            "重置失败：需要高级开发机和至少 Level 3");
+                            Component.translatable("ac.skill_tree.result.reset_requirements"));
                     return;
                 }
                 if (!player.getMainHandItem().is(AcademyItems.MAGNETIC_COIL.get())) {
-                    result(player, packet, devType, false, "重置失败：请主手持高压磁增幅线圈");
+                    result(player, packet, devType, false, Component.translatable("ac.skill_tree.result.reset_no_coil"));
                     return;
                 }
                 boolean hasDifferentFactor = player.getInventory().items.stream().anyMatch(stack ->
@@ -146,7 +147,7 @@ public record LearnSkillPacket(String skillId, int typeOrdinal, Optional<BlockPo
                                 && factor.getCategory() != data.getCurrentAbility());
                 if (!hasDifferentFactor) {
                     result(player, packet, devType, false,
-                            "重置失败：背包中需要与当前能力不同的诱导因子");
+                            Component.translatable("ac.skill_tree.result.reset_no_factor"));
                     return;
                 }
                 int resetLevel = data.getPlayerLevel();
@@ -154,48 +155,50 @@ public record LearnSkillPacket(String skillId, int typeOrdinal, Optional<BlockPo
                         devType.actualEnergyPerStimulation() * resetLevel * 10,
                         packet.devPos().orElse(null))) {
                     result(player, packet, devType, false,
-                            "无法重置：开发机当前不可用或能量不足");
+                            Component.translatable("ac.skill_tree.result.reset_unavailable"));
                     return;
                 }
                 DevLearningSessionManager.ResetSelection selection =
                         DevLearningSessionManager.startReset(player, packet.nonce(), devType, packet.devPos());
                 if (selection == null) {
                     result(player, packet, devType, false,
-                            "重置条件已变化、已有开发正在进行，或请求已处理");
+                            Component.translatable("ac.skill_tree.result.reset_busy"));
                     return;
                 }
                 int stimulations = selection.expectedLevel() * 10;
                 int totalCost = devType.actualEnergyPerStimulation() * stimulations;
-                player.sendSystemMessage(Component.literal("§b开始能力重置：")
-                        .append(Component.translatable(selection.oldCategory().getTranslationKey()))
-                        .append(Component.literal(" → "))
-                        .append(Component.translatable(selection.newCategory().getTranslationKey()))
-                        .append(Component.literal("，预计 " + totalCost + " IF")));
+                player.sendSystemMessage(Component.translatable("ac.skill_tree.msg.reset_start",
+                        Component.translatable(selection.oldCategory().getTranslationKey()),
+                        Component.translatable(selection.newCategory().getTranslationKey()),
+                        totalCost).withStyle(ChatFormatting.AQUA));
                 return;
             }
 
             Skill skill = SkillRegistry.getSkill(data.getCurrentAbility(), packet.skillId());
             if (skill == null) {
-                player.sendSystemMessage(Component.literal("§c未知技能: " + packet.skillId()));
-                result(player, packet, devType, false, "未知技能");
+                player.sendSystemMessage(Component.translatable("ac.skill_tree.msg.unknown_skill", packet.skillId()).withStyle(ChatFormatting.RED));
+                result(player, packet, devType, false, Component.translatable("ac.skill_tree.result.unknown_skill"));
                 return;
             }
 
             if (data.hasLearnedSkill(skill.getId())) {
-                player.sendSystemMessage(Component.literal("§c已学习: ").append(Component.translatable(skill.getTranslationKey())));
-                result(player, packet, devType, false, "该技能已经学习");
+                player.sendSystemMessage(Component.translatable("ac.skill_tree.msg.already_learned",
+                        Component.translatable(skill.getTranslationKey())).withStyle(ChatFormatting.RED));
+                result(player, packet, devType, false, Component.translatable("ac.skill_tree.result.already_learned"));
                 return;
             }
 
             if (!data.canLearnSkill(skill)) {
-                player.sendSystemMessage(Component.literal("§c前置条件未满足: ").append(Component.translatable(skill.getTranslationKey())));
-                result(player, packet, devType, false, "前置技能、等级或熟练度不足");
+                player.sendSystemMessage(Component.translatable("ac.skill_tree.msg.prereq",
+                        Component.translatable(skill.getTranslationKey())).withStyle(ChatFormatting.RED));
+                result(player, packet, devType, false, Component.translatable("ac.skill_tree.result.prereq"));
                 return;
             }
 
             if (skill.getLevel() > devType.maxLevel) {
-                player.sendSystemMessage(Component.literal("§c同步率不足，该开发机无法支持 Lv." + skill.getLevel() + " 技能"));
-                result(player, packet, devType, false, "开发机同步率不足，无法学习该等级技能");
+                player.sendSystemMessage(Component.translatable("ac.skill_tree.msg.sync_rate", skill.getLevel())
+                        .withStyle(ChatFormatting.RED));
+                result(player, packet, devType, false, Component.translatable("ac.skill_tree.result.sync_rate"));
                 return;
             }
 
@@ -204,26 +207,26 @@ public record LearnSkillPacket(String skillId, int typeOrdinal, Optional<BlockPo
             // The UI and the session both use the real per-stimulation drain.
             int totalCost = devType.actualEnergyPerStimulation() * stimulations;
             if (!validateEnergySource(player, devType, totalCost, devPos)) {
-                player.sendSystemMessage(Component.literal("§c能量不足或开发会话已失效"));
-                result(player, packet, devType, false, "无法开始：开发机当前不可用或能量不足");
+                player.sendSystemMessage(Component.translatable("ac.skill_tree.msg.unavailable").withStyle(ChatFormatting.RED));
+                result(player, packet, devType, false, Component.translatable("ac.skill_tree.result.unavailable"));
                 return;
             }
             if (!DevLearningSessionManager.start(player,packet.nonce(),devType,packet.devPos(),
                     skill.getId(), skill.getCategory(), skill.getLevel())) {
-                result(player, packet, devType, false, "已有开发正在进行，或请求已处理"); return;
+                result(player, packet, devType, false, Component.translatable("ac.skill_tree.result.busy")); return;
             }
-            player.sendSystemMessage(Component.literal("§b开始开发：").append(Component.translatable(skill.getTranslationKey()))
-                    .append(Component.literal("，预计 " + totalCost + " IF")));
+            player.sendSystemMessage(Component.translatable("ac.skill_tree.msg.learn_start",
+                    Component.translatable(skill.getTranslationKey()), totalCost).withStyle(ChatFormatting.AQUA));
         });
     }
 
     private static void result(ServerPlayer player, LearnSkillPacket packet, DevMachineType type,
-                               boolean success, String reason) {
+                               boolean success, Component reason) {
         result(player, packet, type, success, reason, false);
     }
 
     private static void result(ServerPlayer player, LearnSkillPacket packet, DevMachineType type,
-                               boolean success, String reason, boolean inProgress) {
+                               boolean success, Component reason, boolean inProgress) {
         int energy = 0, maximum = 0;
         if (type == DevMachineType.PORTABLE) {
             ItemStack stack = player.getMainHandItem();
@@ -307,7 +310,7 @@ public record LearnSkillPacket(String skillId, int typeOrdinal, Optional<BlockPo
     }
 
     static void progress(ServerPlayer player, UUID nonce, DevMachineType type, Optional<BlockPos> pos,
-                         int stimulation, int maximum, String reason) {
+                         int stimulation, int maximum, Component reason) {
         result(player, new LearnSkillPacket("", type.ordinal(), pos, nonce), type, false, reason, true);
     }
 
@@ -318,14 +321,15 @@ public record LearnSkillPacket(String skillId, int typeOrdinal, Optional<BlockPo
         LearnSkillPacket packet = new LearnSkillPacket(skillId,type.ordinal(),pos,nonce);
         if (data.getCurrentAbility() != skillCategory || skill == null
                 || data.hasLearnedSkill(skillId) || !data.canLearnSkill(skill)) {
-            result(player,packet,type,false,"开发失败：完成时条件已经变化"); return;
+            result(player,packet,type,false,Component.translatable("ac.skill_tree.result.learn_changed")); return;
         }
         data.learnSkill(skillId);
         NeoForge.EVENT_BUS.post(new AbilityEvents.SkillLearned(player, skill));
         com.mohistmc.academy.advancement.LegacyAdvancementBridge.learned(player,data,skill);
         data.syncTo(player);
-        player.sendSystemMessage(Component.literal("§a开发完成：").append(Component.translatable(skill.getTranslationKey())));
-        result(player,packet,type,true,"开发完成：学习成功");
+        player.sendSystemMessage(Component.translatable("ac.skill_tree.msg.learn_done",
+                Component.translatable(skill.getTranslationKey())).withStyle(ChatFormatting.GREEN));
+        result(player,packet,type,true,Component.translatable("ac.skill_tree.result.learn_done"));
     }
 
     static void completeLevelUp(ServerPlayer player, UUID nonce, DevMachineType type,
@@ -334,7 +338,7 @@ public record LearnSkillPacket(String skillId, int typeOrdinal, Optional<BlockPo
         LearnSkillPacket packet = new LearnSkillPacket(LEVEL_UP_ACTION, type.ordinal(), pos, nonce);
         if (!data.hasAbility() || data.getCurrentAbility() != category
                 || data.getPlayerLevel() != expectedLevel || !data.canLevelUp()) {
-            result(player, packet, type, false, "升级失败：完成时等级或进度已经变化");
+            result(player, packet, type, false, Component.translatable("ac.skill_tree.result.level_changed"));
             return;
         }
         int next = expectedLevel + 1;
@@ -342,8 +346,8 @@ public record LearnSkillPacket(String skillId, int typeOrdinal, Optional<BlockPo
         NeoForge.EVENT_BUS.post(new AbilityEvents.LevelChanged(player, expectedLevel, next));
         com.mohistmc.academy.advancement.LegacyAdvancementBridge.levels(player, data);
         data.syncTo(player);
-        player.sendSystemMessage(Component.literal("§a能力等级提升完成：Lv." + next));
-        result(player, packet, type, true, "等级提升完成：Lv." + next);
+        player.sendSystemMessage(Component.translatable("ac.skill_tree.msg.level_done", next).withStyle(ChatFormatting.GREEN));
+        result(player, packet, type, true, Component.translatable("ac.skill_tree.result.level_done", next));
     }
 
     /** Commit the old reset only after level*10 stimulations complete. */
@@ -356,7 +360,7 @@ public record LearnSkillPacket(String skillId, int typeOrdinal, Optional<BlockPo
                 || data.getCurrentAbility() != selection.oldCategory()
                 || data.getPlayerLevel() != selection.expectedLevel()
                 || !selection.stillPresent(player) || !selection.consume(player)) {
-            result(player, packet, type, false, "能力重置失败：完成时材料、能力或等级已经变化");
+            result(player, packet, type, false, Component.translatable("ac.skill_tree.result.reset_changed"));
             return;
         }
 
@@ -371,10 +375,10 @@ public record LearnSkillPacket(String skillId, int typeOrdinal, Optional<BlockPo
         NeoForge.EVENT_BUS.post(new AbilityEvents.LevelChanged(player, oldLevel, newLevel));
         com.mohistmc.academy.advancement.LegacyAdvancementBridge.levels(player, data);
         data.syncTo(player);
-        player.sendSystemMessage(Component.literal("§a能力重置完成：")
-                .append(Component.translatable(selection.newCategory().getTranslationKey()))
-                .append(Component.literal("，当前 Level " + newLevel)));
-        result(player, packet, type, true, "能力重置完成");
+        player.sendSystemMessage(Component.translatable("ac.skill_tree.msg.reset_done",
+                Component.translatable(selection.newCategory().getTranslationKey()), newLevel)
+                .withStyle(ChatFormatting.GREEN));
+        result(player, packet, type, true, Component.translatable("ac.skill_tree.result.reset_done"));
     }
 
     /** Commit a factor/random category only after all five server ticks groups complete. */
@@ -384,11 +388,11 @@ public record LearnSkillPacket(String skillId, int typeOrdinal, Optional<BlockPo
         LearnSkillPacket packet = new LearnSkillPacket(INDUCTION_ACTION, type.ordinal(), pos, nonce);
         PlayerAbilityData data = player.getData(AcademyAttachments.PLAYER_ABILITY);
         if (data.hasAbility()) {
-            result(player, packet, type, false, "能力诱导失败：完成时能力状态已经变化");
+            result(player, packet, type, false, Component.translatable("ac.skill_tree.result.induct_changed"));
             return;
         }
         if (!selection.stillPresent(player, type, pos) || !selection.consume(player, type, pos)) {
-            result(player, packet, type, false, "能力诱导失败：锁定的诱导因子已被移走或替换");
+            result(player, packet, type, false, Component.translatable("ac.skill_tree.result.induct_factor_gone"));
             return;
         }
 
@@ -401,9 +405,9 @@ public record LearnSkillPacket(String skillId, int typeOrdinal, Optional<BlockPo
         NeoForge.EVENT_BUS.post(new AbilityEvents.LevelChanged(player, oldLevel, 1));
         com.mohistmc.academy.advancement.LegacyAdvancementBridge.levels(player, data);
         data.syncTo(player);
-        player.sendSystemMessage(Component.literal("§a能力诱导完成：")
-                .append(Component.translatable(selection.category().getTranslationKey())));
-        result(player, packet, type, true, "能力诱导完成");
+        player.sendSystemMessage(Component.translatable("ac.skill_tree.msg.induct_done",
+                Component.translatable(selection.category().getTranslationKey())).withStyle(ChatFormatting.GREEN));
+        result(player, packet, type, true, Component.translatable("ac.skill_tree.result.induct_done"));
     }
 
     private static int getSkillCost(Skill skill) {

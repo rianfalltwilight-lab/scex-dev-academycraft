@@ -52,9 +52,9 @@ public record DisconnectFromNodePacket(MenuActionToken actionToken, BlockPos mac
 
                 if (be instanceof com.mohistmc.academy.energy.api.block.IWirelessUser user) {
                     if (WirelessSystem.unlinkUser(level, user)) {
-                        player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§a已断开连接"));
+                        player.sendSystemMessage(net.minecraft.network.chat.Component.translatable("message.academy.wireless.disconnected").withStyle(net.minecraft.ChatFormatting.GREEN));
                     } else {
-                        player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§c该机器未连接到任何节点"));
+                        player.sendSystemMessage(net.minecraft.network.chat.Component.translatable("message.academy.wireless.not_linked").withStyle(net.minecraft.ChatFormatting.RED));
                     }
                 }
             }

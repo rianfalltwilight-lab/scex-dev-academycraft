@@ -57,8 +57,8 @@ public class WindBaseGui extends AcademyBaseUI<WindGenBaseMenu> {
         new InfoArea()
                 .histogram(InfoArea.histBuffer(menu.getEnergy(), menu.getMaxEnergy()))
                 .seplineInfo()
-                .property("海拔", menu.pos == null ? "-" : Integer.toString(menu.pos.getY()))
-                .property("速率", String.format(Locale.ROOT, "%.1f IF/t", menu.getGenerationRate()))
+                .property(Component.translatable("ac.gui.common.prop.altitude").getString(), menu.pos == null ? "-" : Integer.toString(menu.pos.getY()))
+                .property(Component.translatable("ac.gui.common.prop.gen_speed").getString(), String.format(Locale.ROOT, "%.1f IF/t", menu.getGenerationRate()))
                 .draw(graphics, this.leftPos, this.topPos);
     }
 }

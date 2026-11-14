@@ -8,6 +8,7 @@ import com.mohistmc.academy.world.menu.DevAdvancedMenu;
 import com.mohistmc.academy.world.menu.DevNormalMenu;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -114,8 +115,10 @@ public record ConsoleCommandPacket(BlockPos pos, String command) implements Cust
                             advanced.getMaxEnergyStored(), sessionPos, nonce, nodeName));
                 }
                 default -> {
-                    player.sendSystemMessage(Component.literal("§c未知命令: " + packet.command()));
-                    player.sendSystemMessage(Component.literal("§7可用命令: learn, reset"));
+                    player.sendSystemMessage(Component.translatable("message.academy.console.unknown_command", packet.command())
+                            .withStyle(ChatFormatting.RED));
+                    player.sendSystemMessage(Component.translatable("message.academy.console.available_commands", "learn, reset")
+                            .withStyle(ChatFormatting.GRAY));
                 }
             }
         });

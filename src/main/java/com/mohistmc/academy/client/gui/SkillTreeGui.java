@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.util.FormattedCharSequence;
@@ -185,24 +186,24 @@ public class SkillTreeGui extends AcademyScreen {
         if (pendingSkillId != null && mc.player != null) {
             PlayerAbilityData data = mc.player.getData(AcademyAttachments.PLAYER_ABILITY);
             if (LearnSkillPacket.INDUCTION_ACTION.equals(pendingSkillId) && data.hasAbility()) {
-                serverFeedback = Component.literal("§a服务器确认：能力诱导成功，请重新打开开发机继续学习");
+                serverFeedback = Component.translatable("ac.skill_tree.feedback.induct_ok").withStyle(ChatFormatting.GREEN);
                 pendingSkillId = null;
                 pendingLevel = -1;
                 buildSkillNodes();
             } else if (LearnSkillPacket.LEVEL_UP_ACTION.equals(pendingSkillId)
                     && data.getPlayerLevel() > pendingLevel) {
-                serverFeedback = Component.literal("§a服务器确认：能力等级提升成功，请重新打开开发机继续学习");
+                serverFeedback = Component.translatable("ac.skill_tree.feedback.level_ok").withStyle(ChatFormatting.GREEN);
                 pendingSkillId = null;
                 pendingLevel = -1;
                 selectedNode = null;
                 buildSkillNodes();
             } else if (data.hasLearnedSkill(pendingSkillId)) {
-                serverFeedback = Component.literal("§a服务器确认：学习成功，请重新打开开发机继续学习");
+                serverFeedback = Component.translatable("ac.skill_tree.feedback.learn_ok").withStyle(ChatFormatting.GREEN);
                 pendingSkillId = null;
                 pendingLevel = -1;
                 buildSkillNodes();
             } else if (mc.level != null && mc.level.getGameTime() - pendingSince > 500) {
-                serverFeedback = Component.literal("§c服务器未接受请求；请检查条件、能量或会话距离");
+                serverFeedback = Component.translatable("ac.skill_tree.feedback.timeout").withStyle(ChatFormatting.RED);
                 pendingSkillId = null;
                 pendingLevel = -1;
             }
@@ -224,7 +225,8 @@ public class SkillTreeGui extends AcademyScreen {
         boolean developing = result.inProgress();
         if (!developing) { gui.pendingSkillId = null; gui.pendingLevel = -1; }
         else if (mc.level != null) gui.pendingSince = mc.level.getGameTime();
-        gui.serverFeedback = Component.literal((result.success() ? "§a" : developing ? "§b" : "§c") + result.reason());
+        gui.serverFeedback = result.reason().copy().withStyle(result.success() ? ChatFormatting.GREEN
+                : developing ? ChatFormatting.AQUA : ChatFormatting.RED);
         gui.sessionSpent = !developing;
         gui.buildSkillNodes();
     }
@@ -290,7 +292,7 @@ public class SkillTreeGui extends AcademyScreen {
         pushZ(graphics);
 
         if (!interactiveLayout) {
-            String message = "窗口过小，请放大窗口或降低 GUI 缩放";
+            String message = Component.translatable("ac.ui.window_too_small").getString();
             int maxText = Math.max(0, guiWidth - 4);
             String clipped = maxText == 0 ? "" : font.plainSubstrByWidth(message, maxText);
             if (!clipped.isEmpty()) graphics.drawString(font, clipped, guiLeft + 2, guiTop + Math.max(0, guiHeight / 2 - 4),
@@ -441,9 +443,9 @@ public class SkillTreeGui extends AcademyScreen {
         int stimulations = (int) (3 + node.skill.getLevel() * node.skill.getLevel() * .5f);
         int cost = devType.actualEnergyPerStimulation() * stimulations;
         // SkillTree.scala refused to start (hint "noenergy") unless the whole estimate was available.
-        String prompt = pendingSkillId != null ? serverFeedback.getString()
-                : energy < cost ? Component.translatable("ac.skill_tree.noenergy").getString()
-                : Component.translatable("ac.skill_tree.learn_question", cost).getString();
+        Component prompt = pendingSkillId != null ? serverFeedback
+                : energy < cost ? Component.translatable("ac.skill_tree.noenergy")
+                : Component.translatable("ac.skill_tree.learn_question", cost);
         graphics.drawCenteredString(font, prompt, centerX, textY + scaled(39), 0xFFDDDDDD);
         boolean learnable = node.canLearn && node.skill.getLevel() <= devType.maxLevel
                 && energy >= cost && pendingSkillId == null
@@ -671,7 +673,8 @@ public class SkillTreeGui extends AcademyScreen {
                 addConsoleLines(output, Component.translatable("ac.skill_tree.console.learn_hint").getString());
             }
         }
-        if (!serverFeedback.getString().isBlank()) addConsoleLines(output, serverFeedback.getString());
+        if (!serverFeedback.getString().isBlank())
+            output.addAll(font.split(serverFeedback, Math.max(16, treeAreaWidth - scaled(10))));
 
         int maxRows = Math.max(1, treeAreaHeight / 10 - 2);
         int first = Math.max(0, output.size() - maxRows);
@@ -843,49 +846,58 @@ public class SkillTreeGui extends AcademyScreen {
         }
 
         tooltip.add(Component.empty());
-        tooltip.add(Component.literal("§f等级: " + skill.getLevel() + "  类型: " + (skill.getType() == SkillType.PASSIVE ? "被动" : "主动")));
+        tooltip.add(Component.translatable("ac.skill_slot.level_type", skill.getLevel(),
+                Component.translatable(skill.getType() == SkillType.PASSIVE ? "ac.skill_slot.passive" : "ac.skill_slot.active"))
+                .withStyle(ChatFormatting.WHITE));
         if (skill.getBaseCpCost() > 0) {
-            tooltip.add(Component.literal("§b计算力: " + (int) skill.getBaseCpCost() + "  §c过载: " + (int) skill.getBaseOverload()));
+            tooltip.add(Component.empty()
+                    .append(Component.translatable("ac.skill_slot.cp", (int) skill.getBaseCpCost()).withStyle(ChatFormatting.AQUA))
+                    .append("  ")
+                    .append(Component.translatable("ac.skill_slot.overload", (int) skill.getBaseOverload()).withStyle(ChatFormatting.RED)));
         }
 
         if (hoveredNode.learned) {
             // 已学习状态
-            tooltip.add(Component.literal("§a[已学习]"));
+            tooltip.add(Component.translatable("ac.skill_tree.tooltip.learned").withStyle(ChatFormatting.GREEN));
             if (!hoveredNode.isPassive) {
                 float prof = data.getProficiency(skill.getId());
-                tooltip.add(Component.literal("§e熟练度: " + String.format("%.1f%%", prof * 100)));
+                tooltip.add(Component.translatable("ac.skill_slot.proficiency", String.format("%.1f", prof * 100))
+                        .withStyle(ChatFormatting.YELLOW));
             }
             // 开发机能量不足时追加提示
             if (!fromTerminal && devType != null && energy <= 0) {
-                tooltip.add(Component.literal("§c[开发机能量不足] 该技能暂不可用"));
+                tooltip.add(Component.translatable("ac.skill_tree.tooltip.learned_no_energy").withStyle(ChatFormatting.RED));
             }
         } else if (hoveredNode.canLearn) {
             // 可学习状态
             if (readOnly) {
-                tooltip.add(Component.literal("§7[仅查看] 请使用开发机学习"));
+                tooltip.add(Component.translatable("ac.skill_tree.tooltip.read_only").withStyle(ChatFormatting.GRAY));
             } else if (skill.getLevel() > devType.maxLevel) {
-                tooltip.add(Component.literal("§c[同步率不足] 该开发机无法支持此等级技能"));
+                tooltip.add(Component.translatable("ac.skill_tree.tooltip.sync_rate").withStyle(ChatFormatting.RED));
             } else if (!fromTerminal && devType != null && energy <= 0) {
                 // 能量不足时优先提示
-                tooltip.add(Component.literal("§c[开发机能量不足] 暂无法学习该技能"));
+                tooltip.add(Component.translatable("ac.skill_tree.tooltip.no_energy").withStyle(ChatFormatting.RED));
             } else {
                 int stimulations = (int) (3 + skill.getLevel() * skill.getLevel() * .5f);
                 int cost = devType.actualEnergyPerStimulation() * stimulations;
                 float seconds = stimulations * devType.developmentTicksPerStimulation() / 20f;
-                tooltip.add(Component.literal("§b[开始开发] 预计: " + cost + " IF / " + String.format("%.1f",seconds) + "秒"));
+                tooltip.add(Component.translatable("ac.skill_tree.tooltip.estimate", cost, String.format("%.1f", seconds))
+                        .withStyle(ChatFormatting.AQUA));
             }
         } else {
             // 未解锁状态
-            tooltip.add(Component.literal("§c[未解锁]"));
+            tooltip.add(Component.translatable("ac.skill_tree.tooltip.locked").withStyle(ChatFormatting.RED));
             if (skill.getLevel() > data.getPlayerLevel()) {
-                tooltip.add(Component.literal("§c✗ §7需要能力等级 Lv." + skill.getLevel()
-                        + "（当前 Lv." + data.getPlayerLevel() + "）"));
+                tooltip.add(Component.literal("✗ ").withStyle(ChatFormatting.RED)
+                        .append(Component.translatable("ac.skill_tree.tooltip.level_req", skill.getLevel(),
+                                data.getPlayerLevel()).withStyle(ChatFormatting.GRAY)));
             }
             for (Skill.Prerequisite prereq : skill.getPrerequisites()) {
                 String prereqId = prereq.skillId();
                 if (prereqId.startsWith("any_level_")) {
                     int reqLv = Integer.parseInt(prereqId.substring("any_level_".length()));
-                    tooltip.add(Component.literal("§7  需要任意 Lv." + reqLv + " 技能"));
+                    tooltip.add(Component.literal("  ").append(Component.translatable("ac.skill_tree.anyskill", reqLv))
+                            .withStyle(ChatFormatting.GRAY));
                 } else {
                     String prereqName = Component.translatable("item.academy.factor_" + skill.getCategory().id() + "." + prereqId).getString();
                     boolean met = data.hasLearnedSkill(prereqId) && data.getProficiency(prereqId) >= prereq.proficiencyRequired();

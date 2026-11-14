@@ -64,7 +64,8 @@ public class DevAdvancedGui extends AcademyBaseUI<DevAdvancedMenu> {
     @Override protected void renderEnergyInfoPanel(GuiGraphics graphics) {
         InfoArea info = new InfoArea();
         info.histogram(InfoArea.histEnergy(menu.getEnergy(), menu.getMaxEnergy()));
-        info.property("类型", "高级");
+        info.property(Component.translatable("ac.ui.info.type").getString(),
+                com.mohistmc.academy.world.block.DevMachineType.ADVANCED.displayName().getString());
         info.draw(graphics, leftPos, topPos);
     }
 
@@ -75,7 +76,7 @@ public class DevAdvancedGui extends AcademyBaseUI<DevAdvancedMenu> {
     @Override public void renderBackground(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         if (compactFallback) {
             graphics.fill(0, 0, width, height, 0xDD101018);
-            graphics.drawCenteredString(font, "窗口过小，请放大窗口或降低 GUI 缩放",
+            graphics.drawCenteredString(font, Component.translatable("ac.ui.window_too_small"),
                     width / 2, Math.max(4, height / 2 - 4), 0xFFFFFFFF);
             return;
         }
@@ -83,10 +84,10 @@ public class DevAdvancedGui extends AcademyBaseUI<DevAdvancedMenu> {
         else renderDeveloperMachinePanel(graphics);
         graphics.drawString(font, Component.translatable("block.academy.dev_advanced"),
                 leftPos + 8, topPos + 7, 0xFF28C4E8);
-        graphics.drawString(font, "材料取自主手和玩家背包（与 1.0.7 一致）",
+        graphics.drawString(font, Component.translatable("ac.developer.hint.reset_materials"),
                 leftPos + 8, topPos + 27, 0xFFAAAAAA);
         drawActionButton(graphics, leftPos + 94, topPos + 60, 72, 16,
-                "返回技能树", mouseX, mouseY);
+                Component.translatable("ac.developer.back_to_skill_tree"), mouseX, mouseY);
         renderEnergyInfoPanel(graphics);
     }
 
@@ -124,7 +125,7 @@ public class DevAdvancedGui extends AcademyBaseUI<DevAdvancedMenu> {
     }
 
     private void drawActionButton(GuiGraphics graphics, int x, int y, int w, int h,
-                                  String label, double mouseX, double mouseY) {
+                                  Component label, double mouseX, double mouseY) {
         int color = isHoveringButton(x, y, w, h, mouseX, mouseY) ? 0xFF3498DB : 0xFF2980B9;
         graphics.fill(x, y, x + w, y + h, color);
         graphics.drawCenteredString(font, label, x + w / 2, y + 4, 0xFFFFFFFF);

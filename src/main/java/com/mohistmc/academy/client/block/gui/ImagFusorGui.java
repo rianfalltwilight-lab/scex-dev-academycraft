@@ -72,9 +72,9 @@ public class ImagFusorGui extends AcademyBaseUI<ImagFusorMenu> {
                 InfoArea.histEnergy(menu.getEnergy(), menu.getMaxEnergy()),
                 InfoArea.histPhaseLiquid(menu.getFluidAmount(), menu.getMaxFluid()));
         String process = menu.getProcessingTime() <= 0
-                ? "待机"
+                ? Component.translatable("ac.gui.common.idle").getString()
                 : menu.getProcessingTime() + "/" + menu.getProcessingDuration() + " t";
-        info.seplineInfo().property("进度", process);
+        info.seplineInfo().property(Component.translatable("ac.skill_tree.progress").getString(), process);
         info.draw(graphics, this.leftPos, this.topPos);
     }
 }

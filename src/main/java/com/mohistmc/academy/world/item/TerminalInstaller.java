@@ -4,6 +4,7 @@ import com.mohistmc.academy.network.StartTerminalInstallPacket;
 import com.mohistmc.academy.skill.AcademyAttachments;
 import com.mohistmc.academy.skill.PlayerAbilityData;
 import java.util.List;
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -29,7 +30,8 @@ public class TerminalInstaller extends AcademyItem {
 
         if (data.isTerminalInstalled()) {
             if (level.isClientSide()) {
-                player.displayClientMessage(Component.literal("§7[数据终端] §c你已经安装过数据终端了。"), true);
+                player.displayClientMessage(BaseApp.terminalMessage(Component.translatable("ac.terminal.alrdy_installed")
+                        .withStyle(ChatFormatting.RED)), true);
             }
             return InteractionResultHolder.fail(stack);
         }
@@ -47,7 +49,8 @@ public class TerminalInstaller extends AcademyItem {
 
     @Override
     public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> components, TooltipFlag flag) {
-        components.add(Component.literal("§7右键安装数据终端"));
-        components.add(Component.literal("§7安装后可按 Alt 打开终端界面"));
+        components.add(Component.translatable("item.academy.terminal_installer.tooltip").withStyle(ChatFormatting.GRAY));
+        components.add(Component.translatable("item.academy.terminal_installer.tooltip.open",
+                Component.keybind("key.academy.open_terminal")).withStyle(ChatFormatting.GRAY));
     }
 }

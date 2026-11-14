@@ -101,22 +101,24 @@ public abstract class BaseNodeGui<T extends BaseNodeMenu> extends AcademyBaseUI<
                 : com.mohistmc.academy.client.gui.WirelessDisplayName.display(nodeNameInput.toString());
         String password = passwordEdited ? "*".repeat(nodePasswordInput.length())
                 + (editFocus == EditFocus.PASSWORD ? "▌" : "")
-                : menu.hasPasswordConfigured() ? "已设置（修改）" : "公开（未设）";
+                : tr(menu.hasPasswordConfigured() ? "ac.gui.node.password_set" : "ac.gui.node.password_public");
         InfoArea info = new InfoArea()
                 .histogram(
                         InfoArea.histEnergy(menu.getNodeEnergy(), menu.getNodeMaxEnergy()),
                         InfoArea.histCapacity(menu.getNodeLoad(), menu.getNodeCapacity()))
                 .seplineInfo()
-                .property("带宽", menu.getNodeBandwidth() + " IF/t")
-                .property("范围", menu.getNodeRange() + " 格")
-                .property("所有者", trimInfo(menu.getOwnerLabel()));
-        info.property("节点名", trimInfo(name));
+                .property(tr("ac.gui.common.prop.bandwidth"), menu.getNodeBandwidth() + " IF/t")
+                .property(tr("ac.gui.common.prop.range"), tr("ac.gui.common.blocks", menu.getNodeRange()))
+                .property(tr("ac.gui.common.prop.owner"), trimInfo(menu.getOwnerLabel()));
+        info.property(tr("ac.gui.common.prop.node_name"), trimInfo(name));
         nameRowY = info.lastElementY();
-        info.property("密码", menu.canEditNode() ? password : "仅所有者可改");
+        info.property(tr("ac.gui.common.prop.password"),
+                menu.canEditNode() ? password : tr("ac.gui.node.owner_only"));
         passwordRowY = info.lastElementY();
-        if (pendingNameToken != null || pendingPasswordToken != null) info.property("状态", "保存中…");
-        else if (saveRejected) info.property("状态", "保存被拒绝");
-        else if (saveWaitingForSession) info.property("状态", "同步中，请回车");
+        String status = tr("ac.gui.common.prop.status");
+        if (pendingNameToken != null || pendingPasswordToken != null) info.property(status, tr("ac.gui.common.saving"));
+        else if (saveRejected) info.property(status, tr("ac.gui.node.save_rejected"));
+        else if (saveWaitingForSession) info.property(status, tr("ac.gui.common.syncing"));
         infoPanelX = InfoArea.resolvePanelX(this.leftPos);
         info.draw(graphics, this.leftPos, this.topPos);
     }
@@ -290,6 +292,10 @@ public abstract class BaseNodeGui<T extends BaseNodeMenu> extends AcademyBaseUI<
         return Boolean.getBoolean("academy.machineVisualGate")
                 || Boolean.getBoolean("academy.concurrentMenuGate");
     }
+    private static String tr(String key, Object... args) {
+        return Component.translatable(key, args).getString();
+    }
+
     private String trimInfo(String value) {
         return this.font.plainSubstrByWidth(value == null ? "" : value, 58);
     }

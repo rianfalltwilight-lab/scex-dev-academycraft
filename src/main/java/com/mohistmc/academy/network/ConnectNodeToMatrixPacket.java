@@ -61,7 +61,7 @@ public record ConnectNodeToMatrixPacket(MenuActionToken actionToken, BlockPos no
 
             var state = WirelessSystem.reconcileMatrixNetwork(level, matrix);
             if (!state.active() || !matrix.isOperational()) {
-                player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§c矩阵尚未初始化或组件不完整"));
+                player.sendSystemMessage(net.minecraft.network.chat.Component.translatable("message.academy.matrix.incomplete").withStyle(net.minecraft.ChatFormatting.RED));
                 return;
             }
 
@@ -70,13 +70,14 @@ public record ConnectNodeToMatrixPacket(MenuActionToken actionToken, BlockPos no
             if (data == null || !data.isNetworkDiscoverable(targetNetwork,
                     packet.nodePos().getX(), packet.nodePos().getY(), packet.nodePos().getZ(),
                     node.getRange())) {
-                player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§c矩阵网络不在节点可发现范围内"));
+                player.sendSystemMessage(net.minecraft.network.chat.Component.translatable("message.academy.matrix.not_discoverable").withStyle(net.minecraft.ChatFormatting.RED));
                 return;
             }
 
             boolean linked = WirelessSystem.linkNode(level, matrix, node, packet.password().orElse(""));
-            player.sendSystemMessage(net.minecraft.network.chat.Component.literal(linked
-                    ? "§a节点已加入矩阵网络" : "§c连接失败，请检查密码、容量和范围"));
+            player.sendSystemMessage(linked
+                    ? net.minecraft.network.chat.Component.translatable("message.academy.matrix.node_joined").withStyle(net.minecraft.ChatFormatting.GREEN)
+                    : net.minecraft.network.chat.Component.translatable("message.academy.matrix.node_join_failed").withStyle(net.minecraft.ChatFormatting.RED));
         });
     }
 }

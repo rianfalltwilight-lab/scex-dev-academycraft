@@ -12,9 +12,9 @@ class WirelessMachineUiContractTest {
     @Test void emptyNodeResponseIsDistinctFromLoadingAndExplained() throws Exception {
         String ui = source("com/mohistmc/academy/client/gui/AcademyBaseUI.java");
         assertTrue(ui.contains("nodeResponseReceived"));
-        assertTrue(ui.contains("正在扫描附近节点"));
-        assertTrue(ui.contains("附近没有可用节点"));
-        assertTrue(ui.contains("放置无线节点即可连接；矩阵仅用于扩展网络"));
+        assertTrue(ui.contains("gui.academy.wireless.scanning_nodes"));
+        assertTrue(ui.contains("gui.academy.wireless.no_nodes"));
+        assertTrue(ui.contains("gui.academy.wireless.node_hint"));
         assertTrue(ui.contains("pendingNodeData != null"));
         assertTrue(ui.contains("WirelessState.WIFI && this.panelActive"));
         assertTrue(ui.contains("nodeRequestDeadline"));

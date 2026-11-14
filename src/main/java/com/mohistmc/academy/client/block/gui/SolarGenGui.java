@@ -64,7 +64,7 @@ public class SolarGenGui extends AcademyBaseUI<SolarGenMenu> {
             case WEAK -> "0.6 IF/t";
             case STOPPED -> "0 IF/t";
         };
-        info.seplineInfo().property("产能", rate);
+        info.seplineInfo().property(Component.translatable("ac.gui.common.prop.gen_speed").getString(), rate);
         info.draw(graphics, this.leftPos, this.topPos);
     }
 

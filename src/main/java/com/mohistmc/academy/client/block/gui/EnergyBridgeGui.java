@@ -51,7 +51,7 @@ public final class EnergyBridgeGui extends AcademyBaseUI<EnergyBridgeMenu> {
     protected void renderEnergyInfoPanel(GuiGraphics graphics) {
         InfoArea info = new InfoArea();
         info.histogram(InfoArea.histBuffer(menu.getStoredIf(), menu.getMaxIf()));
-        info.seplineInfo().property(menu.isInput() ? "方向" : "方向",
+        info.seplineInfo().property(Component.translatable("ac.gui.common.prop.direction").getString(),
                 menu.isInput() ? "RF/FE → IF" : "IF → RF/FE");
         info.draw(graphics, leftPos, topPos);
     }
