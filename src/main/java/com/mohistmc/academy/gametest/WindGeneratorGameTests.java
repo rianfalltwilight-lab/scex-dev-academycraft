@@ -105,9 +105,12 @@ public final class WindGeneratorGameTests {
         var upperEnergy = level.getCapability(
                 net.neoforged.neoforge.capabilities.Capabilities.EnergyStorage.BLOCK,
                 basePos.above(), Direction.UP);
+        // Generators only give energy through FE; fill the authoritative store directly.
+        base.setEnergy(10);
         if (lowerEnergy == null || upperEnergy == null
-                || lowerEnergy.receiveEnergy(40, false) != 40
-                || upperEnergy.getEnergyStored() != 40) {
+                || lowerEnergy.receiveEnergy(40, false) != 0
+                || upperEnergy.getEnergyStored() != lowerEnergy.getEnergyStored()
+                || upperEnergy.getEnergyStored() <= 0) {
             helper.fail("wind base proxy did not expose the main block's authoritative energy"); return;
         }
         base.setEnergy(0);

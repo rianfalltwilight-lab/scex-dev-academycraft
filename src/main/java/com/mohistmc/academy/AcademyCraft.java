@@ -151,20 +151,35 @@ public class AcademyCraft {
                 AcademyItems.IMAG_LEGGINGS.get(), AcademyItems.IMAG_BOOTS.get());
         // Expose IF through the standard NeoForge energy capability so Jade and
         // automation mods see the same authoritative value as our machine GUI.
+        // Each face is limited to the machine's IF bandwidth per tick; consumers only receive and
+        // generators only give (the old unlimited two-way view let pipes drain developers).
         event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, AcademyBlockEntities.DEV_NORMAL.get(),
-                (be,side) -> new com.mohistmc.academy.capability.ForgeEnergyView(be));
+                (be,side) -> com.mohistmc.academy.capability.MachineEnergyViews.consumer(be, be, be::getBandwidth));
         event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, AcademyBlockEntities.DEV_ADVANCED.get(),
-                (be,side) -> new com.mohistmc.academy.capability.ForgeEnergyView(be));
+                (be,side) -> com.mohistmc.academy.capability.MachineEnergyViews.consumer(be, be, be::getBandwidth));
         event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, AcademyBlockEntities.DEV_NORMAL_SUB.get(),
                 (be,side) -> energyViewOfMain(be));
         event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, AcademyBlockEntities.DEV_ADVANCED_SUB.get(),
                 (be,side) -> energyViewOfMain(be));
         event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, AcademyBlockEntities.SOLAR_GEN.get(),
-                (be,side) -> new com.mohistmc.academy.capability.ForgeEnergyView(be));
+                (be,side) -> com.mohistmc.academy.capability.MachineEnergyViews.generator(be, be, be::getBandwidth, () -> true));
         event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, AcademyBlockEntities.ABILITY_INTERFERER.get(),
-                (be,side) -> new com.mohistmc.academy.capability.ForgeEnergyView(be));
+                (be,side) -> com.mohistmc.academy.capability.MachineEnergyViews.consumer(be, be, be::getBandwidth));
         event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, AcademyBlockEntities.WINDGEN_BASE.get(),
-                (be,side) -> new com.mohistmc.academy.capability.ForgeEnergyView(be));
+                (be,side) -> com.mohistmc.academy.capability.MachineEnergyViews.generator(be, be, be::getBandwidth, () -> true));
+        event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, AcademyBlockEntities.IMAG_FUSOR.get(),
+                (be,side) -> com.mohistmc.academy.capability.MachineEnergyViews.receiver(be, be::getEnergy, be::getMaxEnergy));
+        event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, AcademyBlockEntities.METAL_FORMER.get(),
+                (be,side) -> com.mohistmc.academy.capability.MachineEnergyViews.receiver(be, be::getEnergy, be::getMaxEnergy));
+        event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, AcademyBlockEntities.PHASE_GEN.get(),
+                (be,side) -> com.mohistmc.academy.capability.MachineEnergyViews.source(be, be::getStoredEnergy,
+                        () -> com.mohistmc.academy.config.MachineConfig.PHASE_BUFFER.get()));
+        event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, AcademyBlockEntities.NODE_BASIC.get(),
+                (be,side) -> com.mohistmc.academy.capability.MachineEnergyViews.node(be));
+        event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, AcademyBlockEntities.NODE_STANDARD.get(),
+                (be,side) -> com.mohistmc.academy.capability.MachineEnergyViews.node(be));
+        event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, AcademyBlockEntities.NODE_ADVANCED.get(),
+                (be,side) -> com.mohistmc.academy.capability.MachineEnergyViews.node(be));
         event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, AcademyBlockEntities.WIND_GEN_BASE_SUB.get(),
                 (be, side) -> energyViewOfWindBase(be));
         event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, AcademyBlockEntities.RF_INPUT.get(),
@@ -179,8 +194,9 @@ public class AcademyCraft {
                 || subEntity.getLevel() == null) return null;
         var mainEntity = com.mohistmc.academy.world.block.DevMachineSubBase.validatedMainForProxy(
                 subEntity.getLevel(), subEntity.getBlockPos(), subEntity.getBlockState().getBlock(), sub);
-        if (!(mainEntity instanceof com.mohistmc.academy.capability.IFEnergyStorage energy)) return null;
-        return new com.mohistmc.academy.capability.ForgeEnergyView(energy, () ->
+        if (!(mainEntity instanceof com.mohistmc.academy.capability.IFEnergyStorage energy)
+                || !(mainEntity instanceof com.mohistmc.academy.energy.api.block.IWirelessReceiver receiver)) return null;
+        return com.mohistmc.academy.capability.MachineEnergyViews.consumer(mainEntity, energy, receiver::getBandwidth, () ->
                 !subEntity.isRemoved() && subEntity.getLevel() != null
                 && com.mohistmc.academy.world.block.DevMachineSubBase.validatedMainForProxy(
                         subEntity.getLevel(), subEntity.getBlockPos(), subEntity.getBlockState().getBlock(), sub) == mainEntity);
@@ -201,7 +217,7 @@ public class AcademyCraft {
         if (!(main instanceof com.mohistmc.academy.world.block.entity.WindGenBaseBlockEntity energy)) {
             return null;
         }
-        return new com.mohistmc.academy.capability.ForgeEnergyView(energy, () ->
+        return com.mohistmc.academy.capability.MachineEnergyViews.generator(energy, energy, energy::getBandwidth, () ->
                 !subEntity.isRemoved() && subEntity.getLevel() != null
                 && com.mohistmc.academy.world.block.LoadedMachineChunks.contains(subEntity.getLevel(), subEntity.getBlockPos().below())
                 && subEntity.getLevel().getBlockEntity(subEntity.getBlockPos().below()) == main);
