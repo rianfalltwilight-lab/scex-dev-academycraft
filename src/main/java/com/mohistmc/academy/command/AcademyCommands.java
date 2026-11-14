@@ -126,6 +126,8 @@ public final class AcademyCommands {
                                 .then(skillArg().then(Commands.argument("raw", FloatArgumentType.floatArg(0))
                                         .executes(AcademyCommands::debugDamage)))))));
 
+        root.then(AcademyMobCommands.build());
+
         dispatcher.register(root);
     }
 
