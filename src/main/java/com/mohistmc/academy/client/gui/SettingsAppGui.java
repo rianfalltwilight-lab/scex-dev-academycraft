@@ -230,6 +230,7 @@ public class SettingsAppGui extends AcademyScreen {
                         SettingsConfigPacket.DESTROY_BLOCKS, !current));
             }
         }
+        ACConfig.Client.save();
         buildRows();
         updateButtons();
     }
