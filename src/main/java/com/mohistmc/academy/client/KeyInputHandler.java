@@ -284,7 +284,8 @@ public class KeyInputHandler {
         }
 
         if (OPEN_SKILL_SLOT.consumeClick()) {
-            if (mc.screen == null) {
+            // ClientHandler.keyEditPreset only opens PresetEditUI while the player has a category.
+            if (mc.screen == null && mc.player.getData(AcademyAttachments.PLAYER_ABILITY).hasAbility()) {
                 mc.setScreen(new SkillSlotGui());
             }
             return;

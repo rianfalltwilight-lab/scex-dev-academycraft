@@ -28,4 +28,11 @@ class LegacyAbilityRulesTest {
         assertEquals(3.5f,LegacyAbilityRules.overloadRecovery(0,500,d),1e-6);
         assertEquals(2.625f,LegacyAbilityRules.overloadRecovery(500,500,d),1e-6);
     }
+    @Test void recoveryScalesWithRawMaxAndKeepsUnclampedLerpAboveIt() {
+        // CPData uses the raw maxCP/maxOverload fields; current values may exceed them by usage growth
+        // and MathUtils.lerpf does not clamp, so the CP factor rises past 2 and the overload one drops below .75.
+        var d=LegacyAbilityRules.DEFAULTS;
+        assertEquals(.6f*2.2f,LegacyAbilityRules.cpRecovery(2400,2000,1,d),1e-5);
+        assertEquals(.007f*500*(1-.25f*1.2f),LegacyAbilityRules.overloadRecovery(600,500,d),1e-5);
+    }
 }

@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -165,9 +166,18 @@ public class PlayerAbilityData {
     }
 
     public float getLevelProgressThreshold() {
+        return getLevelProgressThreshold(PlayerAbilityData::skillEnabled);
+    }
+
+    /**
+     * AbilityData.getLevelProgress counts {@code skill.canControl()} skills of the current level, and
+     * Skill.canControl() is {@code isEnabled() && canControl}: a config-disabled skill is not counted.
+     */
+    public float getLevelProgressThreshold(Predicate<String> enabled) {
         if (!hasAbility() || playerLevel < 1 || playerLevel > 5) return 0.0f;
         int controllable = (int) SkillRegistry.getSkillsByCategory(currentAbility).stream()
-                .filter(skill -> skill.getType() == SkillType.ACTIVE && skill.getLevel() == playerLevel)
+                .filter(skill -> skill.getType() == SkillType.ACTIVE && skill.getLevel() == playerLevel
+                        && enabled.test(skill.getId()))
                 .count();
         return LegacyLevelProgress.threshold(playerLevel, controllable);
     }
@@ -200,6 +210,10 @@ public class PlayerAbilityData {
     }
 
     public float getUsageMaxCp() { return usageMaxCp; }
+    /** CPData.getRawMaxCP: level base + course bonuses, without usage growth (drives recovery speed). */
+    public float getRawMaxCp() { return maxCp - usageMaxCp; }
+    /** CPData.getRawMaxOverload: level base + course bonuses, without usage growth. */
+    public float getRawMaxOverload() { return maxOverload - usageMaxOverload; }
     public float getUsageMaxOverload() { return usageMaxOverload; }
 
     public void setUsageResourceGrowth(float cp, float overload) {
@@ -374,6 +388,21 @@ public class PlayerAbilityData {
     }
 
     public boolean canLearnSkill(Skill skill) {
+        return canLearnSkill(skill, PlayerAbilityData::skillEnabled);
+    }
+
+    /** Server skill tuning {@code <id>.enabled}; 1.0.7 Skill.isEnabled(). */
+    public static boolean skillEnabled(String skillId) {
+        return ACConfig.Server.skill(skillId).enabled();
+    }
+
+    /**
+     * 1.0.7 Skill.isEnabled(): a disabled skill does not appear in the skill tree (so it cannot be
+     * developed), and Skill.setParent/addSkillDep only add the dependency when the parent is enabled,
+     * so a disabled prerequisite never blocks its children.
+     */
+    public boolean canLearnSkill(Skill skill, Predicate<String> enabled) {
+        if (!enabled.test(skill.getId())) return false;
         if (devMode) return true;
         if (skill.getCategory() != currentAbility) return false;
         if (learnedSkills.contains(skill.getId())) return false;
@@ -390,6 +419,7 @@ public class PlayerAbilityData {
                         .anyMatch(s -> learnedSkills.contains(s.getId()));
                 if (!hasAnySkillAtLevel) return false;
             } else {
+                if (!enabled.test(prereqId)) continue;
                 if (!learnedSkills.contains(prereqId)) return false;
                 if (getProficiency(prereqId) < prereq.proficiencyRequired()) return false;
             }
@@ -399,10 +429,14 @@ public class PlayerAbilityData {
 
     // ==================== 冷却系统 ====================
 
-    /** 设置技能冷却（tick） */
+    /**
+     * 设置技能冷却（tick）。1.0.7 CooldownData.doSet keeps the LONGER of the running and the new
+     * cooldown, so a shorter value never cuts an existing cooldown. Use {@link #clearCooldowns()}
+     * to drop cooldowns.
+     */
     public void setCooldown(String skillId, int ticks) {
         if (validKey(skillId) && ticks > 0) {
-            cooldowns.put(skillId, Math.min(ticks, 20 * 60 * 60));
+            cooldowns.merge(skillId, Math.min(ticks, 20 * 60 * 60), Math::max);
         }
     }
 
@@ -707,9 +741,9 @@ public class PlayerAbilityData {
         sanitizeResources();
         var rules = ACConfig.Server.legacyRules();
         if (cpRecoveryDelay > 0) cpRecoveryDelay--; else
-            currentCp = Math.min(currentCp + LegacyAbilityRules.cpRecovery(currentCp,maxCp,cpRegenRate,rules), maxCp);
+            currentCp = Math.min(currentCp + LegacyAbilityRules.cpRecovery(currentCp,getRawMaxCp(),cpRegenRate,rules), maxCp);
         if (overloadRecoveryDelay > 0) overloadRecoveryDelay--; else
-            currentOverload = Math.max(currentOverload - LegacyAbilityRules.overloadRecovery(currentOverload,maxOverload,rules), 0);
+            currentOverload = Math.max(currentOverload - LegacyAbilityRules.overloadRecovery(currentOverload,getRawMaxOverload(),rules), 0);
         // CPData.tick sets overloadFine again only once overload is fully drained.
         if (currentOverload <= 0) overloadLocked = false;
 
@@ -740,6 +774,34 @@ public class PlayerAbilityData {
     }
     private static boolean finite(float value) { return Float.isFinite(value); }
     private static boolean validKey(String value) { return value != null && !value.isBlank() && value.length() <= 128; }
+
+    /**
+     * 1.0.7 AbilityData.setCategory plus its CategoryChangeEvent listeners: the level is kept (Level 1
+     * only when it was 0), so level progress and CP/overload usage growth survive; learned skills,
+     * skill exp, presets and cooldowns are cleared; CPData.recalcMaxValue refills CP and drains overload.
+     * Returns true when the category actually changed.
+     */
+    public boolean changeCategory(AbilityCategory category) {
+        if (category == null) {
+            if (currentAbility == null) return false;
+            reset();
+            cooldowns.clear();
+            return true;
+        }
+        if (category.equals(currentAbility)) return false;
+        currentAbility = category;
+        if (playerLevel == 0) {
+            playerLevel = 1;
+            levelProgressExp = 0;
+        }
+        learnedSkills.clear();
+        skillProficiency.clear();
+        for (SkillPreset preset : presets) preset.clearAll();
+        currentPreset = 0;
+        cooldowns.clear();
+        recalculateMaxResources(true);
+        return true;
+    }
 
     public void reset() {
         currentAbility = null;
