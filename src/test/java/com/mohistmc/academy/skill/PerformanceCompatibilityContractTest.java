@@ -121,7 +121,7 @@ class PerformanceCompatibilityContractTest {
         assertFalse(railgun.contains("instanceof Monster"));
         assertTrue(railgun.contains("state.is(Blocks.BEDROCK)"));
         assertTrue(railgun.contains("event.isCanceled()"));
-        assertTrue(railgun.contains("traceBarrier(level, player"));
+        assertTrue(railgun.contains("traceBarrier(level, caster"));
         assertTrue(railgun.contains("lookVec.scale(stopDistance)"),
                 "entity ray must be clipped to the authoritative wall distance");
         assertTrue(railgun.contains("MAX_INCREMENT = 50.0"),

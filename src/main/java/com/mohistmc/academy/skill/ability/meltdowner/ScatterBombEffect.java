@@ -4,6 +4,9 @@ import com.mohistmc.academy.skill.ability.LoadedRaycast;
 
 import static com.mohistmc.academy.utils.MathUtils.lerpf;
 
+import com.mohistmc.academy.AcademyCraft;
+import com.mohistmc.academy.api.mob.MobCastContext;
+import com.mohistmc.academy.api.mob.MobCastable;
 import com.mohistmc.academy.config.DynamicSkillRules;
 import com.mohistmc.academy.entity.MdBallEntity;
 import com.mohistmc.academy.skill.AcademyDamageHelper;
@@ -18,18 +21,25 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 
 /** Final 1.12.2 seven-orb scatter context, including mastery auto-aim and over-hold behavior. */
-public final class ScatterBombEffect implements ChargingSkillEffect {
+@EventBusSubscriber(modid = AcademyCraft.MODID)
+public final class ScatterBombEffect implements ChargingSkillEffect, MobCastable {
     private static final int ACTIVE_TICKS = 80;
     private static final int OVERHOLD_TICKS = 200;
     private static final double RAY_RANGE = 15;
@@ -44,6 +54,11 @@ public final class ScatterBombEffect implements ChargingSkillEffect {
     }
 
     private static final Map<UUID, State> STATES = new HashMap<>();
+    /**
+     * Balls of a charging mob caster.  An entry exists only between charge start and release/abort;
+     * the mob charging manager aborts on death, unload or dimension change, which discards the balls.
+     */
+    private static final Map<UUID, List<MdBallEntity>> MOB_BALLS = new ConcurrentHashMap<>();
 
     @Override public String getId() { return "scatter_bomb"; }
     @Override public boolean appliesBaseResourceCost() { return false; }
@@ -161,21 +176,26 @@ public final class ScatterBombEffect implements ChargingSkillEffect {
      * degrees on each axis.  It is deliberately not a simple 15-block ray.
      */
     static Vec3 legacyRandomDestination(ServerPlayer player) {
-        Vec3 look = player.getLookAngle().normalize();
+        return legacyRandomDestination(player, player.getLookAngle());
+    }
+
+    static Vec3 legacyRandomDestination(LivingEntity player, Vec3 aim) {
+        Vec3 look = aim.normalize();
         Vec3 begin = player.getEyePosition().add(look.scale(RAY_RANGE));
         float pitch = (float) Math.toRadians((player.getRandom().nextFloat() - .5F) * 25F);
         float yaw = (float) Math.toRadians((player.getRandom().nextFloat() - .5F) * 25F);
         return begin.add(look.xRot(pitch).yRot(yaw).scale(RAY_RANGE));
     }
 
-    static Entity nearestVisibleTarget(ServerPlayer player, Vec3 from, Vec3 destination) {
-        BlockHitResult wall = LoadedRaycast.clip(player.serverLevel(), new ClipContext(from, destination,
+    static Entity nearestVisibleTarget(LivingEntity player, Vec3 from, Vec3 destination) {
+        ServerLevel level = (ServerLevel) player.level();
+        BlockHitResult wall = LoadedRaycast.clip(level, new ClipContext(from, destination,
                 ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
         double maxDistance = wall.getType() == HitResult.Type.BLOCK
                 ? from.distanceToSqr(wall.getLocation()) : from.distanceToSqr(destination);
         Entity best = null;
         double bestDistance = Double.MAX_VALUE;
-        for (Entity candidate : player.serverLevel().getEntities(player,
+        for (Entity candidate : level.getEntities(player,
                 new AABB(from, destination).inflate(1),
                 entity -> entity != player && !(entity instanceof MdBallEntity)
                         && entity.isAlive() && entity.isPickable())) {
@@ -204,6 +224,66 @@ public final class ScatterBombEffect implements ChargingSkillEffect {
 
     @Override public void execute(ServerPlayer player, PlayerAbilityData data) {}
     @Override public int getCooldownTicks(float proficiency) { return 0; }
+
+    /** Mob cast: the player's full 80-tick spawn window (seven balls), released at its end. */
+    @Override public int mobChargeTicks(float proficiency) { return ACTIVE_TICKS; }
+
+    /** The skill has no cooldown of its own; the mob floor ({@code mobs.minCooldownTicks}) applies. */
+    @Override public int mobCooldownTicks(float proficiency) { return getCooldownTicks(proficiency); }
+
+    @Override
+    public boolean mobChargeTick(MobCastContext context, int ticks) {
+        LivingEntity caster = context.caster();
+        List<MdBallEntity> balls = MOB_BALLS.computeIfAbsent(caster.getUUID(), id -> new ArrayList<>());
+        if (ticks >= 20 && ticks % 10 == 0) {
+            MdBallEntity ball = AcademyEntities.MD_BALL.get().create(context.level());
+            if (ball != null) {
+                ball.bind(caster.getUUID(), balls.size(), false);
+                if (context.level().addFreshEntity(ball)) balls.add(ball);
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Fires every ball.  With a living target each ray aims at it (the mastery auto-aim, applied to the
+     * mob's chosen target at any proficiency); without one the rays scatter around the look like a
+     * player's.  Damage goes through AcademyDamageHelper, so allies and same-type mobs are spared.
+     */
+    @Override
+    public boolean mobCast(MobCastContext context) {
+        List<MdBallEntity> balls = MOB_BALLS.remove(context.caster().getUUID());
+        if (balls == null || balls.isEmpty()) return false;
+        LivingEntity caster = context.caster();
+        ServerLevel level = context.level();
+        LivingEntity aimed = context.target();
+        float damage = DynamicSkillRules.damage(getId(), lerpf(5, 9, context.proficiency()));
+        for (MdBallEntity ball : balls) {
+            Vec3 from = ball.isRemoved() ? caster.getEyePosition() : ball.position();
+            Vec3 destination = aimed != null ? aimed.position().add(0, aimed.getEyeHeight(), 0)
+                    : legacyRandomDestination(caster, context.look());
+            Entity target = nearestVisibleTarget(caster, from, destination);
+            if (target != null && AcademyDamageHelper.allowsTarget(caster, target)) {
+                target.invulnerableTime = -1;
+                AcademyDamageHelper.hurt(caster, target, com.mohistmc.academy.skill.SkillDamageSource.attack(caster), damage);
+            }
+            EffectHelper.mdRaySmall(level, from, destination);
+            level.playSound(null, from.x, from.y, from.z, AcademySounds.MD_RAY_SMALL, SoundSource.HOSTILE, .5F, 1.0F);
+            ball.discard();
+        }
+        return true;
+    }
+
+    @Override
+    public void mobChargeAborted(MobCastContext context) {
+        List<MdBallEntity> balls = MOB_BALLS.remove(context.caster().getUUID());
+        if (balls != null) balls.forEach(Entity::discard);
+    }
+
+    @SubscribeEvent
+    public static void stopped(ServerStoppedEvent event) {
+        MOB_BALLS.clear();
+    }
 
     /** Lifecycle cancellation is distinct from the legacy same-world release/upkeep termination. */
     public static void discardOnLifecycle(ServerPlayer player) {

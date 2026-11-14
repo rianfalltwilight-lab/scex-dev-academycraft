@@ -1,6 +1,8 @@
 package com.mohistmc.academy.skill.ability.electromaster;
 
 import com.mohistmc.academy.config.DynamicSkillRules;
+import com.mohistmc.academy.api.mob.MobCastContext;
+import com.mohistmc.academy.api.mob.MobCastable;
 
 import com.mohistmc.academy.skill.ChargingSkillEffect;
 import com.mohistmc.academy.skill.PlayerAbilityData;
@@ -12,13 +14,15 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.LivingEntity;
 
 import static com.mohistmc.academy.utils.MathUtils.lerpf;
 
 /** 生物电强化 —— 蓄力后获得多种药水效果 */
-public class BodyIntensifyEffect implements ChargingSkillEffect {
+public class BodyIntensifyEffect implements ChargingSkillEffect, MobCastable {
 
     private static final int MIN_TICKS = 10;
     private static final int MAX_TICKS = 40;
@@ -116,10 +120,38 @@ public class BodyIntensifyEffect implements ChargingSkillEffect {
         }
 
         float exp = data.getProficiency(getId());
+        intensify(player, exp, ticks);
+
+        if (!data.isDevMode()) {
+            DynamicSkillRules.addExp(player,data, getId(), 0.01f);
+            // IntensifyContext queried ctx.getSkillExp after addSkillExp.
+            data.setCooldown(getId(), getCooldownTicks(data.getProficiency(getId())));
+        }
+        AcademySounds.playSound(player, AcademySounds.EM_INTENSIFY_ACTIVATE, 0.5f, 1.0f);
+        EffectHelper.intensifyActivation(player.serverLevel(), player.getX(), player.getY(), player.getZ());
+    }
+
+    /** Mob cast: a full 40-tick charge, then the same self buffs and hunger; needs no target. */
+    @Override
+    public boolean mobCast(MobCastContext context) {
+        LivingEntity caster = context.caster();
+        intensify(caster, context.proficiency(), Math.max(MIN_TICKS, context.chargeTicks()));
+        AcademySounds.playSound(context.level(), caster.getX(), caster.getY(), caster.getZ(),
+                AcademySounds.EM_INTENSIFY_ACTIVATE, SoundSource.HOSTILE, 0.5f, 1.0f);
+        EffectHelper.intensifyActivation(context.level(), caster.getX(), caster.getY(), caster.getZ());
+        return true;
+    }
+
+    @Override public int mobChargeTicks(float proficiency) { return MAX_TICKS; }
+
+    @Override public int mobCooldownTicks(float proficiency) { return getCooldownTicks(proficiency); }
+
+    /** The released buffs, shared by players and mob casters. */
+    private static void intensify(LivingEntity caster, float exp, int ticks) {
         int effectiveTicks = ElectromasterRules.bodyIntensifyEffectiveTicks(ticks);
 
         double probability = ElectromasterRules.bodyIntensifyProbability(effectiveTicks);
-        int buffTime = (int) ((1.0f + player.getRandom().nextFloat()) * effectiveTicks
+        int buffTime = (int) ((1.0f + caster.getRandom().nextFloat()) * effectiveTicks
                 * lerpf(1.5f, 2.5f, exp));
         int buffLevel = (int) Math.floor(probability);
 
@@ -129,12 +161,12 @@ public class BodyIntensifyEffect implements ChargingSkillEffect {
         double p = probability;
         int idx = 0;
         while (p > 0 && idx + 1 < BASE_EFFECTS.size()) {
-            if (player.getRandom().nextDouble() < p) {
+            if (caster.getRandom().nextDouble() < p) {
                 idx++;
                 MobEffectInstance template = BASE_EFFECTS.get(idx);
                 int level = Math.min(buffLevel, template.getAmplifier());
                 int duration = buffTime;
-                player.addEffect(new MobEffectInstance(
+                caster.addEffect(new MobEffectInstance(
                         template.getEffect(), duration, level,
                         template.isAmbient(), true, true
                 ));
@@ -144,15 +176,7 @@ public class BodyIntensifyEffect implements ChargingSkillEffect {
 
         // 饥饿 debuff（副作用）
         int hungerTime = (int) (1.25f * effectiveTicks);
-        player.addEffect(new MobEffectInstance(MobEffects.HUNGER, hungerTime, 2));
-
-        if (!data.isDevMode()) {
-            DynamicSkillRules.addExp(player,data, getId(), 0.01f);
-            // IntensifyContext queried ctx.getSkillExp after addSkillExp.
-            data.setCooldown(getId(), getCooldownTicks(data.getProficiency(getId())));
-        }
-        AcademySounds.playSound(player, AcademySounds.EM_INTENSIFY_ACTIVATE, 0.5f, 1.0f);
-        EffectHelper.intensifyActivation(player.serverLevel(), player.getX(), player.getY(), player.getZ());
+        caster.addEffect(new MobEffectInstance(MobEffects.HUNGER, hungerTime, 2));
     }
 
     @Override
