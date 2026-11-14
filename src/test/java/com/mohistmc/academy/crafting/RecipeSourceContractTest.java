@@ -19,7 +19,8 @@ class RecipeSourceContractTest {
         try (var files = Files.list(ROOT)) {
             json = files.filter(p -> p.toString().endsWith(".json")).toList();
         }
-        assertEquals(115, json.size(), "86 AcademyCraft recipes plus 29 clean-room ExtraAcC compatibility recipes are required");
+        assertEquals(117, json.size(), "86 AcademyCraft recipes, 29 clean-room ExtraAcC compatibility recipes and"
+                + " 2 Singularity Iteration recipes (si_rf_input, si_rf_output; loaded only with mio_icif) are required");
         long former = json.stream().filter(p -> read(p).contains("\"academy:metal_forming\"")).count();
         Pattern fusorType = Pattern.compile(
                 "\\\"type\\\"\\s*:\\s*\\\"academy:imag_fus(?:or|ing)\\\"");
