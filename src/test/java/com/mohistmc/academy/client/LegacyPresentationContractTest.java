@@ -104,7 +104,7 @@ class LegacyPresentationContractTest {
                 &&movement.contains("restore()"));
         assertTrue(presentation.contains("renderThunderClap")&&presentation.contains("textures/effects/ripple.png"));
         assertTrue(bolt.contains("for(int i=0;i<3;i++)")&&bolt.contains("fullArcEnd")
-                &&bolt.contains("e -> e != player && e.isAlive() && e.isPickable()"));
+                &&bolt.contains("e -> e != caster && e.isAlive() && e.isPickable()"));
     }
 
     @Test void bodyIntensifyUsesItsDescendingArcEntityInsteadOfGenericParticles() throws Exception {

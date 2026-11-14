@@ -3,6 +3,9 @@ package com.mohistmc.academy.skill.ability.electromaster;
 import com.mohistmc.academy.skill.ability.LoadedRaycast;
 import com.mohistmc.academy.config.DynamicSkillRules;
 
+import com.mohistmc.academy.api.mob.MobCastContext;
+import com.mohistmc.academy.api.mob.MobCastable;
+import com.mohistmc.academy.skill.AcademyDamageHelper;
 import com.mohistmc.academy.world.effect.EffectHelper;
 import com.mohistmc.academy.config.DynamicSkillRules;
 import com.mohistmc.academy.skill.PlayerAbilityData;
@@ -16,6 +19,8 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
@@ -24,7 +29,7 @@ import net.minecraft.world.phys.Vec3;
 import static com.mohistmc.academy.utils.MathUtils.lerpf;
 
 /** 雷击之枪 —— 对视线方向发射闪电，命中目标+AOE伤害 */
-public class ThunderBoltEffect implements SkillEffect {
+public class ThunderBoltEffect implements SkillEffect, MobCastable {
 
     private static final double RANGE = 20.0;
     private static final double AOE_RANGE = 8.0;
@@ -52,15 +57,35 @@ public class ThunderBoltEffect implements SkillEffect {
         float overload = lerpf(50, 27, proficiency);
         if (!DynamicSkillRules.tryPay(data,getId(),cp,overload)) return;
 
+        boolean effective = bolt(player, level, proficiency, player.getEyePosition(), player.getLookAngle());
+        DynamicSkillRules.addExp(player,data, getId(), effective ? 0.005f : 0.003f);
+    }
+
+    @Override
+    public boolean mobCast(MobCastContext context) {
+        bolt(context.caster(), context.level(), context.proficiency(), context.eye(), context.look());
+        return true;
+    }
+
+    @Override
+    public int mobCooldownTicks(float proficiency) {
+        return getCooldownTicks(proficiency);
+    }
+
+    /**
+     * The bolt after CP payment, shared by players and mob casters; returns whether anything was hit
+     * (the player path turns that into exp).  Mob casters never slow targets they may not hit.
+     */
+    private boolean bolt(LivingEntity caster, ServerLevel level, float proficiency, Vec3 eyePos, Vec3 lookVec) {
         float damage = lerpf(10, 25, proficiency);
         float aoeDamage = lerpf(6, 15, proficiency);
 
-        Vec3 eyePos = player.getEyePosition();
-        Vec3 lookVec = player.getLookAngle();
         Vec3 endPos = eyePos.add(lookVec.scale(RANGE));
 
-        EntityHitResult entityHit = rayTraceEntities(player, eyePos, endPos);
-        BlockHitResult blockHit = (BlockHitResult) LoadedRaycast.pick(player, RANGE);
+        EntityHitResult entityHit = rayTraceEntities(caster, eyePos, endPos);
+        // Same clip as LoadedRaycast.pick(player, RANGE), along the given aim.
+        BlockHitResult blockHit = LoadedRaycast.clip(level, new ClipContext(eyePos, endPos,
+                ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, caster));
 
         Vec3 impactPoint;
         final Entity targetEntity;
@@ -83,37 +108,38 @@ public class ThunderBoltEffect implements SkillEffect {
         }
 
         if (hitEntity && targetEntity != null && targetEntity.isAlive()) {
-            ElectromasterDamageHelper.attack(player,targetEntity,com.mohistmc.academy.skill.SkillDamageSource.attack(player),
+            ElectromasterDamageHelper.attack(caster,targetEntity,com.mohistmc.academy.skill.SkillDamageSource.attack(caster),
                     DynamicSkillRules.damage(getId(),damage));
 
-            if (proficiency > 0.2 && level.random.nextDouble() < 0.8 && targetEntity instanceof LivingEntity living) {
+            if (proficiency > 0.2 && level.random.nextDouble() < 0.8 && targetEntity instanceof LivingEntity living
+                    && affects(caster, living)) {
                 living.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 3));
             }
 
         }
 
-        List<Entity> aoes = level.getEntities(player,
+        List<Entity> aoes = level.getEntities(caster,
                 new AABB(impactPoint.x - AOE_RANGE, impactPoint.y - AOE_RANGE, impactPoint.z - AOE_RANGE,
                         impactPoint.x + AOE_RANGE, impactPoint.y + AOE_RANGE, impactPoint.z + AOE_RANGE),
-                e -> e instanceof LivingEntity && e.isAlive() && e != player
+                e -> e instanceof LivingEntity && e.isAlive() && e != caster
                         && (targetEntity == null || e != targetEntity)
                         && ElectromasterRules.thunderBoltAoeContains(
                                 e.getX()-impactPoint.x,e.getY()-impactPoint.y,e.getZ()-impactPoint.z));
 
         for (Entity e : aoes) {
-            ElectromasterDamageHelper.attack(player,e,com.mohistmc.academy.skill.SkillDamageSource.attack(player),
+            ElectromasterDamageHelper.attack(caster,e,com.mohistmc.academy.skill.SkillDamageSource.attack(caster),
                     DynamicSkillRules.damage(getId(),aoeDamage));
 
             // Preserve the actual 1.0.7 branch: it checked and slowed ad.target
             // inside the AOE loop, rather than applying the effect to e.
             if (proficiency > 0.2 && level.random.nextDouble() < 0.8
-                    && targetEntity instanceof LivingEntity primary) {
+                    && targetEntity instanceof LivingEntity primary && affects(caster, primary)) {
                 primary.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20, 3));
             }
         }
 
-        AcademySounds.playSound(level, player.getX(), player.getY(), player.getZ(),
-                AcademySounds.EM_ARC_STRONG, SoundSource.PLAYERS, 0.6f, 1.0f);
+        AcademySounds.playSound(level, caster.getX(), caster.getY(), caster.getZ(),
+                AcademySounds.EM_ARC_STRONG, caster instanceof Player ? SoundSource.PLAYERS : SoundSource.HOSTILE, 0.6f, 1.0f);
 
         // The official client spawned three overlapping strong main arcs.
         Vec3 fullArcEnd = eyePos.add(lookVec.scale(RANGE));
@@ -123,14 +149,18 @@ public class ThunderBoltEffect implements SkillEffect {
                     e.position().add(0,e.getEyeHeight(),0),15+level.random.nextInt(11));
         }
 
-        boolean effective = hitEntity || !aoes.isEmpty();
-        DynamicSkillRules.addExp(player,data, getId(), effective ? 0.005f : 0.003f);
+        return hitEntity || !aoes.isEmpty();
     }
 
-    private EntityHitResult rayTraceEntities(ServerPlayer player, Vec3 start, Vec3 end) {
+    /** Players keep the legacy unconditional slow; a mob only slows what it may damage. */
+    private static boolean affects(LivingEntity caster, Entity target) {
+        return caster instanceof Player || AcademyDamageHelper.allowsTarget(caster, target);
+    }
+
+    private EntityHitResult rayTraceEntities(LivingEntity caster, Vec3 start, Vec3 end) {
         AABB searchArea = new AABB(start,end).inflate(1.0);
-        List<Entity> entities = player.level().getEntities(player, searchArea,
-                e -> e != player && e.isAlive() && e.isPickable()
+        List<Entity> entities = caster.level().getEntities(caster, searchArea,
+                e -> e != caster && e.isAlive() && e.isPickable()
                         // Legacy Raytrace.traceLiving: only living entities are targets.
                         && e instanceof net.minecraft.world.entity.LivingEntity);
 

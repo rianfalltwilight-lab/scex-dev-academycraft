@@ -1,6 +1,8 @@
 package com.mohistmc.academy.skill.ability.aerohand;
 
 import com.mohistmc.academy.AcademyCraft;
+import com.mohistmc.academy.api.mob.MobCastContext;
+import com.mohistmc.academy.api.mob.MobCastable;
 import com.mohistmc.academy.config.DynamicSkillRules;
 import com.mohistmc.academy.skill.AcademyDamageHelper;
 import com.mohistmc.academy.skill.PlayerAbilityData;
@@ -21,6 +23,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
@@ -28,24 +31,35 @@ import static com.mohistmc.academy.utils.MathUtils.lerpf;
 
 /** Expanding six-to-nine-block air shell that damages, repels and clears projectiles. */
 @EventBusSubscriber(modid = AcademyCraft.MODID)
-public final class AirWallEffect implements DynamicOneShotSkillEffect {
+public final class AirWallEffect implements DynamicOneShotSkillEffect, MobCastable {
     private static final List<Ring> RINGS = new ArrayList<>();
 
     private static final class Ring {
         final ServerLevel level;
         final UUID owner;
+        /** Players resolve through the player list as before; mobs through their level. */
+        final boolean playerOwner;
         final Vec3 centre;
         final float proficiency;
         final float maximum;
         float radius;
         int age;
 
-        Ring(ServerPlayer player, float proficiency) {
-            level = player.serverLevel();
-            owner = player.getUUID();
-            centre = player.position();
+        Ring(ServerLevel level, LivingEntity caster, float proficiency) {
+            this.level = level;
+            owner = caster.getUUID();
+            playerOwner = caster instanceof ServerPlayer;
+            centre = caster.position();
             this.proficiency = proficiency;
             maximum = lerpf(6, 9, proficiency);
+        }
+
+        LivingEntity resolveOwner() {
+            if (playerOwner) {
+                ServerPlayer player = level.getServer().getPlayerList().getPlayer(owner);
+                return player == null || player.serverLevel() != level ? null : player;
+            }
+            return level.getEntity(owner) instanceof LivingEntity living ? living : null;
         }
     }
 
@@ -56,18 +70,37 @@ public final class AirWallEffect implements DynamicOneShotSkillEffect {
     @Override
     public void execute(ServerPlayer player, PlayerAbilityData data) {
         float p = data.getProficiency(getId());
-        RINGS.add(new Ring(player, p));
-        player.serverLevel().playSound(null, player.blockPosition(), SoundEvents.FIRECHARGE_USE,
-                SoundSource.PLAYERS, 1.0F, 0.5F);
+        start(player, player.serverLevel(), p);
         if (!data.isDevMode()) DynamicSkillRules.addExp(player, data, getId(), lerpf(0.02F, 0.01F, p));
+    }
+
+    /** Mob path: same ring around the caster, no payment or experience. */
+    @Override
+    public boolean mobCast(MobCastContext context) {
+        start(context.caster(), context.level(), context.proficiency());
+        return true;
+    }
+
+    @Override public int mobCooldownTicks(float p) { return getCooldownTicks(p); }
+
+    private static void start(LivingEntity caster, ServerLevel level, float p) {
+        RINGS.add(new Ring(level, caster, p));
+        level.playSound(null, caster.blockPosition(), SoundEvents.FIRECHARGE_USE,
+                caster.getSoundSource(), 1.0F, 0.5F);
+    }
+
+    /** Whether an air wall owned by this entity is still expanding (tests, addons). */
+    public static boolean hasActiveRing(UUID owner) {
+        for (Ring ring : RINGS) if (ring.owner.equals(owner)) return true;
+        return false;
     }
 
     @SubscribeEvent
     public static void tick(ServerTickEvent.Post event) {
         for (Ring ring : List.copyOf(RINGS)) {
             if (!RINGS.contains(ring)) continue;
-            ServerPlayer owner = ring.level.getServer().getPlayerList().getPlayer(ring.owner);
-            if (owner == null || owner.serverLevel() != ring.level || !owner.isAlive()) {
+            LivingEntity owner = ring.resolveOwner();
+            if (owner == null || !owner.isAlive()) {
                 RINGS.remove(ring);
                 continue;
             }
@@ -105,6 +138,14 @@ public final class AirWallEffect implements DynamicOneShotSkillEffect {
                 }
             }
         }
+    }
+
+    /** A non-player owner that dies, despawns or unloads takes its rings with it at once. */
+    @SubscribeEvent
+    public static void ownerLeft(EntityLeaveLevelEvent event) {
+        if (RINGS.isEmpty() || event.getLevel().isClientSide() || event.getEntity() instanceof ServerPlayer) return;
+        UUID left = event.getEntity().getUUID();
+        RINGS.removeIf(ring -> !ring.playerOwner && ring.owner.equals(left));
     }
 
     @SubscribeEvent public static void stopped(ServerStoppedEvent event) { RINGS.clear(); }
