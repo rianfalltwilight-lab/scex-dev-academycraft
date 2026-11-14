@@ -112,5 +112,5 @@ public final class PsychoSlamEffect implements DynamicOneShotSkillEffect {
     }
 
     @SubscribeEvent public static void stopped(ServerStoppedEvent event) { ACTIVE.clear(); }
-    @Override public int getCooldownTicks(float p) { return Math.round(200 - 100 * Math.clamp(p, 0, 1)); }
+    @Override public int getCooldownTicks(float p) { return (int) (200 - 100 * Math.clamp(p, 0, 1)); }
 }

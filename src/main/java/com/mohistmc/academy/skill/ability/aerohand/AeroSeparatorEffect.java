@@ -91,5 +91,5 @@ public final class AeroSeparatorEffect implements DynamicOneShotSkillEffect {
     @net.neoforged.bus.api.SubscribeEvent
     public static void stopped(net.neoforged.neoforge.event.server.ServerStoppedEvent event) { PULSES.clear(); }
 
-    @Override public int getCooldownTicks(float p) { return Math.round(lerpf(200, 120, Math.clamp(p, 0, 1))); }
+    @Override public int getCooldownTicks(float p) { return (int) lerpf(200, 120, Math.clamp(p, 0, 1)); }
 }

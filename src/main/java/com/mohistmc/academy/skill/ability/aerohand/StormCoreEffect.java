@@ -102,5 +102,5 @@ public final class StormCoreEffect implements DynamicOneShotSkillEffect {
     }
 
     @SubscribeEvent public static void stopped(ServerStoppedEvent event) { CORES.clear(); }
-    @Override public int getCooldownTicks(float p) { return Math.round(lerpf(450, 300, Math.clamp(p, 0, 1))); }
+    @Override public int getCooldownTicks(float p) { return (int) lerpf(450, 300, Math.clamp(p, 0, 1)); }
 }

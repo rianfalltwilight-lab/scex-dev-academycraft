@@ -10,5 +10,5 @@ public final class AirBladeEffect extends AeroProjectileEffect {
     @Override public float rawCp(float p) { return lerpf(100, 150, p); }
     @Override public float rawOverload(float p) { return lerpf(60, 40, p); }
     @Override protected float activationExp(float p) { return lerpf(0.002F, 0.004F, p); }
-    @Override public int getCooldownTicks(float p) { return Math.round(lerpf(40, 30, Math.clamp(p, 0, 1))); }
+    @Override public int getCooldownTicks(float p) { return (int) lerpf(40, 30, Math.clamp(p, 0, 1)); }
 }

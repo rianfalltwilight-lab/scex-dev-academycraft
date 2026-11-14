@@ -121,7 +121,7 @@ public final class TelekinesisPassiveHandler {
         }
         if (!HARDENED.containsKey(player.getUUID())) return;
         if (!passive(player, data, "psycho_harden")) {
-            stopHarden(player, data, false);
+            stopHarden(player, data, true); // ExtraAcC s_terminate always set 160
             return;
         }
         float blocked = event.getAmount();
@@ -234,7 +234,7 @@ public final class TelekinesisPassiveHandler {
             return;
         }
         if (!passive(player, data, "liquid_shadow")) {
-            stopShadow(player, data, false);
+            stopShadow(player, data, true); // ExtraAcC s_terminate always set 100
             return;
         }
         if (!DynamicSkillRules.tryPay(data, "liquid_shadow", 1F, 0)) {

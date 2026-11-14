@@ -472,8 +472,9 @@ public class KeyInputHandler {
     }
 
     private static boolean isToggleContextSkill(String skillId) {
+        // ExtraAcC Paper Drill used KeyDelegates.contextActivate: press to start, press again to stop.
         return "storm_wing".equals(skillId) || "vec_deviation".equals(skillId)
-                || "vec_reflection".equals(skillId);
+                || "vec_reflection".equals(skillId) || "paper_drill".equals(skillId);
     }
 
     private static int chargingSlot(String skillId) {

@@ -55,7 +55,7 @@ public class AirJetEffect implements com.mohistmc.academy.skill.ability.DynamicO
 
     @Override
     public int getCooldownTicks(float proficiency) {
-        return Math.round(40 - 30 * Math.clamp(proficiency, 0.0f, 1.0f));
+        return (int) (40 - 30 * Math.clamp(proficiency, 0.0f, 1.0f));
     }
 }
 

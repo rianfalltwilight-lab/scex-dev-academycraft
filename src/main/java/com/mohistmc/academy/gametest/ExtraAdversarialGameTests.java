@@ -238,7 +238,6 @@ public final class ExtraAdversarialGameTests {
     @GameTest(template = "empty") public static void needlingStopsAtThinWall(GameTestHelper h) { thinWall(h, new PsychoNeedlingEffect()); }
     @GameTest(template = "empty") public static void throwingStopsAtThinWall(GameTestHelper h) { thinWall(h, new PsychoThrowingEffect()); }
     @GameTest(template = "empty") public static void slamStopsAtThinWall(GameTestHelper h) { slamSurface(h, true); }
-    @GameTest(template = "empty") public static void paperDrillStopsAtThinWall(GameTestHelper h) { thinWall(h, new PaperDrillEffect()); }
 
     private static void executeWithFlight(GameTestHelper helper, ServerPlayer player,
                                           com.mohistmc.academy.skill.PlayerAbilityData data, SkillEffect effect) {

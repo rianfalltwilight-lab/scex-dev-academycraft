@@ -108,5 +108,5 @@ public final class AirWallEffect implements DynamicOneShotSkillEffect {
     }
 
     @SubscribeEvent public static void stopped(ServerStoppedEvent event) { RINGS.clear(); }
-    @Override public int getCooldownTicks(float p) { return Math.round(lerpf(60, 40, Math.clamp(p, 0, 1))); }
+    @Override public int getCooldownTicks(float p) { return (int) lerpf(60, 40, Math.clamp(p, 0, 1)); }
 }

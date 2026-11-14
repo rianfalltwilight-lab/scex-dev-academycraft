@@ -69,5 +69,5 @@ public final class PsychoThrowingEffect implements DynamicOneShotSkillEffect {
         return true;
     }
 
-    @Override public int getCooldownTicks(float p) { return Math.round(40 - 20 * Math.clamp(p, 0, 1)); }
+    @Override public int getCooldownTicks(float p) { return (int) (40 - 20 * Math.clamp(p, 0, 1)); }
 }

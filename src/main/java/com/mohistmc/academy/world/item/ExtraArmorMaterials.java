@@ -10,9 +10,14 @@ import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ArmorMaterial;
 import net.minecraft.world.item.crafting.Ingredient;
 
-/** Clean-room 1.21 armor attributes matching the add-on's three special materials. */
+/**
+ * Clean-room 1.21 armor attributes matching the add-on's three special materials.
+ * Resonance keeps the legacy {2, 5, 6, 2} array: ItemResoArmor's getArmorDisplay() of 0
+ * only hid it from the HUD, while Forge 1.12 ISpecialArmor.applyArmor still counted the
+ * attribute armour and toughness against ordinary damage.
+ */
 final class ExtraArmorMaterials {
-    static final Holder<ArmorMaterial> RESONANCE = material("extraacc/reso", defenses(0, 0, 0, 0), 25, 1.0F);
+    static final Holder<ArmorMaterial> RESONANCE = material("extraacc/reso", defenses(2, 5, 6, 2), 25, 1.0F);
     static final Holder<ArmorMaterial> IMAGINARY = material("extraacc/noenergy", defenses(0, 0, 0, 0), 0, 0.0F);
     static final Holder<ArmorMaterial> PAPER = material("extraacc/paper", defenses(2, 5, 6, 2), 0, 4.0F);
 

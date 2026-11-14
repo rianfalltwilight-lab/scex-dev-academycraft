@@ -56,5 +56,5 @@ public final class PsychoNeedlingEffect implements DynamicOneShotSkillEffect {
         return true;
     }
 
-    @Override public int getCooldownTicks(float p) { return Math.round(20 - 10 * Math.clamp(p, 0, 1)); }
+    @Override public int getCooldownTicks(float p) { return (int) (20 - 10 * Math.clamp(p, 0, 1)); }
 }
