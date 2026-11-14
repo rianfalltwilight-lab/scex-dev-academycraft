@@ -14,6 +14,9 @@ public final class AbilityMutationService {
      */
     public static boolean addSkillExp(ServerPlayer player, PlayerAbilityData data, String skillId, float amount) {
         if (player == null || data == null || !Float.isFinite(amount) || amount <= 0 || data.isDevMode()) return false;
+        // academy:proficiency_gain attribute.
+        amount *= data.getProficiencyGainScale();
+        if (!Float.isFinite(amount) || amount <= 0) return false;
         if (player.getData(AcademyAttachments.PLAYER_ABILITY) != data) return false;
         Skill skill = SkillRegistry.getSkill(data.getCurrentAbility(), skillId);
         if (skill == null || !data.hasLearnedSkill(skillId)) return false;

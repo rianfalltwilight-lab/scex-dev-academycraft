@@ -1004,5 +1004,12 @@
   "commands.academy.academy.info.profile": "Balance profile: %s",
   "ac.settings.key.rebind": "Change key bindings",
   "ac.settings.key.conflict": "%s (conflict)",
-  "ac.settings.prop.allSettings": "All settings"
+  "ac.settings.prop.allSettings": "All settings",
+  "attribute.name.academy.max_cp": "Max CP",
+  "attribute.name.academy.cp_regen": "CP Recovery",
+  "attribute.name.academy.max_overload": "Max Overload",
+  "attribute.name.academy.overload_recovery": "Overload Recovery",
+  "attribute.name.academy.cp_cost": "Skill CP Cost",
+  "attribute.name.academy.cooldown": "Skill Cooldown",
+  "attribute.name.academy.proficiency_gain": "Proficiency Gain"
 }

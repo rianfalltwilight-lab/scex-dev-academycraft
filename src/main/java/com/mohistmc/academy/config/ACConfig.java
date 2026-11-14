@@ -142,13 +142,20 @@ public final class ACConfig {
             try { return PVP_ENABLED.get(); }
             catch (IllegalStateException unloaded) { return true; }
         }
+        /** The config rates times the balance profile's {@code rules} multipliers (all 1 in LEGACY). */
         public static LegacyAbilityRules.Snapshot legacyRules() {
+            LegacyAbilityRules.Snapshot config;
             try {
-                return new LegacyAbilityRules.Snapshot(CP_RECOVER_COOLDOWN.get(), CP_RECOVER_SPEED.get().floatValue(),
+                config = new LegacyAbilityRules.Snapshot(CP_RECOVER_COOLDOWN.get(), CP_RECOVER_SPEED.get().floatValue(),
                         OVERLOAD_RECOVER_COOLDOWN.get(), OVERLOAD_RECOVER_SPEED.get().floatValue(),
                         MAX_CP_INCREASE_RATE.get().floatValue(), MAX_OVERLOAD_INCREASE_RATE.get().floatValue(),
                         PROFICIENCY_INCREASE_RATE.get().floatValue());
-            } catch (IllegalStateException unloaded) { return LegacyAbilityRules.DEFAULTS; }
+            } catch (IllegalStateException unloaded) { config = LegacyAbilityRules.DEFAULTS; }
+            return LegacyAbilityRules.withProfile(config,
+                    com.mohistmc.academy.data.ProgressionData.cpRecoveryMultiplier(),
+                    com.mohistmc.academy.data.ProgressionData.overloadRecoveryMultiplier(),
+                    com.mohistmc.academy.data.ProgressionData.usageGrowthMultiplier(),
+                    com.mohistmc.academy.data.ProgressionData.proficiencyGainMultiplier());
         }
         public static LegacyAbilityRules.SkillTuning skill(String id) {
             try {

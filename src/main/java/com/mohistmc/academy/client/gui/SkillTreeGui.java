@@ -479,7 +479,7 @@ public class SkillTreeGui extends AcademyScreen {
                 Skill dependency = SkillRegistry.getSkill(skill.getCategory(), prerequisite.skillId());
                 if (dependency != null) {
                     boolean accepted = data.hasLearnedSkill(dependency.getId())
-                            && data.getProficiency(dependency.getId()) >= prerequisite.proficiencyRequired();
+                            && data.getProficiency(dependency.getId()) >= prerequisite.effectiveProficiency();
                     requirements.add(new RequirementIcon(dependency.getIconLocation(), accepted));
                 }
             }
@@ -903,10 +903,10 @@ public class SkillTreeGui extends AcademyScreen {
                             .withStyle(ChatFormatting.GRAY));
                 } else {
                     String prereqName = Component.translatable("item.academy.factor_" + skill.getCategory().id() + "." + prereqId).getString();
-                    boolean met = data.hasLearnedSkill(prereqId) && data.getProficiency(prereqId) >= prereq.proficiencyRequired();
+                    boolean met = data.hasLearnedSkill(prereqId) && data.getProficiency(prereqId) >= prereq.effectiveProficiency();
                     String status = met ? "§a✓" : "§c✗";
-                    String reqText = prereq.proficiencyRequired() > 0
-                            ? String.format(" %.0f%%", prereq.proficiencyRequired() * 100)
+                    String reqText = prereq.effectiveProficiency() > 0
+                            ? String.format(" %.0f%%", prereq.effectiveProficiency() * 100)
                             : "";
                     tooltip.add(Component.literal(status + " §7" + prereqName + reqText));
                 }

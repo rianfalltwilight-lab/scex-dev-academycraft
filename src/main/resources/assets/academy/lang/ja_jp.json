@@ -1004,5 +1004,12 @@
   "commands.academy.academy.info.profile": "バランスプロファイル：%s",
   "ac.settings.key.rebind": "キー割り当てを変更",
   "ac.settings.key.conflict": "%s（競合）",
-  "ac.settings.prop.allSettings": "すべての設定"
+  "ac.settings.prop.allSettings": "すべての設定",
+  "attribute.name.academy.max_cp": "最大 CP",
+  "attribute.name.academy.cp_regen": "CP 回復",
+  "attribute.name.academy.max_overload": "最大過負荷",
+  "attribute.name.academy.overload_recovery": "過負荷回復",
+  "attribute.name.academy.cp_cost": "スキル CP 消費",
+  "attribute.name.academy.cooldown": "スキルのクールダウン",
+  "attribute.name.academy.proficiency_gain": "熟練度の獲得"
 }

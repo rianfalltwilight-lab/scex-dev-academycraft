@@ -1,0 +1,26 @@
+{
+  "cp": {
+    "initial": [2000, 2000, 3500, 6000, 10000, 16000],
+    "max_added": [0, 1000, 1750, 3000, 5000, 8000]
+  },
+  "overload": {
+    "initial": [150, 150, 240, 380, 560, 800],
+    "max_added": [0, 60, 105, 120, 150, 750]
+  },
+  "level_up": {
+    "threshold_per_skill": [0.4, 0.4, 0.4, 0.4, 0.8, 0.4]
+  },
+  "rules": {
+    "cp_recovery_multiplier": 2.25,
+    "usage_growth_multiplier": 8,
+    "proficiency_gain_multiplier": 2,
+    "keep_usage_growth_on_level_up": true,
+    "overload_unlock_fraction": 0.5,
+    "proficiency_cp_discount": 0.5,
+    "prerequisite_proficiency_cap": 0.75
+  },
+  "cp_potion": {
+    "restore_fraction": 0.5,
+    "max_restore": 1000000000
+  }
+}

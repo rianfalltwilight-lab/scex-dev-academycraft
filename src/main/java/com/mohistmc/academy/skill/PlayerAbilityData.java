@@ -43,6 +43,12 @@ public class PlayerAbilityData {
     private float usageMaxCp = 0;
     private float usageMaxOverload = 0;
     private float cpRegenRate = BASE_CP_REGEN;
+    /** CPData raw maxima: level base + course bonuses (scaled by the max attributes), without usage growth. */
+    private float rawMaxCp = BASE_MAX_CP;
+    private float rawMaxOverload = BASE_MAX_OVERLOAD;
+    /** The owner's academy resource attributes, copied every tick (transient; 1 = no change). */
+    private transient float maxCpScale = 1, maxOverloadScale = 1, cpRegenScale = 1, overloadRecoveryScale = 1,
+            cpCostScale = 1, cooldownScale = 1, proficiencyGainScale = 1;
     private int cpRecoveryDelay;
     private int overloadRecoveryDelay;
     /**
@@ -145,9 +151,12 @@ public class PlayerAbilityData {
         if (this.playerLevel != bounded) {
             this.playerLevel = bounded;
             this.levelProgressExp = 0;
-            // 1.0.7 CPData.Events.changedLevel explicitly cleared both usage-growth fields.
-            this.usageMaxCp = 0;
-            this.usageMaxOverload = 0;
+            // 1.0.7 CPData.Events.changedLevel explicitly cleared both usage-growth fields;
+            // the modern profile keeps them (recalculateMaxResources caps them at the new level).
+            if (!com.mohistmc.academy.data.ProgressionData.keepUsageGrowthOnLevelUp()) {
+                this.usageMaxCp = 0;
+                this.usageMaxOverload = 0;
+            }
             recalculateMaxResources(true);
         }
     }
@@ -211,9 +220,44 @@ public class PlayerAbilityData {
 
     public float getUsageMaxCp() { return usageMaxCp; }
     /** CPData.getRawMaxCP: level base + course bonuses, without usage growth (drives recovery speed). */
-    public float getRawMaxCp() { return maxCp - usageMaxCp; }
+    public float getRawMaxCp() { return rawMaxCp; }
     /** CPData.getRawMaxOverload: level base + course bonuses, without usage growth. */
-    public float getRawMaxOverload() { return maxOverload - usageMaxOverload; }
+    public float getRawMaxOverload() { return rawMaxOverload; }
+
+    /**
+     * Copies the owner's {@code academy:max_cp}, {@code cp_regen}, {@code max_overload},
+     * {@code overload_recovery}, {@code cp_cost}, {@code cooldown} and {@code proficiency_gain} attributes.
+     * Called every player tick, before {@link #tick()}.
+     */
+    public void applyAttributes(net.minecraft.world.entity.LivingEntity owner) {
+        maxCpScale = attribute(owner, com.mohistmc.academy.world.AcademyAttributes.MAX_CP);
+        maxOverloadScale = attribute(owner, com.mohistmc.academy.world.AcademyAttributes.MAX_OVERLOAD);
+        cpRegenScale = attribute(owner, com.mohistmc.academy.world.AcademyAttributes.CP_REGEN);
+        overloadRecoveryScale = attribute(owner, com.mohistmc.academy.world.AcademyAttributes.OVERLOAD_RECOVERY);
+        cpCostScale = attribute(owner, com.mohistmc.academy.world.AcademyAttributes.CP_COST);
+        cooldownScale = attribute(owner, com.mohistmc.academy.world.AcademyAttributes.COOLDOWN);
+        proficiencyGainScale = attribute(owner, com.mohistmc.academy.world.AcademyAttributes.PROFICIENCY_GAIN);
+    }
+
+    private static float attribute(net.minecraft.world.entity.LivingEntity owner,
+                                   net.minecraft.core.Holder<net.minecraft.world.entity.ai.attributes.Attribute> holder) {
+        var instance = owner.getAttribute(holder);
+        if (instance == null) return 1;
+        double value = instance.getValue();
+        return Double.isFinite(value) ? (float) Math.max(0, value) : 1;
+    }
+
+    public float getProficiencyGainScale() { return proficiencyGainScale; }
+
+    /**
+     * The owner's CP cost factor for {@code skillId}: the {@code academy:cp_cost} attribute times the
+     * profile's proficiency discount ({@code 1 - discount x proficiency}; 1.0.7: no discount).
+     */
+    public float cpCostFactor(String skillId) {
+        float discount = com.mohistmc.academy.data.ProgressionData.proficiencyCpDiscount();
+        float factor = cpCostScale * (1 - discount * Math.clamp(getProficiency(skillId), 0, 1));
+        return finite(factor) ? Math.max(0, factor) : 1;
+    }
     public float getUsageMaxOverload() { return usageMaxOverload; }
 
     public void setUsageResourceGrowth(float cp, float overload) {
@@ -230,12 +274,14 @@ public class PlayerAbilityData {
                 0, LegacyResourceProgression.maxAddedCp(level));
         usageMaxOverload = Math.clamp(Float.isFinite(usageMaxOverload) ? usageMaxOverload : 0,
                 0, LegacyResourceProgression.maxAddedOverload(level));
-        maxCp = LegacyResourceProgression.initialCp(level) + usageMaxCp
+        rawMaxCp = maxCpScale * (LegacyResourceProgression.initialCp(level)
                 + LegacyResourceProgression.courseCpBonus(learnedSkills.contains("brain_course"),
-                learnedSkills.contains("brain_course_advanced"));
-        maxOverload = LegacyResourceProgression.initialOverload(level) + usageMaxOverload
-                + LegacyResourceProgression.courseOverloadBonus(learnedSkills.contains("brain_course_advanced"));
-        cpRegenRate = BASE_CP_REGEN
+                learnedSkills.contains("brain_course_advanced")));
+        maxCp = rawMaxCp + maxCpScale * usageMaxCp;
+        rawMaxOverload = maxOverloadScale * (LegacyResourceProgression.initialOverload(level)
+                + LegacyResourceProgression.courseOverloadBonus(learnedSkills.contains("brain_course_advanced")));
+        maxOverload = rawMaxOverload + maxOverloadScale * usageMaxOverload;
+        cpRegenRate = BASE_CP_REGEN * cpRegenScale
                 * LegacyResourceProgression.recoveryMultiplier(learnedSkills.contains("mind_course"));
         if (refill) {
             currentCp = maxCp;
@@ -339,11 +385,6 @@ public class PlayerAbilityData {
         overloadRecoveryDelay = Math.clamp(overload, 0, 1200);
     }
 
-    public void addCpRegenRate(float multiplier) {
-        float candidate = this.cpRegenRate * (1.0f + multiplier);
-        this.cpRegenRate = finite(candidate) ? Math.clamp(candidate, 0, MAX_REGEN_RATE) : BASE_CP_REGEN;
-    }
-
     public boolean hasLearnedSkill(String skillId) {
         if (devMode) return true;
         return learnedSkills.contains(skillId);
@@ -433,7 +474,7 @@ public class PlayerAbilityData {
             } else {
                 if (!enabled.test(prereqId)) continue;
                 if (!learnedSkills.contains(prereqId)) return false;
-                if (getProficiency(prereqId) < prereq.proficiencyRequired()) return false;
+                if (getProficiency(prereqId) < prereq.effectiveProficiency()) return false;
             }
         }
         return true;
@@ -448,7 +489,11 @@ public class PlayerAbilityData {
      * restoring stored/synced remaining ticks must use {@link #setCooldownRaw}.
      */
     public void setCooldown(String skillId, int ticks) {
-        setCooldownRaw(skillId, ticks > 0 ? com.mohistmc.academy.config.DynamicSkillRules.cooldown(skillId, ticks) : ticks);
+        if (ticks <= 0) { setCooldownRaw(skillId, ticks); return; }
+        int tuned = com.mohistmc.academy.config.DynamicSkillRules.cooldown(skillId, ticks);
+        // academy:cooldown attribute; a cooldown never drops below one tick from it.
+        setCooldownRaw(skillId, cooldownScale == 1 ? tuned
+                : (int) Math.clamp(Math.round((double) tuned * cooldownScale), 1, Integer.MAX_VALUE));
     }
 
     /** As {@link #setCooldown} but without the tuning multiplier (persistence, sync, commands). */
@@ -515,7 +560,7 @@ public class PlayerAbilityData {
         // the real proficiency- and context-dependent CP/overload values.
         if (effect != null && !effect.appliesBaseResourceCost()) return true;
         // CPData.perform checks only CP; overload clamps at its cap and then locks.
-        return canAffordCp(skill.getBaseCpCost() * tuning.cp());
+        return canAffordCp(skill.getBaseCpCost() * tuning.cp() * cpCostFactor(skill.getId()));
     }
 
     public void useSkill(Skill skill) {
@@ -523,7 +568,7 @@ public class PlayerAbilityData {
         SkillEffect effect = skill.getEffect();
         if (!isDevMode() && (effect == null || effect.appliesBaseResourceCost())) {
             var tuning = ACConfig.Server.skill(skill.getId());
-            float cpCost = skill.getBaseCpCost() * tuning.cp();
+            float cpCost = skill.getBaseCpCost() * tuning.cp() * cpCostFactor(skill.getId());
             float overloadCost = skill.getBaseOverload() * tuning.overload();
             var rules = ACConfig.Server.legacyRules();
             if (!creativeExempt) {
@@ -769,9 +814,12 @@ public class PlayerAbilityData {
         if (cpRecoveryDelay > 0) cpRecoveryDelay--; else
             currentCp = Math.min(currentCp + LegacyAbilityRules.cpRecovery(currentCp,getRawMaxCp(),cpRegenRate,rules), maxCp);
         if (overloadRecoveryDelay > 0) overloadRecoveryDelay--; else
-            currentOverload = Math.max(currentOverload - LegacyAbilityRules.overloadRecovery(currentOverload,getRawMaxOverload(),rules), 0);
-        // CPData.tick sets overloadFine again only once overload is fully drained.
-        if (currentOverload <= 0) overloadLocked = false;
+            currentOverload = Math.max(currentOverload - overloadRecoveryScale
+                    * LegacyAbilityRules.overloadRecovery(currentOverload,getRawMaxOverload(),rules), 0);
+        // CPData.tick sets overloadFine again only once overload is fully drained; the modern
+        // profile lifts the lock at overload_unlock_fraction of the maximum.
+        float unlockAt = com.mohistmc.academy.data.ProgressionData.overloadUnlockFraction() * maxOverload;
+        if (currentOverload <= 0 || (unlockAt > 0 && currentOverload <= unlockAt)) overloadLocked = false;
 
         cooldowns.entrySet().removeIf(entry -> {
             int remaining = entry.getValue() - 1;

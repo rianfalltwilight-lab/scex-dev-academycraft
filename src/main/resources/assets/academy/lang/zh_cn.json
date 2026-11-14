@@ -1004,5 +1004,12 @@
   "commands.academy.academy.info.profile": "平衡档位：%s",
   "ac.settings.key.rebind": "修改键位",
   "ac.settings.key.conflict": "%s（冲突）",
-  "ac.settings.prop.allSettings": "全部设置"
+  "ac.settings.prop.allSettings": "全部设置",
+  "attribute.name.academy.max_cp": "CP 上限",
+  "attribute.name.academy.cp_regen": "CP 回复",
+  "attribute.name.academy.max_overload": "过载上限",
+  "attribute.name.academy.overload_recovery": "过载恢复",
+  "attribute.name.academy.cp_cost": "技能 CP 消耗",
+  "attribute.name.academy.cooldown": "技能冷却",
+  "attribute.name.academy.proficiency_gain": "熟练度获取"
 }

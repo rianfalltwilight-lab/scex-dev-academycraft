@@ -1004,5 +1004,12 @@
     "commands.academy.academy.info.profile": "Профиль баланса: %s",
     "ac.settings.key.rebind": "Изменить клавиши",
     "ac.settings.key.conflict": "%s (конфликт)",
-    "ac.settings.prop.allSettings": "Все настройки"
+    "ac.settings.prop.allSettings": "Все настройки",
+    "attribute.name.academy.max_cp": "Макс. CP",
+    "attribute.name.academy.cp_regen": "Восстановление CP",
+    "attribute.name.academy.max_overload": "Макс. перегрузка",
+    "attribute.name.academy.overload_recovery": "Снятие перегрузки",
+    "attribute.name.academy.cp_cost": "Расход CP навыков",
+    "attribute.name.academy.cooldown": "Перезарядка навыков",
+    "attribute.name.academy.proficiency_gain": "Получение мастерства"
 }

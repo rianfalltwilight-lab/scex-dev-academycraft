@@ -10,9 +10,10 @@ import java.util.function.Predicate;
 import net.minecraft.resources.ResourceLocation;
 
 /**
- * {@code data/<namespace>/academy_balance/<profile>/skills/<skill>.json}: the balance profile layer.
+ * {@code data/<namespace>/academy_balance/<profile>/skills/<skill>.json} and
+ * {@code .../<profile>/progression/<name>.json}: the balance profile layer.
  *
- * <p>Files use the {@code academy_skills} format.  The layer for the configured {@link BalanceProfile}
+ * <p>Files use the {@code academy_skills} and {@code academy_progression} formats.  The layer for the configured {@link BalanceProfile}
  * sits between the built-in 1.0.7 numbers and the {@code academy_skills/} overrides, so switching
  * {@code balance.profile} takes effect at once, without {@code /reload}.  AcademyCraft ships the
  * {@code modern} files; packs may add to or replace them like any datapack file.
@@ -31,7 +32,20 @@ public final class BalanceProfileData extends SyncedJsonData {
 
     @Override
     protected void accept(Map<ResourceLocation, JsonElement> files) {
-        skills = parse(files, id -> SkillRegistry.getSkill(id) != null);
+        Map<BalanceProfile, Map<ResourceLocation, JsonElement>> progression = new EnumMap<>(BalanceProfile.class);
+        Map<ResourceLocation, JsonElement> skillFiles = new HashMap<>();
+        files.forEach((file, json) -> {
+            String[] parts = file.getPath().split("/", 3);
+            BalanceProfile profile = parts.length == 3 ? BalanceProfile.byId(parts[0]) : null;
+            if (profile != null && "progression".equals(parts[1])) {
+                progression.computeIfAbsent(profile, p -> new HashMap<>())
+                        .put(ResourceLocation.fromNamespaceAndPath(file.getNamespace(), parts[2]), json);
+            } else {
+                skillFiles.put(file, json);
+            }
+        });
+        skills = parse(skillFiles, id -> SkillRegistry.getSkill(id) != null);
+        ProgressionData.acceptProfileFiles(progression);
     }
 
     /** Installs {@code files} as a datapack reload would; an empty map restores the built-in defaults. */
@@ -52,7 +66,7 @@ public final class BalanceProfileData extends SyncedJsonData {
             String[] parts = file.getPath().split("/", 3);
             BalanceProfile profile = parts.length == 3 ? BalanceProfile.byId(parts[0]) : null;
             if (profile == null || !"skills".equals(parts[1])) {
-                LOGGER.warn("Ignoring balance file {}: expected <profile>/skills/<skill> with profile one of modern, legacy",
+                LOGGER.warn("Ignoring balance file {}: expected <profile>/skills/<skill> or <profile>/progression/<name>, profile modern or legacy",
                         file);
                 return;
             }

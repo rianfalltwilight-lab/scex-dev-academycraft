@@ -130,7 +130,7 @@ public record LocationTeleportActionPacket(int action, int index, String name) i
                     MAX_DESTINATION_CHUNKS))return false;
         }
         float distance=(float)Math.min(800,Math.sqrt(p.distanceToSqr(dest)));
-        float cp=com.mohistmc.academy.config.DynamicSkillRules.cp(skill.getId(),(200-50*exp)*(cross?2:1)*Math.max(8,(float)Math.sqrt(distance)));
+        float cp=com.mohistmc.academy.config.DynamicSkillRules.playerCp(d,skill.getId(),(200-50*exp)*(cross?2:1)*Math.max(8,(float)Math.sqrt(distance)));
         float overload=com.mohistmc.academy.config.DynamicSkillRules.overload(skill.getId(),240);
         if(!com.mohistmc.academy.config.DynamicSkillRules.enabled(skill.getId()))return false;
         // 1.0.7's UI preflight checked CP only; performWithForce then clamped

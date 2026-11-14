@@ -1,5 +1,7 @@
 package com.mohistmc.academy.world;
 
+import java.util.List;
+
 import com.mohistmc.academy.AcademyCraft;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
@@ -31,6 +33,31 @@ public final class AcademyAttributes {
             () -> new PercentageAttribute("attribute.name.academy.skill_resistance", 0.0, -1.0, 1.0)
                     .setSyncable(true));
 
+    /** Multiplier on max CP (level base, usage growth and courses). Base 1.0. */
+    public static final DeferredHolder<Attribute, Attribute> MAX_CP = percent("max_cp", 1, 0, 1024);
+    /** Multiplier on CP recovery. Base 1.0. */
+    public static final DeferredHolder<Attribute, Attribute> CP_REGEN = percent("cp_regen", 1, 0, 1024);
+    /** Multiplier on max overload. Base 1.0. */
+    public static final DeferredHolder<Attribute, Attribute> MAX_OVERLOAD = percent("max_overload", 1, 0, 1024);
+    /** Multiplier on overload recovery. Base 1.0. */
+    public static final DeferredHolder<Attribute, Attribute> OVERLOAD_RECOVERY =
+            percent("overload_recovery", 1, 0, 1024);
+    /** Multiplier on every skill's CP cost; below 1 is cheaper. Base 1.0. */
+    public static final DeferredHolder<Attribute, Attribute> CP_COST = percent("cp_cost", 1, 0, 1024);
+    /** Multiplier on every skill cooldown; below 1 is shorter. Base 1.0. */
+    public static final DeferredHolder<Attribute, Attribute> COOLDOWN = percent("cooldown", 1, 0, 1024);
+    /** Multiplier on proficiency gained. Base 1.0. */
+    public static final DeferredHolder<Attribute, Attribute> PROFICIENCY_GAIN = percent("proficiency_gain", 1, 0, 1024);
+
+    /** The resource attributes, which only players have. */
+    public static final List<DeferredHolder<Attribute, Attribute>> PLAYER_RESOURCES =
+            List.of(MAX_CP, CP_REGEN, MAX_OVERLOAD, OVERLOAD_RECOVERY, CP_COST, COOLDOWN, PROFICIENCY_GAIN);
+
+    private static DeferredHolder<Attribute, Attribute> percent(String id, double base, double min, double max) {
+        return ATTRIBUTES.register(id, () -> new PercentageAttribute("attribute.name.academy." + id, base, min, max)
+                .setSyncable(true));
+    }
+
     private AcademyAttributes() {}
 
     public static Holder<Attribute> skillDamage() { return SKILL_DAMAGE; }
@@ -42,5 +69,7 @@ public final class AcademyAttributes {
             if (!event.has(type, SKILL_DAMAGE)) event.add(type, SKILL_DAMAGE);
             if (!event.has(type, SKILL_RESISTANCE)) event.add(type, SKILL_RESISTANCE);
         }
+        for (DeferredHolder<Attribute, Attribute> resource : PLAYER_RESOURCES)
+            if (!event.has(EntityType.PLAYER, resource)) event.add(EntityType.PLAYER, resource);
     }
 }
