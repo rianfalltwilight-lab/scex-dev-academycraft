@@ -35,6 +35,7 @@ Ores in `c:ores` are visible to other mods' ore processing and to Mine Detect. M
 | `academy:metal/weak` | block | 追加到配置 `ability.weakMetalBlocks` / added to config `weakMetalBlocks` | 空 / empty |
 | `academy:is_ability` | damage_type | 本模组定义的全部伤害类型，供其他模组做“能力伤害”抗性 / every damage type the mod defines, for "ability damage" resistance | 全部 7 种 / all 7 |
 | `academy:mag_manip_immovable` | block | 电磁操控不可搬运（已有）/ Mag Manip cannot pick up (existing) | 开发机、矩阵 / developers, matrix |
+| `academy:arc_conductors` | block | 开启能力时 5 格内这些方块冒电弧（最近 32 个）/ arcs on these blocks within 5 blocks when the ability turns on (nearest 32) | 奇点迭代的 13 种电缆（可选条目）/ Singularity Iteration's 13 cables (optional entries) |
 
 金属方块判定为“配置列表 **或** 标签”。默认金属仍由服务端配置提供；标签默认为空，只用于追加。要移除默认金属，请修改服务端配置。
 
