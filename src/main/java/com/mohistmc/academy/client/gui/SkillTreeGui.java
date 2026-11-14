@@ -238,7 +238,8 @@ public class SkillTreeGui extends AcademyScreen {
         if (!data.hasAbility()) return;
 
         AbilityCategory category = data.getCurrentAbility();
-        List<Skill> allSkills = SkillRegistry.getSkillsByCategory(category);
+        List<Skill> allSkills = SkillRegistry.getSkillsByCategory(category).stream()
+                .filter(skill -> com.mohistmc.academy.skill.SkillTreeVisibility.visible(data, skill)).toList();
         legacyPositionLayout = !allSkills.isEmpty() && allSkills.stream().allMatch(Skill::hasLegacyTreePosition);
         if (legacyPositionLayout) {
             // Final 1.12.2 uses the authored guiX/guiY values directly inside
@@ -439,11 +440,13 @@ public class SkillTreeGui extends AcademyScreen {
         }
         int stimulations = (int) (3 + node.skill.getLevel() * node.skill.getLevel() * .5f);
         int cost = devType.actualEnergyPerStimulation() * stimulations;
+        // SkillTree.scala refused to start (hint "noenergy") unless the whole estimate was available.
         String prompt = pendingSkillId != null ? serverFeedback.getString()
+                : energy < cost ? Component.translatable("ac.skill_tree.noenergy").getString()
                 : Component.translatable("ac.skill_tree.learn_question", cost).getString();
         graphics.drawCenteredString(font, prompt, centerX, textY + scaled(39), 0xFFDDDDDD);
         boolean learnable = node.canLearn && node.skill.getLevel() <= devType.maxLevel
-                && energy >= devType.energyPerTick() && pendingSkillId == null
+                && energy >= cost && pendingSkillId == null
                 && sessionNonce != null && !sessionSpent;
         actionWidth = scaled(36);
         actionLeft = centerX - actionWidth / 2;
@@ -511,9 +514,11 @@ public class SkillTreeGui extends AcademyScreen {
                 centerX, iconY + iconSize + scaled(4), 0xFFFFFFFF);
         int stimulations = 5 * (data.getPlayerLevel() + 1);
         int cost = devType.actualEnergyPerStimulation() * stimulations;
-        graphics.drawCenteredString(font, Component.translatable("ac.skill_tree.level_question").getString()
-                        + "  " + cost + " IF", centerX, iconY + iconSize + scaled(17), 0xFFDDDDDD);
-        boolean enabled = data.canLevelUp() && energy >= devType.energyPerTick()
+        graphics.drawCenteredString(font, energy < cost && pendingSkillId == null
+                        ? Component.translatable("ac.skill_tree.noenergy").getString()
+                        : Component.translatable("ac.skill_tree.level_question").getString() + "  " + cost + " IF",
+                centerX, iconY + iconSize + scaled(17), 0xFFDDDDDD);
+        boolean enabled = data.canLevelUp() && energy >= cost
                 && pendingSkillId == null && sessionNonce != null && !sessionSpent;
         actionWidth = scaled(36);
         actionLeft = centerX - actionWidth / 2;
@@ -942,7 +947,10 @@ public class SkillTreeGui extends AcademyScreen {
             }
             return true;
         }
+        // Leaving for the wireless page reopens the tree with a new session afterwards, which could
+        // no longer follow a development already running, so the page is unavailable meanwhile.
         if (button == 0 && devType != DevMachineType.PORTABLE && devPos != null && sessionNonce != null
+                && pendingSkillId == null
                 && inside(mouseX, mouseY, networkActionLeft, networkActionTop, networkActionWidth, scaled(16))) {
             PacketDistributor.sendToServer(new com.mohistmc.academy.network.OpenDevNetworkPacket(devPos, sessionNonce));
             return true;

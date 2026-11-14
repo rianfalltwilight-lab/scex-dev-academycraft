@@ -86,7 +86,9 @@ public record LearnSkillPacket(String skillId, int typeOrdinal, Optional<BlockPo
                     return;
                 }
                 BlockPos inductionPos = packet.devPos().orElse(null);
-                if (!validateEnergySource(player, devType, devType.energyPerTick(), inductionPos)) {
+                // SkillTree.scala refused to start unless the developer held the whole estimated cost.
+                if (!validateEnergySource(player, devType, devType.actualEnergyPerStimulation()
+                        * DevLearningSessionManager.INDUCTION_STIMULATIONS, inductionPos)) {
                     result(player, packet, devType, false, "无法开始：开发机当前不可用或能量不足");
                     return;
                 }
@@ -114,7 +116,7 @@ public record LearnSkillPacket(String skillId, int typeOrdinal, Optional<BlockPo
                 int level = data.getPlayerLevel();
                 int stimulations = 5 * (level + 1);
                 int totalCost = devType.actualEnergyPerStimulation() * stimulations;
-                if (!validateEnergySource(player, devType, devType.energyPerTick(), packet.devPos().orElse(null))) {
+                if (!validateEnergySource(player, devType, totalCost, packet.devPos().orElse(null))) {
                     result(player, packet, devType, false, "无法升级：开发机当前不可用或能量不足");
                     return;
                 }
@@ -147,7 +149,9 @@ public record LearnSkillPacket(String skillId, int typeOrdinal, Optional<BlockPo
                             "重置失败：背包中需要与当前能力不同的诱导因子");
                     return;
                 }
-                if (!validateEnergySource(player, devType, devType.energyPerTick(),
+                int resetLevel = data.getPlayerLevel();
+                if (!validateEnergySource(player, devType,
+                        devType.actualEnergyPerStimulation() * resetLevel * 10,
                         packet.devPos().orElse(null))) {
                     result(player, packet, devType, false,
                             "无法重置：开发机当前不可用或能量不足");
@@ -197,8 +201,9 @@ public record LearnSkillPacket(String skillId, int typeOrdinal, Optional<BlockPo
 
             BlockPos devPos = packet.devPos().orElse(null);
             int stimulations = (int) (3 + skill.getLevel() * skill.getLevel() * .5f);
-            int totalCost = devType.energyPerStimulation * stimulations;
-            if (!validateEnergySource(player, devType, devType.energyPerTick(), devPos)) {
+            // The UI and the session both use the real per-stimulation drain.
+            int totalCost = devType.actualEnergyPerStimulation() * stimulations;
+            if (!validateEnergySource(player, devType, totalCost, devPos)) {
                 player.sendSystemMessage(Component.literal("§c能量不足或开发会话已失效"));
                 result(player, packet, devType, false, "无法开始：开发机当前不可用或能量不足");
                 return;

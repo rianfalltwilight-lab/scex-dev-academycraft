@@ -104,6 +104,17 @@ public abstract class DevMachineBase extends BaseEntityBlock implements IDevMach
     @Override
     public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
         if (!level.isClientSide() && player instanceof ServerPlayer serverPlayer) {
+            // A fresh right-click supersedes any pending return from the wireless page.
+            com.mohistmc.academy.network.DevNetworkReturn.forget(serverPlayer);
+            openDeveloper(serverPlayer, pos, true);
+        }
+        return InteractionResult.CONSUME;
+    }
+
+    /** Opens the developer skill tree with a new session, as a right-click does. */
+    public static boolean openDeveloper(ServerPlayer serverPlayer, BlockPos pos, boolean closeContainer) {
+        {
+            Level level = serverPlayer.level();
             BlockEntity entity = level.getBlockEntity(pos);
             DevMachineType type;
             IFEnergyStorage storage;
@@ -119,7 +130,7 @@ public abstract class DevMachineBase extends BaseEntityBlock implements IDevMach
                 // strands or deletes a coil/factor.
                 advanced.returnLegacyStagingItems(serverPlayer);
             } else {
-                return InteractionResult.CONSUME;
+                return false;
             }
 
             // AcademyCraft 1.0.7 entered DeveloperUI directly.  The container
@@ -130,7 +141,7 @@ public abstract class DevMachineBase extends BaseEntityBlock implements IDevMach
             // only skill tree. Otherwise a rapid machine transition can send
             // the old menu's close packet after OpenDevGuiPacket and erase the
             // freshly opened developer screen.
-            serverPlayer.closeContainer();
+            if (closeContainer) serverPlayer.closeContainer();
             LearnSkillPacket.syncToClient(serverPlayer);
             UUID nonce = DevLearningSessionManager.issue(serverPlayer, type, Optional.of(pos));
             String nodeName = "";
@@ -143,8 +154,8 @@ public abstract class DevMachineBase extends BaseEntityBlock implements IDevMach
             }
             SafePayloadSender.send(serverPlayer, new OpenDevGuiPacket(type.ordinal(),
                     storage.getEnergyStored(), storage.getMaxEnergyStored(), Optional.of(pos), nonce, nodeName));
+            return true;
         }
-        return InteractionResult.CONSUME;
     }
 
     @Override
