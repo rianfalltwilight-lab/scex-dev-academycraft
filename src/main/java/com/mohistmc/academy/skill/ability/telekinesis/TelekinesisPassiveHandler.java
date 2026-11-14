@@ -117,7 +117,8 @@ public final class TelekinesisPassiveHandler {
         if (event.getSource().is(net.minecraft.world.damagesource.DamageTypes.LIGHTNING_BOLT)
                 && learned(player, data, "insulation")) {
             float original = event.getAmount();
-            if (DynamicSkillRules.tryPay(data, "insulation", 100F * original, 0)) {
+            if (DynamicSkillRules.tryPay(data, "insulation",
+                    100F * com.mohistmc.academy.skill.CombatRules.defenseDamage(original), 0)) {
                 float reduction = 0.20F + 0.20F * data.getProficiency("insulation");
                 event.setAmount(original * (1F - reduction));
                 DynamicSkillRules.addExp(player, data, "insulation", original * 0.002F);
@@ -130,8 +131,9 @@ public final class TelekinesisPassiveHandler {
         }
         float blocked = event.getAmount();
         float p = data.getProficiency("psycho_harden");
+        float costDamage = com.mohistmc.academy.skill.CombatRules.defenseDamage(blocked);
         if (!DynamicSkillRules.tryPay(data, "psycho_harden",
-                blocked * (60F - 30F * p), blocked * 0.1F)) {
+                costDamage * (60F - 30F * p), costDamage * 0.1F)) {
             stopHarden(player, data, true);
             return;
         }

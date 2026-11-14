@@ -1011,5 +1011,6 @@
   "attribute.name.academy.overload_recovery": "過負荷回復",
   "attribute.name.academy.cp_cost": "スキル CP 消費",
   "attribute.name.academy.cooldown": "スキルのクールダウン",
-  "attribute.name.academy.proficiency_gain": "熟練度の獲得"
+  "attribute.name.academy.proficiency_gain": "熟練度の獲得",
+  "attribute.name.academy.skill_power": "スキル威力"
 }

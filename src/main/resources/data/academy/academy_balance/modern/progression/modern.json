@@ -22,5 +22,18 @@
   "cp_potion": {
     "restore_fraction": 0.5,
     "max_restore": 1000000000
+  },
+  "combat": {
+    "level_damage_multiplier": [1, 1, 1.5, 2.25, 3.4, 5],
+    "boss_max_health_fraction": 0.02,
+    "boss_bonus_cap": 2,
+    "armor_pierce": 0.25,
+    "mob_attack_scaling": true,
+    "mob_hit_cap_vs_players": 0.5,
+    "defense_cost_exponent": 0.7,
+    "deviation_cost_per_damage": 0.5,
+    "light_shield_absorb_fraction": 0.3,
+    "reflection_uses_offense_scaling": false,
+    "level_max_health": [0, 0, 2, 4, 8, 12]
   }
 }

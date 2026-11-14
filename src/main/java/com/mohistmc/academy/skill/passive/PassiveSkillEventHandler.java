@@ -42,6 +42,9 @@ import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 @EventBusSubscriber(modid = AcademyCraft.MODID)
 public final class PassiveSkillEventHandler {
     private static final ThreadLocal<Boolean> REFLECTING_DAMAGE = ThreadLocal.withInitial(() -> false);
+
+    /** True while Vector Reflection sends damage back to its source. */
+    public static boolean isReflecting() { return REFLECTING_DAMAGE.get(); }
     private static final String VECTOR_MARK = AcademyCraft.MODID + ":vec_deviated";
 
     /** Optional compatibility opt-in for modded entities excluded by the legacy living/mob rule. */
@@ -259,7 +262,7 @@ public final class PassiveSkillEventHandler {
             // min(currentCP, cost) + ordinary consume in 1.0.7 is equivalent
             // to a forced, clamped debit while preserving the defensive action.
             if (!payForced(data, "vec_deviation",
-                    VecDefenseLegacyMath.deviationDamageCost(proficiency))) return;
+                    VecDefenseLegacyMath.deviationDamageCost(proficiency, amount))) return;
             event.setAmount(amount * VecDefenseLegacyMath.deviationDamageMultiplier(proficiency));
             AbilityMutationService.addSkillExp(player, data, "vec_deviation", amount * .0006f);
             vectorCue(player, player.position().add(0, player.getBbHeight() * .6, 0), false);

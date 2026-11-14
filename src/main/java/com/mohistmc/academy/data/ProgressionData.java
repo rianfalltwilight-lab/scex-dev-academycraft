@@ -90,6 +90,31 @@ public final class ProgressionData extends SyncedJsonData {
         INSTANCE.accept(Map.of());
     }
 
+    // ---- combat (balance profile knobs; all neutral in 1.0.7) --------------------------------------
+
+    /** Ability damage a player deals is multiplied by this per ability level L0..L5. */
+    public static float levelDamageMultiplier(int level) { return values().levelDamageMultiplier[level(level)]; }
+    /** Extra damage on {@code c:bosses}: this fraction of the target's max health ... */
+    public static float bossMaxHealthFraction() { return values().bossMaxHealthFraction; }
+    /** ... but at most this multiple of the hit itself. */
+    public static float bossBonusCap() { return values().bossBonusCap; }
+    /** Fraction of the target's armour reduction that ability damage ignores. */
+    public static float armorPierce() { return values().armorPierce; }
+    /** Mob casts scale with the caster's attack damage relative to its base value. */
+    public static boolean mobAttackScaling() { return values().mobAttackScaling; }
+    /** A mob-cast hit on a player is capped at this fraction of the player's max health (0 = no cap). */
+    public static float mobHitCapVsPlayers() { return values().mobHitCapVsPlayers; }
+    /** Defensive CP costs per damage point use {@code damage ^ exponent} (1.0.7: 1, linear). */
+    public static float defenseCostExponent() { return values().defenseCostExponent; }
+    /** Vector Deviation pays this much CP per damage point on top of its flat cost. */
+    public static float deviationCostPerDamage() { return values().deviationCostPerDamage; }
+    /** Light Shield also absorbs this fraction of the hit on top of its flat amount. */
+    public static float lightShieldAbsorbFraction() { return values().lightShieldAbsorbFraction; }
+    /** Whether reflected damage takes the reflector's skill_damage, skill_power and level scaling. */
+    public static boolean reflectionUsesOffenseScaling() { return values().reflectionUsesOffenseScaling; }
+    /** Extra max health a player gets per ability level L0..L5. */
+    public static float levelMaxHealth(int level) { return values().levelMaxHealth[level(level)]; }
+
     // ---- rules (balance profile knobs) -----------------------------------------------------------
 
     /** Multiplies the config {@code cpRecoverSpeed}. */
@@ -214,7 +239,11 @@ public final class ProgressionData extends SyncedJsonData {
                           float cpRecoveryMultiplier, float overloadRecoveryMultiplier, float usageGrowthMultiplier,
                           float proficiencyGainMultiplier, boolean keepUsageGrowthOnLevelUp, float overloadUnlockFraction,
                           float proficiencyCpDiscount, float prerequisiteProficiencyCap,
-                          float cpPotionRestoreFraction, float cpPotionMaxRestore) {}
+                          float cpPotionRestoreFraction, float cpPotionMaxRestore,
+                          float[] levelDamageMultiplier, float bossMaxHealthFraction, float bossBonusCap,
+                          float armorPierce, boolean mobAttackScaling, float mobHitCapVsPlayers,
+                          float defenseCostExponent, float deviationCostPerDamage, float lightShieldAbsorbFraction,
+                          boolean reflectionUsesOffenseScaling, float[] levelMaxHealth) {}
 
     /** Holds the built-in defaults; each file overrides the fields it names. */
     private static final class Builder {
@@ -244,6 +273,17 @@ public final class ProgressionData extends SyncedJsonData {
         float prerequisiteProficiencyCap = 1;
         float cpPotionRestoreFraction = .5f;
         float cpPotionMaxRestore = 2000;
+        float[] levelDamageMultiplier = {1, 1, 1, 1, 1, 1};
+        float bossMaxHealthFraction = 0;
+        float bossBonusCap = 0;
+        float armorPierce = 0;
+        boolean mobAttackScaling = false;
+        float mobHitCapVsPlayers = 0;
+        float defenseCostExponent = 1;
+        float deviationCostPerDamage = 0;
+        float lightShieldAbsorbFraction = 0;
+        boolean reflectionUsesOffenseScaling = true;
+        float[] levelMaxHealth = {0, 0, 0, 0, 0, 0};
 
         private ResourceLocation file;
 
@@ -257,7 +297,10 @@ public final class ProgressionData extends SyncedJsonData {
                     Map.copyOf(categoryWeights), cpRecoveryMultiplier, overloadRecoveryMultiplier,
                     usageGrowthMultiplier, proficiencyGainMultiplier, keepUsageGrowthOnLevelUp,
                     overloadUnlockFraction, proficiencyCpDiscount, prerequisiteProficiencyCap,
-                    cpPotionRestoreFraction, cpPotionMaxRestore);
+                    cpPotionRestoreFraction, cpPotionMaxRestore, levelDamageMultiplier.clone(),
+                    bossMaxHealthFraction, bossBonusCap, armorPierce, mobAttackScaling, mobHitCapVsPlayers,
+                    defenseCostExponent, deviationCostPerDamage, lightShieldAbsorbFraction,
+                    reflectionUsesOffenseScaling, levelMaxHealth.clone());
         }
 
         void apply(ResourceLocation id, JsonObject root) {
@@ -328,6 +371,23 @@ public final class ProgressionData extends SyncedJsonData {
             if (potion != null) {
                 cpPotionRestoreFraction = number(potion, "cp_potion.", "restore_fraction", cpPotionRestoreFraction, 1);
                 cpPotionMaxRestore = number(potion, "cp_potion.", "max_restore", cpPotionMaxRestore, 1e9f);
+            }
+            JsonObject combat = object(root, "", "combat");
+            if (combat != null) {
+                levelDamageMultiplier = levels(combat, "combat.", "level_damage_multiplier", levelDamageMultiplier);
+                bossMaxHealthFraction = number(combat, "combat.", "boss_max_health_fraction", bossMaxHealthFraction, 1);
+                bossBonusCap = number(combat, "combat.", "boss_bonus_cap", bossBonusCap, 100);
+                armorPierce = number(combat, "combat.", "armor_pierce", armorPierce, 1);
+                mobAttackScaling = bool(combat, "combat.", "mob_attack_scaling", mobAttackScaling);
+                mobHitCapVsPlayers = number(combat, "combat.", "mob_hit_cap_vs_players", mobHitCapVsPlayers, 100);
+                defenseCostExponent = number(combat, "combat.", "defense_cost_exponent", defenseCostExponent, 2);
+                deviationCostPerDamage = number(combat, "combat.", "deviation_cost_per_damage",
+                        deviationCostPerDamage, 1000);
+                lightShieldAbsorbFraction = number(combat, "combat.", "light_shield_absorb_fraction",
+                        lightShieldAbsorbFraction, 1);
+                reflectionUsesOffenseScaling = bool(combat, "combat.", "reflection_uses_offense_scaling",
+                        reflectionUsesOffenseScaling);
+                levelMaxHealth = levels(combat, "combat.", "level_max_health", levelMaxHealth);
             }
             JsonObject induct = object(root, "", "induction");
             if (induct != null) {

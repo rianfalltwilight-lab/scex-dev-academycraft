@@ -1011,5 +1011,6 @@
     "attribute.name.academy.overload_recovery": "Снятие перегрузки",
     "attribute.name.academy.cp_cost": "Расход CP навыков",
     "attribute.name.academy.cooldown": "Перезарядка навыков",
-    "attribute.name.academy.proficiency_gain": "Получение мастерства"
+    "attribute.name.academy.proficiency_gain": "Получение мастерства",
+    "attribute.name.academy.skill_power": "Сила навыков"
 }

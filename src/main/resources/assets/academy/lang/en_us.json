@@ -1011,5 +1011,6 @@
   "attribute.name.academy.overload_recovery": "Overload Recovery",
   "attribute.name.academy.cp_cost": "Skill CP Cost",
   "attribute.name.academy.cooldown": "Skill Cooldown",
-  "attribute.name.academy.proficiency_gain": "Proficiency Gain"
+  "attribute.name.academy.proficiency_gain": "Proficiency Gain",
+  "attribute.name.academy.skill_power": "Skill Power"
 }

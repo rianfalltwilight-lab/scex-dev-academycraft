@@ -33,6 +33,11 @@ public final class AcademyAttributes {
             () -> new PercentageAttribute("attribute.name.academy.skill_resistance", 0.0, -1.0, 1.0)
                     .setSyncable(true));
 
+    /** Flat damage added to every ability hit the entity deals, before the multipliers. Base 0. */
+    public static final DeferredHolder<Attribute, Attribute> SKILL_POWER = ATTRIBUTES.register("skill_power",
+            () -> new net.minecraft.world.entity.ai.attributes.RangedAttribute("attribute.name.academy.skill_power",
+                    0.0, 0.0, 1_000_000.0).setSyncable(true));
+
     /** Multiplier on max CP (level base, usage growth and courses). Base 1.0. */
     public static final DeferredHolder<Attribute, Attribute> MAX_CP = percent("max_cp", 1, 0, 1024);
     /** Multiplier on CP recovery. Base 1.0. */
@@ -68,6 +73,7 @@ public final class AcademyAttributes {
         for (EntityType<? extends net.minecraft.world.entity.LivingEntity> type : event.getTypes()) {
             if (!event.has(type, SKILL_DAMAGE)) event.add(type, SKILL_DAMAGE);
             if (!event.has(type, SKILL_RESISTANCE)) event.add(type, SKILL_RESISTANCE);
+            if (!event.has(type, SKILL_POWER)) event.add(type, SKILL_POWER);
         }
         for (DeferredHolder<Attribute, Attribute> resource : PLAYER_RESOURCES)
             if (!event.has(EntityType.PLAYER, resource)) event.add(EntityType.PLAYER, resource);

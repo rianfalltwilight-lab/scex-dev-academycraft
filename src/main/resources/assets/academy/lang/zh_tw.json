@@ -1011,5 +1011,6 @@
     "attribute.name.academy.overload_recovery": "過載恢復",
     "attribute.name.academy.cp_cost": "技能 CP 消耗",
     "attribute.name.academy.cooldown": "技能冷卻",
-    "attribute.name.academy.proficiency_gain": "熟練度獲取"
+    "attribute.name.academy.proficiency_gain": "熟練度獲取",
+    "attribute.name.academy.skill_power": "技能強度"
 }

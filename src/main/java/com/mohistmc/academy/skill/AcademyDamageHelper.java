@@ -40,6 +40,12 @@ public final class AcademyDamageHelper {
                 && apply(null, target, source, amount, true);
     }
 
+    /** Whether {@code target.hurt(source)} is running for an ability hit right now (any frame). */
+    public static boolean isAbilityHit(Entity target, DamageSource source) {
+        Call call = CALLS.get().peek();
+        return call != null && call.ability && call.target == target && call.source == source;
+    }
+
     public static boolean isAbilityDamageInProgress() {
         Call call = CALLS.get().peek();
         return call != null && call.ability;
@@ -75,7 +81,13 @@ public final class AcademyDamageHelper {
             net.minecraft.world.entity.LivingEntity owner = attacker != null ? attacker
                     : source.getEntity() instanceof net.minecraft.world.entity.LivingEntity living
                     && living != target ? living : null;
-            float scaled = SkillDamageMath.applyAttributes(amount, owner, target);
+            // Balance profile stage: level scaling, skill_power, mob attack scaling (all neutral in LEGACY).
+            boolean reflected = com.mohistmc.academy.skill.passive.PassiveSkillEventHandler.isReflecting()
+                    && !com.mohistmc.academy.data.ProgressionData.reflectionUsesOffenseScaling();
+            float scaled = reflected ? amount * SkillDamageMath.targetMultiplier(target)
+                    : SkillDamageMath.applyAttributes(CombatRules.offense(owner, amount), owner, target);
+            if (!reflected) scaled = CombatRules.bossBonus(target, scaled);
+            scaled = CombatRules.capVsPlayer(owner, target, scaled);
             var event = net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(
                     new com.mohistmc.academy.api.event.AbilityEvents.SkillDamage(owner, target, source, scaled));
             if (event.isCanceled() || !(event.getAmount() > 0)) return false;

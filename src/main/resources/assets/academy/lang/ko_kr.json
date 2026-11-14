@@ -1011,5 +1011,6 @@
     "attribute.name.academy.overload_recovery": "과부하 회복",
     "attribute.name.academy.cp_cost": "스킬 CP 소모",
     "attribute.name.academy.cooldown": "스킬 재사용 대기",
-    "attribute.name.academy.proficiency_gain": "숙련도 획득"
+    "attribute.name.academy.proficiency_gain": "숙련도 획득",
+    "attribute.name.academy.skill_power": "스킬 위력"
 }
