@@ -36,6 +36,13 @@ import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
 public class WindGenBase extends BaseEntityBlock {
+    /** Comparators read the stored energy (MZ5 / UX-10). */
+    @Override public boolean hasAnalogOutputSignal(net.minecraft.world.level.block.state.BlockState state) { return true; }
+    @Override public int getAnalogOutputSignal(net.minecraft.world.level.block.state.BlockState state,
+            net.minecraft.world.level.Level level, net.minecraft.core.BlockPos pos) {
+        return MachineComparator.signal(level, pos);
+    }
+
     public static final MapCodec<WindGenBase> CODEC = simpleCodec(WindGenBase::new);
     /** AcademyCraft 1.0.7 WindGenerator.MIN_PILLARS / MAX_PILLARS. */
     public static final int MIN_PILLARS = 8;
