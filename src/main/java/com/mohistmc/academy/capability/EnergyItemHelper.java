@@ -9,7 +9,16 @@ public final class EnergyItemHelper {
 
     private EnergyItemHelper() {}
 
+    /**
+     * Whether a battery slot accepts the stack: AcademyCraft's own energy items, or another mod's item
+     * with Forge energy ({@link ExternalItemEnergy}), e.g. Singularity Iteration batteries.
+     */
     public static boolean isEnergyItem(ItemStack stack) {
+        return isNativeEnergyItem(stack) || ExternalItemEnergy.supports(stack);
+    }
+
+    /** AcademyCraft's own IF items only. */
+    public static boolean isNativeEnergyItem(ItemStack stack) {
         return stack != null && !stack.isEmpty() && stack.getItem() instanceof IEnergyItem;
     }
 
@@ -33,7 +42,7 @@ public final class EnergyItemHelper {
         if (stack.getItem() instanceof IEnergyItem energyItem) {
             return energyItem.extractEnergy(stack, maxExtract, simulate);
         }
-        return 0;
+        return ExternalItemEnergy.extract(stack, maxExtract, simulate);
     }
 
     public static int receiveEnergy(ItemStack stack, int maxReceive, boolean simulate) {
@@ -41,6 +50,6 @@ public final class EnergyItemHelper {
         if (stack.getItem() instanceof IEnergyItem energyItem) {
             return energyItem.receiveEnergy(stack, maxReceive, simulate);
         }
-        return 0;
+        return ExternalItemEnergy.receive(stack, maxReceive, simulate);
     }
 }

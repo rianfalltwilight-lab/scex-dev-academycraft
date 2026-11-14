@@ -34,8 +34,10 @@ final class MachineAutomationItems implements IItemHandler {
     }
 
     static boolean fullyCharged(ItemStack stack) {
-        return !stack.isEmpty() && stack.getItem() instanceof IEnergyItem energy
-                && energy.getEnergyStored(stack) >= energy.getMaxEnergyStored(stack);
+        if (stack.isEmpty()) return false;
+        if (stack.getItem() instanceof IEnergyItem energy)
+            return energy.getEnergyStored(stack) >= energy.getMaxEnergyStored(stack);
+        return com.mohistmc.academy.capability.ExternalItemEnergy.full(stack);
     }
 
     private boolean available(int slot) {

@@ -108,7 +108,8 @@ public class ChargingEffect implements ChargingSkillEffect {
         Vec3 visualEnd = player.getEyePosition().add(player.getLookAngle().scale(15.0));
 
         if (itemMode) {
-            supported = EnergyItemHelper.isEnergyItem(held);
+            // FE items keep the quarter-IF FE path below, not the whole-IF battery-slot helper.
+            supported = EnergyItemHelper.isNativeEnergyItem(held);
             if (supported) {
                 receiver = (amount, simulate) -> EnergyItemHelper.receiveEnergy(held, amount, simulate);
             } else {
