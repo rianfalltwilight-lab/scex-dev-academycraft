@@ -88,6 +88,7 @@ public final class PaperDrillEffect implements ChargingSkillEffect {
         State state = ACTIVE.get(player.getUUID());
         if (state == null) return false;
         if (!state.paid) {
+            var beforePayment = data.captureDynamicResources();
             if (!canStartCharging(player, data)
                     || !DynamicSkillRules.tryPay(data, getId(), startCp(state.proficiency),
                     startOverload(state.proficiency))) {
@@ -95,8 +96,10 @@ public final class PaperDrillEffect implements ChargingSkillEffect {
                 return false;
             }
             if (!consumePaper(player, TelekinesisRules.PAPER_DRILL_REQUIRED_PAPER)) {
-                data.refundDynamic(DynamicSkillRules.cp(getId(), startCp(state.proficiency)),
-                        DynamicSkillRules.overload(getId(), startOverload(state.proficiency)));
+                // Undo exactly this payment, including any overload lockout it latched
+                // (and nothing at all in creative, where nothing was paid).
+                data.rollbackDynamicPayment(beforePayment, data.captureDynamicResources());
+                data.consumeOverloadTrigger();
                 ACTIVE.remove(player.getUUID());
                 return false;
             }
