@@ -1,0 +1,12 @@
+{
+  "replace": false,
+  "values": [
+    "academy:ability",
+    "academy:ability_drowning",
+    "academy:ability_magic",
+    "academy:ability_thrown",
+    "academy:air_blade",
+    "academy:cruise_bomb",
+    "academy:psycho_needle"
+  ]
+}

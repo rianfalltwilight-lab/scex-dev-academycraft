@@ -48,6 +48,10 @@ public final class PassiveSkillEventHandler {
     public static final TagKey<net.minecraft.world.entity.EntityType<?>> VECTOR_AFFECTABLE = TagKey.create(
             Registries.ENTITY_TYPE,
             ResourceLocation.fromNamespaceAndPath(AcademyCraft.MODID, "vector_affectable"));
+    /** Pack-facing opt-out: Vector Deviation/Reflection never touch these, overriding every other rule. */
+    public static final TagKey<net.minecraft.world.entity.EntityType<?>> VECTOR_IMMUNE = TagKey.create(
+            Registries.ENTITY_TYPE,
+            ResourceLocation.fromNamespaceAndPath(AcademyCraft.MODID, "vector_immune"));
 
     private PassiveSkillEventHandler() {}
 
@@ -104,6 +108,7 @@ public final class PassiveSkillEventHandler {
      */
     private static boolean vectorEntity(ServerPlayer player, Entity entity) {
         if (!entity.isAlive() || entity == player || marked(entity)) return false;
+        if (entity.getType().is(VECTOR_IMMUNE)) return false;
         boolean legacyDefault = !(entity instanceof LivingEntity)
                 && !(entity instanceof ItemEntity)
                 && !(entity instanceof ThrownExperienceBottle);
@@ -233,7 +238,7 @@ public final class PassiveSkillEventHandler {
     }
 
     public static boolean reflectedDamage(ServerPlayer reflector, LivingEntity target, float amount) {
-        if (target == reflector || REFLECTING_DAMAGE.get()) return false;
+        if (target == reflector || REFLECTING_DAMAGE.get() || target.getType().is(VECTOR_IMMUNE)) return false;
         REFLECTING_DAMAGE.set(true);
         try {
             return AcademyDamageHelper.hurt(reflector, target,
@@ -271,7 +276,7 @@ public final class PassiveSkillEventHandler {
             // DamageSource.getSourceOfDamage in 1.0.7 maps to the direct
             // entity, not the projectile's owner/causing entity.
             Entity source = event.getSource().getDirectEntity();
-            if (source != null && source != player) {
+            if (source != null && source != player && !source.getType().is(VECTOR_IMMUNE)) {
                 REFLECTING_DAMAGE.set(true);
                 try {
                     AcademyDamageHelper.hurt(player, source,

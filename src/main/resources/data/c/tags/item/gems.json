@@ -1,0 +1,7 @@
+{
+  "replace": false,
+  "values": [
+    "#c:gems/imag_crystal",
+    "#c:gems/resonant_crystal"
+  ]
+}
