@@ -253,15 +253,26 @@ tasks.register('auditTestJar', Jar) {
 // NeoForge loads each mod as a Java module: a probe cannot share a package with the release mod.
 tasks.register('verifyAuditPackageIsolation') {
     dependsOn tasks.named('classes'), tasks.named('auditTestClasses')
+    // Resolve the class dirs at configuration time: the configuration cache forbids touching
+    // `sourceSets` (a project property) from inside doLast.
+    def mainClassDirs = sourceSets.main.output.classesDirs
+    def auditClassDirs = sourceSets.auditTest.output.classesDirs
+    inputs.files(mainClassDirs, auditClassDirs)
     doLast {
         def packages = { dirs ->
-            dirs.files.collectMany { dir ->
-                fileTree(dir).matching { include '**/*.class' }.files.collect { file ->
-                    dir.toPath().relativize(file.parentFile.toPath()).toString()
+            dirs.files.findAll { it.directory }.collectMany { dir ->
+                def root = dir.toPath()
+                def stream = java.nio.file.Files.walk(root)
+                try {
+                    stream.filter { it.toString().endsWith('.class') }
+                            .map { root.relativize(it.parent).toString() }
+                            .collect(java.util.stream.Collectors.toSet())
+                } finally {
+                    stream.close()
                 }
             }.toSet()
         }
-        def overlap = packages(sourceSets.main.output.classesDirs).intersect(packages(sourceSets.auditTest.output.classesDirs))
+        def overlap = packages(mainClassDirs).intersect(packages(auditClassDirs))
         if (!overlap.empty) throw new GradleException("Audit probe JAR has split module packages: ${overlap}")
     }
 }
