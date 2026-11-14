@@ -1,18 +1,22 @@
 package com.mohistmc.academy.skill.ability.telekinesis;
 
+import com.mohistmc.academy.api.mob.MobCastContext;
+import com.mohistmc.academy.api.mob.MobCastable;
 import com.mohistmc.academy.config.DynamicSkillRules;
 import com.mohistmc.academy.skill.PlayerAbilityData;
 import com.mohistmc.academy.skill.ability.DynamicOneShotSkillEffect;
+import com.mohistmc.academy.world.AcademyEntities;
 import com.mohistmc.academy.world.AcademyItems;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 /** Throws one cobblestone projectile; etched stone is faster, stronger and cheaper. */
-public final class PsychoThrowingEffect implements DynamicOneShotSkillEffect {
+public final class PsychoThrowingEffect implements DynamicOneShotSkillEffect, MobCastable {
     private record Ammo(ItemStack stack, boolean etched) {}
 
     @Override public String getId() { return "psycho_throwing"; }
@@ -62,12 +66,44 @@ public final class PsychoThrowingEffect implements DynamicOneShotSkillEffect {
         float p = data.getProficiency("psycho_throwing");
         ServerLevel level = player.serverLevel();
         if (!PsychoAmmo.launch(player, consumed, returned, p, false)) return false;
-        level.playSound(null, player.blockPosition(), SoundEvents.TRIDENT_THROW.value(),
-                SoundSource.PLAYERS, 0.8F, etched ? 1.2F : 0.9F);
+        launched(level, player, etched);
         if (!data.isDevMode()) DynamicSkillRules.addExp(player, data, "psycho_throwing",
                 0.002F - 0.001F * p);
         return true;
     }
+
+    /** Shared launch feedback; a player's sound source is PLAYERS, as before. */
+    private static void launched(ServerLevel level, LivingEntity caster, boolean etched) {
+        level.playSound(null, caster.blockPosition(), SoundEvents.TRIDENT_THROW.value(),
+                caster.getSoundSource(), 0.8F, etched ? 1.2F : 0.9F);
+    }
+
+    /**
+     * Mob path: a virtual plain cobblestone (the unetched, weaker stone). No inventory is searched or
+     * consumed and the projectile never drops or returns an item, so mobs cannot be farmed for stone.
+     * No payment or experience.
+     */
+    @Override
+    public boolean mobCast(MobCastContext context) {
+        LivingEntity caster = context.caster();
+        ServerLevel level = context.level();
+        var projectile = AcademyEntities.PSYCHO_STONE.get().create(level);
+        if (projectile == null) return false;
+        projectile.prepare(caster, new ItemStack(Items.COBBLESTONE), context.proficiency(),
+                context.eye(), context.look());
+        projectile.setVirtualAmmo(true);
+        projectile.setMobBreaksBlocks(context.mayDestroyBlocks());
+        if (!level.addFreshEntity(projectile) || projectile.isRemoved() || projectile.level() != level
+                || !caster.isAlive() || caster.level() != level) {
+            projectile.discard();
+            return false;
+        }
+        projectile.arm();
+        launched(level, caster, false);
+        return true;
+    }
+
+    @Override public int mobCooldownTicks(float p) { return getCooldownTicks(p); }
 
     @Override public int getCooldownTicks(float p) { return (int) (40 - 20 * Math.clamp(p, 0, 1)); }
 }

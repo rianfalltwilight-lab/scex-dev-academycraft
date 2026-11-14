@@ -30,7 +30,7 @@ class AerohandBehaviorSourceContractTest {
     void jetMovesCasterAndAirProjectilesAreRealEntities() throws Exception {
         String jet = source("skill/ability/aerohand/AirJetEffect.java");
         String ball = source("world/entity/AeroProjectileEntity.java");
-        assertTrue(jet.contains("player.setDeltaMovement"));
+        assertTrue(jet.contains("caster.setDeltaMovement"));
         assertTrue(jet.contains("isOffenseArmourEngaged"));
         assertFalse(jet.contains("AcademyDamageHelper"));
         assertTrue(ball.contains("AeroBehaviorMath.volcanicDamage"));
@@ -46,9 +46,9 @@ class AerohandBehaviorSourceContractTest {
         String boundary = source("skill/AcademyDamageHelper.java");
         assertTrue(separator.contains("implements DynamicOneShotSkillEffect"));
         assertTrue(separator.contains("getGameTime() + 5"));
-        assertTrue(separator.contains("living == player"));
+        assertTrue(separator.contains("living == caster"));
         assertTrue(separator.contains("SkillDamageSource.drowning(player, true)"));
-        assertTrue(separator.contains("SkillDamageSource.drowning(player, false)"));
+        assertTrue(separator.contains("SkillDamageSource.drowning(caster, false)"));
         assertTrue(separator.contains("living.setAirSupply"));
         assertTrue(separator.contains("AcademyDamageHelper.hurtSelf"));
         assertTrue(boundary.contains("target == attacker"));

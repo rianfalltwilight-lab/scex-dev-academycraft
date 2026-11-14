@@ -16,6 +16,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.level.ClipContext;
@@ -28,7 +29,7 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.EventHooks;
 import net.neoforged.neoforge.event.level.BlockEvent;
 
-/** One independently orbiting/accelerating water bomb owned by a paid cruise session. */
+/** One independently orbiting/accelerating water bomb owned by a paid (player) or mob cruise session. */
 public final class CruiseBombEntity extends Projectile {
     private static final EntityDataAccessor<Float> PROFICIENCY = SynchedEntityData.defineId(CruiseBombEntity.class, EntityDataSerializers.FLOAT);
     private static final ResourceKey<DamageType> DAMAGE = ResourceKey.create(Registries.DAMAGE_TYPE,
@@ -38,17 +39,20 @@ public final class CruiseBombEntity extends Projectile {
     private float speed;
     private int lockedTicks;
     private boolean armed, impacting;
+    /** Decided once at a mob cast (config + mobGriefing); players keep their own per-block checks. */
+    private boolean mobBreaksBlocks;
 
     public CruiseBombEntity(EntityType<? extends CruiseBombEntity> type, Level level) { super(type, level); setNoGravity(true); }
     @Override protected void defineSynchedData(SynchedEntityData.Builder builder) { builder.define(PROFICIENCY, 0F); }
     public float proficiency() { return entityData.get(PROFICIENCY); }
     public Entity target() { return target; }
-    public void prepare(ServerPlayer owner, float p) {
+    public void prepare(LivingEntity owner, float p) {
         setOwner(owner); entityData.set(PROFICIENCY, Math.clamp(p,0,1));
         latitude=random.nextDouble()*Math.PI*2; longitude=random.nextDouble()*Math.PI*2;
         orbit(owner);
     }
     public void arm() { armed=true; }
+    public void setMobBreaksBlocks(boolean value) { mobBreaksBlocks=value; }
     public void lock(Entity target) {
         if (this.target != null || !armed || isRemoved()) return;
         this.target=target;
@@ -58,7 +62,7 @@ public final class CruiseBombEntity extends Projectile {
         hasImpulse=true;
     }
     private float acceleration() { return .1F + .1F*proficiency(); }
-    private void orbit(ServerPlayer owner) {
+    private void orbit(LivingEntity owner) {
         setPos(owner.getX()+Math.sin(latitude),owner.getY()+1+Math.cos(latitude)*Math.cos(longitude),
                 owner.getZ()+Math.cos(latitude)*Math.sin(longitude));
     }
@@ -71,7 +75,7 @@ public final class CruiseBombEntity extends Projectile {
         if (isRemoved() || impacting) return;
         if (level().isClientSide) { super.tick(); return; }
         if (!armed) return;
-        if (!(getOwner() instanceof ServerPlayer owner) || !owner.isAlive() || owner.level()!=level()
+        if (!(getOwner() instanceof LivingEntity owner) || !owner.isAlive() || owner.level()!=level()
                 || !CruiseBombEffect.owns(owner,this)) { discard(); return; }
         super.tick();
         if (target==null) {
@@ -118,8 +122,15 @@ public final class CruiseBombEntity extends Projectile {
         lockedTicks++;
     }
 
-    private boolean breakFragile(BlockHitResult hit,ServerPlayer owner) {
+    private boolean breakFragile(BlockHitResult hit,LivingEntity caster) {
         BlockPos pos=hit.getBlockPos();
+        if(!(caster instanceof ServerPlayer owner)) {
+            // Mob caster: no player permissions or BreakEvent; the cast-time griefing decision rules.
+            if(!mobBreaksBlocks||!level().isLoaded(pos)||!DynamicSkillRules.destroysBlocks(level(),"cruise_bomb"))return false;
+            var state=level().getBlockState(pos);
+            return !state.isAir()&&state.getDestroySpeed(level(),pos)==0&&!isRemoved()&&CruiseBombEffect.owns(caster,this)
+                    &&caster.isAlive()&&caster.level()==level()&&level().destroyBlock(pos,true,caster);
+        }
         if(!level().isLoaded(pos)||!DynamicSkillRules.destroysBlocks(level(),"cruise_bomb"))return false;
         var state=level().getBlockState(pos);
         if(state.isAir()||state.getDestroySpeed(level(),pos)!=0||!owner.hasCorrectToolForDrops(state)
@@ -133,7 +144,7 @@ public final class CruiseBombEntity extends Projectile {
         } finally { impacting=false; }
     }
     @Override protected void onHitEntity(EntityHitResult hit) {
-        if(!(getOwner() instanceof ServerPlayer owner)||!CruiseBombEffect.owns(owner,this))return;
+        if(!(getOwner() instanceof LivingEntity owner)||!CruiseBombEffect.owns(owner,this))return;
         if(hit.getEntity() instanceof Projectile projectile) {
             if(projectile.getOwner()!=owner)projectile.discard();
         } else {

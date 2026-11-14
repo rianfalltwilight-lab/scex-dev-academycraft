@@ -1,6 +1,8 @@
 package com.mohistmc.academy.skill.ability.telekinesis;
 
 import com.mohistmc.academy.AcademyCraft;
+import com.mohistmc.academy.api.mob.MobCastContext;
+import com.mohistmc.academy.api.mob.MobCastable;
 import com.mohistmc.academy.config.DynamicSkillRules;
 import com.mohistmc.academy.skill.ability.SkillRaycast;
 import com.mohistmc.academy.skill.AcademyDamageHelper;
@@ -26,7 +28,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 /** Legacy two-stage psycho slam: lift one sighted target for 30 ticks, then drive it down. */
 @EventBusSubscriber(modid = AcademyCraft.MODID)
-public final class PsychoSlamEffect implements DynamicOneShotSkillEffect {
+public final class PsychoSlamEffect implements DynamicOneShotSkillEffect, MobCastable {
     private record Slam(ResourceKey<Level> dimension, UUID owner, UUID target,
                         Vec3 horizontal, float proficiency, long started) {}
     private static final Map<UUID, Slam> ACTIVE = new HashMap<>();
@@ -57,16 +59,42 @@ public final class PsychoSlamEffect implements DynamicOneShotSkillEffect {
     }
 
     private static void launch(ServerPlayer player, PlayerAbilityData data, LivingEntity target, float p) {
-        Vec3 horizontal = new Vec3(player.getLookAngle().x, 0, player.getLookAngle().z);
-        if (horizontal.lengthSqr() < 1.0e-6) horizontal = new Vec3(0, 0, 1);
-        ACTIVE.put(target.getUUID(), new Slam(player.level().dimension(), player.getUUID(),
-                target.getUUID(), horizontal.normalize(), p, player.serverLevel().getGameTime()));
-        EffectHelper.psychoBurst(player.serverLevel(), target.getX(), target.getY() + 0.8,
-                target.getZ(), 18, 0.45);
-        player.serverLevel().playSound(null, target.blockPosition(), SoundEvents.ENDER_DRAGON_GROWL,
-                SoundSource.PLAYERS, 0.75F, 1.35F);
+        start(player, player.serverLevel(), target, p, player.getLookAngle());
         if (!data.isDevMode()) DynamicSkillRules.addExp(player, data, "psycho_slam", 0.001F);
     }
+
+    /** Lifts the target for the tick to drive down; shared by players and mobs (sound source PLAYERS for players). */
+    private static void start(LivingEntity caster, ServerLevel level, LivingEntity target, float p, Vec3 look) {
+        Vec3 horizontal = new Vec3(look.x, 0, look.z);
+        if (horizontal.lengthSqr() < 1.0e-6) horizontal = new Vec3(0, 0, 1);
+        ACTIVE.put(target.getUUID(), new Slam(level.dimension(), caster.getUUID(),
+                target.getUUID(), horizontal.normalize(), p, level.getGameTime()));
+        EffectHelper.psychoBurst(level, target.getX(), target.getY() + 0.8,
+                target.getZ(), 18, 0.45);
+        level.playSound(null, target.blockPosition(), SoundEvents.ENDER_DRAGON_GROWL,
+                caster.getSoundSource(), 0.75F, 1.35F);
+    }
+
+    /**
+     * Mob path: slams {@code context.target()} if it lies within the player's reach (4 + 4p along the
+     * aim), in clear sight, and is a target the mob may hurt. No target, no cast. No payment or experience.
+     */
+    @Override
+    public boolean mobCast(MobCastContext context) {
+        LivingEntity caster = context.caster();
+        LivingEntity target = context.target();
+        if (target == null || !target.isAlive() || target.level() != context.level()
+                || !AcademyDamageHelper.allowsTarget(caster, target)) return false;
+        float p = context.proficiency();
+        Vec3 eye = context.eye();
+        Vec3 reach = eye.add(context.look().normalize().scale(4 + 4 * Math.clamp(p, 0, 1)));
+        if (!target.getBoundingBox().contains(eye) && target.getBoundingBox().clip(eye, reach).isEmpty()) return false;
+        if (!SkillRaycast.hasClearPath(caster, target)) return false;
+        start(caster, context.level(), target, p, context.look());
+        return true;
+    }
+
+    @Override public int mobCooldownTicks(float p) { return getCooldownTicks(p); }
 
     private static LivingEntity findTarget(ServerPlayer player, float p) {
         Vec3 from = player.getEyePosition();
@@ -81,7 +109,7 @@ public final class PsychoSlamEffect implements DynamicOneShotSkillEffect {
             ServerLevel level = event.getServer().getLevel(slam.dimension());
             Entity ownerEntity = level == null ? null : level.getEntity(slam.owner());
             Entity targetEntity = level == null ? null : level.getEntity(slam.target());
-            if (!(ownerEntity instanceof ServerPlayer owner) || !(targetEntity instanceof LivingEntity target)
+            if (!(ownerEntity instanceof LivingEntity owner) || !(targetEntity instanceof LivingEntity target)
                     || !owner.isAlive() || !target.isAlive()) {
                 ACTIVE.remove(slam.target(), slam);
                 continue;
