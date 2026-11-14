@@ -110,6 +110,7 @@ public final class ACConfig {
             builder.pop();
 
             MachineConfig.define(builder);
+            MobCastConfig.define(builder);
 
             SPEC = builder.build();
         }

@@ -72,6 +72,17 @@ public final class AbilityEvents {
         public float getAmount(){return amount;}
         public void setAmount(float amount){this.amount=Float.isFinite(amount)?Math.max(0,amount):0;}
     }
+    /** Fired before a non-player entity casts a skill through AcademyMobAbilities; cancel to refuse it. */
+    public static final class MobSkillCast extends Event implements net.neoforged.bus.api.ICancellableEvent {
+        public final net.minecraft.world.entity.LivingEntity caster;
+        public final Skill skill;
+        public final float proficiency;
+        public final @org.jetbrains.annotations.Nullable net.minecraft.world.entity.LivingEntity target;
+        public MobSkillCast(net.minecraft.world.entity.LivingEntity caster, Skill skill, float proficiency,
+                            net.minecraft.world.entity.LivingEntity target) {
+            this.caster=caster;this.skill=skill;this.proficiency=proficiency;this.target=target;
+        }
+    }
     public static final class SkillLearned extends AbilityEvent {
         public final Skill skill;
         public SkillLearned(Player p,Skill skill){super(p);this.skill=skill;}

@@ -18,4 +18,11 @@ public class AcademyAttachments {
                             .serialize(new PlayerAbilityDataCodec())
                             .copyOnDeath()
                             .build());
+
+    /** Skills a non-player entity knows; see {@link com.mohistmc.academy.api.mob.MobAbilityData}. */
+    public static final Supplier<AttachmentType<com.mohistmc.academy.api.mob.MobAbilityData>> MOB_ABILITY =
+            ATTACHMENT_TYPES.register("mob_ability",
+                    () -> AttachmentType.builder(com.mohistmc.academy.api.mob.MobAbilityData::new)
+                            .serialize(com.mohistmc.academy.api.mob.MobAbilityData.CODEC)
+                            .build());
 }
