@@ -295,6 +295,18 @@ public class PlayerAbilityData {
     }
 
     /** CPData.canPerform: creative always affords the CP, otherwise the current pool must cover it. */
+    /** Transient: the CP a dynamic cost check last asked for and could not get (reject feedback only). */
+    private transient float lastCpShortfall;
+
+    public void noteCpShortfall(float neededCp) { lastCpShortfall = neededCp; }
+
+    /** The CP a failed cost check needed, if the player still cannot afford it; 0 otherwise. Clears the note. */
+    public float takeCpShortfall() {
+        float needed = lastCpShortfall;
+        lastCpShortfall = 0;
+        return needed > 0 && !canAffordCp(needed) ? needed : 0;
+    }
+
     public boolean canAffordCp(float cp) {
         return creativeExempt || currentCp >= cp;
     }

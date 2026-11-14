@@ -25,7 +25,9 @@ public final class DynamicSkillRules {
  public static boolean canPay(PlayerAbilityData data,String id,float rawCp,float rawOverload){
   if(!enabled(id))return false;if(data.isDevMode())return true;float cp=cp(id,rawCp),ol=overload(id,rawOverload);
   // CPData.perform: only CP gates a cast; overload clamps at its cap and then locks every skill.
-  return cp>=0&&ol>=0&&!data.isOverloadLocked()&&data.canAffordCp(cp);
+  if(cp>=0&&ol>=0&&!data.isOverloadLocked()&&data.canAffordCp(cp))return true;
+  if(cp>0&&!data.canAffordCp(cp))data.noteCpShortfall(cp);
+  return false;
  }
  public static void addExp(ServerPlayer player,PlayerAbilityData data,String id,float raw){
   AbilityMutationService.addSkillExp(player,data,id,exp(id,raw));
