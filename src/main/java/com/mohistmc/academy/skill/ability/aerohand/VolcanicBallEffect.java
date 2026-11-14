@@ -10,5 +10,5 @@ public final class VolcanicBallEffect extends AeroProjectileEffect {
     @Override public float rawCp(float p) { return lerpf(40, 100, p); }
     @Override public float rawOverload(float p) { return lerpf(40, 30, p); }
     @Override protected float activationExp(float p) { return lerpf(0.002F, 0.001F, p); }
-    @Override public int getCooldownTicks(float p) { return Math.round(lerpf(20, 5, Math.clamp(p, 0, 1))); }
+    @Override public int getCooldownTicks(float p) { return (int) lerpf(20, 5, Math.clamp(p, 0, 1)); }
 }

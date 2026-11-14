@@ -48,7 +48,7 @@ class LegacyActiveSkillParityContractTest {
         assertTrue(shield.contains("lerpf(5, 3, state.exp), lerpf(50, 30, state.exp)"));
         assertTrue(scatter.contains("onChargingAbort") && scatter.contains("fire(player, data, state)"));
         assertTrue(mag.contains("getSessionTimeoutTicks(PlayerAbilityData data){return Integer.MAX_VALUE;"));
-        assertTrue(accel.contains("directionFromRotation(player.getXRot() - 10.0F"));
+        assertTrue(accel.contains("directionFromRotation(pitch - 10.0F") && accel.contains("player.getXRot(), player.getYRot()"));
         assertTrue(ground.contains("LegacyPlotter") && ground.contains("{1.0, 0.7, 0.7, 0.3, 0.3}"));
     }
 

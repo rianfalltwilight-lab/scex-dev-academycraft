@@ -1,13 +1,14 @@
 package com.mohistmc.academy.skill.ability.telekinesis;
 
 import com.mohistmc.academy.config.DynamicSkillRules;
-import com.mohistmc.academy.skill.ability.SkillRaycast;
 import com.mohistmc.academy.skill.AcademyDamageHelper;
 import com.mohistmc.academy.skill.AbilityCategory;
 import com.mohistmc.academy.skill.ChargingSkillEffect;
 import com.mohistmc.academy.skill.PlayerAbilityData;
 import com.mohistmc.academy.world.effect.EffectHelper;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import net.minecraft.server.level.ServerLevel;
@@ -17,10 +18,21 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
-/** Held paper drill: consumes one stack once, then follows the server-authoritative look ray. */
+/**
+ * Paper drill: consumes one stack once, then drills along the server-authoritative look.
+ *
+ * <p>ExtraAcC bound it with {@code KeyDelegates.contextActivate}: the first press starts the
+ * context, releasing the key does nothing, and a second press (or running out of CP) ends it.
+ * Within the charging framework that is the StormWing toggle shape: the client routes the
+ * second press as the release, {@link #canRelease} only accepts a paid running drill, and the
+ * session has no hard lifetime.
+ */
 public final class PaperDrillEffect implements ChargingSkillEffect {
+    private static final int COOLDOWN_TICKS = 100;
+
     private static float startCp(float proficiency) {
         return 20F * (200F - 100F * Math.clamp(proficiency, 0, 1));
     }
@@ -65,11 +77,18 @@ public final class PaperDrillEffect implements ChargingSkillEffect {
         }
     }
 
+    /** Whether a paid drill is currently running for this player. */
+    public static boolean isDrilling(ServerPlayer player) {
+        State state = ACTIVE.get(player.getUUID());
+        return state != null && state.paid;
+    }
+
     @Override
     public boolean onChargingTick(ServerPlayer player, PlayerAbilityData data, int ticks) {
         State state = ACTIVE.get(player.getUUID());
         if (state == null) return false;
         if (!state.paid) {
+            var beforePayment = data.captureDynamicResources();
             if (!canStartCharging(player, data)
                     || !DynamicSkillRules.tryPay(data, getId(), startCp(state.proficiency),
                     startOverload(state.proficiency))) {
@@ -77,8 +96,10 @@ public final class PaperDrillEffect implements ChargingSkillEffect {
                 return false;
             }
             if (!consumePaper(player, TelekinesisRules.PAPER_DRILL_REQUIRED_PAPER)) {
-                data.refundDynamic(DynamicSkillRules.cp(getId(), startCp(state.proficiency)),
-                        DynamicSkillRules.overload(getId(), startOverload(state.proficiency)));
+                // Undo exactly this payment, including any overload lockout it latched
+                // (and nothing at all in creative, where nothing was paid).
+                data.rollbackDynamicPayment(beforePayment, data.captureDynamicResources());
+                data.consumeOverloadTrigger();
                 ACTIVE.remove(player.getUUID());
                 return false;
             }
@@ -88,28 +109,23 @@ public final class PaperDrillEffect implements ChargingSkillEffect {
                     SoundEvents.TRIDENT_THROW, SoundSource.PLAYERS, 1.0f, 0.65f);
         }
         if (!DynamicSkillRules.tryPay(data, getId(), 1F, 0)) {
-            ACTIVE.remove(player.getUUID());
-            givePaper(player);
+            stop(player, data);
             return false;
         }
         DynamicSkillRules.addExp(player, data, getId(), 0.0001F);
         float proficiency = state.proficiency;
         Vec3 from = player.getEyePosition();
-        Vec3 intended = from.add(player.getLookAngle().normalize()
+        Vec3 to = from.add(player.getLookAngle().normalize()
                 .scale(TelekinesisRules.paperDrillRange(proficiency)));
         ServerLevel level = player.serverLevel();
-        var trace = SkillRaycast.trace(player, from, intended);
-        Vec3 to = trace.end();
 
         if ((ticks & 1) == 0) renderDrill(level, from, to);
         if (ticks % TelekinesisRules.PAPER_DRILL_PULSE_INTERVAL == 0) {
             float damage = DynamicSkillRules.damage(getId(),
                     TelekinesisRules.paperDrillDamage(proficiency));
-            for (var hit : trace.hits()) {
-                LivingEntity target = hit.entity();
+            for (LivingEntity target : targets(player, from, to)) {
                 if (!DynamicSkillRules.tryPay(data, getId(), 100F * target.getBbHeight(), 0)) {
-                    ACTIVE.remove(player.getUUID());
-                    givePaper(player);
+                    stop(player, data);
                     return false;
                 }
                 DynamicSkillRules.addExp(player, data, getId(), 0.002F);
@@ -119,15 +135,39 @@ public final class PaperDrillEffect implements ChargingSkillEffect {
         return true;
     }
 
+    /**
+     * EntityPaperDrill queried every living entity in the axis-aligned box spanned by the eye
+     * and eye + 5 * look. It did not ray-trace, so blocks never shielded a target.
+     */
+    static List<LivingEntity> targets(ServerPlayer player, Vec3 from, Vec3 to) {
+        return player.serverLevel().getEntitiesOfClass(LivingEntity.class, new AABB(from, to),
+                        entity -> entity != player && entity.isAlive() && entity.isPickable()
+                                && !player.isAlliedTo(entity) && AcademyDamageHelper.allowsTarget(entity))
+                .stream().sorted(Comparator.comparingInt(LivingEntity::getId)).toList();
+    }
+
     @Override
     public TickResult getTickResult(ServerPlayer player, PlayerAbilityData data, int ticks) {
         return onChargingTick(player, data, ticks) ? TickResult.CONTINUE : TickResult.ABORT_RESOURCE;
     }
 
+    /** Only the second press of the toggle reaches here; the drill has no maximum duration. */
+    @Override
+    public boolean canRelease(ServerPlayer player, PlayerAbilityData data, int ticks) {
+        return ticks >= getMinChargeTicks(data) && isDrilling(player);
+    }
+
+    @Override
+    public int getSessionTimeoutTicks(PlayerAbilityData data) {
+        return Integer.MAX_VALUE;
+    }
+
     @Override public boolean tryRelease(ServerPlayer player, PlayerAbilityData data, int ticks) {
-        State state = ACTIVE.remove(player.getUUID());
-        if (state != null && state.paid) givePaper(player);
-        return state != null && state.paid;
+        if (!canRelease(player, data, ticks)) return false;
+        ACTIVE.remove(player.getUUID());
+        givePaper(player);
+        // The release path applies getCooldownTicks (100) itself.
+        return true;
     }
 
     @Override public void onChargingRelease(ServerPlayer player, PlayerAbilityData data, int ticks) {
@@ -135,17 +175,25 @@ public final class PaperDrillEffect implements ChargingSkillEffect {
     }
 
     @Override public void onChargingAbort(ServerPlayer player, PlayerAbilityData data) {
-        State state = ACTIVE.remove(player.getUUID());
-        if (state != null && state.paid) givePaper(player);
+        State state = ACTIVE.get(player.getUUID());
+        if (state != null && state.paid) stop(player, data);
+        else ACTIVE.remove(player.getUUID());
+    }
+
+    /** ExtraAcC's s_terminate set the 100-tick cooldown on every end, including CP run-out. */
+    private void stop(ServerPlayer player, PlayerAbilityData data) {
+        ACTIVE.remove(player.getUUID());
+        givePaper(player);
+        if (!data.isDevMode()) data.setCooldown(getId(), COOLDOWN_TICKS);
     }
 
     @Override public int getMinChargeTicks() { return 1; }
     @Override public int getMaxChargeTicks() { return 72_000; }
     @Override public int getCooldownTicks(float proficiency) {
-        return 100;
+        return COOLDOWN_TICKS;
     }
     @Override public int getCooldownTicks(float proficiency, int chargedTicks) {
-        return 100;
+        return COOLDOWN_TICKS;
     }
     @Override public void execute(ServerPlayer player, PlayerAbilityData data) {}
 

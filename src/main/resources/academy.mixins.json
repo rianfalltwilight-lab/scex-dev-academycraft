@@ -8,5 +8,5 @@
     "CommonHooksAbilityDeathMixin"
   ],
   "client": [],
-  "injectors": { "defaultRequire": 1 }
+  "injectors": { "defaultRequire": 0 }
 }

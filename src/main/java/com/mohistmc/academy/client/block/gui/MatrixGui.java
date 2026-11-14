@@ -7,6 +7,7 @@ import com.mohistmc.academy.network.InitMatrixPacket;
 import com.mohistmc.academy.network.MatrixConfigPacket;
 import com.mohistmc.academy.network.NetworkInputLimits;
 import com.mohistmc.academy.world.menu.MatrixMenu;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -28,6 +29,7 @@ public class MatrixGui extends AcademyBaseUI<MatrixMenu> {
     private static final int BUTTON_X = 6;
     private static final int BUTTON_W = PANEL_W - 12;
     private static final int BUTTON_H = 16;
+    private static final int RED_TEXT = 0xFF000000 | ChatFormatting.RED.getColor();
 
     private boolean editingSsid;
     private boolean editingPassword;
@@ -74,34 +76,39 @@ public class MatrixGui extends AcademyBaseUI<MatrixMenu> {
         int px = this.leftPos + PANEL_X;
         int py = this.topPos + PANEL_Y;
         InfoArea.drawPanel(graphics, px, py, PANEL_W, PANEL_H);
-        graphics.drawString(font, menu.isOperational() ? "§a已初始化"
-                        : menu.isInitialized() ? "§e网络暂停（缺少组件）" : "§e初始化矩阵",
+        graphics.drawString(font, menu.isOperational()
+                        ? Component.translatable("ac.gui.matrix.status.operational").withStyle(ChatFormatting.GREEN)
+                        : Component.translatable(menu.isInitialized()
+                                ? "ac.gui.matrix.status.paused" : "ac.gui.matrix.status.uninitialized")
+                                .withStyle(ChatFormatting.YELLOW),
                 px + 6, py + 7, 0xFFFFFFFF, false);
 
         String ssid = editingSsid ? ssidInput + "▌"
                 : menu.isInitialized() ? com.mohistmc.academy.client.gui.WirelessDisplayName.display(ssidInput.toString())
-                : ssidInput.isEmpty() ? "点击设置" : ssidInput.toString();
+                : ssidInput.isEmpty() ? tr("ac.gui.matrix.click_to_set") : ssidInput.toString();
         graphics.drawString(font, trim("SSID: " + ssid), px + 6, py + 23, 0xFFCCCCCC, false);
         String password = passwordEdited ? "*".repeat(passwordInput.length()) + (editingPassword ? "▌" : "")
-                : menu.hasPasswordConfigured() ? "点击修改" : "无";
-        graphics.drawString(font, trim("密码: " + password), px + 6, py + 36, 0xFFCCCCCC, false);
+                : tr(menu.hasPasswordConfigured() ? "ac.gui.matrix.click_to_change" : "ac.gui.matrix.password_none");
+        graphics.drawString(font, trim(tr("ac.gui.matrix.password", password)), px + 6, py + 36, 0xFFCCCCCC, false);
 
         if (menu.isInitialized()) {
-            graphics.drawString(font, "容量: " + menu.getCapacity(), px + 6, py + 53, 0xFFAAAAAA, false);
-            graphics.drawString(font, "带宽: " + menu.getBandwidth() + " IF/t", px + 6, py + 66, 0xFFAAAAAA, false);
-            graphics.drawString(font, "范围: " + menu.getRange() + " 格", px + 6, py + 79, 0xFFAAAAAA, false);
-            graphics.drawString(font, trim("所有者: " + menu.getOwnerLabel()),
+            graphics.drawString(font, Component.translatable("ac.gui.matrix.capacity", menu.getCapacity()), px + 6, py + 53, 0xFFAAAAAA, false);
+            graphics.drawString(font, Component.translatable("ac.gui.matrix.bandwidth", menu.getBandwidth()), px + 6, py + 66, 0xFFAAAAAA, false);
+            graphics.drawString(font, Component.translatable("ac.gui.matrix.range", menu.getRange()), px + 6, py + 79, 0xFFAAAAAA, false);
+            graphics.drawString(font, trim(tr("ac.gui.matrix.owner", menu.getOwnerLabel())),
                     px + 6, py + 92, 0xFF888888, false);
             if (!menu.isOperational()) {
-                graphics.drawString(font, trim("§c补齐核心与三块约束板后自动恢复"), px + 6, py + 106,
-                        0xFFFFFFFF, false);
+                graphics.drawString(font, trim(tr("ac.gui.matrix.restore_hint")), px + 6, py + 106,
+                        RED_TEXT, false);
             }
             graphics.drawString(font, trim(!saveStatus.isEmpty() ? saveStatus : ssidEdited || passwordEdited
-                            ? "有修改，回车保存" : menu.canEdit() ? "点字段，回车保存" : "在节点无线页选择"),
+                            ? tr("ac.gui.matrix.hint.unsaved") : menu.canEdit() ? tr("ac.gui.matrix.hint.edit")
+                            : tr("ac.gui.matrix.hint.read_only")),
                     px + 6, py + 121, 0xFF8FBBD0, false);
         } else {
             graphics.drawString(font, menu.hasInitializationMaterials()
-                            ? "§a核心与约束板已就绪" : "§c需要核心与三块约束板",
+                            ? Component.translatable("ac.gui.matrix.materials_ready").withStyle(ChatFormatting.GREEN)
+                            : Component.translatable("ac.gui.matrix.materials_missing").withStyle(ChatFormatting.RED),
                     px + 6, py + 58, 0xFFFFFFFF, false);
             graphics.drawString(font, trim(saveStatus), px + 6, py + 106, 0xFF8FBBD0, false);
             drawButton(graphics, px + BUTTON_X, py + 78, Component.literal("INIT"),
@@ -123,7 +130,7 @@ public class MatrixGui extends AcademyBaseUI<MatrixMenu> {
                 pendingTicks = 0;
                 pendingSsid = ssidInput.isEmpty() ? "Unnamed" : ssidInput.toString();
                 pendingPassword = passwordInput.toString();
-                saveStatus = "保存中…";
+                saveStatus = tr("ac.gui.common.saving");
                 PacketDistributor.sendToServer(new InitMatrixPacket(pendingToken, menu.pos, pendingSsid, pendingPassword));
                 editingSsid = editingPassword = false;
                 return true;
@@ -212,7 +219,7 @@ public class MatrixGui extends AcademyBaseUI<MatrixMenu> {
         if (pendingToken != null && ++pendingTicks > 200) {
             pendingToken = null;
             pendingSsid = pendingPassword = null;
-            saveStatus = "未确认，请重试";
+            saveStatus = tr("ac.gui.matrix.unconfirmed");
         }
     }
 
@@ -224,18 +231,18 @@ public class MatrixGui extends AcademyBaseUI<MatrixMenu> {
 
     private void submitConfig() {
         if (pendingToken != null) return;
-        if (!menu.actionSessionReady()) { saveStatus = "同步中，请回车"; return; }
-        if (!menu.canEdit() || menu.pos == null) { saveStatus = "无权修改"; return; }
+        if (!menu.actionSessionReady()) { saveStatus = tr("ac.gui.common.syncing"); return; }
+        if (!menu.canEdit() || menu.pos == null) { saveStatus = tr("ac.gui.matrix.no_permission"); return; }
         if (!ssidEdited && !passwordEdited) return;
         if (ssidEdited && !NetworkInputLimits.validRequired(ssidInput.toString(), NetworkInputLimits.SSID)) {
-            saveStatus = "SSID 不能为空";
+            saveStatus = tr("ac.gui.matrix.ssid_empty");
             return;
         }
         pendingToken = menu.nextActionToken();
         pendingTicks = 0;
         pendingSsid = ssidEdited ? ssidInput.toString() : null;
         pendingPassword = passwordEdited ? passwordInput.toString() : null;
-        saveStatus = "保存中…";
+        saveStatus = tr("ac.gui.common.saving");
         // Submit every edited field, never an untouched opening snapshot.
         PacketDistributor.sendToServer(new MatrixConfigPacket(pendingToken, menu.pos,
                 java.util.Optional.ofNullable(pendingSsid), java.util.Optional.ofNullable(pendingPassword)));
@@ -244,7 +251,7 @@ public class MatrixGui extends AcademyBaseUI<MatrixMenu> {
 
     public void acceptMatrixConfigResult(com.mohistmc.academy.network.MatrixConfigResultPacket result) {
         if (!result.pos().equals(menu.pos) || !result.actionToken().equals(pendingToken)) return;
-        saveStatus = result.accepted() ? "已保存" : "保存失败，请重试";
+        saveStatus = tr(result.accepted() ? "ac.gui.matrix.saved" : "ac.gui.matrix.save_failed");
         if (result.accepted()) {
             ssidInput.setLength(0);
             ssidInput.append(result.ssid());
@@ -271,6 +278,10 @@ public class MatrixGui extends AcademyBaseUI<MatrixMenu> {
         graphics.fill(x, y, x + BUTTON_W, y + BUTTON_H, color);
         graphics.drawCenteredString(font, label, x + BUTTON_W / 2, y + 4,
                 enabled ? 0xFFFFFFFF : 0xFF999999);
+    }
+
+    private static String tr(String key, Object... args) {
+        return Component.translatable(key, args).getString();
     }
 
     private String trim(String value) {

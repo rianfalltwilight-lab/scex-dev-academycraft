@@ -41,7 +41,7 @@ public abstract class LivingEntityAbilityBoundaryMixin {
 
     @Inject(method = "hurt", at = @At(value = "FIELD",
             target = "Lnet/minecraft/world/entity/LivingEntity;lastHurt:F", opcode = Opcodes.PUTFIELD, ordinal = 1),
-            require = 1)
+            require = 0)
     private void academy$beforeNormalBranchWrites(DamageSource source, float amount,
                                                    CallbackInfoReturnable<Boolean> result) {
         if ((Object) this instanceof ServerPlayer player) {
@@ -53,7 +53,7 @@ public abstract class LivingEntityAbilityBoundaryMixin {
 
     @Inject(method = "hurt", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/entity/LivingEntity;actuallyHurt(Lnet/minecraft/world/damagesource/DamageSource;F)V"),
-            cancellable = true, require = 2, order = 900)
+            cancellable = true, require = 0, order = 900)
     private void academy$settleAcceptedHit(DamageSource source, float originalAmount,
                                            CallbackInfoReturnable<Boolean> result) {
         if (!((Object) this instanceof ServerPlayer player)) return;
@@ -76,7 +76,7 @@ public abstract class LivingEntityAbilityBoundaryMixin {
 
     @ModifyArg(method = "hurt", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/entity/LivingEntity;actuallyHurt(Lnet/minecraft/world/damagesource/DamageSource;F)V"),
-            index = 1, require = 2, order = 1000)
+            index = 1, require = 0, order = 1000)
     private float academy$settledAmount(float amount) {
         return (Object) this instanceof ServerPlayer ? damageContainers.peek().getNewDamage() : amount;
     }

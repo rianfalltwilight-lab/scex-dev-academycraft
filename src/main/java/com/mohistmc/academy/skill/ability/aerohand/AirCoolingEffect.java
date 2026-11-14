@@ -55,7 +55,7 @@ public class AirCoolingEffect implements com.mohistmc.academy.skill.ability.Dyna
 
     @Override
     public int getCooldownTicks(float proficiency) {
-        return Math.round(300 - 240 * Math.clamp(proficiency, 0.0f, 1.0f));
+        return (int) (300 - 240 * Math.clamp(proficiency, 0.0f, 1.0f));
     }
 }
 

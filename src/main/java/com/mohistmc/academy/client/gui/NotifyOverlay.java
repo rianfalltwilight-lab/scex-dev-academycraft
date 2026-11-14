@@ -21,6 +21,9 @@ public class NotifyOverlay {
     private static final int MAX_NOTIFICATIONS = 3;
     private static final long DURATION_MS = 5000;
     private static final long FADE_MS = 500;
+    /** A frame gap longer than this means the overlay was hidden rather than just a slow frame. */
+    private static final long HIDDEN_GAP_MS = 250;
+    private static long lastVisibleFrame;
 
     private static final List<Notification> notifications = new ArrayList<>();
 
@@ -63,6 +66,11 @@ public class NotifyOverlay {
         long now = System.currentTimeMillis();
 
         synchronized (notifications) {
+            // Time spent hidden (a screen open, F1) does not count toward a notice's lifetime,
+            // so a tutorial unlock raised while the terminal is open is still shown afterwards.
+            long gap = lastVisibleFrame == 0 ? 0 : now - lastVisibleFrame;
+            if (gap > HIDDEN_GAP_MS) for (Notification n : notifications) n.time += gap;
+            lastVisibleFrame = now;
             notifications.removeIf(n -> now - n.time > DURATION_MS + FADE_MS);
 
             int notifW = 220;
@@ -92,10 +100,10 @@ public class NotifyOverlay {
                     textX = x + 26;
                 }
 
-                int titleColor = (int)(alpha * 255) << 24 | 0xFFFFFF;
-                g.drawString(mc.font, n.title, textX, y + 6, titleColor, false);
-                int contentColor = (int)(alpha * 200) << 24 | 0xCCDDEE;
-                g.drawString(mc.font, n.content, textX, y + 24, contentColor, false);
+                // Font treats an alpha below 4 as opaque, which flashed the text at both fade ends.
+                int titleAlpha = (int)(alpha * 255), contentAlpha = (int)(alpha * 200);
+                if (titleAlpha >= 4) g.drawString(mc.font, n.title, textX, y + 6, titleAlpha << 24 | 0xFFFFFF, false);
+                if (contentAlpha >= 4) g.drawString(mc.font, n.content, textX, y + 24, contentAlpha << 24 | 0xCCDDEE, false);
 
                 y += notifH + 4;
             }
@@ -106,7 +114,7 @@ public class NotifyOverlay {
         final String title;
         final String content;
         final ResourceLocation icon;
-        final long time;
+        long time;
 
         Notification(String title, String content, long time) {
             this(title, content, null, time);

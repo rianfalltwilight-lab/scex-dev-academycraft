@@ -28,8 +28,11 @@ public abstract class BaseNodeBlockEntity extends AcademyContainerBlockEntity im
     private static final double DEFAULT_BANDWIDTH = 50;
 
     private double energy = 0;
+    /** Client mirror only; the server reads {@link #tier()} from the machine config. */
     private double maxEnergy = DEFAULT_MAX_ENERGY;
     private double bandwidth = DEFAULT_BANDWIDTH;
+    /** True once a public update tag was applied: this instance mirrors server numbers. */
+    private boolean clientMirror;
     public static final String DEFAULT_NODE_NAME = "Unnamed";
     private String nodeName = DEFAULT_NODE_NAME;
     private String password = "";
@@ -44,6 +47,9 @@ public abstract class BaseNodeBlockEntity extends AcademyContainerBlockEntity im
     public BaseNodeBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
         setItems(NonNullList.withSize(getContainerSize(), ItemStack.EMPTY));
+        // Seed the client mirror; tier() only reads static config holders.
+        maxEnergy = tier().maxEnergy.get();
+        bandwidth = tier().bandwidth.get();
     }
 
     @Override
@@ -51,9 +57,18 @@ public abstract class BaseNodeBlockEntity extends AcademyContainerBlockEntity im
         return 2;
     }
 
-    /** 子类实现 — 返回节点等级对应的信号范围（IWirelessNode 接口） */
+    /** Server config section of this node tier ({@code machines.node.<tier>}). */
+    protected abstract com.mohistmc.academy.config.MachineConfig.NodeTier tier();
+
+    private boolean mirrorsServer() {
+        return clientMirror || level != null && level.isClientSide();
+    }
+
+    /** 节点等级对应的信号范围（IWirelessNode 接口）, read from the machine config. */
     @Override
-    public abstract double getRange();
+    public double getRange() {
+        return tier().range.get();
+    }
 
     /** 是否已连接到矩阵网络 */
     public boolean isConnected() {
@@ -85,6 +100,10 @@ public abstract class BaseNodeBlockEntity extends AcademyContainerBlockEntity im
     public void serverTick() {
         if (level == null || level.isClientSide()) return;
         refreshConnectionState();
+        // A lowered machines.node.*.maxEnergy applies to placed nodes: clamp, never grow.
+        if (energy > getMaxEnergy()) setEnergy(getMaxEnergy());
+        double maxEnergy = getMaxEnergy();
+        double bandwidth = getBandwidth();
 
         int limit = !Double.isFinite(bandwidth) || bandwidth <= 0
                 ? 0 : (int) Math.min(Integer.MAX_VALUE, Math.floor(bandwidth));
@@ -132,6 +151,7 @@ public abstract class BaseNodeBlockEntity extends AcademyContainerBlockEntity im
         BlockState state = getBlockState();
         var raw = state.getBlock().getStateDefinition().getProperty("working");
         if (!(raw instanceof IntegerProperty energyProperty)) return;
+        double maxEnergy = getMaxEnergy();
         int wanted = maxEnergy > 0 && Double.isFinite(maxEnergy)
                 ? Math.clamp((int) Math.round(4.0 * energy / maxEnergy), 0, 4) : 0;
         if (state.getValue(energyProperty) != wanted) {
@@ -142,14 +162,14 @@ public abstract class BaseNodeBlockEntity extends AcademyContainerBlockEntity im
     // ==================== IWirelessNode ====================
 
     @Override
-    public double getMaxEnergy() { return maxEnergy; }
+    public double getMaxEnergy() { return mirrorsServer() ? maxEnergy : tier().maxEnergy.get(); }
 
     @Override
     public double getEnergy() { return energy; }
 
     @Override
     public void setEnergy(double value) {
-        double bounded = com.mohistmc.academy.energy.impl.EnergyBoundary.bounded(value, maxEnergy);
+        double bounded = com.mohistmc.academy.energy.impl.EnergyBoundary.bounded(value, getMaxEnergy());
         if (Double.compare(energy, bounded) == 0) return;
         this.energy = bounded;
         markMachineChanged();
@@ -157,12 +177,12 @@ public abstract class BaseNodeBlockEntity extends AcademyContainerBlockEntity im
     }
 
     @Override
-    public double getBandwidth() { return bandwidth; }
+    public double getBandwidth() { return mirrorsServer() ? bandwidth : tier().bandwidth.get(); }
 
+    /** Maximum linked generators plus receivers ({@code machines.node.<tier>.maxConnections}). */
     @Override
     public int getCapacity() {
-        // 子类可覆盖以提供不同的负载容量
-        return 10;
+        return tier().maxConnections.get();
     }
 
     @Override
@@ -195,8 +215,6 @@ public abstract class BaseNodeBlockEntity extends AcademyContainerBlockEntity im
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
         }
     }
-    public void setMaxEnergy(double maxEnergy) { this.maxEnergy = boundedFinite(maxEnergy, DEFAULT_MAX_ENERGY, 1_000_000_000); energy = com.mohistmc.academy.energy.impl.EnergyBoundary.bounded(energy, this.maxEnergy); setChanged(); updateEnergyModel(); }
-    public void setBandwidth(double bandwidth) { this.bandwidth = boundedFinite(bandwidth, DEFAULT_BANDWIDTH, 1_000_000); setChanged(); }
 
     public long getConfigRevision() { return configRevision; }
     public boolean hasPasswordConfigured() {
@@ -238,13 +256,16 @@ public abstract class BaseNodeBlockEntity extends AcademyContainerBlockEntity im
     @Override
     public void loadAdditional(CompoundTag tag, HolderLookup.Provider provider) {
         super.loadAdditional(tag, provider);
+        // Only update tags carry node_public_config; saved node_maxEnergy/node_bandwidth are
+        // informational, the server always uses the current machine config.
+        if (tag.getBoolean("node_public_config")) clientMirror = true;
         if (tag.contains("node_maxEnergy")) maxEnergy = boundedFinite(tag.getDouble("node_maxEnergy"), DEFAULT_MAX_ENERGY, 1_000_000_000);
         // Final 1.12.2 used energy/nodeName/password.  Earlier rebuilt jars
         // switched to snake_case without an importer, so an upgraded node
         // silently reopened as Unnamed. Prefer the current schema but accept
         // the official keys once and persist them in the current form later.
-        if (tag.contains("node_energy")) energy = com.mohistmc.academy.energy.impl.EnergyBoundary.bounded(tag.getDouble("node_energy"), maxEnergy);
-        else if (tag.contains("energy")) energy = com.mohistmc.academy.energy.impl.EnergyBoundary.bounded(tag.getDouble("energy"), maxEnergy);
+        if (tag.contains("node_energy")) energy = com.mohistmc.academy.energy.impl.EnergyBoundary.bounded(tag.getDouble("node_energy"), getMaxEnergy());
+        else if (tag.contains("energy")) energy = com.mohistmc.academy.energy.impl.EnergyBoundary.bounded(tag.getDouble("energy"), getMaxEnergy());
         if (tag.contains("node_bandwidth")) bandwidth = boundedFinite(tag.getDouble("node_bandwidth"), DEFAULT_BANDWIDTH, 1_000_000);
         long loadedRevision = Math.max(0L, tag.getLong("node_config_revision"));
         boolean newInstance = tag.hasUUID("node_instance_id")
@@ -283,8 +304,8 @@ public abstract class BaseNodeBlockEntity extends AcademyContainerBlockEntity im
     public void saveAdditional(CompoundTag tag, HolderLookup.Provider provider) {
         super.saveAdditional(tag, provider);
         tag.putDouble("node_energy", energy);
-        tag.putDouble("node_maxEnergy", maxEnergy);
-        tag.putDouble("node_bandwidth", bandwidth);
+        tag.putDouble("node_maxEnergy", getMaxEnergy());
+        tag.putDouble("node_bandwidth", getBandwidth());
         tag.putString("node_name", nodeName);
         tag.putString("node_pass", password);
         tag.putLong("node_config_revision", configRevision);
@@ -301,8 +322,8 @@ public abstract class BaseNodeBlockEntity extends AcademyContainerBlockEntity im
         // every tracking client would otherwise receive the plaintext node
         // password.  Only state required by the screen/model is mirrored.
         tag.putDouble("node_energy", energy);
-        tag.putDouble("node_maxEnergy", maxEnergy);
-        tag.putDouble("node_bandwidth", bandwidth);
+        tag.putDouble("node_maxEnergy", getMaxEnergy());
+        tag.putDouble("node_bandwidth", getBandwidth());
         tag.putString("node_name", nodeName);
         tag.putBoolean("node_public_config", true);
         // Deliberately absent from saveAdditional: identity belongs to this loaded instance.

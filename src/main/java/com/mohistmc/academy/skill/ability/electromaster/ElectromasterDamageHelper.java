@@ -7,17 +7,25 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Creeper;
 
 /** Shared observable behavior of AcademyCraft 1.0.7's package-private EMDamageHelper. */
 final class ElectromasterDamageHelper {
     private ElectromasterDamageHelper() {}
 
-    static boolean attack(ServerPlayer attacker, Entity target, DamageSource source, float damage) {
+    /**
+     * Player or mob caster.  A mob only powers creepers it may hit, and only players earn the
+     * charged-creeper advancement.
+     */
+    static boolean attack(LivingEntity attacker, Entity target, DamageSource source, float damage) {
         boolean hurt = AcademyDamageHelper.hurt(attacker, target, source, damage);
-        if (target instanceof Creeper creeper && attacker.serverLevel().random.nextFloat() < .3f) {
-            powerWithoutLightningDamage(attacker.serverLevel(), creeper);
-            LegacyAdvancementBridge.electromasterChargedCreeper(attacker);
+        if (!(attacker.level() instanceof ServerLevel level)) return hurt;
+        if (target instanceof Creeper creeper
+                && (attacker instanceof ServerPlayer || AcademyDamageHelper.allowsTarget(attacker, target))
+                && level.random.nextFloat() < .3f) {
+            powerWithoutLightningDamage(level, creeper);
+            if (attacker instanceof ServerPlayer player) LegacyAdvancementBridge.electromasterChargedCreeper(player);
         }
         return hurt;
     }

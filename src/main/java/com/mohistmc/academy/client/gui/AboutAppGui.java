@@ -150,7 +150,9 @@ public final class AboutAppGui extends Screen {
                 minecraft.keyboardHandler.setClipboard(hoveredUrl);
                 if (minecraft.player != null) {
                     minecraft.player.displayClientMessage(
-                            Component.literal("§7[AcademyCraft] §b链接已复制: " + hoveredUrl), true);
+                            Component.literal("[AcademyCraft] ").withStyle(net.minecraft.ChatFormatting.GRAY)
+                                    .append(Component.translatable("message.academy.about.link_copied", hoveredUrl)
+                                            .withStyle(net.minecraft.ChatFormatting.AQUA)), true);
                 }
                 return true;
             }

@@ -196,7 +196,7 @@ public final class AbilityInterfererGui extends AcademyBaseUI<AbilityInterfererM
         String rangeText = Integer.toString(stateRange);
         graphics.drawString(font, rangeText, 86 - font.width(rangeText) / 2,
                 46, 0xFFFFFF, false);
-        graphics.drawString(font, menu.getEnergy() + "/" + AbilityInterferenceRules.MAX_ENERGY + " IF",
+        graphics.drawString(font, menu.getEnergy() + "/" + com.mohistmc.academy.config.MachineConfig.INTERFERER_BUFFER.get() + " IF",
                 101, 10, 0xBFEAFF, false);
         graphics.drawString(font, Component.translatable("gui.academy.interferer.whitelist"),
                 12, 59, 0xE8F6FF, false);

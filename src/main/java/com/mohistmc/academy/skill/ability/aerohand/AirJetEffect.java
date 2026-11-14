@@ -1,5 +1,7 @@
 package com.mohistmc.academy.skill.ability.aerohand;
 
+import com.mohistmc.academy.api.mob.MobCastContext;
+import com.mohistmc.academy.api.mob.MobCastable;
 import com.mohistmc.academy.config.DynamicSkillRules;
 
 import com.mohistmc.academy.world.effect.EffectHelper;
@@ -9,12 +11,13 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 
 /**
  * 空气喷射 —— 向后喷气，使施术者向视线方向短距离飞跃。
  */
-public class AirJetEffect implements com.mohistmc.academy.skill.ability.DynamicOneShotSkillEffect {
+public class AirJetEffect implements com.mohistmc.academy.skill.ability.DynamicOneShotSkillEffect, MobCastable {
 
     @Override
     public String getId() {
@@ -34,28 +37,43 @@ public class AirJetEffect implements com.mohistmc.academy.skill.ability.DynamicO
     @Override
     public void execute(ServerPlayer player, PlayerAbilityData data) {
         float exp = data.getProficiency(getId());
-        ServerLevel level = player.serverLevel();
-        Vec3 look = player.getLookAngle().normalize();
-        double speed = AeroBehaviorMath.airJetSpeed(exp);
-        Vec3 impulse = look.scale(speed);
-        player.setDeltaMovement(player.getDeltaMovement().add(impulse));
-        player.resetFallDistance();
-        player.hurtMarked = true;
-
-        Vec3 exhaust = player.getEyePosition().subtract(look.scale(0.8));
-        EffectHelper.windBurst(level, exhaust.x, exhaust.y, exhaust.z, 28, 0.8);
-
-        level.playSound(null, player.getX(), player.getY(), player.getZ(),
-                SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 1.0f, 1.0f);
+        jet(player, player.serverLevel(), exp, player.getLookAngle().normalize());
 
         if (!data.isDevMode()) {
             DynamicSkillRules.addExp(player,data,getId(),0.002f + 0.001f * exp);
         }
     }
 
+    /** Mob path: dashes toward the target (or along its look); never when its caster may not move. */
+    @Override
+    public boolean mobCast(MobCastContext context) {
+        LivingEntity caster = context.caster();
+        if (!context.mayMoveCaster() || caster.isPassenger() || caster.isSleeping()) return false;
+        Vec3 look = context.look().normalize();
+        if (!Double.isFinite(look.lengthSqr()) || look.lengthSqr() < 1.0e-8) return false;
+        jet(caster, context.level(), context.proficiency(), look);
+        return true;
+    }
+
+    @Override public int mobCooldownTicks(float proficiency) { return getCooldownTicks(proficiency); }
+
+    /** The impulse, exhaust and sound shared by players and mobs; a player's sound source stays PLAYERS. */
+    private static void jet(LivingEntity caster, ServerLevel level, float exp, Vec3 look) {
+        double speed = AeroBehaviorMath.airJetSpeed(exp);
+        Vec3 impulse = look.scale(speed);
+        caster.setDeltaMovement(caster.getDeltaMovement().add(impulse));
+        caster.resetFallDistance();
+        caster.hurtMarked = true;
+
+        Vec3 exhaust = caster.getEyePosition().subtract(look.scale(0.8));
+        EffectHelper.windBurst(level, exhaust.x, exhaust.y, exhaust.z, 28, 0.8);
+
+        level.playSound(null, caster.getX(), caster.getY(), caster.getZ(),
+                SoundEvents.FIRECHARGE_USE, caster.getSoundSource(), 1.0f, 1.0f);
+    }
+
     @Override
     public int getCooldownTicks(float proficiency) {
-        return Math.round(40 - 30 * Math.clamp(proficiency, 0.0f, 1.0f));
+        return (int) (40 - 30 * Math.clamp(proficiency, 0.0f, 1.0f));
     }
 }
-

@@ -37,9 +37,22 @@ final class ExtraItemActions {
         return false;
     }
 
-    static LivingEntity firstLivingOnRay(ServerPlayer player, double range, double radius) {
+    /** Distance along the look ray to the first solid block, or {@code range} when none is hit. */
+    static double blockReach(ServerPlayer player, double range) {
         Vec3 start = player.getEyePosition();
         Vec3 end = start.add(player.getLookAngle().normalize().scale(range));
+        var hit = com.mohistmc.academy.skill.ability.LoadedRaycast.clip(player.level(),
+                new net.minecraft.world.level.ClipContext(start, end,
+                        net.minecraft.world.level.ClipContext.Block.COLLIDER,
+                        net.minecraft.world.level.ClipContext.Fluid.NONE, player));
+        return hit.getType() == net.minecraft.world.phys.HitResult.Type.MISS
+                ? range : hit.getLocation().distanceTo(start);
+    }
+
+    /** ExtraAcC Raytrace.traceLiving: the nearest living entity in front of the first block. */
+    static LivingEntity firstLivingOnRay(ServerPlayer player, double range, double radius) {
+        Vec3 start = player.getEyePosition();
+        Vec3 end = start.add(player.getLookAngle().normalize().scale(blockReach(player, range)));
         return player.serverLevel().getEntitiesOfClass(LivingEntity.class,
                         new AABB(start, end).inflate(radius), entity -> entity != player && entity.isAlive())
                 .stream()

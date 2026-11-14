@@ -14,12 +14,18 @@ public final class DynamicSkillRules {
  public static float damage(String id,float raw){return scale(scale(raw,tuning(id).damage()),(float)ACConfig.Server.damageMul());}
  public static float exp(String id,float raw){return scale(scale(raw,tuning(id).exp()),ACConfig.Server.legacyRules().proficiencyGrowth());}
  public static boolean destroysBlocks(String id){return tuning(id).destroyBlocks();}
+ /** Cooldown ticks scaled by the {@code cooldown} tuning (config x datapack); 0 or less stays unchanged. */
+ public static int cooldown(String id,int rawTicks){
+  if(rawTicks<=0)return rawTicks;float m=tuning(id).cooldown();if(m==1f)return rawTicks;
+  double v=(double)rawTicks*m;return Double.isFinite(v)?(int)Math.min(Integer.MAX_VALUE,Math.max(0,Math.round(v))):rawTicks;
+ }
  public static boolean destroysBlocks(net.minecraft.world.level.Level level,String id){
   return tuning(id).destroyBlocks()&&ACConfig.Server.mayDestroyBlocks(level);
  }
  public static boolean canPay(PlayerAbilityData data,String id,float rawCp,float rawOverload){
   if(!enabled(id))return false;if(data.isDevMode())return true;float cp=cp(id,rawCp),ol=overload(id,rawOverload);
-  return cp>=0&&ol>=0&&data.getCurrentCp()>=cp&&data.getCurrentOverload()+ol<=data.getMaxOverload();
+  // CPData.perform: only CP gates a cast; overload clamps at its cap and then locks every skill.
+  return cp>=0&&ol>=0&&!data.isOverloadLocked()&&data.canAffordCp(cp);
  }
  public static void addExp(ServerPlayer player,PlayerAbilityData data,String id,float raw){
   AbilityMutationService.addSkillExp(player,data,id,exp(id,raw));

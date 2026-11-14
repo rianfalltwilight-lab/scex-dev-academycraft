@@ -31,10 +31,16 @@ public class SkillEventHandler {
     @SubscribeEvent
     public static void onPlayerTick(PlayerTickEvent.Post event) {
         PlayerAbilityData data = event.getEntity().getData(AcademyAttachments.PLAYER_ABILITY);
+        if (event.getEntity() instanceof ServerPlayer player) data.setCreativeExempt(player.isCreative());
         data.tick(); // 服务端和客户端都递减冷却
 
 
         if (event.getEntity() instanceof ServerPlayer player) {
+            if (data.consumeOverloadTrigger()) {
+                onOverloaded(player, data);
+                player.setData(AcademyAttachments.PLAYER_ABILITY, data);
+                return;
+            }
             DevLearningSessionManager.tick(player);
             DevLearningSessionManager.clearExpired(player);
             LocationTeleportActionPacket.clearExpired(player);
@@ -125,9 +131,17 @@ public class SkillEventHandler {
         }
     }
 
+    /** Keep the creative exemption current before any packet of the next tick is handled. */
+    @SubscribeEvent
+    public static void onGameModeChange(PlayerEvent.PlayerChangeGameModeEvent event) {
+        event.getEntity().getData(AcademyAttachments.PLAYER_ABILITY)
+                .setCreativeExempt(event.getNewGameMode() == net.minecraft.world.level.GameType.CREATIVE);
+    }
+
     @SubscribeEvent
     public static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.getEntity() instanceof ServerPlayer sp) {
+            sp.getData(AcademyAttachments.PLAYER_ABILITY).setCreativeExempt(sp.isCreative());
             LearnSkillPacket.syncToClient(sp);
         }
     }
@@ -165,11 +179,90 @@ public class SkillEventHandler {
         }
     }
 
+    /**
+     * CPData.Events.playerDeath + CooldownData.onPlayerDead. ConfirmedAbilityDeath calls this after
+     * every runtime cleanup (some of which set cooldowns) and before the copyOnDeath clone, so the
+     * respawned player inherits full CP, no overload, no cooldowns and an inactive ability.
+     */
+    public static void resetOnDeath(ServerPlayer player) {
+        PlayerAbilityData data = player.getData(AcademyAttachments.PLAYER_ABILITY);
+        data.recoverAll();
+        data.clearCooldowns();
+        if (data.isAbilityActive()) {
+            data.setAbilityActive(false);
+            net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(
+                    new com.mohistmc.academy.api.event.AbilityEvents.Deactivate(player));
+        }
+        data.syncTo(player);
+    }
+
+    /** CPData.Events.playerWakeup: only a full night's sleep (the server waking everyone) restores. */
+    @SubscribeEvent
+    public static void onPlayerWakeUp(net.neoforged.neoforge.event.entity.player.PlayerWakeUpEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)
+                || event.wakeImmediately() || event.updateLevel()) return;
+        PlayerAbilityData data = player.getData(AcademyAttachments.PLAYER_ABILITY);
+        if (!data.hasAbility()) return;
+        data.recoverAll();
+        data.syncTo(player);
+    }
+
+    /**
+     * Legacy activation-key priority: while the ability is on, a short V press first ends a
+     * live special mode or held skill ({@code terminatesContext} / {@code abortDelegates}),
+     * and only toggles the ability when nothing is running.  Returns whether anything ended.
+     */
+    public static boolean endSpecialFromActivateKey(ServerPlayer player, PlayerAbilityData data) {
+        boolean ended = false;
+        SkillChargingManager.ChargingState state = SkillChargingManager.getState(player.getUUID());
+        if (state != null) {
+            // Storm Wing, Vector Deviation/Reflection and every held charge are charging sessions.
+            SkillChargingManager.cancel(player);
+            notifyCharging(player, state, -1, 0);
+            ended = true;
+        }
+        ended |= FlashingSessionManager.endFromActivateKey(player, data);
+        if (com.mohistmc.academy.skill.ability.aerohand.AeroPassiveRuntime.isOffenseArmourEngaged(player)
+                || com.mohistmc.academy.skill.ability.aerohand.AeroPassiveRuntime.isFlyingActive(player)) {
+            com.mohistmc.academy.skill.ability.aerohand.AeroPassiveRuntime.terminateSustained(player, data);
+            ended = true;
+        }
+        if (com.mohistmc.academy.skill.ability.telekinesis.TelekinesisPassiveHandler.isHardened(player)) {
+            com.mohistmc.academy.skill.ability.telekinesis.TelekinesisPassiveHandler.togglePsychoHarden(player, data);
+            ended = true;
+        }
+        if (com.mohistmc.academy.skill.ability.telekinesis.TelekinesisPassiveHandler.hasLiquidShadow(player)) {
+            ended |= com.mohistmc.academy.skill.ability.telekinesis.TelekinesisPassiveHandler.toggleLiquidShadow(player);
+        }
+        ended |= com.mohistmc.academy.skill.ability.telekinesis.PsychoTransmissionEffect.endFromActivateKey(player, data);
+        ended |= com.mohistmc.academy.skill.ability.telekinesis.CruiseBombEffect.endFromActivateKey(player, data);
+        return ended;
+    }
+
+    /** ContextManager.__onOverload: reaching maximum overload disposes every live context. */
+    private static void onOverloaded(ServerPlayer player, PlayerAbilityData data) {
+        SkillChargingManager.ChargingState state = SkillChargingManager.getState(player.getUUID());
+        if (state != null) {
+            SkillChargingManager.finalizeCharging(player, state, SkillChargingManager.FinalResult.ABORTED);
+            notifyCharging(player, state, -1, 0);
+        }
+        // Legacy Flashing set its cooldown on every termination, overload included.
+        FlashingSessionManager.endFromActivateKey(player, data);
+        LocationTeleportActionPacket.forgetPlayer(player.getUUID());
+        com.mohistmc.academy.skill.ability.aerohand.AeroPassiveRuntime.terminateSustained(player, data);
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new com.mohistmc.academy.api.event.AbilityEvents.Overloaded(
+                player, data.getCurrentOverload(), data.getMaxOverload()));
+        data.syncTo(player);
+    }
+
     @SubscribeEvent
     public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
         if (event.getEntity() instanceof ServerPlayer sp) {
             cancelChargingAndNotify(sp);
             DevLearningSessionManager.clear(sp.getUUID());
+            sp.getData(AcademyAttachments.PLAYER_ABILITY).setCreativeExempt(sp.isCreative());
+            // The dead entity keeps ticking until respawn; drop any cooldown a cleanup set then.
+            if (!event.isEndConquered()) sp.getData(AcademyAttachments.PLAYER_ABILITY).clearCooldowns();
             LearnSkillPacket.syncToClient(sp);
         }
     }

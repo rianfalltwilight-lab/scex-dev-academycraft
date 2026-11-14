@@ -40,6 +40,15 @@ public class StormWingEffect implements ChargingSkillEffect {
     public static void claimExternalFlight(UUID player){EXTERNAL_FLIGHT.add(player);}
     public static void releaseExternalFlight(UUID player){EXTERNAL_FLIGHT.remove(player);}
 
+    /** Last WASD axes reported by the client, as {forward, left}; see StormWingInputPacket. */
+    private static final Map<UUID, byte[]> INPUT = new ConcurrentHashMap<>();
+    private static final byte[] NO_INPUT = {0, 0};
+
+    /** Stores movement keys only for a live Storm Wing context, so stray packets hold no state. */
+    public static void acceptInput(ServerPlayer player, byte forward, byte left) {
+        if (FLIGHT.containsKey(player.getUUID())) INPUT.put(player.getUUID(), new byte[]{forward, left});
+    }
+
     @Override
     public String getId() {
         return "storm_wing";
@@ -114,7 +123,13 @@ public class StormWingEffect implements ChargingSkillEffect {
         performEnvironmentalEffects(player, data, ticks);
 
         // Legacy transition is stateTick > chargeTime, not meter == chargeTime.
-        if (ticks == chargeTime + 1) {
+        if (ticks <= chargeTime) {
+            // StormWing.scala l_tick ran its no-key branch in both CHARGE and
+            // ACTIVE: keys are only bound on activation, so the wind-up always
+            // hovers. Wind-up stays free and has no directional flight.
+            hover(player);
+            player.hurtMarked = true;
+        } else if (ticks == chargeTime + 1) {
             if (!payFlightTick(data)) return false;
             performActivate(player, data);
             performFlightEffects(player, data);
@@ -182,6 +197,7 @@ public class StormWingEffect implements ChargingSkillEffect {
 
     private void cleanupFlight(ServerPlayer player) {
         FlightSnapshot old=FLIGHT.remove(player.getUUID());
+        INPUT.remove(player.getUUID());
         StormWingVisualEntity visual=visual(player.serverLevel(),old);
         if(visual!=null){
             if(!player.isAlive() || !old.dimension().equals(player.level().dimension())) visual.discard();
@@ -211,11 +227,14 @@ public class StormWingEffect implements ChargingSkillEffect {
 
         // Approach the legacy target velocity by exactly ACCEL=.16 per axis.
         Vec3 forward = player.getLookAngle().normalize();
-        // With yaw=0 the old A-key vector is +X.  ServerPlayer.xxa is the
-        // left impulse, so the lateral basis must be (forward.z, 0, -forward.x).
+        // With yaw=0 the old A-key vector is +X.  The reported left axis is the
+        // client's leftImpulse, so the lateral basis must be (forward.z, 0, -forward.x).
         Vec3 left = new Vec3(forward.z, 0, -forward.x);
         if (left.lengthSqr() > 1.0e-6) left = left.normalize();
-        Vec3 direction = forward.scale(player.zza).add(left.scale(player.xxa));
+        // ServerPlayer.xxa/zza stay 0 unless the player rides something, so read
+        // the keys the client reported for this flight instead.
+        byte[] keys = INPUT.getOrDefault(player.getUUID(), NO_INPUT);
+        Vec3 direction = forward.scale(keys[0]).add(left.scale(keys[1]));
         if (direction.lengthSqr() > 1.0e-6) {
             float speed = (exp < .45f ? .7f : 1.2f) * lerpf(2, 3, exp);
             Vec3 target = direction.normalize().scale(speed);
@@ -223,18 +242,23 @@ public class StormWingEffect implements ChargingSkillEffect {
             player.setDeltaMovement(approach(current.x, target.x, .16),
                     approach(current.y, target.y, .16), approach(current.z, target.z, .16));
         } else {
-            Vec3 current = player.getDeltaMovement();
-            Vec3 feet = player.position();
-            HitResult ground = LoadedRaycast.clip(player.level(), new ClipContext(feet.add(0, .5, 0),
-                    feet.add(0, -.3, 0), ClipContext.Block.COLLIDER,
-                    ClipContext.Fluid.NONE, player));
-            player.setDeltaMovement(current.x,
-                    ground.getType() == HitResult.Type.MISS ? current.y + .078 : .1,
-                    current.z);
+            hover(player);
         }
         player.hurtMarked=true;
 
         return true;
+    }
+
+    /** Legacy no-key branch: +.078 Y per tick in the air, or a fixed .1 near the ground. */
+    private static void hover(ServerPlayer player) {
+        Vec3 current = player.getDeltaMovement();
+        Vec3 feet = player.position();
+        HitResult ground = LoadedRaycast.clip(player.level(), new ClipContext(feet.add(0, .5, 0),
+                feet.add(0, -.3, 0), ClipContext.Block.COLLIDER,
+                ClipContext.Fluid.NONE, player));
+        player.setDeltaMovement(current.x,
+                ground.getType() == HitResult.Type.MISS ? current.y + .078 : .1,
+                current.z);
     }
 
     private void performEnvironmentalEffects(ServerPlayer player, PlayerAbilityData data, int ticks) {
@@ -276,6 +300,7 @@ public class StormWingEffect implements ChargingSkillEffect {
     @SubscribeEvent
     public static void onServerStopped(ServerStoppedEvent event) {
         FLIGHT.clear();
+        INPUT.clear();
         EXTERNAL_FLIGHT.clear();
     }
 

@@ -13,14 +13,23 @@ import net.minecraft.world.level.block.state.BlockState;
 
 /** Reload-safe registry/tag matching for the legacy Electromaster target lists. */
 public final class ElectromasterMetalTargets {
+    /** Pack-facing additions to the normalMetalBlocks config list (config OR tag). */
+    public static final TagKey<Block> NORMAL_METAL_TAG = TagKey.create(Registries.BLOCK,
+            ResourceLocation.fromNamespaceAndPath("academy", "metal/normal"));
+    /** Pack-facing additions to the weakMetalBlocks config list (config OR tag). */
+    public static final TagKey<Block> WEAK_METAL_TAG = TagKey.create(Registries.BLOCK,
+            ResourceLocation.fromNamespaceAndPath("academy", "metal/weak"));
+
     private ElectromasterMetalTargets() {}
 
     public static boolean isNormal(BlockState state) {
-        return matchesBlock(state, ACConfig.Server.normalMetalBlocks());
+        return state != null && (state.is(NORMAL_METAL_TAG)
+                || matchesBlock(state, ACConfig.Server.normalMetalBlocks()));
     }
 
     public static boolean isWeak(BlockState state) {
-        return matchesBlock(state, ACConfig.Server.weakMetalBlocks());
+        return state != null && (state.is(WEAK_METAL_TAG)
+                || matchesBlock(state, ACConfig.Server.weakMetalBlocks()));
     }
 
     public static boolean isAny(BlockState state) {

@@ -115,11 +115,11 @@ public final class FreqTransmitterSessionManager {
     public static UUID open(ServerPlayer player, UUID requestedNonce) {
         if (!hasTransmitter(player)) {
             SESSIONS.remove(player.getUUID());
-            closeWithMessage(player, requestedNonce, "未安装频率变送器 APP");
+            closeWithMessage(player, requestedNonce, Component.translatable("ac.freq_transmitter.not_installed"));
             return null;
         }
         if (requestedNonce == null || requestedNonce.equals(new UUID(0, 0))) {
-            closeWithMessage(player, requestedNonce, "无效的频率变送器会话");
+            closeWithMessage(player, requestedNonce, Component.translatable("ac.freq_transmitter.invalid_session"));
             return null;
         }
         long now = player.serverLevel().getGameTime();
@@ -127,8 +127,8 @@ public final class FreqTransmitterSessionManager {
         Session session = new Session(nonce, player.level().dimension(), Stage.SELECT_SOURCE,
                 SourceKind.NONE, null, null, null, now + SESSION_TTL_TICKS, 0, 0);
         SESSIONS.put(player.getUUID(), session);
-        sendState(player, session, FreqTransmitterStatePacket.SELECT_SOURCE, "",
-                "右击一个无线矩阵或无线节点");
+        sendState(player, session, FreqTransmitterStatePacket.SELECT_SOURCE, Component.empty(),
+                Component.translatable("item.academy.app_freq_transmitter.s0_0"));
         return nonce;
     }
 
@@ -141,14 +141,14 @@ public final class FreqTransmitterSessionManager {
         long now = player.serverLevel().getGameTime();
         if (now < session.retryAt) {
             sendState(player, session, FreqTransmitterStatePacket.PASSWORD_REQUIRED,
-                    sourceLabel(player.serverLevel(), session), "尝试过快，请稍后再试");
+                    sourceLabel(player.serverLevel(), session), Component.translatable("ac.freq_transmitter.too_fast"));
             return false;
         }
 
         Resolved source = resolveCanonical(player.serverLevel(), session.source);
         if (!validStoredSource(player.serverLevel(), session, source)
                 || !canPlayerOperateCanonical(player, source.pos)) {
-            terminate(player, session, "源设备已失效或不再可操作");
+            terminate(player, session, Component.translatable("ac.freq_transmitter.source_unusable"));
             return false;
         }
 
@@ -159,7 +159,7 @@ public final class FreqTransmitterSessionManager {
             // 1.0.7 closes the transmitter after a failed authorization.  A
             // fresh OPEN is rate-limited, so this also avoids keeping a
             // reusable password-oracle session alive.
-            terminate(player, session.failedAuth(now), "密码错误，会话已关闭");
+            terminate(player, session.failedAuth(now), Component.translatable("ac.freq_transmitter.wrong_password"));
             return false;
         }
 
@@ -177,7 +177,7 @@ public final class FreqTransmitterSessionManager {
         Session session = SESSIONS.get(player.getUUID());
         if (session == null || !session.nonce.equals(nonce)) return false;
         if (!SESSIONS.remove(player.getUUID(), session)) return false;
-        sendClosed(player, session.nonce, "频率变送器会话已关闭");
+        sendClosed(player, session.nonce, Component.translatable("ac.freq_transmitter.closed"));
         return true;
     }
 
@@ -194,12 +194,12 @@ public final class FreqTransmitterSessionManager {
         if (event.getHand() != InteractionHand.MAIN_HAND) return;
 
         if (expiredOrWrongDimension(player, raw)) {
-            terminate(player, raw, "会话已超时或维度已改变");
+            terminate(player, raw, Component.translatable("ac.freq_transmitter.expired_or_dimension"));
             return;
         }
         if (player.getEyePosition().distanceToSqr(event.getHitVec().getLocation())
                 > MAX_PLAYER_SELECT_DISTANCE_SQR + 1.0E-6) {
-            terminate(player, raw, "目标超过频率变送器的 4 格交互距离");
+            terminate(player, raw, Component.translatable("ac.freq_transmitter.too_far", "4"));
             return;
         }
         selectBlockInternal(player, raw.nonce, event.getPos(), true);
@@ -216,7 +216,7 @@ public final class FreqTransmitterSessionManager {
             } else if (expiredOrWrongDimension(player, session) || !hasTransmitter(player)
                     || session.sourceIdentity != null && session.sourceIdentity.isRemoved()) {
                 if (SESSIONS.remove(entry.getKey(), session)) {
-                    sendClosed(player, session.nonce, "频率变送器会话已超时");
+                    sendClosed(player, session.nonce, Component.translatable("item.academy.app_freq_transmitter.st"));
                 }
             }
         }
@@ -235,17 +235,17 @@ public final class FreqTransmitterSessionManager {
         if (session == null) return SelectionResult.NO_SESSION;
         if (session.stage == Stage.AUTHORIZE_SOURCE) {
             sendState(player, session, FreqTransmitterStatePacket.PASSWORD_REQUIRED,
-                    sourceLabel(player.serverLevel(), session), "请先输入源设备密码");
+                    sourceLabel(player.serverLevel(), session), Component.translatable("ac.freq_transmitter.password_first"));
             return SelectionResult.PASSWORD_REQUIRED;
         }
         if (!canPlayerSelect(player, clickedPos, interactionDistanceValidated)) {
-            terminate(player, session, "目标太远、未加载或无权操作");
+            terminate(player, session, Component.translatable("ac.freq_transmitter.target_unreachable"));
             return SelectionResult.INVALID_TARGET;
         }
 
         Resolved resolved = resolveCanonical(player.serverLevel(), clickedPos);
         if (resolved == null || !canPlayerOperateCanonical(player, resolved.pos)) {
-            terminate(player, session, "未找到可用的无线设备");
+            terminate(player, session, Component.translatable("ac.freq_transmitter.no_device"));
             return SelectionResult.INVALID_TARGET;
         }
         return session.stage == Stage.SELECT_SOURCE
@@ -258,7 +258,7 @@ public final class FreqTransmitterSessionManager {
         String expectedPassword;
         if (resolved.blockEntity instanceof MatrixBlockEntity matrix) {
             if (!WirelessSystem.reconcileMatrixNetwork(player.serverLevel(), matrix).active()) {
-                terminate(player, session, "矩阵尚未初始化或网络不可用");
+                terminate(player, session, Component.translatable("ac.freq_transmitter.matrix_unavailable"));
                 return SelectionResult.INVALID_TARGET;
             }
             kind = SourceKind.MATRIX;
@@ -267,7 +267,7 @@ public final class FreqTransmitterSessionManager {
             kind = SourceKind.NODE;
             expectedPassword = node.getPassword();
         } else {
-            terminate(player, session, "源设备必须是无线矩阵或无线节点");
+            terminate(player, session, Component.translatable("ac.freq_transmitter.source_type"));
             return SelectionResult.INVALID_TARGET;
         }
 
@@ -279,7 +279,7 @@ public final class FreqTransmitterSessionManager {
         SESSIONS.put(player.getUUID(), selected);
         sendState(player, selected, FreqTransmitterStatePacket.PASSWORD_REQUIRED,
                 sourceLabel(player.serverLevel(), selected), expectedPassword.isEmpty()
-                        ? "该设备没有密码，按 Enter 确认" : "请输入源设备密码");
+                        ? Component.translatable("ac.freq_transmitter.no_password") : Component.translatable("ac.freq_transmitter.enter_password"));
         return SelectionResult.PASSWORD_REQUIRED;
     }
 
@@ -287,7 +287,7 @@ public final class FreqTransmitterSessionManager {
         Resolved source = resolveCanonical(player.serverLevel(), session.source);
         if (!validStoredSource(player.serverLevel(), session, source)
                 || !credentialStillAuthorized(session, source)) {
-            terminate(player, session, "源设备已被移除或失效");
+            terminate(player, session, Component.translatable("ac.freq_transmitter.source_removed"));
             return SelectionResult.CLOSED;
         }
 
@@ -296,7 +296,7 @@ public final class FreqTransmitterSessionManager {
             MatrixBlockEntity matrix = (MatrixBlockEntity) source.blockEntity;
             if (target.blockEntity instanceof com.mohistmc.academy.world.block.entity.BaseNodeBlockEntity owned
                     && !owned.canManage(player)) {
-                terminate(player, session, "只能把自己拥有的节点加入矩阵网络");
+                terminate(player, session, Component.translatable("ac.freq_transmitter.own_nodes_only"));
                 return SelectionResult.INVALID_TARGET;
             }
             if (WirelessSystem.reconcileMatrixNetwork(player.serverLevel(), matrix).active()) {
@@ -319,14 +319,14 @@ public final class FreqTransmitterSessionManager {
         }
 
         if (!linked) {
-            terminate(player, session, "连接失败：请检查类型、容量和无线距离");
+            terminate(player, session, Component.translatable("ac.freq_transmitter.link_failed"));
             return SelectionResult.LINK_FAILED;
         }
         long now = player.serverLevel().getGameTime();
         Session refreshed = session.refresh(now);
         SESSIONS.put(player.getUUID(), refreshed);
         sendState(player, refreshed, FreqTransmitterStatePacket.SELECT_TARGET,
-                sourceLabel(player.serverLevel(), refreshed), "连接成功；可继续右击其他目标");
+                sourceLabel(player.serverLevel(), refreshed), Component.translatable("ac.freq_transmitter.linked"));
         return SelectionResult.LINKED;
     }
 
@@ -335,7 +335,7 @@ public final class FreqTransmitterSessionManager {
         if (session == null || !session.nonce.equals(nonce)) return null;
         if (expiredOrWrongDimension(player, session) || !hasTransmitter(player)) {
             if (SESSIONS.remove(player.getUUID(), session) && notifyExpired) {
-                sendClosed(player, session.nonce, "会话已失效，请重新打开频率变送器");
+                sendClosed(player, session.nonce, Component.translatable("ac.freq_transmitter.session_lost"));
             }
             return null;
         }
@@ -460,47 +460,51 @@ public final class FreqTransmitterSessionManager {
                 supplied.getBytes(StandardCharsets.UTF_8));
     }
 
-    private static String sourceLabel(ServerLevel level, Session session) {
+    private static Component sourceLabel(ServerLevel level, Session session) {
         Resolved source = session.source == null ? null : resolveCanonical(level, session.source);
-        if (source == null) return "";
+        if (source == null) return Component.empty();
+        String name;
         if (source.blockEntity instanceof MatrixBlockEntity matrix) {
-            return matrix.getSSID().isBlank() ? "无线矩阵" : "无线矩阵: " + matrix.getSSID();
+            name = matrix.getSSID();
+        } else if (source.blockEntity instanceof IWirelessNode node) {
+            name = node.getNodeName();
+        } else {
+            return Component.empty();
         }
-        if (source.blockEntity instanceof IWirelessNode node) {
-            return node.getNodeName().isBlank() ? "无线节点" : "无线节点: " + node.getNodeName();
-        }
-        return "";
+        Component device = source.blockEntity.getBlockState().getBlock().getName();
+        return name == null || name.isBlank() ? device
+                : Component.translatable("ac.freq_transmitter.source_named", device, name);
     }
 
-    private static String targetPrompt(SourceKind kind) {
-        return kind == SourceKind.MATRIX ? "右击一个无线节点以连接"
-                : "右击一个无线发电机或耗能机器以连接";
+    private static Component targetPrompt(SourceKind kind) {
+        return kind == SourceKind.MATRIX ? Component.translatable("item.academy.app_freq_transmitter.s2_0")
+                : Component.translatable("item.academy.app_freq_transmitter.s3_0");
     }
 
-    private static void sendTargetingState(ServerPlayer player, Session session, String message) {
+    private static void sendTargetingState(ServerPlayer player, Session session, Component message) {
         int state = session.stage == Stage.SELECT_TARGET
                 ? FreqTransmitterStatePacket.SELECT_TARGET : FreqTransmitterStatePacket.SELECT_SOURCE;
         sendState(player, session, state, sourceLabel(player.serverLevel(), session), message);
     }
 
     private static void sendState(ServerPlayer player, Session session, int state,
-                                  String sourceLabel, String message) {
+                                  Component sourceLabel, Component message) {
         SafePayloadSender.send(player, new FreqTransmitterStatePacket(session.nonce, state,
                 session.kind.ordinal(), sourceLabel, message));
     }
 
-    private static void terminate(ServerPlayer player, Session session, String message) {
+    private static void terminate(ServerPlayer player, Session session, Component message) {
         SESSIONS.remove(player.getUUID(), session);
         sendClosed(player, session.nonce, message);
     }
 
-    private static void closeWithMessage(ServerPlayer player, UUID nonce, String message) {
+    private static void closeWithMessage(ServerPlayer player, UUID nonce, Component message) {
         sendClosed(player, nonce == null ? new UUID(0, 0) : nonce, message);
     }
 
-    private static void sendClosed(ServerPlayer player, UUID nonce, String message) {
+    private static void sendClosed(ServerPlayer player, UUID nonce, Component message) {
         SafePayloadSender.send(player, new FreqTransmitterStatePacket(nonce,
-                FreqTransmitterStatePacket.CLOSED, SourceKind.NONE.ordinal(), "", message));
+                FreqTransmitterStatePacket.CLOSED, SourceKind.NONE.ordinal(), Component.empty(), message));
     }
 
     public static void clearPlayer(UUID player) {

@@ -57,12 +57,25 @@ public record SetSkillSlotPacket(int presetIndex, int slotIndex, String skillId)
             } else {
                 com.mohistmc.academy.skill.Skill skill = SkillRegistry.getSkill(data.getCurrentAbility(), skillId);
                 if (skill == null || skill.getType() != com.mohistmc.academy.skill.SkillType.ACTIVE
-                        || !data.hasLearnedSkill(skillId)) return;
+                        || !data.hasLearnedSkill(skillId)
+                        || !PlayerAbilityData.skillEnabled(skillId)) return;
+                // Legacy PresetEditUI never offered a skill the preset already holds; the
+                // client list mirrors that, but a raced or crafted packet must not bind one
+                // skill to two keys.
+                if (isBoundElsewhere(preset, packet.slotIndex(), skillId)) return;
                 data.setSlot(packet.presetIndex(), packet.slotIndex(), skillId);
             }
             NeoForge.EVENT_BUS.post(new AbilityEvents.PresetUpdated(player, packet.presetIndex(), packet.slotIndex(), existing,
                     skillId.isEmpty() ? null : skillId));
             data.syncTo(player);
         });
+    }
+
+    static boolean isBoundElsewhere(SkillPreset preset, int slotIndex, String skillId) {
+        if (preset == null) return false;
+        for (int i = 0; i < SkillPreset.SLOT_COUNT; i++) {
+            if (i != slotIndex && skillId.equals(preset.getSlot(i))) return true;
+        }
+        return false;
     }
 }

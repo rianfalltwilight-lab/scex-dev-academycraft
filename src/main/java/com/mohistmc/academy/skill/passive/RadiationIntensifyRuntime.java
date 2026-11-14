@@ -30,7 +30,7 @@ public final class RadiationIntensifyRuntime {
     private RadiationIntensifyRuntime() {}
 
     public static void mark(ServerPlayer caster, PlayerAbilityData data, Entity target) {
-        if (!data.isAbilityActive() || !data.hasLearnedSkill("rad_intensify") || target == null) return;
+        if (!data.hasLearnedSkill("rad_intensify") || target == null) return;
 
         CompoundTag casterData = caster.getPersistentData();
         int ticks = Math.max(60, casterData.getInt(MARK_TICKS));

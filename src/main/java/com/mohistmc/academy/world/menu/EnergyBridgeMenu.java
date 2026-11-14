@@ -20,7 +20,7 @@ public final class EnergyBridgeMenu extends AcademyMenu {
                 @Override public int get(int index) {
                     return switch (index) {
                         case 0 -> bridge.getStoredFe();
-                        case 1 -> EnergyBridgeBlockEntity.MAX_FE;
+                        case 1 -> EnergyBridgeBlockEntity.maxFe();
                         case 2 -> bridge instanceof EnergyBridgeInputBlockEntity ? 1 : 0;
                         default -> 0;
                     };
@@ -34,7 +34,7 @@ public final class EnergyBridgeMenu extends AcademyMenu {
         addDataSlots(data);
     }
 
-    public double getStoredIf() { return Math.max(0, data.get(0)) / 4.0; }
-    public double getMaxIf() { return Math.max(1, data.get(1)) / 4.0; }
+    public double getStoredIf() { return Math.max(0, data.get(0)) / (double) com.mohistmc.academy.capability.ExternalEnergyConversion.fePerIf(); }
+    public double getMaxIf() { return Math.max(1, data.get(1)) / (double) com.mohistmc.academy.capability.ExternalEnergyConversion.fePerIf(); }
     public boolean isInput() { return data.get(2) != 0; }
 }

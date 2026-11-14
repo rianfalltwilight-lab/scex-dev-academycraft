@@ -42,7 +42,7 @@ public class ScreenMaskOverlay {
         // 目标颜色与透明度
         float[] target;
         float targetA;
-        if (data.getCurrentOverload() >= data.getMaxOverload() && data.getMaxOverload() > 0) {
+        if (data.isOverloaded()) {
             target = COLOR_OVERLOAD;
             targetA = OVERLOAD_ALPHA;
         } else if (data.isAbilityActive()) {

@@ -1,5 +1,6 @@
 package com.mohistmc.academy.world.block.entity;
 
+import com.mohistmc.academy.config.MachineConfig;
 import com.mohistmc.academy.crafting.AcademyRecipeTypes;
 import com.mohistmc.academy.crafting.ImagFusorRecipe;
 import com.mohistmc.academy.crafting.ImagFusorRecipeInput;
@@ -33,9 +34,13 @@ public class ImagFusorBlockEntity extends AcademyContainerBlockEntity implements
     public static final int EMPTY_UNIT_SLOT = 4;
 
     private static final int MAX_FLUID = 8000;
-    private static final int PROCESSING_DURATION = 120;
-    private static final double CONSUME_PER_TICK = 12;
-    private static final double MAX_ENERGY = 2000;
+    // Legacy 1.0.7 values; live numbers come from machines.imagFusor in the server config
+    // and from a recipe's optional "time"/"energy" fields.
+    public static final int PROCESSING_DURATION = 120;
+    public static final double CONSUME_PER_TICK = 12;
+    public static final double MAX_ENERGY = 2000;
+
+    private static double maxEnergy() { return MachineConfig.FUSOR_BUFFER.get(); }
 
     private int processingTime = 0;
     private ImagFusorRecipe processingRecipe;
@@ -61,7 +66,10 @@ public class ImagFusorBlockEntity extends AcademyContainerBlockEntity implements
     public int getProcessingTime() { return processingTime; }
     public boolean isWorking() { return processingTime > 0; }
     public int getMaxFluid() { return MAX_FLUID; }
-    public int getProcessingDuration() { return PROCESSING_DURATION; }
+    /** Ticks of the job in progress (recipe "time"), else machines.imagFusor.processTime. */
+    public int getProcessingDuration() {
+        return processingRecipe != null ? processingRecipe.processTime() : MachineConfig.FUSOR_PROCESS_TIME.get();
+    }
 
     /** Phase-liquid requirement displayed by the original top-centre label. */
     public int getCurrentRecipePhaseLiquid() {
@@ -78,13 +86,13 @@ public class ImagFusorBlockEntity extends AcademyContainerBlockEntity implements
 
     @Override
     public double getRequiredEnergy() {
-        return Math.max(0, MAX_ENERGY - energy);
+        return Math.max(0, maxEnergy() - energy);
     }
 
     @Override
     public double injectEnergy(double amt) {
         if (!Double.isFinite(amt) || amt <= 0) return amt;
-        double accepted = Math.min(amt, MAX_ENERGY - energy);
+        double accepted = Math.max(0, Math.min(amt, maxEnergy() - energy));
         energy += accepted;
         if (accepted > 0) markMachineChanged();
         return amt - accepted;
@@ -101,7 +109,7 @@ public class ImagFusorBlockEntity extends AcademyContainerBlockEntity implements
 
     @Override
     public double getBandwidth() {
-        return 50;
+        return MachineConfig.FUSOR_BANDWIDTH.get();
     }
 
     // ==================== Tick ====================
@@ -112,10 +120,15 @@ public class ImagFusorBlockEntity extends AcademyContainerBlockEntity implements
         if (PhaseFluidContainers.emptyOne(getItems(), FLUID_INPUT_SLOT, EMPTY_UNIT_SLOT, tank))
             markMachineChanged();
 
+        double maxEnergy = maxEnergy();
+        if (energy > maxEnergy) {
+            energy = maxEnergy;
+            markMachineChanged();
+        }
         ItemStack battery = getItems().get(ENERGY_INPUT_SLOT);
-        if (EnergyItemHelper.isEnergyItem(battery) && energy < MAX_ENERGY) {
+        if (EnergyItemHelper.isEnergyItem(battery) && energy < maxEnergy) {
             int gained = EnergyItemHelper.extractEnergy(battery,
-                    Math.min((int) Math.floor(MAX_ENERGY - energy), (int) getBandwidth()), false);
+                    Math.min((int) Math.floor(maxEnergy - energy), (int) getBandwidth()), false);
             if (gained > 0) injectEnergy(gained);
         }
 
@@ -132,6 +145,11 @@ public class ImagFusorBlockEntity extends AcademyContainerBlockEntity implements
                 .map(net.minecraft.world.item.crafting.RecipeHolder::value).orElse(null);
         // CachedCheck resolves its last ID in the current RecipeManager and checks
         // matches again. A changed input or datapack replacement starts a new job.
+        if (recipe == null && processingRecipe != null && processingRecipe.input().test(input)) {
+            // Legacy TileImagFusor.isActionBlocked: the same input item, merely
+            // below the recipe count, pauses the job instead of aborting it.
+            return;
+        }
         if (processingRecipe != null && processingRecipe != recipe) processingTime = 0;
         processingRecipe = recipe;
         if (recipe == null) {
@@ -139,23 +157,32 @@ public class ImagFusorBlockEntity extends AcademyContainerBlockEntity implements
             return;
         }
 
+        // Legacy updateWork aborted (reset) on missing liquid, missing energy or a
+        // different item occupying the output slot.
         if (tank.getFluidAmount() < recipe.phaseLiquid()) {
             processingTime = 0;
             return;
         }
 
         ItemStack result = recipe.output().copy();
-        if (!canAcceptOutput(output, result)) {
+        if (!output.isEmpty() && !output.is(result.getItem())) {
             processingTime = 0;
             return;
         }
+        if (!canAcceptOutput(output, result)) {
+            // Same output item but no room (or differing components): legacy
+            // isActionBlocked kept workProgress paused. Unlike 1.0.7 the paused
+            // machine draws no energy.
+            return;
+        }
 
-        if (pullEnergy(CONSUME_PER_TICK) != CONSUME_PER_TICK) {
+        double cost = recipe.energyPerTick();
+        if (pullEnergy(cost) != cost) {
             processingTime = 0;
             return;
         }
         processingTime++;
-        if (processingTime >= PROCESSING_DURATION) {
+        if (processingTime >= recipe.processTime()) {
             processingTime = 0;
             tank.drain(recipe.phaseLiquid(), net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE);
             input.shrink(recipe.inputCount());
@@ -181,11 +208,12 @@ public class ImagFusorBlockEntity extends AcademyContainerBlockEntity implements
         }
         else tank.setFluid(new FluidStack(AcademyFluids.PHASE_LIQUID.get(),
                 MachineStateSanitizer.clampAmount(tag.getInt("fluidAmount"), MAX_FLUID)));
-        processingTime = MachineStateSanitizer.clampCounter(tag.getInt("processingTime"), PROCESSING_DURATION);
+        // The recipe (and its "time") is unknown until the first tick; keep any valid progress.
+        processingTime = MachineStateSanitizer.clampCounter(tag.getInt("processingTime"), ImagFusorRecipe.MAX_TIME);
         // Keep the legacy saved progress; the first tick binds it to a current
         // matching recipe. Recipe objects are runtime-only and never persisted.
         processingRecipe = null;
-        energy = MachineStateSanitizer.clampFinite((float) tag.getDouble("energy"), (float) MAX_ENERGY);
+        energy = MachineStateSanitizer.clampFinite((float) tag.getDouble("energy"), (float) maxEnergy());
     }
 
     @Override
@@ -199,7 +227,7 @@ public class ImagFusorBlockEntity extends AcademyContainerBlockEntity implements
 
     public FluidTank getFluidTank() { return tank; }
     public double getEnergy() { return energy; }
-    public double getMaxEnergy() { return MAX_ENERGY; }
+    public double getMaxEnergy() { return maxEnergy(); }
 
     // ==================== Legacy sided automation ====================
 

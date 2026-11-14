@@ -43,6 +43,13 @@ public record ToggleAbilityPacket() implements CustomPacketPayload {
                 return;
             }
 
+            // 1.12.2 V key: end a running skill or special mode before switching the ability off.
+            if (data.isAbilityActive()
+                    && com.mohistmc.academy.skill.SkillEventHandler.endSpecialFromActivateKey(player, data)) {
+                data.syncTo(player);
+                return;
+            }
+
             data.toggleAbilityActive();
             NeoForge.EVENT_BUS.post(data.isAbilityActive() ? new AbilityEvents.Activate(player) : new AbilityEvents.Deactivate(player));
 

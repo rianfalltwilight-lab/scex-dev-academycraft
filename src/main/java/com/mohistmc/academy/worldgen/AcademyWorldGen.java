@@ -49,7 +49,7 @@ public final class AcademyWorldGen {
                 new OreConfiguration(
                         new TagMatchTest(BlockTags.STONE_ORE_REPLACEABLES),
                         AcademyBlocks.IMAGSIL_ORE.get().defaultBlockState(),
-                        4
+                        11
                 )
         ));
 
@@ -58,7 +58,7 @@ public final class AcademyWorldGen {
                 new OreConfiguration(
                         new TagMatchTest(BlockTags.STONE_ORE_REPLACEABLES),
                         AcademyBlocks.RESO_ORE.get().defaultBlockState(),
-                        4
+                        9
                 )
         ));
 
@@ -67,7 +67,7 @@ public final class AcademyWorldGen {
                 new OreConfiguration(
                         new TagMatchTest(BlockTags.STONE_ORE_REPLACEABLES),
                         AcademyBlocks.CRYSTAL_ORE.get().defaultBlockState(),
-                        3
+                        12
                 )
         ));
 
@@ -76,7 +76,7 @@ public final class AcademyWorldGen {
                 new OreConfiguration(
                         new TagMatchTest(BlockTags.STONE_ORE_REPLACEABLES),
                         AcademyBlocks.CONSTRAIN_METAL.get().defaultBlockState(),
-                        4
+                        12
                 )
         ));
     }

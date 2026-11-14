@@ -1,6 +1,7 @@
 package com.mohistmc.academy.skill;
 
 import com.mohistmc.academy.AcademyCraft;
+import com.mohistmc.academy.data.SkillTuningData;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.resources.ResourceLocation;
@@ -39,29 +40,41 @@ public class Skill {
         return category;
     }
 
+    /** Unlock level; a datapack {@code level} override (academy_skills) wins. */
     public int getLevel() {
-        return level;
+        var o = SkillTuningData.override(id);
+        return o != null && o.level() != null ? o.level() : level;
     }
 
     public SkillType getType() {
         return type;
     }
 
+    /** Prerequisites; a datapack {@code prerequisites} list replaces the built-in one. */
     public List<Prerequisite> getPrerequisites() {
-        return prerequisites;
+        var o = SkillTuningData.override(id);
+        return o != null && o.prerequisites() != null ? o.prerequisites() : prerequisites;
     }
 
     public float getBaseCpCost() {
-        return baseCpCost;
+        var o = SkillTuningData.override(id);
+        return o != null && o.baseCp() != null ? o.baseCp() : baseCpCost;
     }
 
     public float getBaseOverload() {
-        return baseOverload;
+        var o = SkillTuningData.override(id);
+        return o != null && o.baseOverload() != null ? o.baseOverload() : baseOverload;
     }
 
-    public boolean hasLegacyTreePosition() { return Double.isFinite(treeX) && Double.isFinite(treeY); }
-    public double getTreeX() { return treeX; }
-    public double getTreeY() { return treeY; }
+    public boolean hasLegacyTreePosition() { return Double.isFinite(getTreeX()) && Double.isFinite(getTreeY()); }
+    public double getTreeX() {
+        var o = SkillTuningData.override(id);
+        return o != null && o.treeX() != null ? o.treeX() : treeX;
+    }
+    public double getTreeY() {
+        var o = SkillTuningData.override(id);
+        return o != null && o.treeY() != null ? o.treeY() : treeY;
+    }
 
     public SkillEffect getEffect() {
         return effect;

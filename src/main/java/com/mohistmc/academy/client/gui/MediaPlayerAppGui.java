@@ -2,6 +2,7 @@ package com.mohistmc.academy.client.gui;
 
 import com.mohistmc.academy.client.MediaPlayerManager;
 import com.mohistmc.academy.client.media.ExternalMediaManager;
+import com.mohistmc.academy.config.ACConfig;
 import com.mohistmc.academy.skill.AcademyAttachments;
 import com.mohistmc.academy.skill.PlayerAbilityData;
 import com.mohistmc.academy.terminal.MediaTrack;
@@ -373,6 +374,8 @@ public class MediaPlayerAppGui extends AcademyScreen {
         if (button == 0 && draggingVolume) {
             draggingVolume = false;
             setVolumeFromMouse(mouseX);
+            // Drag updates stay in memory; write the file once per gesture.
+            ACConfig.Client.save();
             return true;
         }
         return super.mouseReleased(mouseX, mouseY, button);

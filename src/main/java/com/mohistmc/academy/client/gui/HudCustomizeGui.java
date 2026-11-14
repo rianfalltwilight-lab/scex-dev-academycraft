@@ -66,6 +66,7 @@ public final class HudCustomizeGui extends AcademyScreen {
         ACConfig.Client.CP_BAR_Y.set(cpY);
         ACConfig.Client.KEY_HINT_X.set(keyX - (width - KEY_W - 12));
         ACConfig.Client.KEY_HINT_Y.set(keyY - (height / 2 - KEY_H / 2));
+        ACConfig.Client.save();
     }
 
     @Override

@@ -41,9 +41,10 @@ public record MatrixNodesPacket(MenuActionToken actionToken, BlockPos matrixPos,
                     || !matrix.canManage(player)) return;
             var networkState = WirelessSystem.reconcileMatrixNetwork(player.serverLevel(), matrix);
             if (!networkState.active()) {
-                player.sendSystemMessage(Component.literal(networkState
+                player.sendSystemMessage(networkState
                         == WirelessSystem.MatrixNetworkState.NEEDS_REINITIALIZATION
-                        ? "§e矩阵需要重新初始化" : "§c矩阵网络不可用，恢复失败"));
+                        ? Component.translatable("message.academy.matrix.needs_reinit").withStyle(net.minecraft.ChatFormatting.YELLOW)
+                        : Component.translatable("message.academy.matrix.unavailable").withStyle(net.minecraft.ChatFormatting.RED));
                 return;
             }
             if (!claimRequest(player.getUUID(), packet.matrixPos, player.serverLevel().getGameTime())) return;

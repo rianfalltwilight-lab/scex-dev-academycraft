@@ -23,7 +23,7 @@ public final class EnergyBridgeOutputBlockEntity extends EnergyBridgeBlockEntity
             return extractExternalFe(amount, simulate);
         }
         @Override public int getEnergyStored() { return getStoredFe(); }
-        @Override public int getMaxEnergyStored() { return MAX_FE; }
+        @Override public int getMaxEnergyStored() { return maxFe(); }
         @Override public boolean canExtract() { return true; }
         @Override public boolean canReceive() { return false; }
     };
@@ -61,27 +61,27 @@ public final class EnergyBridgeOutputBlockEntity extends EnergyBridgeBlockEntity
     }
 
     @Override public double getRequiredEnergy() {
-        return (MAX_FE - getStoredFe()) / (double) ExternalEnergyConversion.FE_PER_IF;
+        return Math.max(0, maxFe() - getStoredFe()) / (double) ExternalEnergyConversion.fePerIf();
     }
 
     @Override
     public double injectEnergy(double amountIf) {
         if (!Double.isFinite(amountIf) || amountIf <= 0) return amountIf;
         int offeredFe = (int) Math.min(Integer.MAX_VALUE,
-                Math.floor(amountIf * ExternalEnergyConversion.FE_PER_IF + 1.0e-9));
+                Math.floor(amountIf * ExternalEnergyConversion.fePerIf() + 1.0e-9));
         int acceptedFe = receiveExternalFe(offeredFe, false);
         return Math.max(0, amountIf
-                - acceptedFe / (double) ExternalEnergyConversion.FE_PER_IF);
+                - acceptedFe / (double) ExternalEnergyConversion.fePerIf());
     }
 
     @Override
     public double pullEnergy(double amountIf) {
         if (!Double.isFinite(amountIf) || amountIf <= 0) return 0;
         int requestedFe = (int) Math.min(Integer.MAX_VALUE,
-                Math.floor(amountIf * ExternalEnergyConversion.FE_PER_IF + 1.0e-9));
+                Math.floor(amountIf * ExternalEnergyConversion.fePerIf() + 1.0e-9));
         int extractedFe = extractExternalFe(requestedFe, false);
-        return extractedFe / (double) ExternalEnergyConversion.FE_PER_IF;
+        return extractedFe / (double) ExternalEnergyConversion.fePerIf();
     }
 
-    @Override public double getBandwidth() { return BANDWIDTH_IF; }
+    @Override public double getBandwidth() { return bandwidthIf(); }
 }

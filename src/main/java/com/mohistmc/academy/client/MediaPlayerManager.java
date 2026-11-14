@@ -68,7 +68,7 @@ public final class MediaPlayerManager {
         currentTrack = trackId;
         lastTrack = trackId;
         paused = false;
-        playStartTick = mc.player != null ? mc.player.tickCount : 0;
+        playStartTick = playerTick();
         pauseStartTick = 0;
         accumulatedPausedTicks = 0;
         currentDurationTicks = track.durationSeconds() * 20;
@@ -170,8 +170,10 @@ public final class MediaPlayerManager {
 
     @SubscribeEvent
     public static void onClientTick(ClientTickEvent.Post event) {
-        if (currentSoundInstance == null) return;
         Minecraft mc = Minecraft.getInstance();
+        // Unpaused client ticks; the sound engine pauses media together with the game.
+        if (!mc.isPaused()) clock++;
+        if (currentSoundInstance == null) return;
         if (!mc.getSoundManager().isActive(currentSoundInstance)) {
             clearFinishedPlayback();
             return;
@@ -190,9 +192,11 @@ public final class MediaPlayerManager {
         return Math.max(0, endpoint - playStartTick - accumulatedPausedTicks);
     }
 
+    /** Playback clock. LocalPlayer.tickCount restarted on respawn or dimension change. */
+    private static int clock;
+
     private static int playerTick() {
-        Minecraft mc = Minecraft.getInstance();
-        return mc.player == null ? 0 : mc.player.tickCount;
+        return clock;
     }
 
     private static void clearFinishedPlayback() {

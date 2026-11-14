@@ -14,6 +14,12 @@ public final class ACConfig {
 
     private ACConfig() {}
 
+    /** {@code ConfigValue.set} only changes memory; persist runtime edits like legacy config.save(). */
+    private static void saveIfLoaded(ModConfigSpec spec) {
+        // Unit tests and early client screens can run before FML attaches a file.
+        if (spec.isLoaded()) spec.save();
+    }
+
     // ==================== 服务端配置 ====================
 
     public static final class Server {
@@ -103,8 +109,16 @@ public final class ACConfig {
                             value -> value instanceof String text && LegacyDimensionAllowlist.validEntry(text));
             builder.pop();
 
+            MachineConfig.define(builder);
+            MobCastConfig.define(builder);
+
             SPEC = builder.build();
         }
+
+        /** Forces class initialization; used by {@link MachineConfig}. */
+        static void init() {}
+
+        public static void save() { saveIfLoaded(SPEC); }
 
         public static double damageMul() { return SKILL_DAMAGE_MULTIPLIER.get(); }
         public static boolean pvpEnabled() {
@@ -234,6 +248,8 @@ public final class ACConfig {
 
             SPEC = builder.build();
         }
+
+        public static void save() { saveIfLoaded(SPEC); }
 
         public static boolean showHud() { return booleanOr(SHOW_HUD, true); }
         public static boolean showCpBar() { return booleanOr(SHOW_CP_BAR, true); }

@@ -45,13 +45,13 @@ public record NodeConfigPacket(MenuActionToken actionToken, BlockPos pos, Option
                 if (!PayloadRateLimiter.allow(player.getUUID(), "node_config", player.serverLevel().getGameTime(), 20, 4)) return;
                 if (!(player.containerMenu instanceof BaseNodeMenu menu)
                         || !packet.pos().equals(menu.pos) || !menu.stillValid(player) || !menu.acceptAction(packet.actionToken(), player)) {
-                    player.sendSystemMessage(Component.literal("§c节点界面已失效，请重新打开"));
+                    player.sendSystemMessage(Component.translatable("message.academy.node.screen_stale").withStyle(net.minecraft.ChatFormatting.RED));
                     reply(player, packet, false);
                     return;
                 }
                 if (packet.name().filter(n -> !NetworkInputLimits.validRequired(n, MAX_NAME_LENGTH)).isPresent()
                         || packet.password().filter(p -> !NetworkInputLimits.validOptional(p, MAX_PASSWORD_LENGTH)).isPresent()) {
-                    player.sendSystemMessage(Component.literal("§c节点名或密码格式无效"));
+                    player.sendSystemMessage(Component.translatable("message.academy.node.invalid_config").withStyle(net.minecraft.ChatFormatting.RED));
                     reply(player, packet, false);
                     return;
                 }
@@ -72,7 +72,7 @@ public record NodeConfigPacket(MenuActionToken actionToken, BlockPos pos, Option
                     packet.name().ifPresent(node::setNodeName);
                     packet.password().ifPresent(node::setPassword);
                     node.setChanged();
-                    player.sendSystemMessage(Component.literal("§aNode config updated"));
+                    player.sendSystemMessage(Component.translatable("message.academy.node.config_updated").withStyle(net.minecraft.ChatFormatting.GREEN));
                     reply(player, packet, true);
                 }
             }

@@ -64,7 +64,7 @@ class DevMachineUiContractTest {
         assertFalse(block.contains("player.openMenu(getMenuProvider(state, level, pos), pos)"));
         assertTrue(normal.contains("new ConsoleCommandPacket(menu.pos, \"learn\")"));
         assertTrue(normal.contains("if (!panelActive && button == 0"));
-        assertTrue(normal.contains("\"技能树\""));
+        assertTrue(normal.contains("\"item.academy.app_skill_tree\""));
         assertTrue(menu.contains("addDataSlots(machineData)"));
         assertTrue(menu.contains("isBoundTo"));
         assertTrue(command.contains("player.containerMenu instanceof DevNormalMenu"));

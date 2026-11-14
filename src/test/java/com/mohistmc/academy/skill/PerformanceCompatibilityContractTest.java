@@ -121,7 +121,7 @@ class PerformanceCompatibilityContractTest {
         assertFalse(railgun.contains("instanceof Monster"));
         assertTrue(railgun.contains("state.is(Blocks.BEDROCK)"));
         assertTrue(railgun.contains("event.isCanceled()"));
-        assertTrue(railgun.contains("traceBarrier(level, player"));
+        assertTrue(railgun.contains("traceBarrier(level, caster"));
         assertTrue(railgun.contains("lookVec.scale(stopDistance)"),
                 "entity ray must be clipped to the authoritative wall distance");
         assertTrue(railgun.contains("MAX_INCREMENT = 50.0"),
@@ -181,7 +181,7 @@ class PerformanceCompatibilityContractTest {
         assertTrue(charging.contains("held.getCapability(Capabilities.EnergyStorage.ITEM)"));
         assertTrue(charging.contains("level.getCapability("));
         assertTrue(charging.contains("Capabilities.EnergyStorage.BLOCK"));
-        assertTrue(charging.contains("ExternalEnergyConversion.FE_PER_IF"));
+        assertTrue(charging.contains("ExternalEnergyConversion.fePerIf()"));
         assertTrue(charging.contains("receiver.receive(requested, true)"));
         assertTrue(charging.contains("receiver.receive(simulated, false)"));
         assertTrue(charging.contains("player.getLookAngle().scale(15.0)")

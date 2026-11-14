@@ -1,6 +1,8 @@
 package com.mohistmc.academy.skill.ability.electromaster;
 
 import com.mohistmc.academy.skill.ability.LoadedRaycast;
+import com.mohistmc.academy.api.mob.MobCastContext;
+import com.mohistmc.academy.api.mob.MobCastable;
 import com.mohistmc.academy.skill.AcademyDamageHelper;
 
 import com.mohistmc.academy.config.DynamicSkillRules;
@@ -21,6 +23,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
@@ -44,7 +47,7 @@ import static com.mohistmc.academy.utils.MathUtils.lerpf;
 
 /** 电弧激发 —— 向前方发射电弧，命中实体造成伤害，命中水面有概率电出熟鱼，命中方块有概率点火 */
 @EventBusSubscriber(modid = AcademyCraft.MODID)
-public class ArcGenEffect implements SkillEffect {
+public class ArcGenEffect implements SkillEffect, MobCastable {
     private static final Map<UUID, Long> LAST_CAST = new ConcurrentHashMap<>();
 
     @SubscribeEvent public static void logout(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent event) {
@@ -82,15 +85,52 @@ public class ArcGenEffect implements SkillEffect {
 
         if (!DynamicSkillRules.tryPay(data,getId(),cp,overload)) return;
 
+        ArcOutcome outcome = arc(player, player.serverLevel(), exp, player.getEyePosition(), player.getLookAngle(),
+                true, true);
+        if (outcome.fished()) {
+            com.mohistmc.academy.advancement.LegacyAdvancementBridge.award(player,"electromaster/arc_gen");
+        }
+
+        float expIncr = 0f;
+        if (outcome.hit() == ArcOutcome.ENTITY) expIncr = getExpIncr(exp, true);
+        else if (outcome.hit() == ArcOutcome.BLOCK) expIncr = getExpIncr(exp, false);
+        if (expIncr > 0 && !data.isDevMode()) {
+            DynamicSkillRules.addExp(player,data, getId(), expIncr);
+        }
+
+        // 冷却时间（由 SkillRegistry 的 Builder 处理基础冷却，这里不强制设置）
+    }
+
+    /**
+     * Mob cast: no CP, no exp, no LAST_CAST entry (the mob cooldown already exceeds its 2-tick guard).
+     * Ignition is griefing, so it needs {@link MobCastContext#mayDestroyBlocks()}; the water branch only
+     * drops a cooked fish and stays on.
+     */
+    @Override
+    public boolean mobCast(MobCastContext context) {
+        // No fishing for mobs: like virtual psycho needles, mob casts must not be farmable for items.
+        arc(context.caster(), context.level(), context.proficiency(), context.eye(), context.look(),
+                context.mayDestroyBlocks(), false);
+        return true;
+    }
+
+    @Override
+    public int mobCooldownTicks(float proficiency) {
+        return getCooldownTicks(proficiency);
+    }
+
+    private record ArcOutcome(int hit, boolean fished) {
+        static final int NONE = 0, BLOCK = 1, ENTITY = 2;
+    }
+
+    /** The arc after CP payment, shared by players and mob casters. */
+    private ArcOutcome arc(LivingEntity caster, ServerLevel level, float exp, Vec3 eyePos, Vec3 lookVec,
+                           boolean allowIgnite, boolean allowFish) {
         float range = lerpf(6, 15, exp);
         float damage = lerpf(5, 9, exp);
         float igniteProb = lerpf(0, 0.6f, exp);
         double fishProb = exp > 0.5f ? 0.1 : 0;
-        ServerLevel level = player.serverLevel();
-        Vec3 eyePos = player.getEyePosition();
-        Vec3 lookVec = player.getLookAngle();
-
-        TraceResult result = trace(player, eyePos, lookVec, range);
+        TraceResult result = trace(caster, level, eyePos, lookVec, range);
 
         Vec3 visualEnd = eyePos.add(lookVec.scale(range));
         if (result != null) {
@@ -99,43 +139,43 @@ public class ArcGenEffect implements SkillEffect {
         }
         EffectHelper.electricTether(level, eyePos, visualEnd, 10);
 
-        AcademySounds.playSound(level, player.getX(), player.getY(), player.getZ(),
-                AcademySounds.EM_ARC_WEAK, SoundSource.PLAYERS, 0.5f, 1.0f);
+        AcademySounds.playSound(level, caster.getX(), caster.getY(), caster.getZ(),
+                AcademySounds.EM_ARC_WEAK, caster instanceof Player ? SoundSource.PLAYERS : SoundSource.HOSTILE,
+                0.5f, 1.0f);
 
-        float expIncr = 0f;
+        int hit = ArcOutcome.NONE;
+        boolean fished = false;
 
         if (result != null) {
             if (result.isEntity && result.entity != null) {
                 // === 命中实体 ===
                 Entity target = result.entity;
-                ElectromasterDamageHelper.attack(player,target,com.mohistmc.academy.skill.SkillDamageSource.attack(player),
+                ElectromasterDamageHelper.attack(caster,target,com.mohistmc.academy.skill.SkillDamageSource.attack(caster),
                         DynamicSkillRules.damage(getId(),damage));
 
-                expIncr = getExpIncr(exp, true);
+                hit = ArcOutcome.ENTITY;
             } else if (result.blockPos != null && LoadedRaycast.isLoaded(level, result.blockPos)) {
                 // === 命中方块 ===
                 BlockState state = level.getBlockState(result.blockPos);
 
                 if (state.is(Blocks.WATER)) {
-                    if (level.random.nextDouble() < fishProb) {
+                    if (level.random.nextDouble() < fishProb && allowFish) {
                         Vec3 pos = result.hitPos != null ? result.hitPos : Vec3.atCenterOf(result.blockPos);
-                        if (authorized(player, level, result.blockPos)) {
+                        if (authorized(caster, level, result.blockPos)) {
                             ItemEntity fish = new ItemEntity(level,
                                     pos.x, pos.y, pos.z,
                                     new ItemStack(Items.COOKED_COD));
                             // addFreshEntity itself posts NeoForge's cancellable join event.
-                            if (level.addFreshEntity(fish)) {
-                                com.mohistmc.academy.advancement.LegacyAdvancementBridge.award(player,"electromaster/arc_gen");
-                            }
+                            fished = level.addFreshEntity(fish);
                         }
                     }
                 } else {
-                    if (level.random.nextDouble() < igniteProb) {
+                    if (level.random.nextDouble() < igniteProb && allowIgnite) {
                         BlockPos firePos = result.blockPos.above();
-                        if (authorized(player, level, firePos) && level.isEmptyBlock(firePos)) {
+                        if (authorized(caster, level, firePos) && level.isEmptyBlock(firePos)) {
                             BlockEvent.EntityPlaceEvent permission = new BlockEvent.EntityPlaceEvent(
                                     BlockSnapshot.create(level.dimension(), level, firePos),
-                                    level.getBlockState(result.blockPos), player);
+                                    level.getBlockState(result.blockPos), caster);
                             NeoForge.EVENT_BUS.post(permission);
                             if (!permission.isCanceled()) {
                                 level.setBlockAndUpdate(firePos, Blocks.FIRE.defaultBlockState());
@@ -144,36 +184,32 @@ public class ArcGenEffect implements SkillEffect {
                     }
                 }
 
-                expIncr = getExpIncr(exp, false);
-            }
-
-            if (expIncr > 0 && !data.isDevMode()) {
-                DynamicSkillRules.addExp(player,data, getId(), expIncr);
+                hit = ArcOutcome.BLOCK;
             }
         }
-
-        // 冷却时间（由 SkillRegistry 的 Builder 处理基础冷却，这里不强制设置）
+        return new ArcOutcome(hit, fished);
     }
 
-    private static boolean authorized(ServerPlayer player, ServerLevel level, BlockPos pos) {
-        return LoadedRaycast.isLoaded(level, pos) && level.getWorldBorder().isWithinBounds(pos) && level.mayInteract(player, pos);
+    private static boolean authorized(LivingEntity caster, ServerLevel level, BlockPos pos) {
+        return LoadedRaycast.isLoaded(level, pos) && level.getWorldBorder().isWithinBounds(pos)
+                // Spawn protection is a player rule; a mob's ignition is gated by mayDestroyBlocks instead.
+                && (!(caster instanceof Player player) || level.mayInteract(player, pos));
     }
 
     @SubscribeEvent public static void stopped(ServerStoppedEvent event) { LAST_CAST.clear(); }
 
 
     /** 射线追踪，检测实体和方块（包括水）。 */
-    private TraceResult trace(ServerPlayer player, Vec3 start, Vec3 dir, double range) {
-        ServerLevel level = player.serverLevel();
+    private TraceResult trace(LivingEntity caster, ServerLevel level, Vec3 start, Vec3 dir, double range) {
 
         Vec3 end = start.add(dir.scale(range));
         // LambdaLib's filNormal used exact collision shapes and ArcGen added
         // water to that selector. Vanilla's collider + any-fluid clip is the
         // 1.21.1 equivalent; fixed 0.3-block stepping skipped slabs/fences.
         BlockHitResult blockHit = LoadedRaycast.clip(level, new ClipContext(start, end,
-                ClipContext.Block.COLLIDER, ClipContext.Fluid.ANY, player));
+                ClipContext.Block.COLLIDER, ClipContext.Fluid.ANY, caster));
         Vec3 entityEnd = blockHit.getType() == HitResult.Type.MISS ? end : blockHit.getLocation();
-        EntityHitResult entityHit = rayTraceEntities(player, start, entityEnd);
+        EntityHitResult entityHit = rayTraceEntities(caster, start, entityEnd);
         if (entityHit != null) {
             TraceResult result = new TraceResult();
             result.isEntity = true;
@@ -190,10 +226,12 @@ public class ArcGenEffect implements SkillEffect {
         return null;
     }
 
-    private EntityHitResult rayTraceEntities(ServerPlayer player, Vec3 start, Vec3 end) {
+    private EntityHitResult rayTraceEntities(LivingEntity caster, Vec3 start, Vec3 end) {
         AABB searchArea = new AABB(start, end).inflate(1.0);
-        List<Entity> entities = player.level().getEntities(player, searchArea,
-                e -> e != player && e.isAlive() && e.isPickable());
+        List<Entity> entities = caster.level().getEntities(caster, searchArea,
+                e -> e != caster && e.isAlive() && e.isPickable()
+                        // Legacy Raytrace.traceLiving: only living entities are targets.
+                        && e instanceof net.minecraft.world.entity.LivingEntity);
 
         Entity closest = null;
         double closestDist = Double.MAX_VALUE;

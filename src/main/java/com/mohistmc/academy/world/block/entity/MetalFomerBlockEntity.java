@@ -1,6 +1,7 @@
 package com.mohistmc.academy.world.block.entity;
 
 import com.mohistmc.academy.capability.EnergyItemHelper;
+import com.mohistmc.academy.config.MachineConfig;
 import com.mohistmc.academy.crafting.AcademyRecipeTypes;
 import com.mohistmc.academy.crafting.MetalFormingRecipe;
 import com.mohistmc.academy.crafting.MetalFormingRecipeInput;
@@ -31,10 +32,14 @@ public class MetalFomerBlockEntity extends AcademyContainerBlockEntity implement
     public static final int SLOT_OUT = 1;
     public static final int SLOT_BATTERY = 2;
 
+    // Legacy 1.0.7 values; live numbers come from machines.metalFormer in the server config
+    // and from a recipe's optional "time"/"energy" fields.
     public static final double MAX_ENERGY = 3000;
     public static final double BANDWIDTH = 50;
     public static final int WORK_TICKS = 60;
     public static final double CONSUME_PER_TICK = 13.3;
+
+    private static double maxEnergy() { return MachineConfig.FORMER_BUFFER.get(); }
 
     private static final int SEARCH_TICKS = 5;
 
@@ -87,12 +92,12 @@ public class MetalFomerBlockEntity extends AcademyContainerBlockEntity implement
     }
 
     public double getWorkProgress() {
-        return isWorkInProgress() ? (double) workCounter / WORK_TICKS : 0;
+        return isWorkInProgress() ? Math.min(1.0, (double) workCounter / current.processTime()) : 0;
     }
 
     public double getEnergy() { return energy; }
 
-    public double getMaxEnergy() { return MAX_ENERGY; }
+    public double getMaxEnergy() { return maxEnergy(); }
 
     public boolean isClientWorking() { return clientWorking; }
 
@@ -100,13 +105,13 @@ public class MetalFomerBlockEntity extends AcademyContainerBlockEntity implement
 
     @Override
     public double getRequiredEnergy() {
-        return MAX_ENERGY - energy;
+        return Math.max(0, maxEnergy() - energy);
     }
 
     @Override
     public double injectEnergy(double amt) {
         if (!Double.isFinite(amt) || amt <= 0) return amt;
-        double give = Math.min(amt, MAX_ENERGY - energy);
+        double give = Math.max(0, Math.min(amt, maxEnergy() - energy));
         energy += give;
         if (give > 0) markMachineChanged();
         return amt - give;
@@ -123,7 +128,7 @@ public class MetalFomerBlockEntity extends AcademyContainerBlockEntity implement
 
     @Override
     public double getBandwidth() {
-        return BANDWIDTH;
+        return MachineConfig.FORMER_BANDWIDTH.get();
     }
 
     // ==================== 模式切换 ====================
@@ -143,6 +148,10 @@ public class MetalFomerBlockEntity extends AcademyContainerBlockEntity implement
 
     public void serverTick() {
         if (level == null || level.isClientSide) return;
+        if (energy > maxEnergy()) {
+            energy = maxEnergy();
+            markMachineChanged();
+        }
 
         // A datapack reload can replace the manager's recipe object while a
         // job is in progress. Re-resolve before debiting or producing output.
@@ -152,9 +161,10 @@ public class MetalFomerBlockEntity extends AcademyContainerBlockEntity implement
             workCounter = 0;
         }
         if (current != null) {
-            if (!isActionBlocked() && pullEnergy(CONSUME_PER_TICK) == CONSUME_PER_TICK) {
+            double cost = current.energyPerTick();
+            if (!isActionBlocked() && pullEnergy(cost) == cost) {
                 ++workCounter;
-                if (workCounter == WORK_TICKS) {
+                if (workCounter >= current.processTime()) {
                     finishJob();
                 }
             } else {
@@ -334,7 +344,7 @@ public class MetalFomerBlockEntity extends AcademyContainerBlockEntity implement
     public void loadAdditional(CompoundTag tag, HolderLookup.Provider provider) {
         super.loadAdditional(tag, provider);
         if (tag.contains("energy")) energy = MachineStateSanitizer.clampFinite(
-                (float) tag.getDouble("energy"), (float) MAX_ENERGY);
+                (float) tag.getDouble("energy"), (float) maxEnergy());
         if (tag.contains("mode")) mode = Mode.byOrdinal(tag.getInt("mode"));
         if (tag.contains("workCounter")) workCounter = tag.getInt("workCounter");
         if (tag.contains("working")) clientWorking = tag.getBoolean("working");

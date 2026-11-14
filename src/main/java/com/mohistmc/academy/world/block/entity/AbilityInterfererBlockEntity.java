@@ -32,7 +32,8 @@ public final class AbilityInterfererBlockEntity extends AcademyContainerBlockEnt
     public static final int BATTERY_SLOT = 0;
     public static final int MAX_WHITELIST = 32;
     public static final int MAX_PLAYER_NAME = 16;
-    private static final int BANDWIDTH = 50;
+    /** Legacy 1.0.7 battery bandwidth; live value is machines.abilityInterferer.bandwidth. */
+    public static final int BANDWIDTH = 50;
 
     public record WhitelistEntry(UUID id, String name) {}
 
@@ -59,7 +60,12 @@ public final class AbilityInterfererBlockEntity extends AcademyContainerBlockEnt
 
     public void serverTick() {
         if (level == null || level.isClientSide()) return;
-        boolean changed = chargeFromBattery();
+        boolean changed = false;
+        if (energy > getMaxEnergyStored()) {
+            energy = getMaxEnergyStored();
+            changed = true;
+        }
+        changed |= chargeFromBattery();
         long now = level.getGameTime();
 
         if (!enabled) {
@@ -70,7 +76,8 @@ public final class AbilityInterfererBlockEntity extends AcademyContainerBlockEnt
 
         if (nextPaymentTick == Long.MIN_VALUE) nextPaymentTick = now;
         if (now >= nextPaymentTick) {
-            int cost = AbilityInterferenceRules.pulseCost(range);
+            int cost = com.mohistmc.academy.config.MachineConfig.interfererCost(
+                    AbilityInterferenceRules.pulseCost(range));
             if (energy < cost) {
                 setEnabled(false);
                 return;
@@ -88,7 +95,8 @@ public final class AbilityInterfererBlockEntity extends AcademyContainerBlockEnt
         ItemStack battery = getItems().get(BATTERY_SLOT);
         if (!EnergyItemHelper.isEnergyItem(battery) || energy >= getMaxEnergyStored()) return false;
         int accepted = EnergyItemHelper.extractEnergy(battery,
-                Math.min(BANDWIDTH, getMaxEnergyStored() - energy), false);
+                Math.min(com.mohistmc.academy.config.MachineConfig.INTERFERER_BANDWIDTH.get(),
+                        getMaxEnergyStored() - energy), false);
         if (accepted <= 0) return false;
         energy += accepted;
         return true;
@@ -220,7 +228,8 @@ public final class AbilityInterfererBlockEntity extends AcademyContainerBlockEnt
 
     @Override
     public int getMaxEnergyStored() {
-        return AbilityInterferenceRules.MAX_ENERGY;
+        // 1.0.7 AbilityInterferenceRules.MAX_ENERGY; machines.abilityInterferer.buffer.
+        return com.mohistmc.academy.config.MachineConfig.INTERFERER_BUFFER.get();
     }
 
     @Override
@@ -239,7 +248,7 @@ public final class AbilityInterfererBlockEntity extends AcademyContainerBlockEnt
     @Override
     public double injectEnergy(double amount) {
         if (!Double.isFinite(amount) || amount <= 0) return amount;
-        double accepted = Math.min(amount, getMaxEnergyStored() - energy);
+        double accepted = Math.min(amount, Math.max(0, getMaxEnergyStored() - energy));
         if (accepted > 0) setEnergy(energy + (int) Math.floor(accepted));
         return amount - Math.floor(accepted);
     }
@@ -254,7 +263,7 @@ public final class AbilityInterfererBlockEntity extends AcademyContainerBlockEnt
 
     @Override
     public double getBandwidth() {
-        return BANDWIDTH;
+        return com.mohistmc.academy.config.MachineConfig.INTERFERER_BANDWIDTH.get();
     }
 
     @Override

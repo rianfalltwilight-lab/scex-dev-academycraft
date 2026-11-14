@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -44,6 +45,15 @@ public class PlayerAbilityData {
     private float cpRegenRate = BASE_CP_REGEN;
     private int cpRecoveryDelay;
     private int overloadRecoveryDelay;
+    /**
+     * Legacy CPData {@code !overloadFine}: set when a payment drives overload to its maximum
+     * and cleared only once overload has drained back to zero.  While set, no ability can be used.
+     */
+    private boolean overloadLocked;
+    /** One-shot edge for the server tick, which aborts live sessions and posts the Overloaded event. */
+    private boolean overloadTriggered;
+    /** Mirrors the owner's creative mode each server tick; legacy creative paid neither CP nor overload. */
+    private boolean creativeExempt;
 
     private final Set<String> learnedSkills = new HashSet<>();
     private final Map<String, Float> skillProficiency = new HashMap<>();
@@ -156,9 +166,18 @@ public class PlayerAbilityData {
     }
 
     public float getLevelProgressThreshold() {
+        return getLevelProgressThreshold(PlayerAbilityData::skillEnabled);
+    }
+
+    /**
+     * AbilityData.getLevelProgress counts {@code skill.canControl()} skills of the current level, and
+     * Skill.canControl() is {@code isEnabled() && canControl}: a config-disabled skill is not counted.
+     */
+    public float getLevelProgressThreshold(Predicate<String> enabled) {
         if (!hasAbility() || playerLevel < 1 || playerLevel > 5) return 0.0f;
         int controllable = (int) SkillRegistry.getSkillsByCategory(currentAbility).stream()
-                .filter(skill -> skill.getType() == SkillType.ACTIVE && skill.getLevel() == playerLevel)
+                .filter(skill -> skill.getType() == SkillType.ACTIVE && skill.getLevel() == playerLevel
+                        && enabled.test(skill.getId()))
                 .count();
         return LegacyLevelProgress.threshold(playerLevel, controllable);
     }
@@ -191,6 +210,10 @@ public class PlayerAbilityData {
     }
 
     public float getUsageMaxCp() { return usageMaxCp; }
+    /** CPData.getRawMaxCP: level base + course bonuses, without usage growth (drives recovery speed). */
+    public float getRawMaxCp() { return maxCp - usageMaxCp; }
+    /** CPData.getRawMaxOverload: level base + course bonuses, without usage growth. */
+    public float getRawMaxOverload() { return maxOverload - usageMaxOverload; }
     public float getUsageMaxOverload() { return usageMaxOverload; }
 
     public void setUsageResourceGrowth(float cp, float overload) {
@@ -241,6 +264,52 @@ public class PlayerAbilityData {
 
     public float getMaxOverload() {
         return maxOverload;
+    }
+
+    public boolean isOverloadLocked() {
+        return overloadLocked;
+    }
+
+    /** CPData.isOverloaded: locked and still inside the post-overload recovery delay. */
+    public boolean isOverloaded() {
+        return overloadLocked && overloadRecoveryDelay > 0;
+    }
+
+    public void setOverloadLocked(boolean locked) {
+        this.overloadLocked = locked;
+    }
+
+    /** Returns and clears the "just reached maximum overload" edge. */
+    public boolean consumeOverloadTrigger() {
+        boolean triggered = overloadTriggered;
+        overloadTriggered = false;
+        return triggered;
+    }
+
+    public boolean isCreativeExempt() {
+        return creativeExempt;
+    }
+
+    public void setCreativeExempt(boolean exempt) {
+        this.creativeExempt = exempt;
+    }
+
+    /** CPData.canPerform: creative always affords the CP, otherwise the current pool must cover it. */
+    public boolean canAffordCp(float cp) {
+        return creativeExempt || currentCp >= cp;
+    }
+
+    /** CPData.addOverload: clamp at the cap and latch the lockout when the cap is reached. */
+    private void addPaidOverload(float amount) {
+        currentOverload = Math.min(maxOverload, currentOverload + Math.max(0, amount));
+        latchIfOverloaded();
+    }
+
+    private void latchIfOverloaded() {
+        if (maxOverload > 0 && currentOverload >= maxOverload && !overloadLocked) {
+            overloadLocked = true;
+            overloadTriggered = true;
+        }
     }
 
     public void addMaxOverload(float amount) {
@@ -319,6 +388,21 @@ public class PlayerAbilityData {
     }
 
     public boolean canLearnSkill(Skill skill) {
+        return canLearnSkill(skill, PlayerAbilityData::skillEnabled);
+    }
+
+    /** Server skill tuning {@code <id>.enabled}; 1.0.7 Skill.isEnabled(). */
+    public static boolean skillEnabled(String skillId) {
+        return ACConfig.Server.skill(skillId).enabled();
+    }
+
+    /**
+     * 1.0.7 Skill.isEnabled(): a disabled skill does not appear in the skill tree (so it cannot be
+     * developed), and Skill.setParent/addSkillDep only add the dependency when the parent is enabled,
+     * so a disabled prerequisite never blocks its children.
+     */
+    public boolean canLearnSkill(Skill skill, Predicate<String> enabled) {
+        if (!enabled.test(skill.getId())) return false;
         if (devMode) return true;
         if (skill.getCategory() != currentAbility) return false;
         if (learnedSkills.contains(skill.getId())) return false;
@@ -335,6 +419,7 @@ public class PlayerAbilityData {
                         .anyMatch(s -> learnedSkills.contains(s.getId()));
                 if (!hasAnySkillAtLevel) return false;
             } else {
+                if (!enabled.test(prereqId)) continue;
                 if (!learnedSkills.contains(prereqId)) return false;
                 if (getProficiency(prereqId) < prereq.proficiencyRequired()) return false;
             }
@@ -344,10 +429,20 @@ public class PlayerAbilityData {
 
     // ==================== 冷却系统 ====================
 
-    /** 设置技能冷却（tick） */
+    /**
+     * 设置技能冷却（tick）。1.0.7 CooldownData.doSet keeps the LONGER of the running and the new
+     * cooldown, so a shorter value never cuts an existing cooldown. Use {@link #clearCooldowns()}
+     * to drop cooldowns. Starts a cooldown, so the {@code cooldown} skill tuning multiplier applies;
+     * restoring stored/synced remaining ticks must use {@link #setCooldownRaw}.
+     */
     public void setCooldown(String skillId, int ticks) {
+        setCooldownRaw(skillId, ticks > 0 ? com.mohistmc.academy.config.DynamicSkillRules.cooldown(skillId, ticks) : ticks);
+    }
+
+    /** As {@link #setCooldown} but without the tuning multiplier (persistence, sync, commands). */
+    public void setCooldownRaw(String skillId, int ticks) {
         if (validKey(skillId) && ticks > 0) {
-            cooldowns.put(skillId, Math.min(ticks, 20 * 60 * 60));
+            cooldowns.merge(skillId, Math.min(ticks, 20 * 60 * 60), Math::max);
         }
     }
 
@@ -361,11 +456,24 @@ public class PlayerAbilityData {
         return cooldowns.getOrDefault(skillId, 0);
     }
 
+    /** CPData.recoverAll (death, a full night's sleep): full CP, no overload, no lockout. */
+    public void recoverAll() {
+        currentCp = maxCp;
+        currentOverload = 0;
+        overloadLocked = false;
+        overloadTriggered = false;
+    }
+
     /** Clears every ability cooldown and returns the number of cleared entries. */
     public int clearCooldowns() {
         int count = cooldowns.size();
         cooldowns.clear();
         return count;
+    }
+
+    /** Clears one skill's cooldown; true when it had one. */
+    public boolean clearCooldown(String skillId) {
+        return cooldowns.remove(skillId) != null;
     }
 
     /** 获取技能最大冷却 tick（用于 HUD 显示） */
@@ -383,6 +491,8 @@ public class PlayerAbilityData {
         var tuning = ACConfig.Server.skill(skill.getId());
         if (!tuning.enabled()) return false;
         if (isDevMode()) return true;
+        // CPData.canUseAbility: an overloaded player cannot use any skill until overload drains to 0.
+        if (overloadLocked) return false;
         if (currentAbility != skill.getCategory() || playerLevel < skill.getLevel()) return false;
         if (!hasLearnedSkill(skill.getId())) return false;
         if (isOnCooldown(skill.getId())) return false;
@@ -392,8 +502,8 @@ public class PlayerAbilityData {
         // must not reject a cast before canActivate/canStartCharging evaluates
         // the real proficiency- and context-dependent CP/overload values.
         if (effect != null && !effect.appliesBaseResourceCost()) return true;
-        if (currentCp < skill.getBaseCpCost() * tuning.cp()) return false;
-        return currentOverload + skill.getBaseOverload() * tuning.overload() <= maxOverload;
+        // CPData.perform checks only CP; overload clamps at its cap and then locks.
+        return canAffordCp(skill.getBaseCpCost() * tuning.cp());
     }
 
     public void useSkill(Skill skill) {
@@ -403,12 +513,14 @@ public class PlayerAbilityData {
             var tuning = ACConfig.Server.skill(skill.getId());
             float cpCost = skill.getBaseCpCost() * tuning.cp();
             float overloadCost = skill.getBaseOverload() * tuning.overload();
-            currentCp -= cpCost;
-            addOverload(overloadCost);
             var rules = ACConfig.Server.legacyRules();
+            if (!creativeExempt) {
+                currentCp -= cpCost;
+                addPaidOverload(overloadCost);
+                cpRecoveryDelay = rules.cpDelay();
+                overloadRecoveryDelay = rules.overloadDelay();
+            }
             growUsageResources(cpCost, overloadCost, rules);
-            cpRecoveryDelay = rules.cpDelay();
-            overloadRecoveryDelay = rules.overloadDelay();
         }
         if (effect != null) {
             int cd = effect.getCooldownTicks(getProficiency(skill.getId()));
@@ -420,13 +532,17 @@ public class PlayerAbilityData {
     public boolean tryConsumeDynamic(float cpCost, float overloadCost) {
         if (isDevMode()) return true;
         if (!Float.isFinite(cpCost) || !Float.isFinite(overloadCost) || cpCost < 0 || overloadCost < 0) return false;
-        if (currentCp < cpCost || currentOverload + overloadCost > maxOverload) return false;
-        currentCp -= cpCost;
-        addOverload(overloadCost);
+        if (overloadLocked || !canAffordCp(cpCost)) return false;
         var rules = ACConfig.Server.legacyRules();
+        if (!creativeExempt) {
+            currentCp -= cpCost;
+            // Legacy perform never refused for overload: it clamps at the cap and then locks.
+            addPaidOverload(overloadCost);
+            cpRecoveryDelay = rules.cpDelay();
+            overloadRecoveryDelay = rules.overloadDelay();
+        }
+        // Creative still grows the usage maxima, as CPData.performInternal did.
         growUsageResources(cpCost, overloadCost, rules);
-        cpRecoveryDelay = rules.cpDelay();
-        overloadRecoveryDelay = rules.overloadDelay();
         return true;
     }
 
@@ -437,15 +553,21 @@ public class PlayerAbilityData {
      */
     public boolean consumeDynamicForced(float cpCost, float overloadCost) {
         if (isDevMode()) return true;
+        // A forced debit only skips the CP/overload preflight. While overloaded no context could
+        // start in 1.12.2 (canUseAbility), so no forced payment may succeed either.
+        if (overloadLocked) return false;
         LegacyResourceProgression.ForcedResources result = LegacyResourceProgression.consumeWithForce(
                 currentCp, currentOverload, maxOverload, cpCost, overloadCost);
         if (result == null) return false;
-        currentCp = result.cp();
-        currentOverload = result.overload();
         var rules = ACConfig.Server.legacyRules();
+        if (!creativeExempt) {
+            currentCp = result.cp();
+            currentOverload = result.overload();
+            latchIfOverloaded();
+            cpRecoveryDelay = rules.cpDelay();
+            overloadRecoveryDelay = rules.overloadDelay();
+        }
         growUsageResources(cpCost, overloadCost, rules);
-        cpRecoveryDelay = rules.cpDelay();
-        overloadRecoveryDelay = rules.overloadDelay();
         return true;
     }
 
@@ -466,11 +588,11 @@ public class PlayerAbilityData {
 
     /** Snapshot immediately around a payment, before running fallible external hooks. */
     public record DynamicResources(float cp, float overload, float growthCp, float growthOverload,
-                                   int cpDelay, int overloadDelay) {}
+                                   int cpDelay, int overloadDelay, boolean overloadLocked) {}
 
     public DynamicResources captureDynamicResources() {
         return new DynamicResources(currentCp, currentOverload, usageMaxCp, usageMaxOverload,
-                cpRecoveryDelay, overloadRecoveryDelay);
+                cpRecoveryDelay, overloadRecoveryDelay, overloadLocked);
     }
 
     /** Undo only this payment's deltas; retain resource changes made by external hooks. */
@@ -482,6 +604,11 @@ public class PlayerAbilityData {
         usageMaxOverload += before.growthOverload - paid.growthOverload;
         if (cpRecoveryDelay == paid.cpDelay) cpRecoveryDelay = before.cpDelay;
         if (overloadRecoveryDelay == paid.overloadDelay) overloadRecoveryDelay = before.overloadDelay;
+        // A refunded payment must not leave behind the lockout it triggered.
+        if (!before.overloadLocked && paid.overloadLocked && currentOverload < maxOverload) {
+            overloadLocked = false;
+            overloadTriggered = false;
+        }
         recalculateMaxResources(false);
     }
 
@@ -628,9 +755,11 @@ public class PlayerAbilityData {
         sanitizeResources();
         var rules = ACConfig.Server.legacyRules();
         if (cpRecoveryDelay > 0) cpRecoveryDelay--; else
-            currentCp = Math.min(currentCp + LegacyAbilityRules.cpRecovery(currentCp,maxCp,cpRegenRate,rules), maxCp);
+            currentCp = Math.min(currentCp + LegacyAbilityRules.cpRecovery(currentCp,getRawMaxCp(),cpRegenRate,rules), maxCp);
         if (overloadRecoveryDelay > 0) overloadRecoveryDelay--; else
-            currentOverload = Math.max(currentOverload - LegacyAbilityRules.overloadRecovery(currentOverload,maxOverload,rules), 0);
+            currentOverload = Math.max(currentOverload - LegacyAbilityRules.overloadRecovery(currentOverload,getRawMaxOverload(),rules), 0);
+        // CPData.tick sets overloadFine again only once overload is fully drained.
+        if (currentOverload <= 0) overloadLocked = false;
 
         cooldowns.entrySet().removeIf(entry -> {
             int remaining = entry.getValue() - 1;
@@ -660,6 +789,34 @@ public class PlayerAbilityData {
     private static boolean finite(float value) { return Float.isFinite(value); }
     private static boolean validKey(String value) { return value != null && !value.isBlank() && value.length() <= 128; }
 
+    /**
+     * 1.0.7 AbilityData.setCategory plus its CategoryChangeEvent listeners: the level is kept (Level 1
+     * only when it was 0), so level progress and CP/overload usage growth survive; learned skills,
+     * skill exp, presets and cooldowns are cleared; CPData.recalcMaxValue refills CP and drains overload.
+     * Returns true when the category actually changed.
+     */
+    public boolean changeCategory(AbilityCategory category) {
+        if (category == null) {
+            if (currentAbility == null) return false;
+            reset();
+            cooldowns.clear();
+            return true;
+        }
+        if (category.equals(currentAbility)) return false;
+        currentAbility = category;
+        if (playerLevel == 0) {
+            playerLevel = 1;
+            levelProgressExp = 0;
+        }
+        learnedSkills.clear();
+        skillProficiency.clear();
+        for (SkillPreset preset : presets) preset.clearAll();
+        currentPreset = 0;
+        cooldowns.clear();
+        recalculateMaxResources(true);
+        return true;
+    }
+
     public void reset() {
         currentAbility = null;
         playerLevel = 0;
@@ -671,6 +828,8 @@ public class PlayerAbilityData {
         usageMaxCp = 0;
         usageMaxOverload = 0;
         cpRegenRate = BASE_CP_REGEN;
+        overloadLocked = false;
+        overloadTriggered = false;
         learnedSkills.clear();
         skillProficiency.clear();
         abilityActive = false;
@@ -717,6 +876,7 @@ public class PlayerAbilityData {
         tag.putFloat("cp_regen", cpRegenRate);
         tag.putInt("cp_recovery_delay", cpRecoveryDelay);
         tag.putInt("overload_recovery_delay", overloadRecoveryDelay);
+        tag.putBoolean("overload_locked", overloadLocked);
 
         ListTag learnedList = new ListTag();
         for (String skillId : learnedSkills) {
@@ -798,7 +958,7 @@ public class PlayerAbilityData {
 
     private static final Set<String> RUNTIME_SYNC_KEYS = Set.of("cp", "max_cp", "overload", "max_overload",
             "usage_max_cp", "usage_max_overload", "cp_regen", "cp_recovery_delay", "overload_recovery_delay",
-            "level_progress_exp", "proficiency", "current_preset", "ability_active", "cooldowns");
+            "overload_locked", "level_progress_exp", "proficiency", "current_preset", "ability_active", "cooldowns");
 
     /** Low-frequency configuration. Runtime changes never dirty this snapshot. */
     public CompoundTag toProfileSyncTag() {
@@ -820,6 +980,7 @@ public class PlayerAbilityData {
         tag.putFloat("cp_regen", cpRegenRate);
         tag.putInt("cp_recovery_delay", cpRecoveryDelay);
         tag.putInt("overload_recovery_delay", overloadRecoveryDelay);
+        tag.putBoolean("overload_locked", overloadLocked);
         tag.putFloat("level_progress_exp", levelProgressExp);
         tag.putInt("current_preset", currentPreset);
         tag.putBoolean("ability_active", abilityActive);
@@ -841,6 +1002,7 @@ public class PlayerAbilityData {
         if (tag.contains("overload")) setCurrentOverload(tag.getFloat("overload"));
         if (tag.contains("cp_recovery_delay")) cpRecoveryDelay = Math.clamp(tag.getInt("cp_recovery_delay"), 0, 1200);
         if (tag.contains("overload_recovery_delay")) overloadRecoveryDelay = Math.clamp(tag.getInt("overload_recovery_delay"), 0, 1200);
+        if (tag.contains("overload_locked")) overloadLocked = tag.getBoolean("overload_locked");
         if (tag.contains("level_progress_exp")) setLevelProgressExp(tag.getFloat("level_progress_exp"));
         if (tag.contains("current_preset")) setCurrentPreset(tag.getInt("current_preset"));
         if (tag.contains("ability_active")) setAbilityActive(tag.getBoolean("ability_active"));
@@ -852,7 +1014,7 @@ public class PlayerAbilityData {
         if (tag.contains("cooldowns")) {
             cooldowns.clear();
             CompoundTag values = tag.getCompound("cooldowns");
-            for (String key : values.getAllKeys()) setCooldown(key, values.getInt(key));
+            for (String key : values.getAllKeys()) setCooldownRaw(key, values.getInt(key));
         }
     }
 
@@ -884,6 +1046,7 @@ public class PlayerAbilityData {
         data.setUsageResourceGrowth(usageCp, usageOverload);
         data.setCurrentCp(tag.getFloat("cp"));
         data.setCurrentOverload(tag.getFloat("overload"));
+        data.setOverloadLocked(tag.getBoolean("overload_locked"));
 
         if (tag.contains("obtained")) {
             ListTag list = tag.getList("obtained", net.minecraft.nbt.Tag.TAG_STRING);
@@ -955,7 +1118,7 @@ public class PlayerAbilityData {
         if (tag.contains("cooldowns")) {
             CompoundTag cdTag = tag.getCompound("cooldowns");
             for (String key : cdTag.getAllKeys()) {
-                data.setCooldown(key, cdTag.getInt(key));
+                data.setCooldownRaw(key, cdTag.getInt(key));
             }
         }
 

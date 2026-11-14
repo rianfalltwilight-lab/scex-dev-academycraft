@@ -18,7 +18,7 @@ class VecmanipLegacySourceContractTest {
         assertTrue(source.contains("distanceToSqr(finalPos) <= AOE_RANGE * AOE_RANGE"));
         assertTrue(source.contains("for (int dx = -3; dx < 3; dx++)"));
         assertTrue(source.contains("e.setPos(e.getX(), e.getY() + .1"));
-        assertTrue(source.contains("waveRings(level,player.getEyePosition().lerp(finalPos,.7)"));
+        assertTrue(source.contains("waveRings(level,caster.getEyePosition().lerp(finalPos,.7)"));
         assertFalse(source.contains("EffectHelper.glowBurst"));
     }
 
@@ -26,7 +26,7 @@ class VecmanipLegacySourceContractTest {
         String source = source("skill/ability/vecmanip/GroundShockEffect.java");
         assertTrue(source.contains("Math.cos(90.0)"));
         assertTrue(source.contains("Math.sin(90.0)"));
-        assertTrue(source.contains("SoundSource.PLAYERS, 2.0f, 1.0f"));
+        assertTrue(source.contains("SoundSource.PLAYERS : SoundSource.HOSTILE, 2.0f, 1.0f"));
     }
 
     @Test void stormWingDoesNotEnableASecondVanillaFlightController() throws Exception {
@@ -70,5 +70,21 @@ class VecmanipLegacySourceContractTest {
         assertTrue(controller.contains("getXRot() + 3.4f"));
         assertTrue(controller.contains("vectorPunchStartedNanos"));
         assertTrue(controller.contains("Axis.XP.rotationDegrees(-20 * t)"));
+    }
+
+    /** Restored legacy behaviour: replaces the old port-only exclusion and layers. */
+    @Test void vectorDefensesUseLegacyExcludedListAndGroundShockLegacyLayers() throws Exception {
+        String passive = source("skill/passive/PassiveSkillEventHandler.java");
+        // default.conf excluded: ["item", "xp_bottle", "living", "mob"]; xp orbs stay affected.
+        assertTrue(passive.contains("!(entity instanceof LivingEntity)"));
+        assertTrue(passive.contains("!(entity instanceof ThrownExperienceBottle)"));
+        assertFalse(passive.contains("instanceof ExperienceOrb"));
+        String ground = source("skill/ability/vecmanip/GroundShockEffect.java");
+        // Groundshock.scala: y <- y0 - 1 until y0 + 1 with y0 = feet Y.
+        assertTrue(ground.contains("new BlockPos(px + ox, fy + oy, pz + oz)"));
+        assertFalse(ground.contains("py + oy"));
+        String wing = source("skill/ability/vecmanip/StormWingEffect.java");
+        // StormWing.scala l_tick hovers in CHARGE as well as ACTIVE.
+        assertTrue(wing.contains("if (ticks <= chargeTime) {") && wing.contains("hover(player);"));
     }
 }

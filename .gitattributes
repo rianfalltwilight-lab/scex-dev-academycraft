@@ -3,3 +3,6 @@
 # are changed when only line endings change.
 src/generated/**/.cache/cache text eol=lf
 src/generated/**/*.json text eol=lf
+
+# The POSIX wrapper must keep LF endings or /bin/sh rejects it on macOS/Linux.
+gradlew text eol=lf

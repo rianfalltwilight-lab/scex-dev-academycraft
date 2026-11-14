@@ -4,6 +4,8 @@ import com.mohistmc.academy.skill.ability.LoadedRaycast;
 import com.mohistmc.academy.skill.AcademyDamageHelper;
 
 import com.mohistmc.academy.config.DynamicSkillRules;
+import com.mohistmc.academy.api.mob.MobCastContext;
+import com.mohistmc.academy.api.mob.MobCastable;
 
 import com.mohistmc.academy.world.effect.EffectHelper;
 import com.mohistmc.academy.entity.RailgunBeamEntity;
@@ -27,18 +29,21 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.EventHooks;
 import net.neoforged.neoforge.event.level.BlockEvent;
 
 import static com.mohistmc.academy.utils.MathUtils.lerpf;
 
-public class RailgunEffect implements ChargingSkillEffect {
+public class RailgunEffect implements ChargingSkillEffect, MobCastable {
 
     private static final int CHARGE_TICKS = 20;
     private static final double BEAM_RANGE = 45.0;
@@ -171,11 +176,40 @@ public class RailgunEffect implements ChargingSkillEffect {
 
     private void performRailgun(ServerPlayer player, PlayerAbilityData data, float exp) {
         ServerLevel level = player.serverLevel();
+        boolean hitEntity = shoot(player, level, exp, player.getEyePosition(0), player.getLookAngle(),
+                DynamicSkillRules.destroysBlocks(level, getId()));
+
+        if (hitEntity) {
+            DynamicSkillRules.addExp(player,data, getId(), 0.01f);
+        } else {
+            DynamicSkillRules.addExp(player,data, getId(), 0.005f);
+        }
+    }
+
+    /**
+     * Mob cast: the item-ammunition charge time, then the same shot from a virtual coin.  Nothing is
+     * taken from or dropped into the world as ammunition; blocks break only when the cast may grief.
+     */
+    @Override
+    public boolean mobCast(MobCastContext context) {
+        shoot(context.caster(), context.level(), context.proficiency(), context.eye(), context.look(),
+                context.mayDestroyBlocks());
+        return true;
+    }
+
+    @Override public int mobChargeTicks(float proficiency) { return CHARGE_TICKS; }
+
+    @Override public int mobCooldownTicks(float proficiency) { return getCooldownTicks(proficiency); }
+
+    /**
+     * The shot after ammunition and payment, shared by players and mob casters; returns whether an
+     * entity was in the beam (the player path turns that into exp).
+     */
+    private boolean shoot(LivingEntity caster, ServerLevel level, float exp, Vec3 eyePos, Vec3 lookVec,
+                          boolean mayDestroyBlocks) {
         float damage = lerpf(60, 110, exp);
         double energy = lerpf(900, 2000, exp);
 
-        Vec3 lookVec = player.getLookAngle();
-        Vec3 eyePos = player.getEyePosition(0);
         Vec3 rightVec = lookVec.cross(new Vec3(0, 1, 0)).normalize();
         Vec3 visualStart = eyePos.add(rightVec.scale(0.3))
                 .add(0, -0.2, 0)
@@ -186,17 +220,16 @@ public class RailgunEffect implements ChargingSkillEffect {
 
         Vec3 end = rayStart.add(lookVec.scale(MAX_INCREMENT));
         List<LivingEntity> targets = new ArrayList<>(level.getEntitiesOfClass(LivingEntity.class,
-                new AABB(rayStart, end).inflate(RADIUS * 1.2), e -> e != player && e.isAlive()));
+                new AABB(rayStart, end).inflate(RADIUS * 1.2), e -> e != caster && e.isAlive()));
         targets.removeIf(e -> perpendicularDistance(rayStart, lookVec, e.position()) >= RADIUS * 1.2
                 || firstIntersection(rayStart, end, e.getBoundingBox().inflate(RADIUS)).isEmpty());
         targets.sort(Comparator.comparingDouble(e -> firstIntersection(rayStart, end, e.getBoundingBox().inflate(RADIUS))
                 .map(p -> p.distanceTo(rayStart)).orElse(Double.MAX_VALUE)));
         boolean hitEntity = false;
-        boolean mayDestroyBlocks = DynamicSkillRules.destroysBlocks(level, getId());
         // One authoritative reachable distance governs blocks, entity damage and FX.
         // A canceled/unbreakable/energy-exhausting central traversal is a hard barrier.
         double stopDistance = mayDestroyBlocks
-                ? traceBarrier(level, player, rayStart, lookVec, MAX_INCREMENT, energy)
+                ? traceBarrier(level, caster, rayStart, lookVec, MAX_INCREMENT, energy)
                 : MAX_INCREMENT;
         for (LivingEntity target : targets) {
             var intersection = firstIntersection(rayStart, rayStart.add(lookVec.scale(stopDistance)), target.getBoundingBox().inflate(RADIUS));
@@ -207,12 +240,12 @@ public class RailgunEffect implements ChargingSkillEffect {
                     (float)Math.min(1D, perpendicularDistance(rayStart, lookVec, target.position()) / MAX_INCREMENT));
             hitEntity = true;
             if (target instanceof ServerPlayer reflector
-                    && PassiveSkillEventHandler.reflectSpecialRay(reflector, player, attenuated)) {
+                    && PassiveSkillEventHandler.reflectSpecialRay(reflector, caster, attenuated)) {
                 stopDistance = distance;
                 reflectDamage(reflector);
                 break;
             }
-            AcademyDamageHelper.hurt(player,target,com.mohistmc.academy.skill.SkillDamageSource.attack(player), DynamicSkillRules.damage(getId(),attenuated));
+            AcademyDamageHelper.hurt(caster,target,com.mohistmc.academy.skill.SkillDamageSource.attack(caster), DynamicSkillRules.damage(getId(),attenuated));
             EffectHelper.glowBurst(level, target.getX(), target.getEyeY(), target.getZ(),
                     3, 0.3f, 0x88FFCC44, 10, 0.2f);
         }
@@ -231,16 +264,11 @@ public class RailgunEffect implements ChargingSkillEffect {
             if (x * x + y * y <= RADIUS * RADIUS) origins.add(rayStart.add(right.scale(x)).add(vertical.scale(y)));
         double lineEnergy = energy / Math.max(1, origins.size());
         if (mayDestroyBlocks)
-            for (Vec3 origin : origins) destroyLine(level, player, origin, lookVec, stopDistance, lineEnergy);
+            for (Vec3 origin : origins) destroyLine(level, caster, origin, lookVec, stopDistance, lineEnergy);
 
-        AcademySounds.playSound(level, player.getX(), player.getY(), player.getZ(),
-                AcademySounds.EM_RAILGUN, SoundSource.PLAYERS, 0.5f, 1.0f);
-
-        if (hitEntity) {
-            DynamicSkillRules.addExp(player,data, getId(), 0.01f);
-        } else {
-            DynamicSkillRules.addExp(player,data, getId(), 0.005f);
-        }
+        AcademySounds.playSound(level, caster.getX(), caster.getY(), caster.getZ(),
+                AcademySounds.EM_RAILGUN, caster instanceof Player ? SoundSource.PLAYERS : SoundSource.HOSTILE, 0.5f, 1.0f);
+        return hitEntity;
     }
 
     private static double along(Vec3 start, Vec3 direction, Vec3 point) { return point.subtract(start).dot(direction); }
@@ -253,7 +281,7 @@ public class RailgunEffect implements ChargingSkillEffect {
         return box.clip(start, end);
     }
 
-    public static double traceBarrier(ServerLevel level, ServerPlayer player, Vec3 origin, Vec3 direction,
+    public static double traceBarrier(ServerLevel level, LivingEntity caster, Vec3 origin, Vec3 direction,
                                        double maxDistance, double energy) {
         if (!Double.isFinite(energy) || energy <= 0) return 0;
         BlockPos previous = null;
@@ -262,21 +290,19 @@ public class RailgunEffect implements ChargingSkillEffect {
             if (pos.equals(previous)) continue;
             previous = pos;
             if (!LoadedRaycast.isLoaded(level, pos) || !level.getWorldBorder().isWithinBounds(pos)
-                    || !level.mayInteract(player, pos)) return Math.max(0, d - .01);
+                    || !mayInteract(level, caster, pos)) return Math.max(0, d - .01);
             var state = level.getBlockState(pos);
             if (state.isAir()) continue;
             float hardness = state.getDestroySpeed(level, pos);
             if (hardness < 0 || state.is(Blocks.BEDROCK) || energy < hardness) return Math.max(0, d - .01);
-            BlockEvent.BreakEvent event = new BlockEvent.BreakEvent(level, pos, state, player);
-            NeoForge.EVENT_BUS.post(event);
-            if (event.isCanceled() || level.getBlockState(pos) != state) return Math.max(0, d - .01);
+            if (!allowsBreak(level, caster, pos, state) || level.getBlockState(pos) != state) return Math.max(0, d - .01);
             energy -= Math.max(0, hardness);
             if (energy <= 0) return Math.max(0, d - .01);
         }
         return maxDistance;
     }
 
-    private static void destroyLine(ServerLevel level, ServerPlayer player, Vec3 origin, Vec3 direction,
+    private static void destroyLine(ServerLevel level, LivingEntity caster, Vec3 origin, Vec3 direction,
                                     double maxDistance, double energy) {
         BlockPos previous = null;
         for (double d = 0; d <= maxDistance && energy > 0; d += .45) {
@@ -284,32 +310,46 @@ public class RailgunEffect implements ChargingSkillEffect {
             if (pos.equals(previous)) continue;
             previous = pos;
             if (!LoadedRaycast.isLoaded(level, pos) || !level.getWorldBorder().isWithinBounds(pos)
-                    || !level.mayInteract(player, pos)) break;
+                    || !mayInteract(level, caster, pos)) break;
             var state = level.getBlockState(pos);
             if (state.isAir()) continue;
             float hardness = state.getDestroySpeed(level, pos);
             if (hardness < 0 || state.is(Blocks.BEDROCK) || energy < hardness) break;
-            BlockEvent.BreakEvent event = new BlockEvent.BreakEvent(level, pos, state, player);
-            NeoForge.EVENT_BUS.post(event);
-            if (event.isCanceled() || level.getBlockState(pos) != state
-                    || !level.destroyBlock(pos, level.random.nextFloat() < .05f, player)) break;
+            if (!allowsBreak(level, caster, pos, state) || level.getBlockState(pos) != state
+                    || !level.destroyBlock(pos, dropsBlocks(level, caster), caster)) break;
             energy -= Math.max(0, hardness);
             if (level.random.nextFloat() < .05f) {
                 BlockPos neighbor = pos.relative(net.minecraft.core.Direction.getRandom(level.random));
                 if (!LoadedRaycast.isLoaded(level, neighbor) || !level.getWorldBorder().isWithinBounds(neighbor)
-                        || !level.mayInteract(player, neighbor)) continue;
+                        || !mayInteract(level, caster, neighbor)) continue;
                 var neighborState = level.getBlockState(neighbor);
                 float neighborHardness = neighborState.getDestroySpeed(level, neighbor);
                 if (!neighborState.isAir() && neighborHardness >= 0 && energy >= neighborHardness) {
-                    BlockEvent.BreakEvent neighborEvent = new BlockEvent.BreakEvent(level, neighbor, neighborState, player);
-                    NeoForge.EVENT_BUS.post(neighborEvent);
-                    if (!neighborEvent.isCanceled() && level.getBlockState(neighbor) == neighborState
-                            && level.destroyBlock(neighbor, level.random.nextFloat() < .05f, player)) {
+                    if (allowsBreak(level, caster, neighbor, neighborState) && level.getBlockState(neighbor) == neighborState
+                            && level.destroyBlock(neighbor, dropsBlocks(level, caster), caster)) {
                         energy -= neighborHardness;
                     }
                 }
             }
         }
+    }
+
+    /** Players keep the spawn-protection check; a mob caster was already cleared by mayDestroyBlocks. */
+    private static boolean mayInteract(ServerLevel level, LivingEntity caster, BlockPos pos) {
+        return !(caster instanceof Player player) || level.mayInteract(player, pos);
+    }
+
+    /** A player's BreakEvent, or the LivingDestroyBlockEvent mods use to protect blocks from mobs. */
+    private static boolean allowsBreak(ServerLevel level, LivingEntity caster, BlockPos pos, BlockState state) {
+        if (!(caster instanceof Player player)) return EventHooks.onEntityDestroyBlock(caster, pos, state);
+        BlockEvent.BreakEvent event = new BlockEvent.BreakEvent(level, pos, state, player);
+        NeoForge.EVENT_BUS.post(event);
+        return !event.isCanceled();
+    }
+
+    /** The legacy 5% drop chance for players; mob shots never yield items. */
+    private static boolean dropsBlocks(ServerLevel level, LivingEntity caster) {
+        return caster instanceof Player && level.random.nextFloat() < .05f;
     }
 
     private void reflectDamage(ServerPlayer reflector) {

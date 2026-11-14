@@ -31,6 +31,11 @@ repositories {
     mavenCentral()
     // Official JEI Maven. JEI remains compile-only and optional at runtime.
     maven { url = 'https://maven.blamejared.com' }
+    // KubeJS and Rhino, compile-only: the KubeJS plugin loads only when KubeJS is installed.
+    maven {
+        url = 'https://maven.latvian.dev/releases'
+        content { includeGroup 'dev.latvian.mods' }
+    }
 }
 
 base {
@@ -214,6 +219,14 @@ dependencies {
     if (providers.gradleProperty('withJei').map(String::toBoolean).orElse(false).get()) {
         localRuntime "mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
     }
+    // Optional KubeJS integration (compat/kubejs). Run with -PwithKubeJS=true to load KubeJS in dev runs.
+    compileOnly("dev.latvian.mods:kubejs-neoforge:${kubejs_version}") { transitive = false }
+    compileOnly("dev.latvian.mods:rhino:${rhino_version}") { transitive = false }
+    if (providers.gradleProperty('withKubeJS').map(String::toBoolean).orElse(false).get()) {
+        // KubeJS ships its own libraries as jar-in-jar, so no transitive resolution is needed.
+        localRuntime("dev.latvian.mods:kubejs-neoforge:${kubejs_version}") { transitive = false }
+        localRuntime("dev.latvian.mods:rhino:${rhino_version}") { transitive = false }
+    }
 
     // Example mod dependency using a mod jar from ./libs with a flat dir repository
     // This maps to ./libs/coolmod-${mc_version}-${coolmod_version}.jar
@@ -253,15 +266,26 @@ tasks.register('auditTestJar', Jar) {
 // NeoForge loads each mod as a Java module: a probe cannot share a package with the release mod.
 tasks.register('verifyAuditPackageIsolation') {
     dependsOn tasks.named('classes'), tasks.named('auditTestClasses')
+    // Resolve the class dirs at configuration time: the configuration cache forbids touching
+    // `sourceSets` (a project property) from inside doLast.
+    def mainClassDirs = sourceSets.main.output.classesDirs
+    def auditClassDirs = sourceSets.auditTest.output.classesDirs
+    inputs.files(mainClassDirs, auditClassDirs)
     doLast {
         def packages = { dirs ->
-            dirs.files.collectMany { dir ->
-                fileTree(dir).matching { include '**/*.class' }.files.collect { file ->
-                    dir.toPath().relativize(file.parentFile.toPath()).toString()
+            dirs.files.findAll { it.directory }.collectMany { dir ->
+                def root = dir.toPath()
+                def stream = java.nio.file.Files.walk(root)
+                try {
+                    stream.filter { it.toString().endsWith('.class') }
+                            .map { root.relativize(it.parent).toString() }
+                            .collect(java.util.stream.Collectors.toSet())
+                } finally {
+                    stream.close()
                 }
             }.toSet()
         }
-        def overlap = packages(sourceSets.main.output.classesDirs).intersect(packages(sourceSets.auditTest.output.classesDirs))
+        def overlap = packages(mainClassDirs).intersect(packages(auditClassDirs))
         if (!overlap.empty) throw new GradleException("Audit probe JAR has split module packages: ${overlap}")
     }
 }

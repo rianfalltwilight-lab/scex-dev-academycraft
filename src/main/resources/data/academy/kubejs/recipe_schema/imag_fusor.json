@@ -1,0 +1,48 @@
+{
+	"keys": [
+		{
+			"name": "output",
+			"role": "output",
+			"type": "item_stack"
+		},
+		{
+			"name": "input",
+			"role": "input",
+			"type": "ingredient"
+		},
+		{
+			"name": "phaseLiquid",
+			"role": "input",
+			"type": "int",
+			"function_names": ["phaseLiquid", "liquid"],
+			"default_optional": true
+		},
+		{
+			"name": "inputCount",
+			"role": "input",
+			"type": "int",
+			"function_names": ["inputCount", "count"],
+			"default_optional": true
+		},
+		{
+			"name": "time",
+			"type": "ticks",
+			"function_names": ["time"],
+			"default_optional": true
+		},
+		{
+			"name": "energy",
+			"type": "float",
+			"function_names": ["energy"],
+			"default_optional": true
+		}
+	],
+	"constructors": [
+		{
+			"keys": ["output", "input", "phaseLiquid"]
+		},
+		{
+			"keys": ["output", "input"]
+		}
+	]
+}

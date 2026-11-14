@@ -64,7 +64,7 @@ public final class LegacyVecmanipClientController {
             float exp = data.getProficiency("ground_shock");
             groundReleaseEligible = mc.player.onGround() && (data.isDevMode()
                     || data.getCurrentCp() >= 80 + 70 * exp
-                    && data.getCurrentOverload() + 15 - 5 * exp <= data.getMaxOverload());
+                    && !data.isOverloadLocked());
         } else if (groundWasCharging && lastGroundTicks >= 5 && groundReleaseEligible) {
             groundSlamTicks = 4;
         }
@@ -85,9 +85,8 @@ public final class LegacyVecmanipClientController {
             lastVectorTicks = ChargingHudOverlay.currentTicks();
             float exp = data.getProficiency(current);
             float cp = "dir_shock".equals(current) ? 50 + 50 * exp : 160 + 40 * exp;
-            float overload = "dir_shock".equals(current) ? 18 - 6 * exp : 50 - 20 * exp;
             vectorReleaseEligible = data.isDevMode() || data.getCurrentCp() >= cp
-                    && data.getCurrentOverload() + overload <= data.getMaxOverload();
+                    && !data.isOverloadLocked();
         } else if (vectorWasCharging && lastVectorTicks >= 7 && lastVectorTicks <= 49
                 && vectorReleaseEligible
                 && ("dir_blast".equals(vectorSkill) || hasLivingTarget(mc, 3))) {

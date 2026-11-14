@@ -22,7 +22,10 @@ class WindGeneratorSourceContractTest {
         assertTrue(block.contains("middleComplete = mainHeight >= MIN_PILLARS"));
         assertTrue(block.contains("mainHeight > MAX_PILLARS"));
         assertTrue(entity.contains("Math.min((int) storedEnergy, (int) getBandwidth())"));
-        assertTrue(entity.contains("return 300"));
+        // 1.0.7 LATENCY_MK3 bandwidth is now the machines.windGen.bandwidth default.
+        assertTrue(entity.contains("return MachineConfig.WIND_BANDWIDTH.get();"));
+        org.junit.jupiter.api.Assertions.assertEquals(300.0,
+                com.mohistmc.academy.config.MachineConfig.WIND_BANDWIDTH.get());
         // Numeric menu data is incremental; only changed world-visible state broadcasts.
         assertTrue(entity.contains("if (stateChanged)"));
         assertFalse(entity.contains("periodicEnergySync"));

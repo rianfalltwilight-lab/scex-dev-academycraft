@@ -5,7 +5,6 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.damagesource.DamageTypes;
@@ -29,28 +28,28 @@ public final class SkillDamageSource extends DamageSource {
         return ResourceKey.create(Registries.DAMAGE_TYPE, ResourceLocation.fromNamespaceAndPath("academy", path));
     }
 
-    private static SkillDamageSource create(ServerPlayer caster, ResourceKey<DamageType> type,
+    private static SkillDamageSource create(LivingEntity caster, ResourceKey<DamageType> type,
             @Nullable Entity direct, @Nullable Entity owner) {
         return new SkillDamageSource(caster.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE)
                 .getHolderOrThrow(type), direct, owner);
     }
 
-    public static SkillDamageSource attack(ServerPlayer caster) { return create(caster, ABILITY, caster, caster); }
-    public static SkillDamageSource magic(ServerPlayer caster) { return create(caster, MAGIC, caster, caster); }
-    public static SkillDamageSource thrown(ServerPlayer caster, Entity projectile) { return create(caster, THROWN, projectile, caster); }
+    public static SkillDamageSource attack(LivingEntity caster) { return create(caster, ABILITY, caster, caster); }
+    public static SkillDamageSource magic(LivingEntity caster) { return create(caster, MAGIC, caster, caster); }
+    public static SkillDamageSource thrown(LivingEntity caster, Entity projectile) { return create(caster, THROWN, projectile, caster); }
 
     /** Plasma Cannon keeps its existing native explosion classification and direct entity. */
-    public static SkillDamageSource explosion(ServerPlayer caster) {
+    public static SkillDamageSource explosion(LivingEntity caster) {
         return create(caster, DamageTypes.PLAYER_EXPLOSION, caster, caster);
     }
 
     /** Preserve the three released piercing-projectile registry IDs and direct entity. */
-    public static SkillDamageSource projectile(ServerPlayer caster, Entity projectile, ResourceKey<DamageType> type) {
+    public static SkillDamageSource projectile(LivingEntity caster, Entity projectile, ResourceKey<DamageType> type) {
         return create(caster, type, projectile, caster);
     }
 
     /** Self suffocation has no hostile owner; other victims must see the caster for native PvP/kill credit. */
-    public static SkillDamageSource drowning(ServerPlayer caster, boolean self) {
+    public static SkillDamageSource drowning(LivingEntity caster, boolean self) {
         return create(caster, DROWNING, null, self ? null : caster);
     }
 

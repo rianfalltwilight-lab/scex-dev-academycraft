@@ -77,8 +77,9 @@ public class DevAdvancedBlockEntity extends AcademyContainerBlockEntity
         }
         if (movedAny) {
             setChanged();
-            player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
-                    "§e已将旧版开发机暂存槽中的材料退回背包（背包满时掉落在机器旁）"));
+            player.sendSystemMessage(net.minecraft.network.chat.Component.translatable(
+                    "message.academy.developer.legacy_items_returned")
+                    .withStyle(net.minecraft.ChatFormatting.YELLOW));
         }
         return movedAny;
     }

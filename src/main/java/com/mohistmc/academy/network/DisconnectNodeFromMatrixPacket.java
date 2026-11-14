@@ -53,8 +53,9 @@ public record DisconnectNodeFromMatrixPacket(MenuActionToken actionToken, BlockP
             WirelessNet network = data == null ? null : data.getNetwork(node);
             var matrix = network == null ? null : network.getMatrix();
             boolean unlinked = matrix != null && WirelessSystem.unlinkNode(level, matrix, node);
-            player.sendSystemMessage(net.minecraft.network.chat.Component.literal(unlinked
-                    ? "§a节点已退出矩阵网络" : "§c节点当前未连接矩阵"));
+            player.sendSystemMessage(unlinked
+                    ? net.minecraft.network.chat.Component.translatable("message.academy.matrix.node_left").withStyle(net.minecraft.ChatFormatting.GREEN)
+                    : net.minecraft.network.chat.Component.translatable("message.academy.matrix.node_not_linked").withStyle(net.minecraft.ChatFormatting.RED));
         });
     }
 }

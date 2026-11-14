@@ -228,7 +228,7 @@ public final class CoreDeepAuditGameTests {
             UUID nonce = DevLearningSessionManager.issue(p, DevMachineType.PORTABLE, Optional.empty());
             LearnSkillPacket.handle(new LearnSkillPacket(LearnSkillPacket.INDUCTION_ACTION,
                     DevMachineType.PORTABLE.ordinal(), Optional.empty(), nonce), context(p));
-            int ticks = DevMachineType.PORTABLE.developmentTicksPerStimulation() * DevLearningSessionManager.INDUCTION_STIMULATIONS;
+            int ticks = DevMachineType.PORTABLE.developmentTicksPerStimulation() * com.mohistmc.academy.data.ProgressionData.inductionStimulations();
             for (int i = 0; i < ticks; i++) DevLearningSessionManager.tick(p);
             h.assertTrue(data.hasAbility() && data.getPlayerLevel() == 1
                     && EnergyItemHelper.getEnergy(portable) == 10_000 - ticks * DevMachineType.PORTABLE.energyPerTick(),

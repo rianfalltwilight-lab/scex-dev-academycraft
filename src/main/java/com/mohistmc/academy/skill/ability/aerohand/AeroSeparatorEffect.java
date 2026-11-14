@@ -1,5 +1,7 @@
 package com.mohistmc.academy.skill.ability.aerohand;
 
+import com.mohistmc.academy.api.mob.MobCastContext;
+import com.mohistmc.academy.api.mob.MobCastable;
 import com.mohistmc.academy.config.DynamicSkillRules;
 import com.mohistmc.academy.skill.AcademyDamageHelper;
 import com.mohistmc.academy.skill.PlayerAbilityData;
@@ -18,9 +20,11 @@ import static com.mohistmc.academy.utils.MathUtils.lerpf;
 
 /** The non-charging cast creates a vacuum whose first and only pulse is five ticks later. */
 @net.neoforged.fml.common.EventBusSubscriber(modid = "academy")
-public final class AeroSeparatorEffect implements DynamicOneShotSkillEffect {
+public final class AeroSeparatorEffect implements DynamicOneShotSkillEffect, MobCastable {
     private record Pulse(ServerPlayer owner, ServerLevel level, float proficiency, long due) {}
     private static final java.util.Map<java.util.UUID, Pulse> PULSES = new java.util.HashMap<>();
+    /** The player pulse's five-tick delay; mobs wait it out as a server-timed charge. */
+    private static final int PULSE_DELAY = 5;
     @Override public String getId() { return "aero_separator"; }
     @Override public float rawCp(float p) { return lerpf(1200, 1800, p); }
     @Override public float rawOverload(float p) { return lerpf(480, 360, p); }
@@ -34,26 +38,45 @@ public final class AeroSeparatorEffect implements DynamicOneShotSkillEffect {
                 lerpf(0.002F, 0.001F, data.getProficiency(getId())));
     }
 
+    /**
+     * Mob path: the same delayed pulse around the caster, timed by the mob charge (which ends with
+     * its caster). A mob never suffocates itself: {@code hurtSelf} is a player-only boundary, and a
+     * self-hit would make the skill suicidal for low-health casters.
+     */
+    @Override public int mobChargeTicks(float p) { return PULSE_DELAY; }
+
+    @Override
+    public boolean mobCast(MobCastContext context) {
+        LivingEntity caster = context.caster();
+        if (!caster.isAlive() || caster.level() != context.level()) return false;
+        detonate(caster, context.proficiency(), caster.position());
+        return true;
+    }
+
+    @Override public int mobCooldownTicks(float p) { return getCooldownTicks(p); }
+
     static int detonate(ServerPlayer player, PlayerAbilityData data, Vec3 centre) {
         return detonate(player, data.getProficiency("aero_separator"), centre);
     }
 
-    private static int detonate(ServerPlayer player, float proficiency, Vec3 centre) {
-        ServerLevel level = player.serverLevel();
+    /** Players suffocate themselves too (legacy); a mob caster is left out of its own pulse. */
+    private static int detonate(LivingEntity caster, float proficiency, Vec3 centre) {
+        ServerLevel level = (ServerLevel) caster.level();
         float radius = AeroBehaviorMath.separatorRadius(proficiency);
         float damage = DynamicSkillRules.damage("aero_separator", AeroBehaviorMath.separatorDamage(proficiency));
         EffectHelper.glowBurst(level, centre.x, centre.y, centre.z,
                 32, 0.18F, 0xAAEAFBFF, 12, 1.7);
         level.playSound(null, centre.x, centre.y, centre.z,
-                SoundEvents.BREEZE_INHALE, SoundSource.PLAYERS, 1.5F, 0.45F);
+                SoundEvents.BREEZE_INHALE, caster.getSoundSource(), 1.5F, 0.45F);
         AABB area = new AABB(centre, centre).inflate(radius);
         for (Projectile projectile : level.getEntitiesOfClass(Projectile.class, area,
-                Projectile::isAlive)) projectile.discard();
+                p -> p.isAlive() && AeroProjectileRules.clearsLikeLegacy(p))) projectile.discard();
         int affected = 0;
         for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, area, LivingEntity::isAlive)) {
-            boolean hurt = living == player
-                    ? AcademyDamageHelper.hurtSelf(player, living, com.mohistmc.academy.skill.SkillDamageSource.drowning(player, true), damage)
-                    : AcademyDamageHelper.hurt(player, living, com.mohistmc.academy.skill.SkillDamageSource.drowning(player, false), damage);
+            boolean hurt = living == caster
+                    ? caster instanceof ServerPlayer player
+                    && AcademyDamageHelper.hurtSelf(player, living, com.mohistmc.academy.skill.SkillDamageSource.drowning(player, true), damage)
+                    : AcademyDamageHelper.hurt(caster, living, com.mohistmc.academy.skill.SkillDamageSource.drowning(caster, false), damage);
             if (hurt) {
                 living.setAirSupply(Math.min(living.getAirSupply(), 0));
                 affected++;
@@ -91,5 +114,5 @@ public final class AeroSeparatorEffect implements DynamicOneShotSkillEffect {
     @net.neoforged.bus.api.SubscribeEvent
     public static void stopped(net.neoforged.neoforge.event.server.ServerStoppedEvent event) { PULSES.clear(); }
 
-    @Override public int getCooldownTicks(float p) { return Math.round(lerpf(200, 120, Math.clamp(p, 0, 1))); }
+    @Override public int getCooldownTicks(float p) { return (int) lerpf(200, 120, Math.clamp(p, 0, 1)); }
 }

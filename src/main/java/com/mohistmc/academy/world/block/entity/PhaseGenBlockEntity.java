@@ -1,5 +1,6 @@
 package com.mohistmc.academy.world.block.entity;
 
+import com.mohistmc.academy.config.MachineConfig;
 import com.mohistmc.academy.energy.api.block.IWirelessGenerator;
 import com.mohistmc.academy.world.AcademyBlockEntities;
 import com.mohistmc.academy.world.AcademyFluids;
@@ -23,10 +24,13 @@ public class PhaseGenBlockEntity extends AcademyContainerBlockEntity implements 
 
     public static final int TANK_SIZE = 8000;
     public static final int PER_UNIT = 1000;
+    // Legacy 1.0.7 values; live numbers come from machines.phaseGen in the server config.
     public static final int CONSUME_PER_TICK = 100;
     public static final double GEN_PER_MB = 0.5;
-    private static final double MAX_BANDWIDTH = 50; // 100 mB * .5 IF/mB
-    private static final int MAX_STORAGE = 6000;
+    public static final double MAX_BANDWIDTH = 50; // 100 mB * .5 IF/mB
+    public static final int MAX_STORAGE = 6000;
+
+    private static int maxStorage() { return MachineConfig.PHASE_BUFFER.get(); }
 
     private float storedEnergy = 0;
     private final IItemHandler topItems = itemView(new int[]{0}, true, false);
@@ -60,14 +64,21 @@ public class PhaseGenBlockEntity extends AcademyContainerBlockEntity implements 
         // item.  Draining the tank only when NodeConn asked for energy left an
         // unbound generator permanently at 0 IF and made its battery slot a
         // no-op.
-        double required = Math.max(0.0, MAX_STORAGE - storedEnergy);
-        int maxDrain = Math.min(CONSUME_PER_TICK, (int) (required / GEN_PER_MB));
+        int maxStorage = maxStorage();
+        if (storedEnergy > maxStorage) {
+            storedEnergy = maxStorage;
+            changed = true;
+        }
+        double perMb = MachineConfig.PHASE_ENERGY_PER_MB.get();
+        double required = Math.max(0.0, maxStorage - storedEnergy);
+        int maxDrain = perMb <= 0 ? 0
+                : (int) Math.min(MachineConfig.PHASE_MAX_DRAIN.get(), Math.floor(required / perMb));
         if (maxDrain > 0) {
             FluidStack drained = tank.drain(maxDrain,
                     net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE);
             if (!drained.isEmpty()) {
-                storedEnergy = Math.min(MAX_STORAGE,
-                        storedEnergy + (float) (drained.getAmount() * GEN_PER_MB));
+                storedEnergy = Math.min(maxStorage,
+                        storedEnergy + (float) (drained.getAmount() * perMb));
                 changed = true;
             }
         }
@@ -75,7 +86,7 @@ public class PhaseGenBlockEntity extends AcademyContainerBlockEntity implements 
         if (PhaseFluidContainers.emptyOne(getItems(), 0, 1, tank)) changed = true;
         ItemStack energyItem = getItems().get(2);
         if (EnergyItemHelper.isEnergyItem(energyItem) && storedEnergy >= 1) {
-            int charged = EnergyItemHelper.receiveEnergy(energyItem, Math.min((int) storedEnergy, (int) MAX_BANDWIDTH), false);
+            int charged = EnergyItemHelper.receiveEnergy(energyItem, Math.min((int) storedEnergy, (int) getBandwidth()), false);
             storedEnergy -= charged;
             if (charged > 0) changed = true;
         }
@@ -90,7 +101,7 @@ public class PhaseGenBlockEntity extends AcademyContainerBlockEntity implements 
         // Wireless transport pulls from the already generated buffer.  The
         // NodeConn also applies this generator's bandwidth, but keep the bound
         // here for safe direct callers.
-        double give = Math.min(Math.min(req, MAX_BANDWIDTH), storedEnergy);
+        double give = Math.min(Math.min(req, getBandwidth()), storedEnergy);
         storedEnergy -= (float) give;
         if (give > 0) markMachineChanged();
         return give;
@@ -98,13 +109,13 @@ public class PhaseGenBlockEntity extends AcademyContainerBlockEntity implements 
 
     @Override
     public double getBandwidth() {
-        return MAX_BANDWIDTH;
+        return MachineConfig.PHASE_BANDWIDTH.get();
     }
 
     // ==================== Accessors ====================
 
     public float getStoredEnergy() { return storedEnergy; }
-    public int getMaxEnergy() { return MAX_STORAGE; }
+    public int getMaxEnergy() { return maxStorage(); }
     public int getFluidAmount() { return tank.getFluidAmount(); }
     public int getTankSize() { return TANK_SIZE; }
     /** Compatibility for older menu/tests; the bar now represents tank fill. */
@@ -127,7 +138,7 @@ public class PhaseGenBlockEntity extends AcademyContainerBlockEntity implements 
 
     /** 是否正在工作中 */
     public boolean isWorking() {
-        return tank.getFluidAmount() > 0 && storedEnergy < MAX_STORAGE;
+        return tank.getFluidAmount() > 0 && storedEnergy < maxStorage();
     }
 
     // ==================== NBT ====================
@@ -135,7 +146,7 @@ public class PhaseGenBlockEntity extends AcademyContainerBlockEntity implements 
     @Override
     public void loadAdditional(CompoundTag tag, HolderLookup.Provider provider) {
         super.loadAdditional(tag, provider);
-        storedEnergy = MachineStateSanitizer.clampFinite(tag.getFloat("storedEnergy"), MAX_STORAGE);
+        storedEnergy = MachineStateSanitizer.clampFinite(tag.getFloat("storedEnergy"), maxStorage());
         if (tag.contains("tank")) {
             tank.readFromNBT(provider, tag.getCompound("tank"));
             FluidStack loaded = tank.getFluid();

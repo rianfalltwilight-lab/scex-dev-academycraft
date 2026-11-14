@@ -103,12 +103,18 @@ class ExtraAcCompatibilityContractTest {
     void damagingRaysShareTheAuditedCollisionBoundary() throws Exception {
         // This is a wiring contract only. ExtraAdversarialGameTests exercises the
         // actual glass-pane and overlapping-box counterexamples on a real server.
-        for (String path : List.of("skill/ability/telekinesis/PsychoSlamEffect.java",
-                "skill/ability/telekinesis/PaperDrillEffect.java")) {
+        for (String path : List.of("skill/ability/telekinesis/PsychoSlamEffect.java")) {
             String source = read(path);
             assertTrue(source.contains("SkillRaycast.trace(") || source.contains("SkillRaycast.traceEntities("), path);
             assertFalse(source.contains("getBoundingBox().inflate("), path);
         }
+        // Paper Drill is the exception: ExtraAcC's EntityPaperDrill hit every living entity in
+        // the eye..eye+5*look box without a ray trace, so walls never shielded a target
+        // (ExtraAcRestoreGameTests.paperDrillHitsThroughWallsLikeTheLegacyBox).
+        String drill = read("skill/ability/telekinesis/PaperDrillEffect.java");
+        assertFalse(drill.contains("SkillRaycast"));
+        assertTrue(drill.contains("new AABB(from, to)"));
+        assertTrue(drill.contains("AcademyDamageHelper.allowsTarget(entity)"));
         String boundary = read("skill/ability/SkillRaycast.java");
         assertTrue(boundary.contains("ClipContext.Block.COLLIDER"));
         assertTrue(boundary.contains("box.clip(from, end)"));
@@ -122,6 +128,36 @@ class ExtraAcCompatibilityContractTest {
         assertTrue(runtime.contains("Attributes.KNOCKBACK_RESISTANCE"));
         assertTrue(runtime.contains("0.9, AttributeModifier.Operation.ADD_VALUE"));
         assertTrue(runtime.contains("removeArmourKnockbackResistance(player)"));
+        // ExtraAcC never pushed the attacker back; its s_terminate always set the 40-tick cooldown.
+        assertFalse(runtime.contains("attacker.push("));
+        assertFalse(runtime.contains("boolean cooldown"));
+    }
+
+    @Test
+    void resonanceArmourKeepsItsLegacyArmourArrayAndPaperDrillIsAToggle() throws Exception {
+        // ItemResoArmor: ArmorVars {2, 5, 6, 2} (boots, legs, chest, helmet) with toughness 1.
+        assertTrue(read("world/item/ExtraArmorMaterials.java")
+                .contains("material(\"extraacc/reso\", defenses(2, 5, 6, 2), 25, 1.0F)"));
+        String drill = read("skill/ability/telekinesis/PaperDrillEffect.java");
+        assertTrue(drill.contains("getSessionTimeoutTicks(PlayerAbilityData data)"));
+        assertTrue(drill.contains("return Integer.MAX_VALUE;"));
+        assertTrue(drill.contains("public boolean canRelease("));
+    }
+
+    @Test
+    void addonCooldownsTruncateLikeTheLegacyIntCast() throws Exception {
+        // ExtraAcC: ctx.setCooldown((int) MathUtils.lerpf(a, b, exp)); Math.round could add one tick.
+        assertTrue(read("skill/ability/aerohand/VolcanicBallEffect.java")
+                .contains("return (int) lerpf(20, 5, Math.clamp(p, 0, 1));"));
+        for (String path : List.of("AeroSeparatorEffect", "AirBladeEffect", "AirCoolingEffect", "AirJetEffect",
+                "AirWallEffect", "BomberLanceEffect", "StormCoreEffect", "VolcanicBallEffect")) {
+            assertFalse(read("skill/ability/aerohand/" + path + ".java").contains("Math.round(l")
+                    || read("skill/ability/aerohand/" + path + ".java").contains("return Math.round("), path);
+        }
+        for (String path : List.of("OverloadThinkingEffect", "PsychoNeedlingEffect", "PsychoSlamEffect",
+                "PsychoThrowingEffect")) {
+            assertFalse(read("skill/ability/telekinesis/" + path + ".java").contains("return Math.round("), path);
+        }
     }
 
     @Test

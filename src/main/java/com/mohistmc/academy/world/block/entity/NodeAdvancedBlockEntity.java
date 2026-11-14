@@ -11,17 +11,10 @@ import net.minecraft.world.level.block.state.BlockState;
 public class NodeAdvancedBlockEntity extends BaseNodeBlockEntity {
     public NodeAdvancedBlockEntity(BlockPos pos, BlockState state) {
         super(AcademyBlockEntities.NODE_ADVANCED.get(), pos, state);
-        setMaxEnergy(200000);
-        setBandwidth(900);
     }
 
     @Override
-    public double getRange() {
-        return 19.0;
-    }
-
-    @Override
-    public int getCapacity() {
-        return 20;
+    protected com.mohistmc.academy.config.MachineConfig.NodeTier tier() {
+        return com.mohistmc.academy.config.MachineConfig.NODE_ADVANCED;
     }
 }

@@ -60,24 +60,26 @@ public record InitMatrixPacket(MenuActionToken actionToken, BlockPos pos, String
                     if (be instanceof MatrixBlockEntity matrix) {
                         // 检查所有者权限
                         if (!matrix.canManage(player)) {
-                            player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§c只有矩阵所有者才能初始化！"));
+                            player.sendSystemMessage(net.minecraft.network.chat.Component.translatable("message.academy.matrix.owner_only_init").withStyle(net.minecraft.ChatFormatting.RED));
                             return;
                         }
                         var networkState = WirelessSystem.reconcileMatrixNetwork(level, matrix);
                         if (networkState.active()) {
-                            player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
+                            player.sendSystemMessage(
                                     networkState == WirelessSystem.MatrixNetworkState.RECOVERED
-                                            ? "§a矩阵网络已从存档状态恢复！" : "§c该矩阵已经初始化过了！"));
+                                            ? net.minecraft.network.chat.Component.translatable("message.academy.matrix.recovered_from_save").withStyle(net.minecraft.ChatFormatting.GREEN)
+                                            : net.minecraft.network.chat.Component.translatable("message.academy.matrix.already_initialized").withStyle(net.minecraft.ChatFormatting.RED));
                             return;
                         }
                         if (matrix.isInitialized()) {
-                            player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§c矩阵网络恢复失败，请稍后重试！"));
+                            player.sendSystemMessage(net.minecraft.network.chat.Component.translatable("message.academy.matrix.recovery_failed").withStyle(net.minecraft.ChatFormatting.RED));
                             return;
                         }
                         int coreLevel = matrix.initializationCoreLevel();
                         if (!matrix.hasInitializationMaterials()) {
-                            player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
-                                    "§c初始化需要 1 个矩阵核心和 3 个约束金属板"));
+                            player.sendSystemMessage(net.minecraft.network.chat.Component.translatable(
+                                    "message.academy.matrix.init_materials", "1", "3")
+                                    .withStyle(net.minecraft.ChatFormatting.RED));
                             return;
                         }
 
@@ -110,11 +112,13 @@ public record InitMatrixPacket(MenuActionToken actionToken, BlockPos pos, String
                         accepted = created;
                         if (created) {
                             level.sendBlockUpdated(packet.pos(), matrix.getBlockState(), matrix.getBlockState(), 3);
-                            player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§a矩阵初始化成功！网络: " + packet.ssid()));
+                            player.sendSystemMessage(net.minecraft.network.chat.Component.translatable(
+                                    "message.academy.matrix.init_success", packet.ssid())
+                                    .withStyle(net.minecraft.ChatFormatting.GREEN));
                         } else {
                             restore(matrix, oldSsid, oldPassword, oldCapacity, oldBandwidth, oldRange);
                             level.sendBlockUpdated(packet.pos(), matrix.getBlockState(), matrix.getBlockState(), 3);
-                            player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§c网络创建失败，矩阵未初始化，可修改后重试"));
+                            player.sendSystemMessage(net.minecraft.network.chat.Component.translatable("message.academy.matrix.init_failed").withStyle(net.minecraft.ChatFormatting.RED));
                         }
                     }
                 } finally {

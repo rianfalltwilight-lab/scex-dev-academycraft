@@ -62,8 +62,9 @@ public record MatrixConfigPacket(MenuActionToken actionToken, BlockPos matrixPos
                 changed = WirelessSystem.changePassword(level, matrix, packet.password().get());
             }
             reply(player, packet.actionToken(), packet.matrixPos(), changed);
-            player.sendSystemMessage(net.minecraft.network.chat.Component.literal(changed
-                    ? "§a矩阵设置已保存" : "§c矩阵设置保存失败"));
+            player.sendSystemMessage(changed
+                    ? net.minecraft.network.chat.Component.translatable("message.academy.matrix.config_saved").withStyle(net.minecraft.ChatFormatting.GREEN)
+                    : net.minecraft.network.chat.Component.translatable("message.academy.matrix.config_save_failed").withStyle(net.minecraft.ChatFormatting.RED));
         });
     }
     static void reply(ServerPlayer player, MenuActionToken token, BlockPos pos, boolean accepted) {

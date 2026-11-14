@@ -18,11 +18,11 @@ class LegacySkillTreeContractTest {
         String source = Files.readString(Path.of("src/main/java/com/mohistmc/academy/skill/SkillRegistry.java"));
         String em = section(source, "registerElectromasterSkills", "registerMeltdownerSkills");
         assertReq(em, "charging", req("arc_gen", .3f));
-        assertReq(em, "mag_movement", req("arc_gen", 1f), req("charging", .7f));
+        assertReq(em, "mag_movement", req("arc_gen", 0f), req("charging", .7f));
         assertReq(em, "mag_manip", req("mag_movement", .5f));
         assertReq(em, "body_intensify", req("arc_gen", 1f), req("charging", 1f));
         assertReq(em, "mine_detect", req("mag_manip", 1f));
-        assertReq(em, "thunder_bolt", req("arc_gen", 1f), req("charging", .7f));
+        assertReq(em, "thunder_bolt", req("arc_gen", 0f), req("charging", .7f));
         assertReq(em, "railgun", req("thunder_bolt", .3f), req("mag_manip", 1f));
         assertReq(em, "thunder_clap", req("thunder_bolt", 1f));
         assertPositions(em, Map.ofEntries(

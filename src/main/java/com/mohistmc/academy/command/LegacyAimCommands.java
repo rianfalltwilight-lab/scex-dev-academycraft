@@ -241,13 +241,15 @@ public final class LegacyAimCommands {
             }
             int oldLevel = data.getPlayerLevel();
             boolean wasActive = data.isAbilityActive();
-            data.reset();
-            data.clearCooldowns();
-            data.setCurrentAbility(category);
-            data.setPlayerLevel(1);
+            // CommandAIMBase "cat" -> AbilityData.setCategory: the level is kept (Level 1 only from 0),
+            // so level progress and usage growth survive; learned skills, skill exp, presets and
+            // cooldowns are cleared. Running skill sessions end (ContextManager disposes them).
+            data.changeCategory(category);
+            data.setAbilityActive(false);
+            int newLevel = data.getPlayerLevel();
             if (wasActive) NeoForge.EVENT_BUS.post(new AbilityEvents.Deactivate(player));
             NeoForge.EVENT_BUS.post(new AbilityEvents.CategoryChanged(player, oldCategory, category));
-            if (oldLevel != 1) NeoForge.EVENT_BUS.post(new AbilityEvents.LevelChanged(player, oldLevel, 1));
+            if (oldLevel != newLevel) NeoForge.EVENT_BUS.post(new AbilityEvents.LevelChanged(player, oldLevel, newLevel));
             LegacyAdvancementBridge.levels(player, data);
             data.syncTo(player);
             send(context.getSource(), "commands.academy.aim.category.set", player.getDisplayName(),

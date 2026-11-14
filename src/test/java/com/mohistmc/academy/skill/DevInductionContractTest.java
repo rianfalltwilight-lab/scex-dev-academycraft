@@ -17,7 +17,7 @@ class DevInductionContractTest {
         String factor = source("com/mohistmc/academy/world/item/BaseFactor.java");
         assertTrue(factor.contains("super(properties.stacksTo(1))"));
         assertTrue(factor.contains("if (!player.isCreative())"));
-        assertTrue(factor.contains("请在能力开发机中开始能力诱导"));
+        assertTrue(factor.contains("message.academy.factor.use_developer"));
         assertFalse(factor.contains("if (!player.isCreative()) {\n            stack.shrink(1)"));
     }
 
@@ -29,7 +29,7 @@ class DevInductionContractTest {
         assertFalse(sessions.contains("Source.ADVANCED_SLOT"));
         assertTrue(sessions.contains("Developer blocks\n        // never owned factor slots"));
         assertTrue(sessions.contains("new ArrayList<>(AbilityCategory.all())"));
-        assertTrue(sessions.contains("锁定的能力诱导因子已被移走或替换"));
+        assertTrue(sessions.contains("\"ac.skill_tree.result.factor_gone\""));
         assertTrue(packet.contains("completeInduction"));
         assertTrue(packet.contains("selection.consume(player, type, pos)"));
         assertTrue(packet.contains("data.setPlayerLevel(1)"));
@@ -41,7 +41,7 @@ class DevInductionContractTest {
         String packet = source("com/mohistmc/academy/network/LearnSkillPacket.java");
         String sessions = source("com/mohistmc/academy/network/DevLearningSessionManager.java");
         assertTrue(packet.contains("data.getPlayerLevel() < 3"));
-        assertTrue(sessions.contains("selection.expectedLevel() * 10"));
+        assertTrue(sessions.contains("ProgressionData.resetStimulations(selection.expectedLevel())"));
         assertTrue(sessions.contains("player.getMainHandItem().is(AcademyItems.MAGNETIC_COIL.get())"));
         assertTrue(packet.contains("new AbilityEvents.CategoryChanged"));
         assertTrue(packet.contains("new AbilityEvents.LevelChanged"));

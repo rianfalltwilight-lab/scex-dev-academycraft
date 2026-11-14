@@ -19,10 +19,31 @@ class WorldgenResourceContractTest {
         for (String id : List.of("ore_reso","ore_constraint","ore_crystal","ore_imagsil")) assertTrue(ores.contains("academy:" + id));
         String lakes = Files.readString(DATA.resolve("neoforge/biome_modifier/phase_liquid_lakes.json"));
         assertTrue(lakes.contains("academy:phase_liquid_lake"));
-        assertTrue(Files.readString(DATA.resolve("worldgen/placed_feature/ore_reso.json")).contains("\"count\": 18"));
-        assertTrue(Files.readString(DATA.resolve("worldgen/placed_feature/ore_constraint.json")).contains("\"count\": 24"));
-        assertTrue(Files.readString(DATA.resolve("worldgen/placed_feature/ore_crystal.json")).contains("\"count\": 48"));
-        assertTrue(Files.readString(DATA.resolve("worldgen/placed_feature/ore_imagsil.json")).contains("\"count\": 22"));
+        // Legacy ACWorldGen: WorldGenMinable(reso 9 / constraint 12 / crystal 12 / imagsil 11)
+        // attempted 8 / 8 / 12 / 8 times per chunk.
+        var legacy = java.util.Map.of("ore_reso", new int[]{9, 8}, "ore_constraint", new int[]{12, 8},
+                "ore_crystal", new int[]{12, 12}, "ore_imagsil", new int[]{11, 8});
+        for (var entry : legacy.entrySet()) {
+            var configured = JsonParser.parseString(Files.readString(DATA.resolve(
+                    "worldgen/configured_feature/" + entry.getKey() + ".json"))).getAsJsonObject();
+            assertEquals(entry.getValue()[0], configured.getAsJsonObject("config").get("size").getAsInt(),
+                    entry.getKey() + " vein size");
+            var placement = JsonParser.parseString(Files.readString(DATA.resolve(
+                    "worldgen/placed_feature/" + entry.getKey() + ".json"))).getAsJsonObject().getAsJsonArray("placement");
+            int count = -1;
+            for (var modifier : placement) {
+                var object = modifier.getAsJsonObject();
+                if ("minecraft:count".equals(object.get("type").getAsString())) count = object.get("count").getAsInt();
+            }
+            assertEquals(entry.getValue()[1], count, entry.getKey() + " attempts per chunk");
+        }
+        String worldGen = Files.readString(Path.of("src/main/java/com/mohistmc/academy/worldgen/AcademyWorldGen.java"));
+        for (var entry : java.util.Map.of("IMAGSIL_ORE", 11, "RESO_ORE", 9, "CRYSTAL_ORE", 12,
+                "CONSTRAIN_METAL", 12).entrySet()) {
+            var pattern = java.util.regex.Pattern.compile(java.util.regex.Pattern.quote(
+                    entry.getKey() + ".get().defaultBlockState(),") + "\\s+" + entry.getValue() + "\\s");
+            assertTrue(pattern.matcher(worldGen).find(), "datagen bootstrap drifted for " + entry.getKey());
+        }
         for (String id : List.of("ore_reso","ore_constraint","ore_crystal","ore_imagsil")) {
             String placed = Files.readString(DATA.resolve("worldgen/placed_feature/" + id + ".json"));
             assertTrue(placed.contains("\"type\": \"academy:ores_enabled\""));

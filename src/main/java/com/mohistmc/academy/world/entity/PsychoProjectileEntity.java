@@ -17,6 +17,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.projectile.ItemSupplier;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -52,6 +53,10 @@ public final class PsychoProjectileEntity extends Projectile implements ItemSupp
     private boolean armed;
     private boolean settling;
     private int retryTicks;
+    /** Mob casts fire a virtual needle: nothing was consumed, so nothing is dropped or returned. */
+    private boolean virtualAmmo;
+    /** Decided once at a mob cast (config + mobGriefing); players keep their own per-block checks. */
+    private boolean mobBreaksBlocks;
 
     public PsychoProjectileEntity(EntityType<? extends PsychoProjectileEntity> type, Level level, Kind kind) {
         super(type, level);
@@ -66,12 +71,17 @@ public final class PsychoProjectileEntity extends Projectile implements ItemSupp
     }
 
     public void prepare(ServerPlayer owner, ItemStack item, float p) {
+        prepare(owner, item, p, owner.getEyePosition(), owner.getLookAngle());
+    }
+
+    /** Any living caster; a player passes its own eye and look so the result is unchanged. */
+    public void prepare(LivingEntity owner, ItemStack item, float p, Vec3 eye, Vec3 look) {
         setOwner(owner);
-        setPos(owner.getEyePosition());
+        setPos(eye);
         entityData.set(ITEM, item.copyWithCount(1));
         proficiency = Float.isFinite(p) ? Math.clamp(p, 0, 1) : 0;
         float acceleration = (0.1F + 0.05F * proficiency) * (etched() ? 1.5F : 1.0F);
-        Vec3 direction = owner.getLookAngle().normalize();
+        Vec3 direction = look.normalize();
         entityData.set(ACCELERATION, direction.scale(acceleration).toVector3f());
         // 1.12.2 World increments age before update; EntityFlying increments it again.
         // The upstream <= 20 condition therefore accelerates on ten real game ticks.
@@ -81,6 +91,10 @@ public final class PsychoProjectileEntity extends Projectile implements ItemSupp
 
     /** Called only after entity admission and ammunition consumption both succeed. */
     public void arm() { armed = true; }
+    /** Marks a mob's needle: no ammunition behind it, so settling never drops or returns an item. */
+    public void setVirtualAmmo(boolean value) { virtualAmmo = value; }
+    public boolean isVirtualAmmo() { return virtualAmmo; }
+    public void setMobBreaksBlocks(boolean value) { mobBreaksBlocks = value; }
     public Kind kind() { return kind; }
     @Override public ItemStack getItem() { return entityData.get(ITEM); }
     public boolean isReturning() { return entityData.get(RETURNING); }
@@ -96,7 +110,7 @@ public final class PsychoProjectileEntity extends Projectile implements ItemSupp
             if (!level().isClientSide && --retryTicks <= 0) settleReturn();
             return;
         }
-        if (!level().isClientSide && (!(getOwner() instanceof ServerPlayer owner) || !owner.isAlive()
+        if (!level().isClientSide && (!(getOwner() instanceof LivingEntity owner) || !owner.isAlive()
                 || owner.level() != level())) {
             beginReturn(); settleReturn(); return;
         }
@@ -173,6 +187,14 @@ public final class PsychoProjectileEntity extends Projectile implements ItemSupp
     }
 
     private boolean breakFragile(BlockHitResult hit) {
+        if (getOwner() instanceof LivingEntity caster && !(caster instanceof ServerPlayer)) {
+            // Mob caster: no player permissions or BreakEvent; the cast-time griefing decision rules.
+            BlockPos pos = hit.getBlockPos();
+            var state = level().getBlockState(pos);
+            return mobBreaksBlocks && DynamicSkillRules.destroysBlocks(level(), skill()) && level().isLoaded(pos)
+                    && !state.isAir() && state.getDestroySpeed(level(), pos) == 0 && !isRemoved() && !isReturning()
+                    && caster.isAlive() && caster.level() == level() && level().destroyBlock(pos, true, caster);
+        }
         if (!(getOwner() instanceof ServerPlayer owner) || !DynamicSkillRules.destroysBlocks(level(), skill())) return false;
         BlockPos pos = hit.getBlockPos();
         var state = level().getBlockState(pos);
@@ -186,7 +208,7 @@ public final class PsychoProjectileEntity extends Projectile implements ItemSupp
     }
 
     @Override protected void onHitEntity(EntityHitResult hit) {
-        if (!(getOwner() instanceof ServerPlayer owner) || owner.level() != level() || !owner.isAlive()) return;
+        if (!(getOwner() instanceof LivingEntity owner) || owner.level() != level() || !owner.isAlive()) return;
         float damage = kind == Kind.NEEDLE ? 4 + 4 * proficiency : (12 + 4 * proficiency) * (etched() ? 1.25F : 1);
         var type = kind == Kind.NEEDLE ? NEEDLE_DAMAGE : com.mohistmc.academy.skill.SkillDamageSource.THROWN;
         AcademyDamageHelper.hurt(owner, hit.getEntity(), com.mohistmc.academy.skill.SkillDamageSource.projectile(owner, this, type),
@@ -205,7 +227,7 @@ public final class PsychoProjectileEntity extends Projectile implements ItemSupp
         settling = true;
         retryTicks = 20;
         try {
-            if (getItem().isEmpty()) { discard(); return; }
+            if (virtualAmmo || getItem().isEmpty()) { discard(); return; }
             BlockPos at = blockPosition();
             var drop = new ItemEntity(level(), at.getX(), at.getY(), at.getZ(), getItem().copy());
             drop.setDefaultPickUpDelay();
@@ -241,6 +263,8 @@ public final class PsychoProjectileEntity extends Projectile implements ItemSupp
         tag.putInt("BoostLeft", entityData.get(BOOST_LEFT));
         tag.putBoolean("Returning", isReturning());
         tag.putBoolean("Armed", armed);
+        if (virtualAmmo) tag.putBoolean("VirtualAmmo", true);
+        if (mobBreaksBlocks) tag.putBoolean("MobBreaksBlocks", true);
     }
 
     @Override protected void readAdditionalSaveData(CompoundTag tag) {
@@ -253,6 +277,8 @@ public final class PsychoProjectileEntity extends Projectile implements ItemSupp
         entityData.set(BOOST_LEFT, Math.clamp(tag.getInt("BoostLeft"), 0, 10));
         entityData.set(RETURNING, tag.getBoolean("Returning"));
         armed = tag.getBoolean("Armed");
+        virtualAmmo = tag.getBoolean("VirtualAmmo");
+        mobBreaksBlocks = tag.getBoolean("MobBreaksBlocks");
         if (isReturning()) setDeltaMovement(Vec3.ZERO);
     }
 }

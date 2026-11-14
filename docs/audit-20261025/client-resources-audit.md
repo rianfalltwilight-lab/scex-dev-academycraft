@@ -32,7 +32,7 @@ ExtraSkillVisualGate 另要求三个空气弹、巡航弹与水人实际出现�
 
 ## 世界生成与流体
 
-AcademyPlacementModifiers 的概率使用 nextDouble<0.3，没有 nextInt(0)；开关从服务器配置读取。四矿脉大小4/4/3/4与固定上游一致，实际生成为datapack+vanilla OreFeature/LakeFeature，不存在自定义跨块同步查找循环。删除了不做任何工作的 ServerAboutToStart 空订阅，保留实际datapack注册。PhaseFluid保持源液量8、流动LEVEL、非无限源和容器掉落路径。
+AcademyPlacementModifiers 的概率使用 nextDouble<0.3，没有 nextInt(0)；开关从服务器配置读取。四矿脉（reso/constraint/crystal/imagsil）按 1.12.2 WorldGenMinable 恢复为大小 9/12/12/11、每区块 8/8/12/8 次，实际生成为datapack+vanilla OreFeature/LakeFeature，不存在自定义跨块同步查找循环。删除了不做任何工作的 ServerAboutToStart 空订阅，保留实际datapack注册。PhaseFluid保持源液量8、流动LEVEL、非无限源和容器掉落路径。
 
 ## 构建与兼容
 

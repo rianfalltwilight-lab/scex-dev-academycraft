@@ -63,6 +63,7 @@ public record SkillKeyDownPacket(int slotIndex, SkillInputToken actionToken) imp
             // Dynamic/legacy charging costs are authoritative and may be much larger
             // than the registry's UI estimate. Never create a state before they pass.
             if (!chargingEffect.canStartCharging(player, data)) { reject(player, packet.slotIndex(), skillId, packet.generation(), now); return; }
+            if (!com.mohistmc.academy.skill.SkillCastGate.allow(player, skill)) { reject(player, packet.slotIndex(), skillId, packet.generation(), now); return; }
 
             SkillChargingManager.ChargingState state = SkillChargingManager.startCharging(player.getUUID(), packet.slotIndex(), skill.getId(), packet.generation(), player.serverLevel().getGameTime());
             chargingEffect.onChargingStart(player, data);

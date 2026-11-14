@@ -15,9 +15,9 @@ class DevLearningFeedbackContractTest {
         String server = source("com/mohistmc/academy/network/LearnSkillPacket.java");
         assertTrue(tree.contains("acceptServerResult"));
         assertFalse(tree.contains("sessionSpent = true;\n                pendingSince"));
-        assertTrue(server.contains("前置技能、等级或熟练度不足"));
-        assertTrue(server.contains("无法开始：开发机当前不可用或能量不足"));
-        assertTrue(server.contains("同步率不足"));
+        assertTrue(server.contains("\"ac.skill_tree.result.prereq\""));
+        assertTrue(server.contains("\"ac.skill_tree.result.unavailable\""));
+        assertTrue(server.contains("\"ac.skill_tree.result.sync_rate\""));
         assertTrue(server.contains("DevLearningSessionManager.start"));
     }
 

@@ -66,7 +66,9 @@ public final class ChargingOutputGameTests {
                         data.setProficiency("charging",proficiency);
                         if(!effect.onChargingTick(player,data,tick)) throw new AssertionError("tick rejected");
                         int stored=path==0?EnergyItemHelper.getEnergy(item):path==1?nativeBlock.getEnergyStored():fe.getEnergyStored();
-                        if(stored!=old*5*tick/2) throw new AssertionError("path="+path+" level="+level+" step="+step+" tick="+tick+" stored="+stored+" expected="+(old*5*tick/2));
+                        // Legacy CurrentCharging charged items with ignoreBandwidth=false: an energy unit takes at most 20 IF per tick.
+                        int expected=path==0?Math.min(old*5*tick/2,com.mohistmc.academy.world.item.EnergyUnit.BANDWIDTH*tick):old*5*tick/2;
+                        if(stored!=expected) throw new AssertionError("path="+path+" level="+level+" step="+step+" tick="+tick+" stored="+stored+" expected="+expected);
                     }
                     effect.onChargingRelease(player,data,2);
                     if(effect.onChargingTick(player,data,3)) throw new AssertionError("released session generated energy");
@@ -84,9 +86,9 @@ public final class ChargingOutputGameTests {
         ChargingEffect effect=new ChargingEffect();
         try {
             EnergyItemHelper.setEnergy(item,0);data.setProficiency("charging",0);effect.onChargingStart(player,data);
-            effect.onChargingTick(player,data,1);if(EnergyItemHelper.getEnergy(item)!=37) throw new AssertionError("first tick");
+            effect.onChargingTick(player,data,1);if(EnergyItemHelper.getEnergy(item)!=com.mohistmc.academy.world.item.EnergyUnit.BANDWIDTH) throw new AssertionError("first tick");
             effect.onChargingAbort(player,data);data.setProficiency("charging",0);effect.onChargingStart(player,data);
-            effect.onChargingTick(player,data,1);if(EnergyItemHelper.getEnergy(item)!=74) throw new AssertionError("abort leaked carry");
+            effect.onChargingTick(player,data,1);if(EnergyItemHelper.getEnergy(item)!=2*com.mohistmc.academy.world.item.EnergyUnit.BANDWIDTH) throw new AssertionError("abort leaked carry");
             EnergyItemHelper.setEnergy(item,Integer.MAX_VALUE);int full=EnergyItemHelper.getEnergy(item);
             effect.onChargingTick(player,data,2);if(EnergyItemHelper.getEnergy(item)!=full) throw new AssertionError("full target overflow");
             EnergyItemHelper.setEnergy(item,full-1);effect.onChargingTick(player,data,3);

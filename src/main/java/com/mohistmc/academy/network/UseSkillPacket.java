@@ -8,6 +8,7 @@ import com.mohistmc.academy.skill.SkillEffect;
 import com.mohistmc.academy.skill.SkillPreset;
 import com.mohistmc.academy.skill.AbilityInterferenceService;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -42,24 +43,25 @@ public record UseSkillPacket(int slotIndex, SkillInputToken actionToken) impleme
             if (packet.slotIndex() < 0 || packet.slotIndex() >= SkillPreset.SLOT_COUNT) return;
             if (!SkillInputSessionManager.canAccept(player, packet.actionToken())) { SkillInputSessionManager.refresh(player); return; }
             Skill skill = data.getSlotSkill(data.getCurrentPresetIndex(), packet.slotIndex());
-            if (skill == null) { reject(player, now, "empty", "§c槽位未装备技能"); return; }
-            if (!data.hasLearnedSkill(skill.getId())) { reject(player, now, "unlearned", "§c尚未学习: " + skill.getId()); return; }
+            if (skill == null) { reject(player, now, "empty", Component.translatable("message.academy.skill.slot_empty", packet.slotIndex() + 1)); return; }
+            if (!data.hasLearnedSkill(skill.getId())) { reject(player, now, "unlearned", Component.translatable("message.academy.skill.not_learned", Component.translatable(skill.getTranslationKey()))); return; }
             SkillEffect effect = skill.getEffect();
             if (effect == null || effect instanceof com.mohistmc.academy.skill.ChargingSkillEffect) return;
             // Consume an authentic one-shot intent before transient gameplay gates.
             if (!SkillInputSessionManager.accept(player, packet.actionToken())) return;
             if (AbilityInterferenceService.isInterfered(player)) { AbilityInterferenceService.notifyBlocked(player); return; }
-            if (!data.isAbilityActive()) { reject(player, now, "inactive", "§c能力未激活"); return; }
+            if (!data.isAbilityActive()) { reject(player, now, "inactive", Component.translatable("message.academy.ability.inactive")); return; }
             if (data.isOnCooldown(skill.getId())) return;
             // PlayerAbilityData.canUseSkill checks enabled/learned/cooldown for
             // every skill, but deliberately skips registry CP/OL for dynamic
             // contexts before their live preflight below.
             if (!data.canUseSkill(skill)) {
-                reject(player, now, "resource", "§c计算力不足或过载过高");
+                reject(player, now, "resource", Component.translatable("message.academy.skill.insufficient_cp"));
                 return;
             }
 
             if (!effect.canActivate(player, data)) return;
+            if (!com.mohistmc.academy.skill.SkillCastGate.allow(player, skill)) return;
 
             float preActivationProficiency = data.getProficiency(skill.getId());
             boolean executed;
@@ -90,8 +92,8 @@ public record UseSkillPacket(int slotIndex, SkillInputToken actionToken) impleme
         });
     }
 
-    private static void reject(ServerPlayer player, long now, String reason, String message) {
+    private static void reject(ServerPlayer player, long now, String reason, Component message) {
         if (PayloadRateLimiter.allow(player.getUUID(), "use_skill_feedback:" + reason, now, 20, 1))
-            player.sendSystemMessage(Component.literal(message));
+            player.sendSystemMessage(message.copy().withStyle(ChatFormatting.RED));
     }
 }

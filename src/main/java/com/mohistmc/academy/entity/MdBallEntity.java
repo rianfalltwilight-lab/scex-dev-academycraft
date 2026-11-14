@@ -6,6 +6,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
@@ -37,7 +38,7 @@ public final class MdBallEntity extends Entity {
     public MdBallEntity bind(UUID owner, int slot, boolean active, int life) {
         entityData.set(OWNER, Optional.of(owner)); entityData.set(SLOT, slot); entityData.set(ACTIVE, active);
         entityData.set(LIFE, Math.max(1, life));
-        Entity source = level().getPlayerByUUID(owner);
+        Entity source = owner(owner);
         float yaw = source == null ? 0 : source.getYRot();
         float theta = (float) (-yaw / 180 * Math.PI
                 + (level().random.nextFloat() * .9f - .45f) * Math.PI);
@@ -89,9 +90,20 @@ public final class MdBallEntity extends Entity {
         super.tick();
         if (level().isClientSide) updateClientAnimation();
         if (tickCount >= lifetime()) { if (!level().isClientSide) discard(); return; }
-        UUID id = ownerId(); Entity owner = id == null ? null : level().getPlayerByUUID(id);
+        UUID id = ownerId(); Entity owner = id == null ? null : owner(id);
         if (owner == null || !owner.isAlive()) { if (!level().isClientSide) discard(); return; }
         updatePosition(owner);
+    }
+
+    /**
+     * A player owner first (unchanged), then, on the server, any entity in this level so a mob-cast
+     * ball (Electron Bomb via the mob API) follows its caster instead of being discarded.  The client
+     * only resolves players and otherwise relies on the server's position updates.
+     */
+    private Entity owner(UUID id) {
+        Entity player = level().getPlayerByUUID(id);
+        if (player != null || !(level() instanceof ServerLevel server)) return player;
+        return server.getEntity(id);
     }
 
     private void updateClientAnimation() {

@@ -33,12 +33,15 @@ public class WindMainGui extends AcademyBaseUI<WindGenMainMenu> {
 
         if (menu.pos != null) {
             new InfoArea().seplineInfo()
-                    .property("海拔", Integer.toString(menu.pos.getY()))
-                    .property("结构", menu.isStructureComplete() ? "完整" : "不完整")
-                    .property("扇叶", menu.isFanInstalled() ? "已安装" : "未安装")
-                    .property("状态", menu.isWorking() ? "运行中"
+                    .property(Component.translatable("ac.gui.common.prop.altitude").getString(), Integer.toString(menu.pos.getY()))
+                    .property(Component.translatable("ac.gui.windgen.prop.structure").getString(), Component.translatable(menu.isStructureComplete()
+                            ? "ac.gui.windgen.structure.complete" : "ac.gui.windgen.structure.incomplete").getString())
+                    .property(Component.translatable("ac.gui.windgen.prop.fan").getString(), Component.translatable(menu.isFanInstalled()
+                            ? "ac.gui.windgen.fan.installed" : "ac.gui.windgen.fan.missing").getString())
+                    .property(Component.translatable("ac.gui.common.prop.status").getString(),
+                            Component.translatable(menu.isWorking() ? "ac.gui.windgen.state.running"
                             : menu.isStructureComplete() && menu.isFanInstalled()
-                            ? "停止（旋翼受阻）" : "停止")
+                            ? "ac.gui.windgen.state.blocked" : "ac.gui.windgen.state.stopped").getString())
                     .draw(p_300197_, this.leftPos, this.topPos);
         }
     }

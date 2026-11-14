@@ -2,8 +2,8 @@ package com.mohistmc.academy.skill;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import com.mohistmc.academy.data.ProgressionData;
 import com.mohistmc.academy.world.block.DevMachineType;
-import com.mohistmc.academy.network.DevLearningSessionManager;
 import org.junit.jupiter.api.Test;
 
 class DevLearningCadenceTest {
@@ -16,17 +16,19 @@ class DevLearningCadenceTest {
     @Test void legacySkillStimulationCurveIsExactForLevelsOneThroughFive() {
         int[] expected = {3, 5, 7, 11, 15};
         for (int level=1; level<=5; level++)
-            assertEquals(expected[level-1], (int)(3 + level * level * .5f));
+            assertEquals(expected[level-1], ProgressionData.learnStimulations(level));
     }
 
     @Test void initialAbilityInductionUsesTheLegacyLevelZeroFiveStimulations() {
-        assertEquals(5, DevLearningSessionManager.INDUCTION_STIMULATIONS);
+        assertEquals(5, ProgressionData.inductionStimulations());
+        assertEquals(15, ProgressionData.levelUpStimulations(2));
+        assertEquals(30, ProgressionData.resetStimulations(3));
     }
 
     private static void assertMachine(DevMachineType type, int sync, int ticks, int energy, int actualEnergy) {
-        assertEquals(sync,type.syncRate);
-        assertEquals(ticks,type.stimulationTicks);
-        assertEquals(energy,type.energyPerStimulation);
+        assertEquals(sync,type.syncRate());
+        assertEquals(ticks,type.stimulationTicks());
+        assertEquals(energy,type.energyPerStimulation());
         assertEquals(energy / ticks,type.energyPerTick());
         assertEquals(ticks + 1, type.developmentTicksPerStimulation());
         assertEquals(actualEnergy, type.actualEnergyPerStimulation());

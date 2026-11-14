@@ -4,6 +4,8 @@ import com.mohistmc.academy.skill.ability.LoadedRaycast;
 import com.mohistmc.academy.skill.AcademyDamageHelper;
 
 import com.mohistmc.academy.config.DynamicSkillRules;
+import com.mohistmc.academy.api.mob.MobCastContext;
+import com.mohistmc.academy.api.mob.MobCastable;
 
 import com.mohistmc.academy.world.effect.EffectHelper;
 import com.mohistmc.academy.skill.ChargingSkillEffect;
@@ -14,12 +16,13 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import com.mohistmc.academy.world.effect.VisualLightning;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
-public class ThunderClapEffect implements ChargingSkillEffect {
+public class ThunderClapEffect implements ChargingSkillEffect, MobCastable {
 
     private static final int MIN_TICKS = 40;
     private static final int MAX_TICKS = 60;
@@ -86,28 +89,65 @@ public class ThunderClapEffect implements ChargingSkillEffect {
 
         Vec3 targetPos = getTargetPos(player);
 
+        strike(player, level, exp, ticks, targetPos);
+
+        DynamicSkillRules.addExp(player,data, getId(), 0.003f);
+    }
+
+    /**
+     * Mob cast: a full 60-tick charge, then the strike lands on the target (or the 40-block look end).
+     * The strike is visual lightning only, so it never sets fire or breaks blocks.
+     */
+    @Override
+    public boolean mobCast(MobCastContext context) {
+        Vec3 targetPos;
+        if (context.target() != null) {
+            targetPos = context.target().position();
+        } else {
+            Vec3 end = context.eye().add(context.look().scale(40.0));
+            BlockHitResult hit = LoadedRaycast.clip(context.level(), new ClipContext(context.eye(), end,
+                    ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, context.caster()));
+            targetPos = hit.getType() != HitResult.Type.MISS ? hit.getLocation() : end;
+        }
+        strike(context.caster(), context.level(), context.proficiency(), context.chargeTicks(), targetPos);
+        return true;
+    }
+
+    @Override public int mobChargeTicks(float proficiency) { return MAX_TICKS; }
+
+    @Override
+    public boolean mobChargeTick(MobCastContext context, int tick) {
+        if (tick == 1) {
+            LivingEntity caster = context.caster();
+            EffectHelper.arcSpark(context.level(), caster.getX(), caster.getY() + 1, caster.getZ(), 20, 0.5);
+        }
+        return true;
+    }
+
+    @Override public int mobCooldownTicks(float proficiency) { return getCooldownTicks(proficiency, MAX_TICKS); }
+
+    /** The released strike, shared by players and mob casters. */
+    private void strike(LivingEntity caster, ServerLevel level, float exp, int ticks, Vec3 targetPos) {
         VisualLightning.send(level, targetPos);
 
         float damage = getDamage(exp, ticks);
         float range = getRange(exp);
 
-        List<Entity> entities = level.getEntities(player,
+        List<Entity> entities = level.getEntities(caster,
                 new AABB(targetPos.x - range, targetPos.y - range, targetPos.z - range,
                         targetPos.x + range, targetPos.y + range, targetPos.z + range),
                 Entity::isAlive);
 
         for (Entity e : entities) {
-            if (e != player) {
+            if (e != caster) {
                 double dist = targetPos.distanceTo(e.position());
                 if (dist <= range) {
                     float faded = ElectromasterRules.thunderClapDamageAtDistance(damage, dist, range);
-                    AcademyDamageHelper.hurt(player,e,com.mohistmc.academy.skill.SkillDamageSource.attack(player),
+                    AcademyDamageHelper.hurt(caster,e,com.mohistmc.academy.skill.SkillDamageSource.attack(caster),
                             DynamicSkillRules.damage(getId(),faded));
                 }
             }
         }
-
-        DynamicSkillRules.addExp(player,data, getId(), 0.003f);
     }
 
     @Override

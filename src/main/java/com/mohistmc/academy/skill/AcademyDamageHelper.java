@@ -11,20 +11,21 @@ import net.minecraft.world.entity.player.Player;
 /** Final boundary for damage caused by AcademyCraft abilities only. */
 public final class AcademyDamageHelper {
     private static final class Call {
-        final ServerPlayer attacker;
+        final net.minecraft.world.entity.LivingEntity attacker;
         final Entity target;
         final DamageSource source;
         final boolean ability;
         AbilityDamageFrames.Frame frame;
-        Call(ServerPlayer attacker, Entity target, DamageSource source, boolean ability) {
+        Call(net.minecraft.world.entity.LivingEntity attacker, Entity target, DamageSource source, boolean ability) {
             this.attacker = attacker; this.target = target; this.source = source; this.ability = ability;
         }
     }
     private static final ThreadLocal<Deque<Call>> CALLS = ThreadLocal.withInitial(ArrayDeque::new);
     private AcademyDamageHelper() {}
 
-    public static boolean hurt(ServerPlayer attacker, Entity target, DamageSource source, float amount) {
-        return allowsTarget(target) && valid(target, source, amount)
+    /** Ability damage from a caster: a player (PvP rules) or, for mob-cast skills, any living entity. */
+    public static boolean hurt(net.minecraft.world.entity.LivingEntity attacker, Entity target, DamageSource source, float amount) {
+        return allowsTarget(attacker, target) && valid(target, source, amount)
                 && apply(attacker, target, source, amount, true);
     }
 
@@ -54,7 +55,7 @@ public final class AcademyDamageHelper {
         Call call = CALLS.get().peek();
         return call != null && call.ability && call.frame != null && call.frame == AbilityDamageFrames.peek()
                 && call.target == target && call.source == source
-                && call.attacker != target ? call.attacker : null;
+                && call.attacker != target && call.attacker instanceof ServerPlayer player ? player : null;
     }
 
     static void bindDamageFrame(AbilityDamageFrames.Frame frame, DamageSource source) {
@@ -66,8 +67,20 @@ public final class AcademyDamageHelper {
         return target != null && source != null && amount > 0 && Float.isFinite(amount);
     }
 
-    private static boolean apply(ServerPlayer attacker, Entity target, DamageSource source,
+    private static boolean apply(net.minecraft.world.entity.LivingEntity attacker, Entity target, DamageSource source,
                                  float amount, boolean ability) {
+        if (ability) {
+            // Attribute stage (the per-skill and global config stage already ran in the effect), then the
+            // public SkillDamage event. The attacker is the caster when known, else the source's owner.
+            net.minecraft.world.entity.LivingEntity owner = attacker != null ? attacker
+                    : source.getEntity() instanceof net.minecraft.world.entity.LivingEntity living
+                    && living != target ? living : null;
+            float scaled = SkillDamageMath.applyAttributes(amount, owner, target);
+            var event = net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(
+                    new com.mohistmc.academy.api.event.AbilityEvents.SkillDamage(owner, target, source, scaled));
+            if (event.isCanceled() || !(event.getAmount() > 0)) return false;
+            amount = event.getAmount();
+        }
         var calls = CALLS.get();
         calls.push(new Call(attacker, target, source, ability));
         try {
@@ -81,6 +94,18 @@ public final class AcademyDamageHelper {
 
     public static boolean allowsTarget(Entity target) {
         return allowsTarget(target, ACConfig.Server.pvpEnabled());
+    }
+
+    /**
+     * Players follow the PvP setting. A mob caster never hits itself, its allies or team, its owner
+     * (tamed mobs), or by default other mobs of its own type ({@code mobs.sameTypeFriendly}).
+     */
+    public static boolean allowsTarget(@org.jetbrains.annotations.Nullable net.minecraft.world.entity.LivingEntity attacker,
+                                       Entity target) {
+        if (attacker == null || attacker instanceof Player) return allowsTarget(target);
+        if (target == attacker || attacker.isAlliedTo(target) || target.isAlliedTo(attacker)) return false;
+        if (attacker instanceof net.minecraft.world.entity.OwnableEntity ownable && ownable.getOwner() == target) return false;
+        return !(com.mohistmc.academy.config.MobCastConfig.sameTypeFriendly() && target.getType() == attacker.getType());
     }
 
     static boolean allowsTarget(Entity target, boolean pvpEnabled) {

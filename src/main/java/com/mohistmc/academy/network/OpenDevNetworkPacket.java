@@ -48,8 +48,12 @@ public record OpenDevNetworkPacket(BlockPos pos, UUID nonce) implements CustomPa
                 return;
             }
             player.openMenu(provider, packet.pos())
-                    .ifPresent(containerId -> SafePayloadSender.send(player,
-                            new OpenDevNetworkPagePacket(packet.pos(), containerId)));
+                    .ifPresent(containerId -> {
+                        SafePayloadSender.send(player, new OpenDevNetworkPagePacket(packet.pos(), containerId));
+                        // Legacy showed the wireless page as a cover of the developer UI;
+                        // closing it returns to the developer instead of the world.
+                        DevNetworkReturn.expect(player, packet.pos(), containerId);
+                    });
         });
     }
 }

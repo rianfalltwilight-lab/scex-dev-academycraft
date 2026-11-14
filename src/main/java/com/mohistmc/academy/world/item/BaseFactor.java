@@ -45,7 +45,7 @@ public class BaseFactor extends AcademyItem {
         // timing and server-owned session checks entirely.  Retain the old
         // creative-only shortcut solely as an explicit test aid.
         if (!player.isCreative()) {
-            player.sendSystemMessage(Component.literal("请在能力开发机中开始能力诱导。"));
+            player.sendSystemMessage(Component.translatable("message.academy.factor.use_developer"));
             return InteractionResultHolder.fail(stack);
         }
 
@@ -53,8 +53,8 @@ public class BaseFactor extends AcademyItem {
         AbilityCategory oldCategory = data.getCurrentAbility();
         int oldLevel = data.getPlayerLevel();
         if (data.hasAbility()) {
-            player.sendSystemMessage(Component.literal("[测试用/临时] 已更换职业为: ")
-                    .append(Component.translatable(category.getTranslationKey())));
+            player.sendSystemMessage(Component.translatable("message.academy.factor.debug_category_changed",
+                    Component.translatable(category.getTranslationKey())));
             data.reset();
         }
 

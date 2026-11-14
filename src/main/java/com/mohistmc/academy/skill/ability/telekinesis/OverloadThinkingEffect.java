@@ -40,6 +40,6 @@ public final class OverloadThinkingEffect implements SkillEffect {
     @Override public boolean grantsActivationProficiency() { return false; }
 
     @Override public int getCooldownTicks(float proficiency) {
-        return Math.round(300 - 240 * Math.clamp(proficiency, 0, 1));
+        return (int) (300 - 240 * Math.clamp(proficiency, 0, 1));
     }
 }

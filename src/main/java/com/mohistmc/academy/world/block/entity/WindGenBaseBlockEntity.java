@@ -2,6 +2,7 @@ package com.mohistmc.academy.world.block.entity;
 
 import com.mohistmc.academy.capability.EnergyItemHelper;
 import com.mohistmc.academy.capability.IFEnergyStorage;
+import com.mohistmc.academy.config.MachineConfig;
 import com.mohistmc.academy.energy.api.block.IWirelessGenerator;
 import com.mohistmc.academy.world.AcademyBlockEntities;
 import com.mohistmc.academy.world.block.WindGenBase;
@@ -21,9 +22,12 @@ public class WindGenBaseBlockEntity extends AcademyContainerBlockEntity
     private boolean middleComplete;
     private boolean working;
     private double generationRate;
-    private static final double MIN_GENERATION_RATE = 7.5;
-    private static final double MAX_GENERATION_RATE = 15.0;
-    private static final int MAX_STORAGE = 20000;
+    // Legacy 1.0.7 values; live numbers come from machines.windGen in the server config.
+    public static final double MIN_GENERATION_RATE = 7.5;
+    public static final double MAX_GENERATION_RATE = 15.0;
+    public static final int MAX_STORAGE = 20000;
+
+    private static int maxStorage() { return MachineConfig.WIND_BUFFER.get(); }
     private float storedEnergy = 0.0f;
     private final IItemHandler inputItems = MachineAutomationItems.chargingSlot(this, Direction.UP, () -> true);
     private final IItemHandler outputItems = MachineAutomationItems.chargingSlot(this, Direction.DOWN, () -> true);
@@ -73,10 +77,12 @@ public class WindGenBaseBlockEntity extends AcademyContainerBlockEntity
         }
 
         float oldEnergy = storedEnergy;
+        int maxStorage = maxStorage();
+        if (storedEnergy > maxStorage) storedEnergy = maxStorage;
 
         if (working) {
             if (Double.isFinite(generationRate)) {
-                storedEnergy = Math.min(MAX_STORAGE, storedEnergy + (float) generationRate);
+                storedEnergy = Math.min(maxStorage, storedEnergy + (float) generationRate);
             }
         }
 
@@ -93,9 +99,9 @@ public class WindGenBaseBlockEntity extends AcademyContainerBlockEntity
         }
     }
 
+    /** 1.0.7: 7.5 IF/t at Y<=70 rising linearly to 15 IF/t at Y>=160 (machines.windGen.*). */
     private static double generationRate(int mainY) {
-        double t = Math.clamp((mainY - 70.0) / 90.0, 0.0, 1.0);
-        return MIN_GENERATION_RATE + (MAX_GENERATION_RATE - MIN_GENERATION_RATE) * t;
+        return MachineConfig.windRate(mainY);
     }
 
     /**
@@ -138,7 +144,7 @@ public class WindGenBaseBlockEntity extends AcademyContainerBlockEntity
 
     @Override
     public double getBandwidth() {
-        return 300; // 1.0.7 IFConstants.LATENCY_MK3
+        return MachineConfig.WIND_BANDWIDTH.get(); // 1.0.7 IFConstants.LATENCY_MK3 = 300
     }
 
     // ==================== IFEnergyStorage ====================
@@ -150,19 +156,19 @@ public class WindGenBaseBlockEntity extends AcademyContainerBlockEntity
 
     @Override
     public int getMaxEnergyStored() {
-        return MAX_STORAGE;
+        return maxStorage();
     }
 
     @Override
     public void setEnergy(int energy) {
-        float bounded = Math.clamp(energy, 0, MAX_STORAGE);
+        float bounded = Math.clamp(energy, 0, maxStorage());
         if (storedEnergy == bounded) return;
         storedEnergy = bounded;
         markMachineChanged();
     }
 
     @Override public int receiveEnergy(int amount, boolean simulate) {
-        int accepted = Math.min(Math.max(0, amount), (int) (MAX_STORAGE - storedEnergy));
+        int accepted = Math.min(Math.max(0, amount), Math.max(0, (int) (maxStorage() - storedEnergy)));
         if (!simulate && accepted > 0) { storedEnergy += accepted; markMachineChanged(); }
         return accepted;
     }
@@ -188,14 +194,14 @@ public class WindGenBaseBlockEntity extends AcademyContainerBlockEntity
     public void loadAdditional(CompoundTag p_331149_, HolderLookup.Provider p_333170_) {
         super.loadAdditional(p_331149_, p_333170_);
         if (p_331149_.contains("storedEnergy")) {
-            this.storedEnergy = MachineStateSanitizer.clampFinite(p_331149_.getFloat("storedEnergy"), MAX_STORAGE);
+            this.storedEnergy = MachineStateSanitizer.clampFinite(p_331149_.getFloat("storedEnergy"), maxStorage());
         }
         structureComplete = p_331149_.getBoolean("structureComplete");
         middleComplete = p_331149_.getBoolean("middleComplete");
         working = p_331149_.getBoolean("working");
         double loadedRate = p_331149_.getDouble("generationRate");
         generationRate = Double.isFinite(loadedRate)
-                ? Math.clamp(loadedRate, 0.0, MAX_GENERATION_RATE) : 0.0;
+                ? Math.clamp(loadedRate, 0.0, Math.max(MachineConfig.WIND_MIN_RATE.get(), MachineConfig.WIND_MAX_RATE.get())) : 0.0;
     }
 
     @Override

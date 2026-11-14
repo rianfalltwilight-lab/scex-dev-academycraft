@@ -40,7 +40,7 @@ public record SettingsConfigPacket(byte setting, boolean enabled) implements Cus
         if (!server.isSingleplayer() || !server.isSingleplayerOwner(player.getGameProfile())) return false;
         if (!PayloadRateLimiter.allow(player.getUUID(), "settings-config",
                 player.serverLevel().getGameTime(), 1, 4)) return false;
-        return switch (setting) {
+        boolean applied = switch (setting) {
             case PVP -> {
                 ACConfig.Server.PVP_ENABLED.set(enabled);
                 yield true;
@@ -51,5 +51,7 @@ public record SettingsConfigPacket(byte setting, boolean enabled) implements Cus
             }
             default -> false;
         };
+        if (applied) ACConfig.Server.save();
+        return applied;
     }
 }

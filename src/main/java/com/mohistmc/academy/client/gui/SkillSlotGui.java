@@ -2,7 +2,6 @@ package com.mohistmc.academy.client.gui;
 
 import com.mohistmc.academy.client.KeyInputHandler;
 import com.mohistmc.academy.network.SetSkillSlotPacket;
-import com.mohistmc.academy.network.SwitchPresetPacket;
 import com.mohistmc.academy.skill.AcademyAttachments;
 import com.mohistmc.academy.skill.PlayerAbilityData;
 import com.mohistmc.academy.skill.Skill;
@@ -48,6 +47,7 @@ public class SkillSlotGui extends AcademyScreen {
     private final List<AcademyActionButton> slotButtons = new ArrayList<>();
     private final List<AcademyActionButton> dropdownButtons = new ArrayList<>();
     private int viewPreset;
+    private boolean viewPresetChosen;
     private int hoveredSlot = -1;
     private int hoveredTab = -1;
     private int dropdownSlot = -1;
@@ -68,9 +68,11 @@ public class SkillSlotGui extends AcademyScreen {
         this.dropdownSlot = -1;
 
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player != null) {
+        // init() also runs on resize; keep the page being edited rather than jumping back.
+        if (mc.player != null && !viewPresetChosen) {
             PlayerAbilityData data = mc.player.getData(AcademyAttachments.PLAYER_ABILITY);
             this.viewPreset = data.getCurrentPresetIndex();
+            viewPresetChosen = true;
         }
         presetButtons.clear(); slotButtons.clear(); dropdownButtons.clear();
         int tabWidth = PlayerAbilityData.PRESET_COUNT * TAB_WIDTH + (PlayerAbilityData.PRESET_COUNT - 1) * TAB_GAP;
@@ -78,8 +80,9 @@ public class SkillSlotGui extends AcademyScreen {
             int index = i;
             presetButtons.add(addWidget(new AcademyActionButton(guiLeft + (GUI_WIDTH - tabWidth) / 2 + i * (TAB_WIDTH + TAB_GAP),
                     guiTop + 8, TAB_WIDTH, TAB_HEIGHT, Component.empty(), () -> {
+                // PresetEditUI.startTransit only changed the page being edited; switching the
+                // preset used in combat stays on the C key.
                 viewPreset = index;
-                PacketDistributor.sendToServer(new SwitchPresetPacket(index));
                 updateControlMessages();
             })));
         }
@@ -523,7 +526,8 @@ public class SkillSlotGui extends AcademyScreen {
             // their resources in their own server-authoritative handlers, so
             // filtering on the registry's one-shot cost hid the whole
             // Teleporter category from this selector.
-            if (data.hasLearnedSkill(skill.getId())) {
+            // AbilityData.getControllableSkillList only offered enabled (canControl) skills.
+            if (data.hasLearnedSkill(skill.getId()) && PlayerAbilityData.skillEnabled(skill.getId())) {
                 result.add(skill.getId());
             }
         }

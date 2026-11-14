@@ -38,8 +38,8 @@ final class MeltdownerLegacySourceContractTest {
         String bomb = source("skill/ability/meltdowner/ElectronBombEffect.java");
         String scatter = source("skill/ability/meltdowner/ScatterBombEffect.java");
         assertTrue(bomb.contains("ball.remaining == 2"));
-        assertTrue(bomb.contains("lookingDestination(player, RANGE)"));
-        assertTrue(bomb.contains("firstEntity(player, from, destination)"));
+        assertTrue(bomb.contains("lookingDestination(caster, level, aim(caster, ball.target), RANGE)"));
+        assertTrue(bomb.contains("firstEntity(caster, level, from, destination)"));
         assertTrue(bomb.contains("!(candidate instanceof MdBallEntity)"));
         assertFalse(bomb.contains("MD_BALLSHOOT"));
         assertTrue(scatter.contains("int autoCount = exp > .5F"));
@@ -57,8 +57,8 @@ final class MeltdownerLegacySourceContractTest {
         assertTrue(shield.contains("if (left == 0) event.setCanceled(true)"));
 
         String barrage = source("skill/ability/meltdowner/RayBarrageEffect.java");
-        assertTrue(barrage.contains("player.serverLevel().getEntities(player, legacyFanBounds(player)"));
-        assertTrue(barrage.contains("LookingHit plain = lookingHit(player)"));
+        assertTrue(barrage.contains("level.getEntities(caster, legacyFanBounds(aim)"));
+        assertTrue(barrage.contains("LookingHit plain = lookingHit(caster, level, aim)"));
 
         String jet = source("skill/ability/meltdowner/JetEngineRuntime.java");
         String jetEffect = source("skill/ability/meltdowner/JetEngineEffect.java");

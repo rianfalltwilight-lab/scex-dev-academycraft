@@ -51,8 +51,12 @@ public final class TelekinesisPassiveHandler {
     private TelekinesisPassiveHandler() {}
 
     private static boolean passive(ServerPlayer player, PlayerAbilityData data, String id) {
+        return data.isAbilityActive() && learned(player, data, id);
+    }
+
+    /** ExtraAcC Insulation only checked isSkillLearned, not activation. */
+    private static boolean learned(ServerPlayer player, PlayerAbilityData data, String id) {
         return player.isAlive() && !AbilityInterferenceService.isInterfered(player)
-                && data.isAbilityActive()
                 && data.getCurrentAbility() == AbilityCategory.TELEKINESIS
                 && data.hasLearnedSkill(id) && DynamicSkillRules.enabled(id);
     }
@@ -62,7 +66,7 @@ public final class TelekinesisPassiveHandler {
         if (!(target instanceof ServerPlayer defender) || attacker == defender
                 || !Float.isFinite(amount) || amount <= 0) return amount;
         PlayerAbilityData defense = defender.getData(AcademyAttachments.PLAYER_ABILITY);
-        if (!passive(defender, defense, "insulation")) return amount;
+        if (!learned(defender, defense, "insulation")) return amount;
         PlayerAbilityData offense = attacker.getData(AcademyAttachments.PLAYER_ABILITY);
         AbilityCategory source = offense.getCurrentAbility();
         float proficiency = defense.getProficiency("insulation");
@@ -111,7 +115,7 @@ public final class TelekinesisPassiveHandler {
         if (!(event.getEntity() instanceof ServerPlayer player) || event.getAmount() <= 0) return;
         PlayerAbilityData data = player.getData(AcademyAttachments.PLAYER_ABILITY);
         if (event.getSource().is(net.minecraft.world.damagesource.DamageTypes.LIGHTNING_BOLT)
-                && passive(player, data, "insulation")) {
+                && learned(player, data, "insulation")) {
             float original = event.getAmount();
             if (DynamicSkillRules.tryPay(data, "insulation", 100F * original, 0)) {
                 float reduction = 0.20F + 0.20F * data.getProficiency("insulation");
@@ -121,7 +125,7 @@ public final class TelekinesisPassiveHandler {
         }
         if (!HARDENED.containsKey(player.getUUID())) return;
         if (!passive(player, data, "psycho_harden")) {
-            stopHarden(player, data, false);
+            stopHarden(player, data, true); // ExtraAcC s_terminate always set 160
             return;
         }
         float blocked = event.getAmount();
@@ -159,6 +163,9 @@ public final class TelekinesisPassiveHandler {
         if (!HARDENED.containsKey(player.getUUID())) return;
         HARDENED.remove(player.getUUID());
         if (cooldown && !data.isDevMode()) data.setCooldown("psycho_harden", 160);
+        // ExtraAcC removed the hardening Slowness X first.  Without that, 1.21 keeps the
+        // stronger effect running and only stores Slowness V as hidden, freezing the player.
+        player.removeEffect(MobEffects.MOVEMENT_SLOWDOWN);
         player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 80, 4,
                 false, false, false));
     }
@@ -231,7 +238,7 @@ public final class TelekinesisPassiveHandler {
             return;
         }
         if (!passive(player, data, "liquid_shadow")) {
-            stopShadow(player, data, false);
+            stopShadow(player, data, true); // ExtraAcC s_terminate always set 100
             return;
         }
         if (!DynamicSkillRules.tryPay(data, "liquid_shadow", 1F, 0)) {

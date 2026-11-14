@@ -76,25 +76,25 @@ public record ConnectToNodePacket(MenuActionToken actionToken, BlockPos machineP
                     // at that coordinate made valid wireless links disappear
                     // on protected servers even though the player never edits
                     // the node block or inventory here.
-                    player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§c没有权限操作当前机器"));
+                    player.sendSystemMessage(net.minecraft.network.chat.Component.translatable("message.academy.wireless.no_machine_permission").withStyle(net.minecraft.ChatFormatting.RED));
                     return;
                 }
 
                 // 获取节点
                 BlockEntity nodeBe = level.getBlockEntity(packet.nodePos());
                 if (!(nodeBe instanceof com.mohistmc.academy.energy.api.block.IWirelessNode iNode)) {
-                    player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§c未找到无线节点"));
+                    player.sendSystemMessage(net.minecraft.network.chat.Component.translatable("message.academy.wireless.node_not_found").withStyle(net.minecraft.ChatFormatting.RED));
                     return;
                 }
                 double nodeRange = Math.max(0.0, Math.min(256.0, iNode.getRange()));
                 if (packet.machinePos().distSqr(packet.nodePos()) > nodeRange * nodeRange) {
-                    player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§c机器超出节点信号范围"));
+                    player.sendSystemMessage(net.minecraft.network.chat.Component.translatable("message.academy.wireless.machine_out_of_range").withStyle(net.minecraft.ChatFormatting.RED));
                     return;
                 }
                 // 获取机器
                 BlockEntity machineBe = level.getBlockEntity(packet.machinePos());
                 if (machineBe == null) {
-                    player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§c未找到机器"));
+                    player.sendSystemMessage(net.minecraft.network.chat.Component.translatable("message.academy.wireless.machine_not_found").withStyle(net.minecraft.ChatFormatting.RED));
                     return;
                 }
 
@@ -107,22 +107,22 @@ public record ConnectToNodePacket(MenuActionToken actionToken, BlockPos machineP
                     boolean ok = WirelessSystem.linkGenerator(level, iNode, gen, needAuth, pass);
                     if (ok) {
                         FAILED_AUTH.remove(attemptKey);
-                        player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§a发电机已连接到节点"));
+                        player.sendSystemMessage(net.minecraft.network.chat.Component.translatable("message.academy.wireless.generator_linked").withStyle(net.minecraft.ChatFormatting.GREEN));
                     } else {
                         recordFailure(attemptKey, previousAttempt, level.getGameTime(), needAuth);
-                        player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§c连接失败，请检查密码和距离"));
+                        player.sendSystemMessage(net.minecraft.network.chat.Component.translatable("message.academy.wireless.link_failed").withStyle(net.minecraft.ChatFormatting.RED));
                     }
                 } else if (machineBe instanceof IWirelessReceiver rec) {
                     boolean ok = WirelessSystem.linkReceiver(level, iNode, rec, needAuth, pass);
                     if (ok) {
                         FAILED_AUTH.remove(attemptKey);
-                        player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§a机器已连接到节点"));
+                        player.sendSystemMessage(net.minecraft.network.chat.Component.translatable("message.academy.wireless.machine_linked").withStyle(net.minecraft.ChatFormatting.GREEN));
                     } else {
                         recordFailure(attemptKey, previousAttempt, level.getGameTime(), needAuth);
-                        player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§c连接失败，请检查密码和距离"));
+                        player.sendSystemMessage(net.minecraft.network.chat.Component.translatable("message.academy.wireless.link_failed").withStyle(net.minecraft.ChatFormatting.RED));
                     }
                 } else {
-                    player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§c该机器不支持无线连接"));
+                    player.sendSystemMessage(net.minecraft.network.chat.Component.translatable("message.academy.wireless.unsupported").withStyle(net.minecraft.ChatFormatting.RED));
                 }
             }
         });

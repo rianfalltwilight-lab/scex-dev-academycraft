@@ -12,6 +12,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
@@ -43,6 +44,8 @@ public final class AeroProjectileEntity extends Projectile {
     private Vec3 lateralOffset = Vec3.ZERO;
     private boolean armed;
     private boolean impacting;
+    /** Decided once at a mob cast (config + mobGriefing); players keep their own per-block checks. */
+    private boolean mobBreaksBlocks;
 
     public AeroProjectileEntity(EntityType<? extends AeroProjectileEntity> type, Level level, Kind kind) {
         super(type, level);
@@ -57,11 +60,16 @@ public final class AeroProjectileEntity extends Projectile {
     }
 
     public void prepare(ServerPlayer owner, float proficiency) {
+        prepare(owner, proficiency, owner.getEyePosition(), owner.getLookAngle());
+    }
+
+    /** Any living caster; a player passes its own eye and look so the result is unchanged. */
+    public void prepare(LivingEntity owner, float proficiency, Vec3 eye, Vec3 look) {
         setOwner(owner);
-        setPos(owner.getEyePosition());
+        setPos(eye);
         entityData.set(PROFICIENCY, Math.clamp(proficiency, 0, 1));
         entityData.set(START, position().toVector3f());
-        launchDirection = owner.getLookAngle().normalize();
+        launchDirection = look.normalize();
         float speed = switch (kind) {
             case VOLCANIC_BALL -> .3F + .3F * proficiency();
             case AIR_BLADE -> .8F;
@@ -71,6 +79,7 @@ public final class AeroProjectileEntity extends Projectile {
     }
 
     public void arm() { armed = true; }
+    public void setMobBreaksBlocks(boolean value) { mobBreaksBlocks = value; }
     public Kind kind() { return kind; }
     public float proficiency() { return entityData.get(PROFICIENCY); }
     public int legacyAge() { return entityData.get(AGE); }
@@ -100,7 +109,7 @@ public final class AeroProjectileEntity extends Projectile {
 
     @Override public void tick() {
         if (isRemoved() || impacting || (!level().isClientSide && !armed)) return;
-        if (!level().isClientSide && (!(getOwner() instanceof ServerPlayer owner)
+        if (!level().isClientSide && (!(getOwner() instanceof LivingEntity owner)
                 || !owner.isAlive() || owner.level() != level())) { discard(); return; }
         super.tick();
         // 1.12 World and EntityFlying each increment age once per actual update.
@@ -138,7 +147,7 @@ public final class AeroProjectileEntity extends Projectile {
                 boolean canceled;
                 try { canceled = EventHooks.onProjectileImpact(this, hit); }
                 finally { impacting = false; }
-                if (isRemoved() || !(getOwner() instanceof ServerPlayer owner) || !owner.isAlive()
+                if (isRemoved() || !(getOwner() instanceof LivingEntity owner) || !owner.isAlive()
                         || owner.level() != level() || !position().equals(from)) return;
                 if (canceled) break;
                 if (hit instanceof BlockHitResult block && breakFragile(block, owner)) {
@@ -185,12 +194,21 @@ public final class AeroProjectileEntity extends Projectile {
         return first;
     }
 
-    private boolean breakFragile(BlockHitResult hit, ServerPlayer owner) {
+    private boolean breakFragile(BlockHitResult hit, LivingEntity caster) {
         BlockPos pos = hit.getBlockPos();
         if (!level().isLoaded(pos) || !DynamicSkillRules.destroysBlocks(level(), skill())) return false;
         var state = level().getBlockState(pos);
         float hardness = state.getDestroySpeed(level(), pos);
         float limit = kind == Kind.BOMBER_LANCE ? .4F : .2F;
+        if (!(caster instanceof ServerPlayer owner)) {
+            // Mob caster: no player permissions or BreakEvent; the cast-time griefing decision rules.
+            if (!mobBreaksBlocks || state.isAir() || hardness < 0 || hardness > limit) return false;
+            impacting = true;
+            try {
+                return !isRemoved() && caster.isAlive() && caster.level() == level()
+                        && level().destroyBlock(pos, true, caster);
+            } finally { impacting = false; }
+        }
         if (state.isAir() || hardness < 0 || hardness > limit || !owner.hasCorrectToolForDrops(state)
                 || !owner.getAbilities().mayBuild || !owner.mayInteract(level(), pos) || !level().mayInteract(owner, pos)) return false;
         var event = new BlockEvent.BreakEvent(level(), pos, state, owner);
@@ -203,7 +221,7 @@ public final class AeroProjectileEntity extends Projectile {
     }
 
     @Override protected void onHitEntity(EntityHitResult hit) {
-        if (!(getOwner() instanceof ServerPlayer owner) || !owner.isAlive() || owner.level() != level()) return;
+        if (!(getOwner() instanceof LivingEntity owner) || !owner.isAlive() || owner.level() != level()) return;
         float p = proficiency();
         float ratio = (float) legacyAge() / lifespan();
         float damage = switch (kind) {

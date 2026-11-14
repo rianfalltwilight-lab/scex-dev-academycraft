@@ -85,7 +85,13 @@ abstract class AbstractMineRayEffect implements ChargingSkillEffect {
         else mining.put(p.getUUID(),new Mining(pos.immutable(),state,left)); return maintained;
     }
     private ItemStack harvestTool(ServerPlayer p){ItemStack tool=new ItemStack(harvestLevel()<=2?Items.IRON_PICKAXE:Items.NETHERITE_PICKAXE);if(fortuneLevel()>0){var fortune=p.registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.ENCHANTMENT).getHolderOrThrow(Enchantments.FORTUNE);tool.enchant(fortune,fortuneLevel());}return tool;}
-    private boolean canHarvest(ServerPlayer p,BlockState state){return !state.requiresCorrectToolForDrops()||harvestTool(p).isCorrectToolForDrops(state);}
+    // Legacy compared block.getHarvestLevel(state) <= harvestLevel; blocks whose
+    // tool is not a pickaxe (snow, cobweb, dirt, wood) had level 0/-1 and always qualified.
+    /** Pack-facing opt-out: Mine Rays never break blocks in this tag. */
+    public static final net.minecraft.tags.TagKey<net.minecraft.world.level.block.Block> MINE_RAY_IMMUNE=net.minecraft.tags.TagKey.create(
+            net.minecraft.core.registries.Registries.BLOCK,net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("academy","mine_ray_immune"));
+    public static boolean canHarvestWith(BlockState state,ItemStack pickaxe){if(state.is(MINE_RAY_IMMUNE))return false;return !state.requiresCorrectToolForDrops()||!state.is(net.minecraft.tags.BlockTags.MINEABLE_WITH_PICKAXE)||pickaxe.isCorrectToolForDrops(state);}
+    private boolean canHarvest(ServerPlayer p,BlockState state){return canHarvestWith(state,harvestTool(p));}
     private boolean preflight(ServerLevel l,ServerPlayer p,BlockPos pos,BlockState state){if(!LoadedRaycast.isLoaded(l, pos)||!l.getWorldBorder().isWithinBounds(pos)||!p.mayInteract(l,pos))return false;BlockEvent.BreakEvent event=new BlockEvent.BreakEvent(l,pos,state,p);NeoForge.EVENT_BUS.post(event);return !event.isCanceled()&&l.getBlockState(pos)==state;}
     private boolean breakBlock(ServerLevel l,ServerPlayer p,BlockPos pos,BlockState state){
         // Permissions and the block may have changed during the multi-tick mining operation.

@@ -66,7 +66,8 @@ public class DevNormalGui extends AcademyBaseUI<DevNormalMenu> {
     protected void renderEnergyInfoPanel(GuiGraphics graphics) {
         InfoArea info = new InfoArea();
         info.histogram(InfoArea.histEnergy(menu.getEnergy(), menu.getMaxEnergy()));
-        info.property("类型", "普通");
+        info.property(Component.translatable("ac.ui.info.type").getString(),
+                com.mohistmc.academy.world.block.DevMachineType.NORMAL.displayName().getString());
         info.draw(graphics, leftPos, topPos);
     }
 
@@ -79,7 +80,7 @@ public class DevNormalGui extends AcademyBaseUI<DevNormalMenu> {
     @Override public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         if (compactFallback) {
             graphics.fill(0, 0, width, height, 0xDD101018);
-            graphics.drawCenteredString(font, "窗口过小，请放大窗口或降低 GUI 缩放",
+            graphics.drawCenteredString(font, Component.translatable("ac.ui.window_too_small"),
                     width / 2, Math.max(4, height / 2 - 4), 0xFFFFFFFF);
             return;
         }
@@ -88,10 +89,10 @@ public class DevNormalGui extends AcademyBaseUI<DevNormalMenu> {
         graphics.drawString(font, Component.translatable("block.academy.dev_normal"), leftPos + 8, topPos + 7, 0xFF28C4E8);
         boolean hasAbility = Minecraft.getInstance().player != null && Minecraft.getInstance().player
                 .getData(com.mohistmc.academy.skill.AcademyAttachments.PLAYER_ABILITY).hasAbility();
-        graphics.drawString(font, hasAbility ? "使用左侧无线按钮连接附近节点"
-                : "携带因子指定类别；否则随机", leftPos + 8, topPos + 27, 0xFFAAAAAA);
+        graphics.drawString(font, Component.translatable(hasAbility ? "ac.developer.hint.wireless"
+                : "ac.developer.hint.induction"), leftPos + 8, topPos + 27, 0xFFAAAAAA);
         drawActionButton(graphics, leftPos + 94, topPos + 60, 72, 16,
-                "技能树", mouseX, mouseY);
+                Component.translatable("item.academy.app_skill_tree"), mouseX, mouseY);
         renderEnergyInfoPanel(graphics);
     }
 
@@ -117,7 +118,7 @@ public class DevNormalGui extends AcademyBaseUI<DevNormalMenu> {
     }
 
     private void drawActionButton(GuiGraphics graphics, int x, int y, int w, int h,
-                                  String label, double mouseX, double mouseY) {
+                                  Component label, double mouseX, double mouseY) {
         int color = inside(mouseX, mouseY, x, y, w, h) ? 0xFF3498DB : 0xFF2980B9;
         graphics.fill(x, y, x + w, y + h, color);
         graphics.drawCenteredString(font, label, x + w / 2, y + 4, 0xFFFFFFFF);

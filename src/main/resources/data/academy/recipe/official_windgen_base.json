@@ -7,7 +7,7 @@
   ],
   "key": {
     "A": {
-      "item": "minecraft:iron_ingot"
+      "item": "academy:constraint_ingot"
     },
     "B": {
       "item": "academy:machine_frame"

@@ -51,7 +51,7 @@ public final class AbilityInterfererMenu extends AcademyMenu {
         });
     }
 
-    public int getEnergy() { return Math.clamp(data.get(0), 0, AbilityInterferenceRules.MAX_ENERGY); }
+    public int getEnergy() { return Math.clamp(data.get(0), 0, com.mohistmc.academy.config.MachineConfig.INTERFERER_BUFFER.get()); }
     public int getMaxEnergy() { return Math.max(1, data.get(1)); }
     public int getRange() { return AbilityInterferenceRules.clampRange(data.get(2)); }
     public boolean isEnabled() { return data.get(3) != 0; }

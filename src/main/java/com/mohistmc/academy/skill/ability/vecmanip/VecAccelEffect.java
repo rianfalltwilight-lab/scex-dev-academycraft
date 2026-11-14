@@ -2,6 +2,8 @@ package com.mohistmc.academy.skill.ability.vecmanip;
 
 import com.mohistmc.academy.skill.ability.LoadedRaycast;
 
+import com.mohistmc.academy.api.mob.MobCastContext;
+import com.mohistmc.academy.api.mob.MobCastable;
 import com.mohistmc.academy.config.DynamicSkillRules;
 
 import com.mohistmc.academy.skill.ChargingSkillEffect;
@@ -10,6 +12,9 @@ import com.mohistmc.academy.world.AcademySounds;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -17,10 +22,12 @@ import net.minecraft.world.phys.Vec3;
 import static com.mohistmc.academy.utils.MathUtils.lerpf;
 
 /** 矢量加速 —— 蓄力后向前方高速冲刺 */
-public class VecAccelEffect implements ChargingSkillEffect {
+public class VecAccelEffect implements ChargingSkillEffect, MobCastable {
 
     private static final int MAX_CHARGE = 20;
     private static final double MAX_VELOCITY = 2.5;
+    /** A mob launches at half charge. */
+    private static final int MOB_CHARGE_TICKS = 10;
 
     @Override
     public String getId() {
@@ -80,26 +87,50 @@ public class VecAccelEffect implements ChargingSkillEffect {
 
         if (!DynamicSkillRules.tryPay(data,getId(),cp,overload)) return;
 
+        // EntityLook(yaw, pitch - 10) in 1.0.7 deliberately lifts the launch
+        // vector by ten degrees.  Subtracting from Y would invert that arc.
+        launch(player, player.serverLevel(), ticks, player.getXRot(), player.getYRot());
+
+        DynamicSkillRules.addExp(player,data, getId(), 0.002f);
+    }
+
+    /** Mob path: a short charge, then the dash along the aim; only casters that may move themselves. */
+    @Override public int mobChargeTicks(float proficiency) { return MOB_CHARGE_TICKS; }
+
+    @Override public boolean mobChargeTick(MobCastContext context, int tick) { return context.mayMoveCaster(); }
+
+    @Override
+    public boolean mobCast(MobCastContext context) {
+        LivingEntity caster = context.caster();
+        if (!context.mayMoveCaster()) return false;
+        if (context.proficiency() <= 0.5f && !hasGroundWithinTwoBlocks(caster)) return false;
+        Vec3 look = context.look();
+        float yaw = (float) (Mth.atan2(-look.x, look.z) * Mth.RAD_TO_DEG);
+        float pitch = (float) (Math.asin(Mth.clamp(-look.y, -1, 1)) * Mth.RAD_TO_DEG);
+        launch(caster, context.level(), context.chargeTicks(), pitch, yaw);
+        return true;
+    }
+
+    @Override public int mobCooldownTicks(float proficiency) { return getCooldownTicks(proficiency); }
+
+    /** The dash after payment, shared by players and mob casters; {@code pitch}/{@code yaw} are the aim. */
+    private static void launch(LivingEntity caster, ServerLevel level, int ticks, float pitch, float yaw) {
         int effectiveTicks = Math.min(ticks, MAX_CHARGE);
         double prog = Math.max(0, Math.min(1, effectiveTicks / (double) MAX_CHARGE));
         double speed = Math.sin(lerpf(0.4f, 1.0f, (float) prog)) * MAX_VELOCITY;
 
-        // EntityLook(yaw, pitch - 10) in 1.0.7 deliberately lifts the launch
-        // vector by ten degrees.  Subtracting from Y would invert that arc.
-        Vec3 dir = Vec3.directionFromRotation(player.getXRot() - 10.0F, player.getYRot()).scale(speed);
+        Vec3 dir = Vec3.directionFromRotation(pitch - 10.0F, yaw).scale(speed);
 
-        player.setDeltaMovement(dir);
-        player.hurtMarked = true;
-        player.fallDistance = 0;
-        if (player.getVehicle() != null) {
-            player.stopRiding();
+        caster.setDeltaMovement(dir);
+        caster.hurtMarked = true;
+        caster.fallDistance = 0;
+        if (caster.getVehicle() != null) {
+            caster.stopRiding();
         }
 
-        DynamicSkillRules.addExp(player,data, getId(), 0.002f);
-
-        ServerLevel level = player.serverLevel();
-        AcademySounds.playSound(level, player.getX(), player.getY(), player.getZ(),
-                AcademySounds.VM_VEC_ACCEL, SoundSource.PLAYERS, 0.35f, 1.0f);
+        AcademySounds.playSound(level, caster.getX(), caster.getY(), caster.getZ(),
+                AcademySounds.VM_VEC_ACCEL, caster instanceof Player ? SoundSource.PLAYERS : SoundSource.HOSTILE,
+                0.35f, 1.0f);
     }
 
     @Override
@@ -122,9 +153,9 @@ public class VecAccelEffect implements ChargingSkillEffect {
         return (int) lerpf(80, 50, proficiency);
     }
 
-    private static boolean hasGroundWithinTwoBlocks(ServerPlayer player) {
+    private static boolean hasGroundWithinTwoBlocks(LivingEntity player) {
         Vec3 from = player.position();
-        return LoadedRaycast.clip(player.serverLevel(), new ClipContext(from, from.add(0, -2, 0),
+        return LoadedRaycast.clip(player.level(), new ClipContext(from, from.add(0, -2, 0),
                 ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player)).getType() == HitResult.Type.BLOCK;
     }
 }

@@ -55,10 +55,23 @@ public final class AeroPassiveRuntime {
     }
 
     private static boolean passive(ServerPlayer player, PlayerAbilityData data, String skillId) {
+        return data.isAbilityActive() && learned(player, data, skillId);
+    }
+
+    /** ExtraAcC passives (Ascending Air, Airflow) only checked isSkillLearned, not activation. */
+    private static boolean learned(ServerPlayer player, PlayerAbilityData data, String skillId) {
         return player.isAlive() && !AbilityInterferenceService.isInterfered(player)
-                && data.isAbilityActive()
                 && data.getCurrentAbility() == AbilityCategory.AEROHAND
                 && data.hasLearnedSkill(skillId) && DynamicSkillRules.enabled(skillId);
+    }
+
+    private static void tickAirflow(ServerPlayer player, PlayerAbilityData data) {
+        if (player.tickCount % 20 == 0 && player.getAirSupply() < player.getMaxAirSupply()
+                && learned(player, data, AIRFLOW) && data.getProficiency(AIRFLOW) >= 0.5F
+                && DynamicSkillRules.tryPay(data, AIRFLOW, 50F, 0)) {
+            player.setAirSupply(player.getMaxAirSupply());
+            DynamicSkillRules.addExp(player, data, AIRFLOW, 0.001F);
+        }
     }
 
     public static boolean isOffenseArmourEngaged(ServerPlayer player) {
@@ -73,13 +86,13 @@ public final class AeroPassiveRuntime {
 
     public static boolean toggleOffenseArmour(ServerPlayer player, PlayerAbilityData data) {
         if (ACTIVE_ARMOUR.contains(player.getUUID())) {
-            stopArmour(player, data, true);
+            stopArmour(player, data);
             return true;
         }
         float p = data.getProficiency(OFFENSE_ARMOUR);
         if (!DynamicSkillRules.tryPay(data, OFFENSE_ARMOUR,
                 600F - 200F * p, 80F - 30F * p)) return false;
-        stopFlying(player, data, true);
+        stopFlying(player, data);
         ACTIVE_ARMOUR.add(player.getUUID());
         applyArmourKnockbackResistance(player);
         return true;
@@ -87,12 +100,12 @@ public final class AeroPassiveRuntime {
 
     public static boolean toggleFlying(ServerPlayer player, PlayerAbilityData data) {
         if (ACTIVE_FLYING.contains(player.getUUID())) {
-            stopFlying(player, data, true);
+            stopFlying(player, data);
             return true;
         }
         float p = data.getProficiency(FLYING);
         if (!DynamicSkillRules.tryPay(data, FLYING, 0, 80F - 30F * p)) return false;
-        stopArmour(player, data, true);
+        stopArmour(player, data);
         ACTIVE_FLYING.add(player.getUUID());
         grantFlight(player);
         player.getAbilities().flying = player.mayFly();
@@ -102,8 +115,8 @@ public final class AeroPassiveRuntime {
 
     /** Level-five vacuum explicitly terminates both mutually exclusive sustained contexts. */
     public static void terminateSustained(ServerPlayer player, PlayerAbilityData data) {
-        stopArmour(player, data, true);
-        stopFlying(player, data, true);
+        stopArmour(player, data);
+        stopFlying(player, data);
     }
 
     @SubscribeEvent
@@ -113,27 +126,23 @@ public final class AeroPassiveRuntime {
 
         if (!player.isAlive() || !data.isAbilityActive() || AbilityInterferenceService.isInterfered(player)
                 || data.getCurrentAbility() != AbilityCategory.AEROHAND) {
-            stopArmour(player, data, false);
-            stopFlying(player, data, false);
+            stopArmour(player, data);
+            stopFlying(player, data);
+            tickAirflow(player, data);
             return;
         }
         // Invalid passives must destroy their paid context, not merely hide its effects.
         // Otherwise interference or unlearning can restore flight/armour without a new cast.
         if (ACTIVE_ARMOUR.contains(player.getUUID()) && !passive(player, data, OFFENSE_ARMOUR))
-            stopArmour(player, data, false);
+            stopArmour(player, data);
         if (ACTIVE_FLYING.contains(player.getUUID()) && !passive(player, data, FLYING))
-            stopFlying(player, data, false);
-        if (player.tickCount % 20 == 0 && player.getAirSupply() < player.getMaxAirSupply()
-                && passive(player, data, AIRFLOW) && data.getProficiency(AIRFLOW) >= 0.5F
-                && DynamicSkillRules.tryPay(data, AIRFLOW, 50F, 0)) {
-            player.setAirSupply(player.getMaxAirSupply());
-            DynamicSkillRules.addExp(player, data, AIRFLOW, 0.001F);
-        }
+            stopFlying(player, data);
+        tickAirflow(player, data);
         boolean armour = isOffenseArmourEngaged(player);
         if (armour) {
             applyArmourKnockbackResistance(player);
             if (!DynamicSkillRules.tryPay(data, OFFENSE_ARMOUR, 1F, 0.5F)) {
-                stopArmour(player, data, true);
+                stopArmour(player, data);
             } else {
                 tickOffenseArmour(player, data);
                 DynamicSkillRules.addExp(player, data, OFFENSE_ARMOUR, 0.0001F);
@@ -141,7 +150,7 @@ public final class AeroPassiveRuntime {
         } else if (isFlyingActive(player)) {
             float cp = 16F - 8F * data.getProficiency(FLYING);
             if (!DynamicSkillRules.tryPay(data, FLYING, cp, 0.5F)) {
-                stopFlying(player, data, true);
+                stopFlying(player, data);
                 return;
             }
             grantFlight(player);
@@ -171,9 +180,9 @@ public final class AeroPassiveRuntime {
                 new net.minecraft.world.phys.AABB(player.position().add(0, player.getBbHeight() / 2, 0),
                         player.position().add(0, player.getBbHeight() / 2, 0)).inflate(ARMOUR_RADIUS), Entity::isAlive)) {
             if (entity instanceof Projectile projectile) {
-                if (hostileProjectile(player, projectile)) {
+                if (AeroProjectileRules.clearsLikeLegacy(projectile) && hostileProjectile(player, projectile)) {
                     if (!DynamicSkillRules.tryPay(data, OFFENSE_ARMOUR, 10F, 0)) {
-                        stopArmour(player, data, true);
+                        stopArmour(player, data);
                         return;
                     }
                     projectile.discard();
@@ -181,18 +190,17 @@ public final class AeroPassiveRuntime {
                 }
                 continue;
             }
-            if (entity instanceof LivingEntity living && player.isAlliedTo(living)) continue;
-            if (entity instanceof LivingEntity living) {
-                if (!DynamicSkillRules.tryPay(data, OFFENSE_ARMOUR,
-                        100F * living.getBbHeight(), 0)) {
-                    stopArmour(player, data, true);
-                    return;
-                }
-                com.mohistmc.academy.skill.AcademyDamageHelper.hurt(player, living,
-                        com.mohistmc.academy.skill.SkillDamageSource.attack(player), DynamicSkillRules.damage(
-                                OFFENSE_ARMOUR, 8F + 4F * data.getProficiency(OFFENSE_ARMOUR)));
-                DynamicSkillRules.addExp(player, data, OFFENSE_ARMOUR, 0.002F);
+            // ExtraAcC only damaged and pushed living targets; items, orbs and vehicles stay put.
+            if (!(entity instanceof LivingEntity living) || player.isAlliedTo(living)) continue;
+            if (!DynamicSkillRules.tryPay(data, OFFENSE_ARMOUR,
+                    100F * living.getBbHeight(), 0)) {
+                stopArmour(player, data);
+                return;
             }
+            com.mohistmc.academy.skill.AcademyDamageHelper.hurt(player, living,
+                    com.mohistmc.academy.skill.SkillDamageSource.attack(player), DynamicSkillRules.damage(
+                            OFFENSE_ARMOUR, 8F + 4F * data.getProficiency(OFFENSE_ARMOUR)));
+            DynamicSkillRules.addExp(player, data, OFFENSE_ARMOUR, 0.002F);
             Vec3 away = entity.position().subtract(player.position());
             if (away.lengthSqr() < 1.0e-6) away = new Vec3(0, 0.1, 0);
             away = away.normalize().scale(2.0);
@@ -211,7 +219,7 @@ public final class AeroPassiveRuntime {
         PlayerAbilityData data = data(player);
         float original = event.getAmount();
         if (event.getSource().is(net.minecraft.world.damagesource.DamageTypes.FALL)
-                && passive(player, data, ASCENDING_AIR)) {
+                && learned(player, data, ASCENDING_AIR)) {
             float p = data.getProficiency(ASCENDING_AIR);
             float capped = AeroBehaviorMath.ascendingAirDamageCap(p);
             float saved = original - capped;
@@ -224,7 +232,7 @@ public final class AeroPassiveRuntime {
         }
         if ((event.getSource().is(net.minecraft.world.damagesource.DamageTypes.IN_WALL)
                 || event.getSource().is(DamageTypeTags.IS_DROWNING))
-                && passive(player, data, AIRFLOW)) {
+                && learned(player, data, AIRFLOW)) {
             // The released add-on accidentally keyed this curve to Ascending Air; preserve the played result.
             float p = data.getProficiency(ASCENDING_AIR);
             if (DynamicSkillRules.tryPay(data, AIRFLOW, (40F - 20F * p) * original, 0)) {
@@ -238,20 +246,10 @@ public final class AeroPassiveRuntime {
         float proficiency = data.getProficiency(OFFENSE_ARMOUR);
         if (!DynamicSkillRules.tryPay(data, OFFENSE_ARMOUR,
                 original * 20F, original * 0.5F)) {
-            stopArmour(player, data, true);
+            stopArmour(player, data);
             return;
         }
         event.setAmount(original * AeroBehaviorMath.offenseArmourDamageMultiplier(proficiency));
-        Entity attacker = event.getSource().getEntity();
-        if (attacker != null && attacker != player && !player.isAlliedTo(attacker)
-                && attacker.distanceToSqr(player) <= ARMOUR_RADIUS * ARMOUR_RADIUS) {
-            Vec3 away = attacker.position().subtract(player.position());
-            if (away.lengthSqr() > 1.0e-6) {
-                away = away.normalize().scale(0.35);
-                attacker.push(away.x, 0.08, away.z);
-                attacker.hurtMarked = true;
-            }
-        }
         DynamicSkillRules.addExp(player, data, OFFENSE_ARMOUR, original * 0.0005F);
     }
 
@@ -293,16 +291,18 @@ public final class AeroPassiveRuntime {
         }
     }
 
-    private static void stopArmour(ServerPlayer player, PlayerAbilityData data, boolean cooldown) {
+    // ExtraAcC set the 40-tick cooldown in every MSG_TERMINATED listener, so every
+    // termination (toggle, CP run-out, deactivation, interference) starts it.
+    private static void stopArmour(ServerPlayer player, PlayerAbilityData data) {
         boolean active = ACTIVE_ARMOUR.remove(player.getUUID());
         removeArmourKnockbackResistance(player);
-        if (active && cooldown && !data.isDevMode()) data.setCooldown(OFFENSE_ARMOUR, 40);
+        if (active && !data.isDevMode()) data.setCooldown(OFFENSE_ARMOUR, 40);
     }
 
-    private static void stopFlying(ServerPlayer player, PlayerAbilityData data, boolean cooldown) {
+    private static void stopFlying(ServerPlayer player, PlayerAbilityData data) {
         boolean active = ACTIVE_FLYING.remove(player.getUUID());
         revokeGrantedFlight(player);
-        if (active && cooldown && !data.isDevMode()) data.setCooldown(FLYING, 40);
+        if (active && !data.isDevMode()) data.setCooldown(FLYING, 40);
     }
 
     @SubscribeEvent public static void logout(PlayerEvent.PlayerLoggedOutEvent event) { clearPlayer(event.getEntity()); }
