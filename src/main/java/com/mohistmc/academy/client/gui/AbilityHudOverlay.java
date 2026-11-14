@@ -38,9 +38,20 @@ public class AbilityHudOverlay {
         if (!ACConfig.Client.showHud() || !ACConfig.Client.showKeyHints()) return;
 
         PlayerAbilityData data = mc.player.getData(AcademyAttachments.PLAYER_ABILITY);
-        if (!data.hasAbility() || !data.isAbilityActive()) return;
+        if (!data.hasAbility()) return;
+        boolean inactive = !data.isAbilityActive();
+        if (inactive && !ACConfig.Client.showHudWhenInactive()) return;
 
         GuiGraphics g = graphics;
+        if (inactive) g.setColor(0.6f, 0.6f, 0.6f, 0.45f);
+        try {
+            renderHints(mc, g, data);
+        } finally {
+            if (inactive) g.setColor(1f, 1f, 1f, 1f);
+        }
+    }
+
+    private static void renderHints(Minecraft mc, GuiGraphics g, PlayerAbilityData data) {
         int screenW = mc.getWindow().getGuiScaledWidth();
         int screenH = mc.getWindow().getGuiScaledHeight();
 
@@ -88,8 +99,8 @@ public class AbilityHudOverlay {
                     // Immediate held/toggled feedback. These highlights never predict a
                     // successful activation; synchronized data/cooldown remains authoritative.
                     if (KeyInputHandler.isSkillHeld(slot)) {
-                        int pulse = ((System.currentTimeMillis() / 140L) & 1L) == 0L
-                                ? 0xFFFFFFFF : 0xFF55CCFF;
+                        int pulse = ACConfig.Client.reduceFlashing()
+                                || ((System.currentTimeMillis() / 140L) & 1L) == 0L ? 0xFFFFFFFF : 0xFF55CCFF;
                         g.renderOutline(x - 1, iy - 1, ICON_SIZE + 2, ICON_SIZE + 2, pulse);
                         if ("mark_teleport".equals(skillId)) {
                             int frame = (int) ((System.currentTimeMillis() / 70L) & 7L);
@@ -121,9 +132,21 @@ public class AbilityHudOverlay {
                         if (cdH > 0) {
                             g.fill(x, iy, x + ICON_SIZE, iy + cdH, 0xAA000000);
                         }
+                        if (ACConfig.Client.showCooldownSeconds()) {
+                            String seconds = cooldownLabel(cdTicks);
+                            g.drawString(mc.font, seconds, x + (ICON_SIZE - mc.font.width(seconds)) / 2,
+                                    iy + (ICON_SIZE - mc.font.lineHeight) / 2 + 1, 0xFFFFFFFF, true);
+                        }
                     }
                 }
             }
         }
+    }
+
+    /** "2.4" below ten seconds, whole seconds above. */
+    static String cooldownLabel(int ticks) {
+        double seconds = Math.max(0, ticks) / 20.0;
+        return seconds < 10 ? String.format(java.util.Locale.ROOT, "%.1f", seconds)
+                : Integer.toString((int) Math.ceil(seconds));
     }
 }

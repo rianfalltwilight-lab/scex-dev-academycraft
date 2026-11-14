@@ -75,11 +75,20 @@ public class ChargingHudOverlay {
         if ("railgun".equals(currentSkillId) && progress >= 0.65f) {
             // A deliberately broad, readable QTE window cue. It is presentation only:
             // the server still decides whether a coin and the release timing are valid.
-            color = ((System.currentTimeMillis() / 120L) & 1L) == 0L ? 0xFF66EEFF : 0xFFFFFFFF;
+            color = com.mohistmc.academy.config.ACConfig.Client.reduceFlashing()
+                    || ((System.currentTimeMillis() / 120L) & 1L) == 0L ? 0xFF66EEFF : 0xFFFFFFFF;
         }
         graphics.fill(x, y, x + progressWidth, y + barHeight, color);
 
         graphics.renderOutline(x, y, barWidth, barHeight, 0xFFFFFFFF);
+
+        float penetrate = KeyInputHandler.penetrateHintDistance();
+        if ("penetrate_teleport".equals(currentSkillId) && Float.isFinite(penetrate)) {
+            // The wheel sets the distance; 1.12.2 gave no on-screen hint that it does.
+            Component hint = Component.translatable("ac.hud.penetrate_scroll",
+                    String.format(java.util.Locale.ROOT, "%.1f", penetrate));
+            graphics.drawString(mc.font, hint, (screenWidth - mc.font.width(hint)) / 2, y + barHeight + 3, 0xFFCCDDFF);
+        }
 
         if (!currentSkillId.isEmpty()) {
             PlayerAbilityData data = mc.player.getData(AcademyAttachments.PLAYER_ABILITY);

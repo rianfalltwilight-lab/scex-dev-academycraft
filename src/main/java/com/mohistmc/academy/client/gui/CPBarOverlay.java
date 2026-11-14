@@ -64,9 +64,24 @@ public class CPBarOverlay {
 
         PlayerAbilityData data = mc.player.getData(AcademyAttachments.PLAYER_ABILITY);
         if (!data.hasAbility()) return;
-        if (!data.isAbilityActive()) return;
+        boolean inactive = !data.isAbilityActive();
+        if (inactive && !ACConfig.Client.showHudWhenInactive()) return;
 
         GuiGraphics g = graphics;
+        if (inactive) g.setColor(0.6f, 0.6f, 0.6f, 0.45f);
+        try {
+            renderBar(mc, g, data);
+        } finally {
+            if (inactive) g.setColor(1f, 1f, 1f, 1f);
+        }
+    }
+
+    /** 1.12.2 showed numbers only while V was held; the client option keeps them on. */
+    private static boolean numbersVisible() {
+        return showNumbers || ACConfig.Client.alwaysShowResourceNumbers();
+    }
+
+    private static void renderBar(Minecraft mc, GuiGraphics g, PlayerAbilityData data) {
         int screenW = mc.getWindow().getGuiScaledWidth();
         int screenH = mc.getWindow().getGuiScaledHeight();
 
@@ -93,13 +108,19 @@ public class CPBarOverlay {
 
         // 1.0.7 showed exact resource values only while the V activation key
         // was held. A short (<300 ms) release toggles the ability separately.
-        if (showNumbers) {
+        int textY = Math.round(hudY + HEIGHT * SCALE + 2);
+        if (numbersVisible()) {
             String cp = "CP " + Math.round(data.getCurrentCp()) + " / " + Math.round(data.getMaxCp());
             String ol = "OL " + Math.round(data.getCurrentOverload()) + " / " + Math.round(data.getMaxOverload());
             int textX = Math.round(hudX + hudW - Math.max(mc.font.width(cp), mc.font.width(ol)));
-            int textY = Math.round(hudY + HEIGHT * SCALE + 2);
             g.drawString(mc.font, cp, textX, textY, 0xFFFFFFFF, true);
             g.drawString(mc.font, ol, textX, textY + 10, 0xFFFFC0A0, true);
+            textY += 20;
+        }
+        // Not only the faded bar: say that every skill is locked until overload drains.
+        if (data.isOverloadLocked() && !data.isDevMode()) {
+            var locked = net.minecraft.network.chat.Component.translatable("ac.hud.overload_locked");
+            g.drawString(mc.font, locked, Math.round(hudX + hudW - mc.font.width(locked)), textY, 0xFFFF5555, true);
         }
     }
 
@@ -127,7 +148,7 @@ public class CPBarOverlay {
         if (!data.hasAbility() || !data.isAbilityActive()) return y;
         int screenH = mc.getWindow().getGuiScaledHeight();
         HudPosition p = position(mc.getWindow().getGuiScaledWidth(), screenH);
-        int bottom = showNumbers ? Math.round(p.y() + HEIGHT * SCALE + 2) + 10 + mc.font.lineHeight
+        int bottom = numbersVisible() ? Math.round(p.y() + HEIGHT * SCALE + 2) + 10 + mc.font.lineHeight
                 : (int) Math.ceil(p.y() + HEIGHT * SCALE);
         if (x + width <= p.x() || x >= p.x() + WIDTH * SCALE || y + height <= p.y() || y >= bottom) return y;
         int below = bottom + 4;

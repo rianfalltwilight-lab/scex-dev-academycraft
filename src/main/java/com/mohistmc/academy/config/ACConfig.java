@@ -216,6 +216,10 @@ public final class ACConfig {
         public static final ModConfigSpec.BooleanValue ENABLE_SKILL_SOUNDS;
         public static final ModConfigSpec.DoubleValue MEDIA_PLAYER_VOLUME;
         public static final ModConfigSpec.BooleanValue HEADS_OR_TAILS;
+        public static final ModConfigSpec.BooleanValue SHOW_COOLDOWN_SECONDS;
+        public static final ModConfigSpec.BooleanValue ALWAYS_SHOW_RESOURCE_NUMBERS;
+        public static final ModConfigSpec.BooleanValue SHOW_HUD_WHEN_INACTIVE;
+        public static final ModConfigSpec.BooleanValue REDUCE_FLASHING;
 
         static {
             ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
@@ -248,6 +252,18 @@ public final class ACConfig {
             SHOW_KEY_HINTS = builder
                     .comment("Show key binding hints.")
                     .define("showKeyHints", true);
+            SHOW_COOLDOWN_SECONDS = builder
+                    .comment("Print the remaining cooldown in seconds on each key-hint icon.")
+                    .define("showCooldownSeconds", true);
+            ALWAYS_SHOW_RESOURCE_NUMBERS = builder
+                    .comment("Always print CP and overload numbers on the CP bar (1.12.2: only while V is held).")
+                    .define("alwaysShowResourceNumbers", false);
+            SHOW_HUD_WHEN_INACTIVE = builder
+                    .comment("Keep the CP bar and key hints visible, dimmed, while the ability is switched off.")
+                    .define("showHudWhenInactive", false);
+            REDUCE_FLASHING = builder
+                    .comment("Replace the flashing held-key outline and charge-bar flicker with steady highlights.")
+                    .define("reduceFlashing", false);
             builder.pop();
 
             builder.push("generic");
@@ -279,6 +295,10 @@ public final class ACConfig {
         public static boolean autoAvoidJade() { return booleanOr(AUTO_AVOID_JADE, true); }
         public static boolean showChargingHud() { return booleanOr(SHOW_CHARGING_HUD, true); }
         public static boolean showKeyHints() { return booleanOr(SHOW_KEY_HINTS, true); }
+        public static boolean showCooldownSeconds() { return booleanOr(SHOW_COOLDOWN_SECONDS, true); }
+        public static boolean alwaysShowResourceNumbers() { return booleanOr(ALWAYS_SHOW_RESOURCE_NUMBERS, false); }
+        public static boolean showHudWhenInactive() { return booleanOr(SHOW_HUD_WHEN_INACTIVE, false); }
+        public static boolean reduceFlashing() { return booleanOr(REDUCE_FLASHING, false); }
         public static boolean enableSkillSounds() { return booleanOr(ENABLE_SKILL_SOUNDS, true); }
         public static float mediaPlayerVolume() {
             try { return MEDIA_PLAYER_VOLUME.get().floatValue(); }

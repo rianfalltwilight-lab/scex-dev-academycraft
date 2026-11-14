@@ -840,9 +840,11 @@ public class SkillTreeGui extends AcademyScreen {
 
         String desc = Component.translatable(skill.getDescKey()).getString();
         if (!desc.equals(skill.getDescKey())) {
-            int maxCharsPerLine = Math.max(16, guiWidth / 18);
-            for (int i = 0; i < desc.length(); i += maxCharsPerLine) {
-                tooltip.add(Component.literal("§7" + desc.substring(i, Math.min(i + maxCharsPerLine, desc.length()))));
+            // Wrap by rendered width at word boundaries; the old fixed character count split words.
+            int width = Math.max(96, guiWidth / 3);
+            for (net.minecraft.network.chat.FormattedText line : mc.font.getSplitter()
+                    .splitLines(desc, width, net.minecraft.network.chat.Style.EMPTY)) {
+                tooltip.add(Component.literal(line.getString()).withStyle(ChatFormatting.GRAY));
             }
         }
 
