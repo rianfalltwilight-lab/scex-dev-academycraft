@@ -63,7 +63,7 @@ public final class ShiftTpEffect implements ChargingSkillEffect {
 
     @Override
     public boolean canRelease(ServerPlayer player, PlayerAbilityData data, int ticks) {
-        float exp = data.getProficiency(getId());
+        float exp = skillExp(player, data);
         float cp = lerpf(260, 320, exp), overload = lerpf(40, 30, exp);
         Placement placement = placement(player, exp);
         return placement != null && player.getMainHandItem().getItem() instanceof BlockItem
@@ -73,7 +73,7 @@ public final class ShiftTpEffect implements ChargingSkillEffect {
     @Override
     public boolean tryRelease(ServerPlayer player, PlayerAbilityData data, int ticks) {
         if (!canRelease(player, data, ticks)) return false;
-        float exp = data.getProficiency(getId());
+        float exp = skillExp(player, data);
         Placement placement = placement(player, exp);
         if (placement == null) return false;
         ItemStack live = player.getMainHandItem();
@@ -152,6 +152,22 @@ public final class ShiftTpEffect implements ChargingSkillEffect {
     @Override public void onChargingAbort(ServerPlayer player, PlayerAbilityData data) {}
     @Override public void execute(ServerPlayer player, PlayerAbilityData data) {}
     @Override public int getCooldownTicks(float proficiency) { return (int) lerpf(100, 60, proficiency); }
+
+    /**
+     * ShiftTeleport.getSkillExp returned 1.0 whenever the context could not
+     * break blocks at all, so cost, range, damage and cooldown all ran at full
+     * proficiency (and the block always became a remote drop).
+     */
+    float skillExp(ServerPlayer player, PlayerAbilityData data) {
+        return DynamicSkillRules.destroysBlocks(player.serverLevel(), getId()) ? data.getProficiency(getId()) : 1.0f;
+    }
+
+    @Override
+    public boolean shouldApplyCooldownAfterRelease(ServerPlayer player, PlayerAbilityData data, int chargedTicks) {
+        if (DynamicSkillRules.destroysBlocks(player.serverLevel(), getId())) return true;
+        data.setCooldown(getId(), getCooldownTicks(1.0f));
+        return false;
+    }
 
     private Placement placement(ServerPlayer player, float exp) {
         ItemStack stack = player.getMainHandItem();

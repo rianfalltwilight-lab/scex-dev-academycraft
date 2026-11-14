@@ -102,4 +102,18 @@ final class TeleporterLegacySourceContractTest {
         assertFalse(action.contains("target.playSound"),
                 "final 1.12.2 must not broadcast the Location Teleport button sound from the server");
     }
+
+    /** Restored legacy behaviour: GravityCancellor partial lift, failed-start cooldown, ShiftTP exp 1.0. */
+    @Test
+    void flashingGravityAndShiftTpExpFollowLegacy() throws Exception {
+        String gravity = source("skill/ability/teleporter/GravityCancelRuntime.java");
+        String session = source("skill/ability/teleporter/FlashingSessionManager.java");
+        String shift = source("skill/ability/teleporter/ShiftTpEffect.java");
+        assertTrue(gravity.contains("LIFT = 0.072"));
+        assertTrue(gravity.contains("Attributes.GRAVITY"));
+        assertFalse(gravity.contains("setNoGravity"));
+        assertFalse(gravity.contains("fallDistance"));
+        assertTrue(session.contains("data.setCooldown(\"flashing\", (int) (900 - 500 * exp));"));
+        assertTrue(shift.contains("destroysBlocks(player.serverLevel(), getId()) ? data.getProficiency(getId()) : 1.0f"));
+    }
 }

@@ -120,53 +120,28 @@ public class GroundShockEffect implements ChargingSkillEffect {
             int[] next = plotter.next();
             int x = next[0], y = next[1], z = next[2];
             for (int i = 0; i < offsets.length; i++) {
-                if (level.random.nextDouble() >= probabilities[i]) continue;
-                Vec3 offset = offsets[i];
-                BlockPos pos = BlockPos.containing(x + offset.x, y + offset.y, z + offset.z);
-                if (!LoadedRaycast.isLoaded(level, pos) || !level.getWorldBorder().isWithinBounds(pos)) continue;
-                BlockState state = level.getBlockState(pos);
-                if (state.isAir() || !visitedBlocks.add(pos)) continue;
-
-                if (state.is(Blocks.STONE)) {
-                    energy[0] -= 0.4;
-                    if (destroyBlocks && mayBreak(level, player, pos, state)) level.setBlockAndUpdate(pos, Blocks.COBBLESTONE.defaultBlockState());
-                } else if (state.is(Blocks.GRASS_BLOCK)) {
-                    energy[0] -= 0.2;
-                    if (destroyBlocks && mayBreak(level, player, pos, state)) level.setBlockAndUpdate(pos, Blocks.DIRT.defaultBlockState());
-                } else if (state.is(Blocks.FARMLAND)) {
-                    energy[0] -= 0.1;
-                } else {
-                    energy[0] -= 0.5;
-                }
-
-                if (destroyBlocks && level.random.nextDouble() < groundBreakProb)
-                    energy[0] = breakWithForce(level, player, new BlockPos(x, y, z), false, dropRate, energy[0]);
+                if (level.random.nextDouble() < probabilities[i])
+                    groundCell(level, player, data, offsets[i], x, y, z, destroyBlocks, groundBreakProb, dropRate,
+                            damage, ySpeed, visitedBlocks, visitedEntities, energy);
+                // Groundshock.scala ran this inside deltas.foreach but outside
+                // the probability / non-air / dejavu test: the three blocks
+                // above the plotter cell are cleared on every step, even when
+                // the ground cell itself is air or already visited.
                 for (int above = 1; above <= 3; above++)
                     if (destroyBlocks) energy[0] = breakWithForce(level, player, new BlockPos(x, y + above, z), false, dropRate, energy[0]);
-
-                AABB aabb = new AABB(pos.getX() - 0.2, pos.getY() - 0.2, pos.getZ() - 0.2,
-                        pos.getX() + 1.4, pos.getY() + 2.2, pos.getZ() + 1.4);
-                for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, aabb,
-                        entity -> entity != player && entity.isAlive())) {
-                    if (!visitedEntities.add(living)) continue;
-                    energy[0] -= 1;
-                    AcademyDamageHelper.hurt(player, living, com.mohistmc.academy.skill.SkillDamageSource.attack(player),
-                            DynamicSkillRules.damage(getId(), damage));
-                    living.setDeltaMovement(living.getDeltaMovement().x, ySpeed, living.getDeltaMovement().z);
-                    living.hurtMarked = true;
-                    DynamicSkillRules.addExp(player, data, getId(), 0.002f);
-                }
-                EffectHelper.windBurst(level, pos.getX() + 0.5, pos.getY() + 1, pos.getZ() + 0.5, 3, 0.3);
             }
         }
 
         // 熟练度=1 时破坏大范围弱方块
+        // Groundshock.scala: y0 = player.posY.toInt (the feet layer) and
+        // y <- y0 - 1 until y0 + 1, i.e. the ground layer and the feet layer.
         if (exp >= 1.0f && DynamicSkillRules.destroysBlocks(level, getId())) {
             energy[0] = Double.MAX_VALUE;
+            int fy = feet.getY();
             for (int ox = -5; ox < 5; ox++) {
                 for (int oy = -1; oy < 1; oy++) {
                     for (int oz = -5; oz < 5; oz++) {
-                        BlockPos pos = new BlockPos(px + ox, py + oy, pz + oz);
+                        BlockPos pos = new BlockPos(px + ox, fy + oy, pz + oz);
                         if (!LoadedRaycast.isLoaded(level, pos) || !level.getWorldBorder().isWithinBounds(pos)) continue;
                         BlockState state = level.getBlockState(pos);
                         float hardness = state.getDestroySpeed(level, pos);
@@ -180,6 +155,45 @@ public class GroundShockEffect implements ChargingSkillEffect {
         DynamicSkillRules.addExp(player,data, getId(), 0.001f);
         AcademySounds.playSound(level, player.getX(), player.getY(), player.getZ(),
                 AcademySounds.VM_GROUNDSHOCK, SoundSource.PLAYERS, 2.0f, 1.0f);
+    }
+
+    private void groundCell(ServerLevel level, ServerPlayer player, PlayerAbilityData data, Vec3 offset,
+                            int x, int y, int z, boolean destroyBlocks, float groundBreakProb, float dropRate,
+                            float damage, float ySpeed, Set<BlockPos> visitedBlocks, Set<Entity> visitedEntities,
+                            double[] energy) {
+        BlockPos pos = BlockPos.containing(x + offset.x, y + offset.y, z + offset.z);
+        if (!LoadedRaycast.isLoaded(level, pos) || !level.getWorldBorder().isWithinBounds(pos)) return;
+        BlockState state = level.getBlockState(pos);
+        if (state.isAir() || !visitedBlocks.add(pos)) return;
+
+        if (state.is(Blocks.STONE)) {
+            energy[0] -= 0.4;
+            if (destroyBlocks && mayBreak(level, player, pos, state)) level.setBlockAndUpdate(pos, Blocks.COBBLESTONE.defaultBlockState());
+        } else if (state.is(Blocks.GRASS_BLOCK)) {
+            energy[0] -= 0.2;
+            if (destroyBlocks && mayBreak(level, player, pos, state)) level.setBlockAndUpdate(pos, Blocks.DIRT.defaultBlockState());
+        } else if (state.is(Blocks.FARMLAND)) {
+            energy[0] -= 0.1;
+        } else {
+            energy[0] -= 0.5;
+        }
+
+        if (destroyBlocks && level.random.nextDouble() < groundBreakProb)
+            energy[0] = breakWithForce(level, player, new BlockPos(x, y, z), false, dropRate, energy[0]);
+
+        AABB aabb = new AABB(pos.getX() - 0.2, pos.getY() - 0.2, pos.getZ() - 0.2,
+                pos.getX() + 1.4, pos.getY() + 2.2, pos.getZ() + 1.4);
+        for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, aabb,
+                entity -> entity != player && entity.isAlive())) {
+            if (!visitedEntities.add(living)) continue;
+            energy[0] -= 1;
+            AcademyDamageHelper.hurt(player, living, com.mohistmc.academy.skill.SkillDamageSource.attack(player),
+                    DynamicSkillRules.damage(getId(), damage));
+            living.setDeltaMovement(living.getDeltaMovement().x, ySpeed, living.getDeltaMovement().z);
+            living.hurtMarked = true;
+            DynamicSkillRules.addExp(player, data, getId(), 0.002f);
+        }
+        EffectHelper.windBurst(level, pos.getX() + 0.5, pos.getY() + 1, pos.getZ() + 0.5, 3, 0.3);
     }
 
     @Override

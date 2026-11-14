@@ -20,15 +20,14 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Fireball;
 import net.minecraft.world.entity.projectile.LargeFireball;
 import net.minecraft.world.entity.projectile.SmallFireball;
 import net.minecraft.world.entity.projectile.Snowball;
+import net.minecraft.world.entity.projectile.ThrownExperienceBottle;
 import net.minecraft.world.entity.projectile.ThrownPotion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -45,7 +44,7 @@ public final class PassiveSkillEventHandler {
     private static final ThreadLocal<Boolean> REFLECTING_DAMAGE = ThreadLocal.withInitial(() -> false);
     private static final String VECTOR_MARK = AcademyCraft.MODID + ":vec_deviated";
 
-    /** Optional compatibility opt-in for modded entities excluded by the legacy Mob rule. */
+    /** Optional compatibility opt-in for modded entities excluded by the legacy living/mob rule. */
     public static final TagKey<net.minecraft.world.entity.EntityType<?>> VECTOR_AFFECTABLE = TagKey.create(
             Registries.ENTITY_TYPE,
             ResourceLocation.fromNamespaceAndPath(AcademyCraft.MODID, "vector_affectable"));
@@ -96,15 +95,18 @@ public final class PassiveSkillEventHandler {
     }
 
     /**
-     * 1.0.7 excluded Item, Mob/Monster and XPOrb by default, but did not
-     * exclude other players, armor stands or a projectile merely because its
-     * owner was the defender or an ally.
+     * Legacy default.conf affected_entities.excluded is
+     * ["item", "xp_bottle", "living", "mob"]; EntityAffection maps "living" to
+     * EntityLivingBase, so every living entity (other players, armor stands,
+     * animals, mobs) is excluded, as are dropped items and thrown xp bottles.
+     * Experience orbs are not in the list and stay affected. A projectile is
+     * not excluded merely because its owner is the defender or an ally.
      */
     private static boolean vectorEntity(ServerPlayer player, Entity entity) {
         if (!entity.isAlive() || entity == player || marked(entity)) return false;
-        boolean legacyDefault = !(entity instanceof Mob)
+        boolean legacyDefault = !(entity instanceof LivingEntity)
                 && !(entity instanceof ItemEntity)
-                && !(entity instanceof ExperienceOrb);
+                && !(entity instanceof ThrownExperienceBottle);
         return legacyDefault || entity.getType().is(VECTOR_AFFECTABLE);
     }
 

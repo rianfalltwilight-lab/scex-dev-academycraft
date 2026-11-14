@@ -123,7 +123,13 @@ public class StormWingEffect implements ChargingSkillEffect {
         performEnvironmentalEffects(player, data, ticks);
 
         // Legacy transition is stateTick > chargeTime, not meter == chargeTime.
-        if (ticks == chargeTime + 1) {
+        if (ticks <= chargeTime) {
+            // StormWing.scala l_tick ran its no-key branch in both CHARGE and
+            // ACTIVE: keys are only bound on activation, so the wind-up always
+            // hovers. Wind-up stays free and has no directional flight.
+            hover(player);
+            player.hurtMarked = true;
+        } else if (ticks == chargeTime + 1) {
             if (!payFlightTick(data)) return false;
             performActivate(player, data);
             performFlightEffects(player, data);
@@ -236,18 +242,23 @@ public class StormWingEffect implements ChargingSkillEffect {
             player.setDeltaMovement(approach(current.x, target.x, .16),
                     approach(current.y, target.y, .16), approach(current.z, target.z, .16));
         } else {
-            Vec3 current = player.getDeltaMovement();
-            Vec3 feet = player.position();
-            HitResult ground = LoadedRaycast.clip(player.level(), new ClipContext(feet.add(0, .5, 0),
-                    feet.add(0, -.3, 0), ClipContext.Block.COLLIDER,
-                    ClipContext.Fluid.NONE, player));
-            player.setDeltaMovement(current.x,
-                    ground.getType() == HitResult.Type.MISS ? current.y + .078 : .1,
-                    current.z);
+            hover(player);
         }
         player.hurtMarked=true;
 
         return true;
+    }
+
+    /** Legacy no-key branch: +.078 Y per tick in the air, or a fixed .1 near the ground. */
+    private static void hover(ServerPlayer player) {
+        Vec3 current = player.getDeltaMovement();
+        Vec3 feet = player.position();
+        HitResult ground = LoadedRaycast.clip(player.level(), new ClipContext(feet.add(0, .5, 0),
+                feet.add(0, -.3, 0), ClipContext.Block.COLLIDER,
+                ClipContext.Fluid.NONE, player));
+        player.setDeltaMovement(current.x,
+                ground.getType() == HitResult.Type.MISS ? current.y + .078 : .1,
+                current.z);
     }
 
     private void performEnvironmentalEffects(ServerPlayer player, PlayerAbilityData data, int ticks) {

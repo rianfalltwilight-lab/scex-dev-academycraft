@@ -71,4 +71,20 @@ class VecmanipLegacySourceContractTest {
         assertTrue(controller.contains("vectorPunchStartedNanos"));
         assertTrue(controller.contains("Axis.XP.rotationDegrees(-20 * t)"));
     }
+
+    /** Restored legacy behaviour: replaces the old port-only exclusion and layers. */
+    @Test void vectorDefensesUseLegacyExcludedListAndGroundShockLegacyLayers() throws Exception {
+        String passive = source("skill/passive/PassiveSkillEventHandler.java");
+        // default.conf excluded: ["item", "xp_bottle", "living", "mob"]; xp orbs stay affected.
+        assertTrue(passive.contains("!(entity instanceof LivingEntity)"));
+        assertTrue(passive.contains("!(entity instanceof ThrownExperienceBottle)"));
+        assertFalse(passive.contains("instanceof ExperienceOrb"));
+        String ground = source("skill/ability/vecmanip/GroundShockEffect.java");
+        // Groundshock.scala: y <- y0 - 1 until y0 + 1 with y0 = feet Y.
+        assertTrue(ground.contains("new BlockPos(px + ox, fy + oy, pz + oz)"));
+        assertFalse(ground.contains("py + oy"));
+        String wing = source("skill/ability/vecmanip/StormWingEffect.java");
+        // StormWing.scala l_tick hovers in CHARGE as well as ACTIVE.
+        assertTrue(wing.contains("if (ticks <= chargeTime) {") && wing.contains("hover(player);"));
+    }
 }

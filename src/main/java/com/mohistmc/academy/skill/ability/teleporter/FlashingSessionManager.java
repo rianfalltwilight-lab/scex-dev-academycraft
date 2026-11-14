@@ -46,6 +46,9 @@ public final class FlashingSessionManager {
         }
         float exp = data.getProficiency(skill.getId());
         if (!TeleportSkillHelper.consume(data,"flashing", 80 - 20 * exp, 250 - 70 * exp)) {
+            // Legacy serverMadeAlive terminated on a failed start debit, and
+            // serverTerminated always applied the full cooldown.
+            data.setCooldown("flashing", (int) (900 - 500 * exp));
             SafePayloadSender.send(player, new FlashingStatePacket(false, 0)); return false;
         }
         long epoch = player.getRandom().nextLong(); if (epoch == 0) epoch = 1;
@@ -77,7 +80,9 @@ public final class FlashingSessionManager {
         if (destination == null || !TeleportSkillHelper.consume(data,"flashing", 13 - 7 * state.exp, 0)) return false;
         ACTIVE.put(player.getUUID(), new State(state.epoch, state.expires, state.exp, state.overloadKeep,
                 now, state.dimension, -1, -1));
-        TeleportSkillHelper.teleport(player, destination); GravityCancelRuntime.start(player);
+        TeleportSkillHelper.teleport(player, destination);
+        // Legacy getDest traced from the feet toward eye+dir*dist; this port traces from the eye. Kept as is.
+        GravityCancelRuntime.start(player);
         player.serverLevel().playSound(null, player.blockPosition(), AcademySounds.TP_TP_FLASHING.value(), SoundSource.PLAYERS, 1, 1);
         com.mohistmc.academy.config.DynamicSkillRules.addExp(player,data,"flashing", .002f);
         com.mohistmc.academy.advancement.LegacyAdvancementBridge.award(player,"teleporter/flashing");
