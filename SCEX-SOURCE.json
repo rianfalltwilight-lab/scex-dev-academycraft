@@ -1,17 +1,17 @@
 {
   "name": "AcademyCraft",
   "slug": "scex-academycraft",
-  "sourcePath": "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025",
-  "version": "0.0.33-scex-combat-hud with magic-tag fix",
+  "sourcePath": "D:\\SCEX-Work\\01-Mods\\Other-Ports\\AcademyCraft\\20261114-modernization\\source",
+  "version": "0.0.34-scex-modern",
   "evidence": [
-    "D:\\SCEX-Operations\\03-Projects\\SCEX-长期维护\\areas\\client-release\\candidates\\academycraft-0033-20261025-r1\\candidate.json",
-    "D:\\Minecraft-Projects\\academycraft-deep-audit-0.0.29-20261025\\gradle.properties",
-    "Current local HEAD ef1617b2c13cb9eedf20ca6d11d3085a9471f59a"
+    "docs/RELEASE-0.0.34.md",
+    "gradle.properties",
+    "Gameplay source base: 074b599f518031f5986a39f6b4635dc8bfe70db4"
   ],
   "notes": [
-    "Existing private repository documented as rianfalltwilight-lab/scex-academycraft. Candidate points to this actual source root despite the directory's old 0.0.29 name.",
-    "Candidate source contains the post-delivery c:is_magic academy:ability_magic fix, source fingerprint 689f32a5260c6e8eae64f2d444cb114e77395ff8a6230eca6285b7dd98eae874; do not archive an earlier Git tag instead of current files.",
-    "Retain src assets, Gradle wrapper, scripts, docs, NOTICE/LICENSE and BUILD-INFO. Dependencies are Maven based; commented example libs paths are not active dependencies."
+    "Public SCEX stable release; unofficial AcademyCraft port.",
+    "Historical audit documents retain their original versions and scope.",
+    "Retain LICENSE, NOTICE and resource provenance."
   ],
   "excludeRelative": [
     ".git",
@@ -20,5 +20,7 @@
     "evidence",
     "logs",
     "*.log"
-  ]
+  ],
+  "repository": "https://github.com/rianfalltwilight-lab/scex-dev-academycraft",
+  "visibility": "public"
 }

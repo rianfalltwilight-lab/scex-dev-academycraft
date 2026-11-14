@@ -11,9 +11,13 @@
 
 ## 当前状态
 
-当前开发版本为 **0.0.33-scex-combat-hud**。本轮为技能接入明确的原生伤害类型和施法者归属，修复手持突破附魔影响技能伤害及空气分离的 PVP 归属问题，并把八个 HUD 接入独立具名图层。客户端与服务端使用 **payload-v25-data-v4** 协议（v21 新增风暴之翼方向输入包，v22 开发结果包新增进行中标记，v23 开发与频率发射器消息改为可翻译文本，v24 新增数据包调参同步包，v25 新增平衡档位数据同步、节点/矩阵/干扰器界面数值改为 32 位），发行版本应配套安装；能力存档保持 v4。构建固定 **NeoForge 21.1.248 / Java 21**，加载范围为 Minecraft 1.21.1 对应的 NeoForge 21.1 系列；其他 21.1 小版本尚未逐一运行验证。0.0.29 的历史审计记录见 [深度自检台账](docs/audit-20261025/DEEP-AUDIT.md)。
+当前稳定正式版为 **0.0.34-scex-modern**（2026-11-14）。这是 SCEX 维护的非官方移植正式版，不是原团队的官方发行版。
 
-本轮变更和验收范围见 [0.0.33 原生战斗与 HUD 图层说明](docs/COMBAT-HUD-0.0.33.md)，前一批变更见 [0.0.32 自动化与交互说明](docs/AUTOMATION-UI-0.0.32.md)。本仓库包含 ExtraAcC 行为参考的 25 个物品、23 个专属技能和 29 个配方；这些数量是盘点范围，不能当作玩法或视觉完成率。测试结果应以配套交付报告中的精确 JAR SHA-256、证据路径及已验证层级为准。本次源码修改和隔离测试不代表已经公开发布或部署生产。
+本版整合现代／经典双平衡模式、技能与生物施法完善、觉醒和重置按钮、奇点迭代供电与电池联动及 KubeJS 接口。默认使用现代平衡档；生物不会默认在全世界随机获得技能。版本说明及验证范围见 [0.0.34 正式版说明](docs/RELEASE-0.0.34.md)。
+
+客户端与服务端应配套安装。协议为 **payload-v25-data-v4**，能力存档保持 v4。构建固定 **NeoForge 21.1.248 / Java 21**，加载范围保留 Minecraft 1.21.1 对应的 NeoForge 21.1 系列；未逐一验证所有小版本。
+
+历史改动与审计记录保留原版本标识：[0.0.33 战斗与 HUD](docs/COMBAT-HUD-0.0.33.md)、[0.0.32 自动化与交互](docs/AUTOMATION-UI-0.0.32.md)、[0.0.29 深度自检](docs/audit-20261025/DEEP-AUDIT.md)。本仓库包含 ExtraAcC 行为参考的 25 个物品、23 个专属技能和 29 个配方；这些数量不代表玩法或视觉完成率。
 
 ExtraAcC 原仓库固定快照没有 LICENSE。本轮按用户指定的原始资源来源，纳入 **43 个逐字节保留的 PNG**：25 个物品外观、7 个额外状态纹理、2 个诱导因子、8 个穿戴护甲层和 1 个水人皮肤；物品模型 JSON 按 1.21.1 格式适配并保留原显示变换，没有逐字导入其 Java 实现。逐文件来源与 SHA-256 见 [资源溯源清单](src/main/resources/assets/academy/extraacc-provenance.json)，权利声明见 [NOTICE](NOTICE)；来源记录不代表获得新的授权或重新许可。液态分身已注册独立实体，采用上游水人皮肤与僵尸式模型动画。
 
@@ -24,10 +28,10 @@ ExtraAcC 原仓库固定快照没有 LICENSE。本轮按用户指定的原始资
 | Minecraft | 1.21.1 |
 | NeoForge | 21.1 系列；本轮构建与实测固定 21.1.248 |
 | Java | 21 |
-| AcademyCraft | 0.0.33-scex-combat-hud |
+| AcademyCraft | 0.0.34-scex-modern |
 | JEI / Jade | 可选，不是硬前置 |
 
-使用交付目录中的主 JAR `AcademyCraft-neoforge-1.21.1-0.0.33-scex-combat-hud.jar`，同时放入客户端与服务端的 `mods` 目录；带 `audit-tests` 后缀的独立探针包仅供测试。不要与其他使用 `academy` 模组 ID 的 AcademyCraft JAR 同时安装。旧物品在读取时迁移，升级前保留世界和玩家数据备份；回退到不认识新组件的旧版本时，应恢复升级前备份。准确 SHA-256 以配套 Release 和本轮验证回执为准。
+使用交付目录中的主 JAR `AcademyCraft-neoforge-1.21.1-0.0.34-scex-modern.jar`，同时放入客户端与服务端的 `mods` 目录；带 `audit-tests` 后缀的独立探针包仅供测试。不要与其他使用 `academy` 模组 ID 的 AcademyCraft JAR 同时安装。旧物品在读取时迁移，升级前保留世界和玩家数据备份；回退到不认识新组件的旧版本时，应恢复升级前备份。已发布 JAR 的 SHA-256 见本仓库正式版说明。
 
 ## 构建与测试
 
@@ -46,15 +50,15 @@ A Minecraft mod about superability. The inspiration of AcademyCraft comes from [
 
 Original: https://github.com/LambdaInnovation/AcademyCraft
 
-## Development planning:
- Prioritize functional implementation, then consider beautification (UI, skill effects, etc.)  
- 优先实现功能，再考虑美化(UI, 技能特效等等)
+## Stable release / 稳定正式版
+
+Current stable release: **0.0.34-scex-modern**, for Minecraft 1.21.1 / NeoForge / Java 21. This is an unofficial SCEX port. See [release notes](docs/RELEASE-0.0.34.md) for features and validation limits.
 
 
 Issue(Idea, Bug) Submission
 ============
 
-Please go to [Issues](https://github.com/MohistMC/AcademyCraft/issues) and submit a new ticket.
+Please go to [Issues](https://github.com/rianfalltwilight-lab/scex-dev-academycraft/issues) and submit a new ticket.
 
 Commands
 ========

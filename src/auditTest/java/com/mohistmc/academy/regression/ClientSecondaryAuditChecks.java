@@ -39,7 +39,7 @@ final class ClientSecondaryAuditChecks {
             require(!SkillInputClientState.ready(), "dimension reset admitted stale revision");
             SkillInputClientState.accept(connection, current, 10, dimension);
             require(SkillInputClientState.ready(), "same revision retry was rejected");
-            ClientListener.onLoggingOut(null);
+            ClientListener.onLoggingOut(new net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent.LoggingOut(mc.gameMode, mc.player, connection));
             require(!SkillInputClientState.ready(), "logout retained ready session");
             for (var field : saved.keySet()) {
                 Object value = field.get(null);
