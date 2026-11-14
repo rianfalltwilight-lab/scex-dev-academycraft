@@ -34,7 +34,11 @@ public final class ElectricaliburItem extends ExtraEnergyItem {
         Entity attacker = source.getEntity();
         if (!(attacker instanceof LivingEntity living)) return 0;
         ItemStack held = living.getMainHandItem();
-        return held.is(this) && getEnergyStored(held) >= 500 ? 1.0F : -11.0F;
+        // ExtraAcC swapped the attack modifier: 16 attack damage charged, 4 drained. Player.attack adds
+        // this bonus AFTER scaling for swing charge, so a flat -11 went negative on a partial swing and
+        // healed the target. Scale the bonus with the already-scaled base (15 at full swing) instead.
+        if (!held.is(this)) return 0;
+        return baseAttackDamage * (getEnergyStored(held) >= 500 ? 1.0F / 15F : -11.0F / 15F);
     }
 
     @Override
@@ -68,7 +72,8 @@ public final class ElectricaliburItem extends ExtraEnergyItem {
         if (target != null) {
             AcademyDamageHelper.hurtNonAbility(target, player.damageSources().playerAttack(player), 30);
         }
-        ExtraItemActions.beam(player.serverLevel(), player.getEyePosition(), player.getLookAngle(), 15);
+        ExtraItemActions.beam(player.serverLevel(), player.getEyePosition(), player.getLookAngle(),
+                ExtraItemActions.blockReach(player, 15));
         level.playSound(null, player.blockPosition(), SoundEvents.LIGHTNING_BOLT_IMPACT,
                 SoundSource.PLAYERS, 0.65F, 1.45F);
     }
