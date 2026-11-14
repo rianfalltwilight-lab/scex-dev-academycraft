@@ -465,6 +465,11 @@ public class PlayerAbilityData {
         return count;
     }
 
+    /** Clears one skill's cooldown; true when it had one. */
+    public boolean clearCooldown(String skillId) {
+        return cooldowns.remove(skillId) != null;
+    }
+
     /** 获取技能最大冷却 tick（用于 HUD 显示） */
     public int getMaxCooldownTicks(String skillId) {
         // 从 cooldowns 中我们只有剩余值，最大冷却存储在 setCooldown 时

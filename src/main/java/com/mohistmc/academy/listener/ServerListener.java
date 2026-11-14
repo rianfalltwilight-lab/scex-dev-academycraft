@@ -124,6 +124,7 @@ public class ServerListener {
     @SubscribeEvent
     public void onRegisterCommands(RegisterCommandsEvent event) {
         LegacyAimCommands.register(event.getDispatcher());
+        com.mohistmc.academy.command.AcademyCommands.register(event.getDispatcher());
         LegacyAchievementCommands.register(event.getDispatcher());
         MachineOwnershipMigrationCommands.register(event.getDispatcher());
     }
