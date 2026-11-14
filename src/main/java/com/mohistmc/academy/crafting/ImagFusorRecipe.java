@@ -15,16 +15,44 @@ import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import java.util.Optional;
 
-public record ImagFusorRecipe(Ingredient input, int inputCount, int phaseLiquid, ItemStack output)
+/**
+ * Imaginary Fusor recipe. Optional {@code "time"} (ticks) and {@code "energy"} (IF per tick)
+ * override the machine's {@code machines.imagFusor.processTime / energyPerTick} config.
+ */
+public record ImagFusorRecipe(Ingredient input, int inputCount, int phaseLiquid, ItemStack output,
+                              Optional<Integer> time, Optional<Double> energy)
         implements Recipe<ImagFusorRecipeInput> {
+    public static final int MAX_TIME = 72_000;
+    public static final double MAX_ENERGY_PER_TICK = 1_000_000.0;
+
     public ImagFusorRecipe {
         if (inputCount <= 0) throw new IllegalArgumentException("inputCount must be positive");
         if (phaseLiquid <= 0) throw new IllegalArgumentException("phase_liquid must be positive");
         output = output.copy();
+        time = time == null ? Optional.empty() : time;
+        energy = energy == null ? Optional.empty() : energy;
+        if (time.isPresent() && (time.get() < 1 || time.get() > MAX_TIME))
+            throw new IllegalArgumentException("time must be in 1.." + MAX_TIME);
+        if (energy.isPresent() && !(energy.get() >= 0 && energy.get() <= MAX_ENERGY_PER_TICK))
+            throw new IllegalArgumentException("energy must be in 0.." + MAX_ENERGY_PER_TICK);
+    }
+
+    public ImagFusorRecipe(Ingredient input, int inputCount, int phaseLiquid, ItemStack output) {
+        this(input, inputCount, phaseLiquid, output, Optional.empty(), Optional.empty());
     }
 
     public ImagFusorRecipe(Ingredient input, int phaseLiquid, ItemStack output) {
         this(input, 1, phaseLiquid, output);
+    }
+
+    /** Ticks per craft: the recipe's {@code "time"} or {@code machines.imagFusor.processTime}. */
+    public int processTime() {
+        return time.orElseGet(com.mohistmc.academy.config.MachineConfig.FUSOR_PROCESS_TIME::get);
+    }
+
+    /** IF per tick: the recipe's {@code "energy"} or {@code machines.imagFusor.energyPerTick}. */
+    public double energyPerTick() {
+        return energy.orElseGet(com.mohistmc.academy.config.MachineConfig.FUSOR_ENERGY_PER_TICK::get);
     }
 
     @Override public boolean matches(ImagFusorRecipeInput in, Level level) {
@@ -52,18 +80,27 @@ public record ImagFusorRecipe(Ingredient input, int inputCount, int phaseLiquid,
                         .forGetter(recipe -> Optional.of(recipe.phaseLiquid())),
                 com.mojang.serialization.Codec.INT.optionalFieldOf("phase_liquid")
                         .forGetter(recipe -> Optional.empty()),
-                ItemStack.CODEC.fieldOf("output").forGetter(ImagFusorRecipe::output)
-        ).apply(i, (input, inputCount, currentAmount, legacyAmount, output) -> new ImagFusorRecipe(
+                ItemStack.CODEC.fieldOf("output").forGetter(ImagFusorRecipe::output),
+                // Optional per-recipe processing; absent = machine config value.
+                com.mojang.serialization.Codec.intRange(1, MAX_TIME).optionalFieldOf("time")
+                        .forGetter(ImagFusorRecipe::time),
+                com.mojang.serialization.Codec.doubleRange(0.0, MAX_ENERGY_PER_TICK).optionalFieldOf("energy")
+                        .forGetter(ImagFusorRecipe::energy)
+        ).apply(i, (input, inputCount, currentAmount, legacyAmount, output, time, energy) -> new ImagFusorRecipe(
                 input,
                 inputCount,
                 currentAmount.orElseGet(() -> legacyAmount.orElseThrow(
                         () -> new IllegalArgumentException("phaseLiquid is required"))),
-                output)));
+                output,
+                time,
+                energy)));
         private static final StreamCodec<RegistryFriendlyByteBuf, ImagFusorRecipe> STREAM_CODEC = StreamCodec.composite(
                 Ingredient.CONTENTS_STREAM_CODEC, ImagFusorRecipe::input,
                 ByteBufCodecs.VAR_INT, ImagFusorRecipe::inputCount,
                 ByteBufCodecs.VAR_INT, ImagFusorRecipe::phaseLiquid,
                 ItemStack.STREAM_CODEC, ImagFusorRecipe::output,
+                ByteBufCodecs.optional(ByteBufCodecs.VAR_INT), ImagFusorRecipe::time,
+                ByteBufCodecs.optional(ByteBufCodecs.DOUBLE), ImagFusorRecipe::energy,
                 ImagFusorRecipe::new);
         @Override public MapCodec<ImagFusorRecipe> codec() { return CODEC; }
         @Override public StreamCodec<RegistryFriendlyByteBuf, ImagFusorRecipe> streamCodec() { return STREAM_CODEC; }

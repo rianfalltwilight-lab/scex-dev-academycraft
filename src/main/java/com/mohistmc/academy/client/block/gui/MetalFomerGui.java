@@ -7,7 +7,6 @@ import com.mohistmc.academy.client.gui.InfoArea;
 import com.mohistmc.academy.crafting.MetalFormerRecipes.Mode;
 import com.mohistmc.academy.network.MetalFormerActionMessage;
 import com.mohistmc.academy.utils.RenderUtils;
-import com.mohistmc.academy.world.block.entity.MetalFomerBlockEntity;
 import com.mohistmc.academy.world.menu.MetalFomerMenu;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Locale;
@@ -120,7 +119,7 @@ public class MetalFomerGui extends AcademyBaseUI<MetalFomerMenu> {
         if (this.menu.pos == null) return;
         // 用 Menu 的 ContainerData 同步数据(每 tick 服务端同步)，客户端 BE 的 energy 不实时
         InfoArea info = new InfoArea();
-        info.histogram(InfoArea.histEnergy(menu.getEnergy(), (int) MetalFomerBlockEntity.MAX_ENERGY));
+        info.histogram(InfoArea.histEnergy(menu.getEnergy(), (int) com.mohistmc.academy.config.MachineConfig.FORMER_BUFFER.get()));
         Mode mode = menu.getMode();
         info.property(Component.translatable("ac.ui.info.mode").getString(), Component.translatable(
                 "gui.academy.metal_former.mode." + mode.name().toLowerCase(Locale.ROOT)).getString());

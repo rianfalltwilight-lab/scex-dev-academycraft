@@ -30,6 +30,13 @@ public class MetalFormingRecipe implements Recipe<MetalFormingRecipeInput> {
     private final ItemStack output;
     private final TagKey<Item> outputTag;
     private final int tagOutputCount;
+    /** Optional {@code "time"} (ticks); empty = machines.metalFormer.processTime. */
+    private final java.util.Optional<Integer> time;
+    /** Optional {@code "energy"} (IF per tick); empty = machines.metalFormer.energyPerTick. */
+    private final java.util.Optional<Double> energy;
+
+    public static final int MAX_TIME = 72_000;
+    public static final double MAX_ENERGY_PER_TICK = 1_000_000.0;
 
     public MetalFormingRecipe(MetalFormerRecipes.Mode mode, Ingredient input, int inputCount, ItemStack output) {
         this.mode = mode;
@@ -38,6 +45,8 @@ public class MetalFormingRecipe implements Recipe<MetalFormingRecipeInput> {
         this.output = output.copy();
         this.outputTag = null;
         this.tagOutputCount = 0;
+        this.time = java.util.Optional.empty();
+        this.energy = java.util.Optional.empty();
         validate();
     }
 
@@ -54,7 +63,41 @@ public class MetalFormingRecipe implements Recipe<MetalFormingRecipeInput> {
         this.output = ItemStack.EMPTY;
         this.outputTag = outputTag;
         this.tagOutputCount = outputCount;
+        this.time = java.util.Optional.empty();
+        this.energy = java.util.Optional.empty();
         validate();
+    }
+
+    private MetalFormingRecipe(MetalFormingRecipe base, java.util.Optional<Integer> time,
+                               java.util.Optional<Double> energy) {
+        this.mode = base.mode;
+        this.input = base.input;
+        this.inputCount = base.inputCount;
+        this.output = base.output.copy();
+        this.outputTag = base.outputTag;
+        this.tagOutputCount = base.tagOutputCount;
+        this.time = time == null ? java.util.Optional.empty() : time;
+        this.energy = energy == null ? java.util.Optional.empty() : energy;
+        validate();
+    }
+
+    /** Copy with per-recipe processing overrides (empty = use the machine config). */
+    public MetalFormingRecipe withProcessing(java.util.Optional<Integer> time, java.util.Optional<Double> energy) {
+        return new MetalFormingRecipe(this, time, energy);
+    }
+
+    public java.util.Optional<Integer> getTime() { return time; }
+
+    public java.util.Optional<Double> getEnergy() { return energy; }
+
+    /** Ticks per craft: the recipe's {@code "time"} or {@code machines.metalFormer.processTime}. */
+    public int processTime() {
+        return time.orElseGet(com.mohistmc.academy.config.MachineConfig.FORMER_PROCESS_TIME::get);
+    }
+
+    /** IF per tick: the recipe's {@code "energy"} or {@code machines.metalFormer.energyPerTick}. */
+    public double energyPerTick() {
+        return energy.orElseGet(com.mohistmc.academy.config.MachineConfig.FORMER_ENERGY_PER_TICK::get);
     }
 
     private void validate() {
@@ -64,6 +107,13 @@ public class MetalFormingRecipe implements Recipe<MetalFormingRecipeInput> {
         }
         if (outputTag != null && (tagOutputCount <= 0 || tagOutputCount > 64)) {
             throw new IllegalArgumentException("Metal Former tag output count must be in 1..64");
+        }
+        if (time != null && time.isPresent() && (time.get() < 1 || time.get() > MAX_TIME)) {
+            throw new IllegalArgumentException("Metal Former time must be in 1.." + MAX_TIME);
+        }
+        if (energy != null && energy.isPresent()
+                && !(energy.get() >= 0 && energy.get() <= MAX_ENERGY_PER_TICK)) {
+            throw new IllegalArgumentException("Metal Former energy must be in 0.." + MAX_ENERGY_PER_TICK);
         }
     }
 
@@ -158,8 +208,22 @@ public class MetalFormingRecipe implements Recipe<MetalFormingRecipeInput> {
                 TagKey.codec(Registries.ITEM).optionalFieldOf("output_tag").forGetter(r ->
                         java.util.Optional.ofNullable(r.outputTag)),
                 com.mojang.serialization.Codec.INT.optionalFieldOf("output_count", 2).forGetter(r ->
-                        r.outputTag == null ? 2 : r.tagOutputCount)
+                        r.outputTag == null ? 2 : r.tagOutputCount),
+                // Optional per-recipe processing; absent = machine config value.
+                com.mojang.serialization.Codec.intRange(1, MAX_TIME).optionalFieldOf("time")
+                        .forGetter(r -> r.time),
+                com.mojang.serialization.Codec.doubleRange(0.0, MAX_ENERGY_PER_TICK).optionalFieldOf("energy")
+                        .forGetter(r -> r.energy)
         ).apply(instance, Serializer::decode));
+
+        private static MetalFormingRecipe decode(String modeName, Ingredient input, int inputCount,
+                                                  java.util.Optional<ItemStack> output,
+                                                  java.util.Optional<TagKey<Item>> outputTag,
+                                                  int outputCount,
+                                                  java.util.Optional<Integer> time,
+                                                  java.util.Optional<Double> energy) {
+            return decode(modeName, input, inputCount, output, outputTag, outputCount).withProcessing(time, energy);
+        }
 
         private static MetalFormingRecipe decode(String modeName, Ingredient input, int inputCount,
                                                   java.util.Optional<ItemStack> output,
@@ -177,6 +241,11 @@ public class MetalFormingRecipe implements Recipe<MetalFormingRecipeInput> {
                             mode, input, inputCount, outputTag.orElseThrow(), outputCount));
         }
 
+        private static final StreamCodec<io.netty.buffer.ByteBuf, java.util.Optional<Integer>> OPTIONAL_TIME =
+                ByteBufCodecs.optional(ByteBufCodecs.VAR_INT);
+        private static final StreamCodec<io.netty.buffer.ByteBuf, java.util.Optional<Double>> OPTIONAL_ENERGY =
+                ByteBufCodecs.optional(ByteBufCodecs.DOUBLE);
+
         private static final StreamCodec<RegistryFriendlyByteBuf, MetalFormingRecipe> STREAM_CODEC =
                 new StreamCodec<>() {
                     @Override
@@ -186,14 +255,17 @@ public class MetalFormingRecipe implements Recipe<MetalFormingRecipeInput> {
                         Ingredient input = Ingredient.CONTENTS_STREAM_CODEC.decode(buf);
                         int inputCount = ByteBufCodecs.VAR_INT.decode(buf);
                         boolean tagBacked = ByteBufCodecs.BOOL.decode(buf);
+                        MetalFormingRecipe base;
                         if (!tagBacked) {
-                            return new MetalFormingRecipe(
+                            base = new MetalFormingRecipe(
                                     mode, input, inputCount, ItemStack.STREAM_CODEC.decode(buf));
+                        } else {
+                            TagKey<Item> tag = TagKey.create(
+                                    Registries.ITEM, ResourceLocation.STREAM_CODEC.decode(buf));
+                            int outputCount = ByteBufCodecs.VAR_INT.decode(buf);
+                            base = new MetalFormingRecipe(mode, input, inputCount, tag, outputCount);
                         }
-                        TagKey<Item> tag = TagKey.create(
-                                Registries.ITEM, ResourceLocation.STREAM_CODEC.decode(buf));
-                        int outputCount = ByteBufCodecs.VAR_INT.decode(buf);
-                        return new MetalFormingRecipe(mode, input, inputCount, tag, outputCount);
+                        return base.withProcessing(OPTIONAL_TIME.decode(buf), OPTIONAL_ENERGY.decode(buf));
                     }
 
                     @Override
@@ -209,6 +281,8 @@ public class MetalFormingRecipe implements Recipe<MetalFormingRecipeInput> {
                             ResourceLocation.STREAM_CODEC.encode(buf, recipe.outputTag.location());
                             ByteBufCodecs.VAR_INT.encode(buf, recipe.tagOutputCount);
                         }
+                        OPTIONAL_TIME.encode(buf, recipe.time);
+                        OPTIONAL_ENERGY.encode(buf, recipe.energy);
                     }
                 };
 

@@ -109,8 +109,13 @@ public final class ACConfig {
                             value -> value instanceof String text && LegacyDimensionAllowlist.validEntry(text));
             builder.pop();
 
+            MachineConfig.define(builder);
+
             SPEC = builder.build();
         }
+
+        /** Forces class initialization; used by {@link MachineConfig}. */
+        static void init() {}
 
         public static void save() { saveIfLoaded(SPEC); }
 

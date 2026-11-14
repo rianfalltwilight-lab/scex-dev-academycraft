@@ -118,7 +118,7 @@ public class ChargingEffect implements ChargingSkillEffect {
                 if (external != null) {
                     supported = true;
                     receiver = external::receiveEnergy;
-                    unitsPerIf = ExternalEnergyConversion.FE_PER_IF;
+                    unitsPerIf = ExternalEnergyConversion.fePerIf();
                 }
             }
         } else {
@@ -142,7 +142,7 @@ public class ChargingEffect implements ChargingSkillEffect {
                     if (external != null) {
                         supported = true;
                         receiver = external::receiveEnergy;
-                        unitsPerIf = ExternalEnergyConversion.FE_PER_IF;
+                        unitsPerIf = ExternalEnergyConversion.fePerIf();
                     }
                 }
             }

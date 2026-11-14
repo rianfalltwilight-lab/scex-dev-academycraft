@@ -22,7 +22,12 @@ public class WirelessNet {
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    private static final double BUFFER_MAX = 2000;
+    /** Legacy 1.0.7 network buffer; live value is {@code machines.wireless.networkBuffer}. */
+    public static final double LEGACY_BUFFER_MAX = 2000;
+
+    private static double bufferMax() {
+        return com.mohistmc.academy.config.MachineConfig.WIRELESS_NETWORK_BUFFER.get();
+    }
 
     private final WiWorldData data;
     Level level;
@@ -52,7 +57,7 @@ public class WirelessNet {
 
         ssid = bounded(tag.getString("ssid"));
         password = bounded(tag.getString("password"));
-        buffer = EnergyBoundary.bounded(tag.getDouble("buffer"), BUFFER_MAX);
+        buffer = EnergyBoundary.bounded(tag.getDouble("buffer"), bufferMax());
 
         ListTag list = tag.getList("list", 10); // 10 = TAG_Compound
         for (int i = 0; i < list.size(); ++i) {
@@ -312,11 +317,12 @@ public class WirelessNet {
 
             // Positive delta fills the node and drains the shared buffer.
             // Negative delta charges the buffer; neither side may mint energy.
-            delta = Math.clamp(delta, buffer - BUFFER_MAX, buffer);
+            double bufferMax = bufferMax();
+            delta = Math.clamp(delta, buffer - bufferMax, buffer);
 
             transferLeft -= Math.abs(delta);
             if (delta != 0) {
-                buffer = EnergyBoundary.bounded(buffer - delta, BUFFER_MAX);
+                buffer = EnergyBoundary.bounded(buffer - delta, bufferMax);
                 node.setEnergy(cur + delta);
                 data.setDirty();
             }

@@ -16,7 +16,7 @@ public final class EnergyBridgeInputBlockEntity extends EnergyBridgeBlockEntity
         }
         @Override public int extractEnergy(int amount, boolean simulate) { return 0; }
         @Override public int getEnergyStored() { return getStoredFe(); }
-        @Override public int getMaxEnergyStored() { return MAX_FE; }
+        @Override public int getMaxEnergyStored() { return maxFe(); }
         @Override public boolean canExtract() { return false; }
         @Override public boolean canReceive() { return true; }
     };
@@ -31,10 +31,10 @@ public final class EnergyBridgeInputBlockEntity extends EnergyBridgeBlockEntity
     public double getProvidedEnergy(double requestedIf) {
         if (!Double.isFinite(requestedIf) || requestedIf <= 0) return 0;
         int requestedFe = (int) Math.min(Integer.MAX_VALUE,
-                Math.floor(requestedIf * ExternalEnergyConversion.FE_PER_IF + 1.0e-9));
+                Math.floor(requestedIf * ExternalEnergyConversion.fePerIf() + 1.0e-9));
         int suppliedFe = extractExternalFe(requestedFe, false);
-        return suppliedFe / (double) ExternalEnergyConversion.FE_PER_IF;
+        return suppliedFe / (double) ExternalEnergyConversion.fePerIf();
     }
 
-    @Override public double getBandwidth() { return BANDWIDTH_IF; }
+    @Override public double getBandwidth() { return bandwidthIf(); }
 }

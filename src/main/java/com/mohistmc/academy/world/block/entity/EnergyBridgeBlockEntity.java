@@ -12,9 +12,21 @@ import net.minecraft.world.level.block.state.BlockState;
  * IF), so repeated RF/IF round trips cannot create or discard fractional IF.
  */
 public abstract class EnergyBridgeBlockEntity extends AcademyContainerBlockEntity {
+    // Legacy 1.0.7 values; live numbers come from machines.energyBridge and machines.fePerIf.
     public static final int MAX_IF = 2000;
     public static final int MAX_FE = MAX_IF * ExternalEnergyConversion.FE_PER_IF;
     public static final double BANDWIDTH_IF = 100.0;
+
+    /** Configured FE buffer: {@code bufferIf * fePerIf}, saturating at Integer.MAX_VALUE. */
+    public static int maxFe() {
+        long fe = (long) com.mohistmc.academy.config.MachineConfig.BRIDGE_BUFFER_IF.get()
+                * ExternalEnergyConversion.fePerIf();
+        return (int) Math.min(Integer.MAX_VALUE, fe);
+    }
+
+    public static double bandwidthIf() {
+        return com.mohistmc.academy.config.MachineConfig.BRIDGE_BANDWIDTH.get();
+    }
 
     private int storedFe;
 
@@ -26,11 +38,11 @@ public abstract class EnergyBridgeBlockEntity extends AcademyContainerBlockEntit
 
     public final int getStoredFe() { return storedFe; }
     public final double getStoredIf() {
-        return storedFe / (double) ExternalEnergyConversion.FE_PER_IF;
+        return storedFe / (double) ExternalEnergyConversion.fePerIf();
     }
 
     public final int receiveExternalFe(int amount, boolean simulate) {
-        int accepted = Math.min(Math.max(0, amount), MAX_FE - storedFe);
+        int accepted = Math.min(Math.max(0, amount), Math.max(0, maxFe() - storedFe));
         if (!simulate && accepted > 0) setStoredFe(storedFe + accepted);
         return accepted;
     }
@@ -42,7 +54,7 @@ public abstract class EnergyBridgeBlockEntity extends AcademyContainerBlockEntit
     }
 
     protected final void setStoredFe(int amount) {
-        int bounded = Math.clamp(amount, 0, MAX_FE);
+        int bounded = Math.clamp(amount, 0, maxFe());
         if (bounded == storedFe) return;
         storedFe = bounded;
         markMachineChanged();
@@ -51,7 +63,7 @@ public abstract class EnergyBridgeBlockEntity extends AcademyContainerBlockEntit
     @Override
     public void loadAdditional(CompoundTag tag, HolderLookup.Provider provider) {
         super.loadAdditional(tag, provider);
-        storedFe = Math.clamp(tag.getInt("bridgeStoredFe"), 0, MAX_FE);
+        storedFe = Math.clamp(tag.getInt("bridgeStoredFe"), 0, maxFe());
     }
 
     @Override

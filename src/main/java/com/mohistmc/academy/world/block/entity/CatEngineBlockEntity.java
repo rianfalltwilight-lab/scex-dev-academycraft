@@ -1,5 +1,6 @@
 package com.mohistmc.academy.world.block.entity;
 
+import com.mohistmc.academy.config.MachineConfig;
 import com.mohistmc.academy.energy.api.block.IWirelessGenerator;
 import com.mohistmc.academy.energy.impl.WiWorldData;
 import com.mohistmc.academy.world.AcademyBlockEntities;
@@ -25,10 +26,12 @@ public class CatEngineBlockEntity extends AcademyContainerBlockEntity implements
     private double spinDegrees;
     public boolean enable = false;
 
-    /** AcademyCraft 1.0.7 TileCatEngine: buffer 2000, bandwidth 200, generation 500/t. */
-    private static final int MAX_STORAGE = 2000;
-    private static final double BANDWIDTH = 200;
-    private static final double MAX_GENERATION = 500;
+    /** AcademyCraft 1.0.7 TileCatEngine: buffer 2000, bandwidth 200, generation 500/t (machines.catEngine). */
+    public static final int MAX_STORAGE = 2000;
+    public static final double BANDWIDTH = 200;
+    public static final double MAX_GENERATION = 500;
+
+    private static int maxStorage() { return MachineConfig.CAT_BUFFER.get(); }
     private float storedEnergy = 0;
     private double thisTickGeneration;
     private boolean linked;
@@ -63,9 +66,11 @@ public class CatEngineBlockEntity extends AcademyContainerBlockEntity implements
     public void tick(Level level, BlockPos pos, BlockState state) {
         if (level.isClientSide) return;
         float before = storedEnergy;
-        double required = Math.max(0, MAX_STORAGE - storedEnergy);
-        thisTickGeneration = Math.min(required, MAX_GENERATION);
-        storedEnergy = Math.min(MAX_STORAGE, storedEnergy + (float) thisTickGeneration);
+        int maxStorage = maxStorage();
+        if (storedEnergy > maxStorage) storedEnergy = maxStorage;
+        double required = Math.max(0, maxStorage - storedEnergy);
+        thisTickGeneration = Math.min(required, MachineConfig.CAT_GENERATION.get());
+        storedEnergy = Math.min(maxStorage, storedEnergy + (float) thisTickGeneration);
 
         boolean nowLinked = false;
         if (level instanceof ServerLevel server) {
@@ -100,11 +105,11 @@ public class CatEngineBlockEntity extends AcademyContainerBlockEntity implements
 
     @Override
     public double getBandwidth() {
-        return BANDWIDTH;
+        return MachineConfig.CAT_BANDWIDTH.get();
     }
 
     public float getStoredEnergy() { return storedEnergy; }
-    public int getMaxStorage() { return MAX_STORAGE; }
+    public int getMaxStorage() { return maxStorage(); }
     public double getThisTickGeneration() { return thisTickGeneration; }
     public boolean isLinked() { return linked; }
 
@@ -123,10 +128,10 @@ public class CatEngineBlockEntity extends AcademyContainerBlockEntity implements
     @Override
     public void loadAdditional(CompoundTag tag, HolderLookup.Provider provider) {
         super.loadAdditional(tag, provider);
-        if (tag.contains("storedEnergy")) storedEnergy = MachineStateSanitizer.clampFinite(tag.getFloat("storedEnergy"), MAX_STORAGE);
+        if (tag.contains("storedEnergy")) storedEnergy = MachineStateSanitizer.clampFinite(tag.getFloat("storedEnergy"), maxStorage());
         if (tag.contains("thisTickGeneration")) {
             double loaded = tag.getDouble("thisTickGeneration");
-            thisTickGeneration = Double.isFinite(loaded) ? Math.clamp(loaded, 0, MAX_GENERATION) : 0;
+            thisTickGeneration = Double.isFinite(loaded) ? Math.clamp(loaded, 0, MachineConfig.CAT_GENERATION.get()) : 0;
         }
         if (tag.contains("linked")) linked = tag.getBoolean("linked");
         if (tag.contains("enable")) enable = tag.getBoolean("enable");

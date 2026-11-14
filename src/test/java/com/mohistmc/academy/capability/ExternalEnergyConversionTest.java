@@ -8,6 +8,8 @@ class ExternalEnergyConversionTest {
     @Test
     void preservesLegacyFourRfPerIfRatioWithoutPartialIfClaims() {
         assertEquals(4, ExternalEnergyConversion.FE_PER_IF);
+        // machines.fePerIf defaults to the legacy ratio.
+        assertEquals(4, ExternalEnergyConversion.fePerIf());
         assertEquals(0, ExternalEnergyConversion.wholeIfFromFe(3));
         assertEquals(1, ExternalEnergyConversion.wholeIfFromFe(4));
         assertEquals(25, ExternalEnergyConversion.wholeIfFromFe(103));

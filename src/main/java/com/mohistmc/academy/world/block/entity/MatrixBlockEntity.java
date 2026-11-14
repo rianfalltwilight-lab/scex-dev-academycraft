@@ -86,19 +86,35 @@ public class MatrixBlockEntity extends AcademyContainerBlockEntity implements IW
     @Override
     public int getCapacity() {
         int level = legacyCoreLevel();
-        return hasInitializationMaterials() ? 8 * level : 0;
+        return hasInitializationMaterials() ? capacityFor(level) : 0;
     }
 
     @Override
     public double getBandwidth() {
         int level = legacyCoreLevel();
-        return hasInitializationMaterials() ? 60.0 * level * level : 0;
+        return hasInitializationMaterials() ? bandwidthFor(level) : 0;
     }
 
     @Override
     public double getRange() {
         int level = legacyCoreLevel();
-        return hasInitializationMaterials() ? 24.0 * Math.sqrt(level) : 0;
+        return hasInitializationMaterials() ? rangeFor(level) : 0;
+    }
+
+    /** 1.0.7: {@code 8 * L}; coefficient is {@code machines.matrix.capacityPerLevel}. */
+    public static int capacityFor(int level) {
+        double value = com.mohistmc.academy.config.MachineConfig.MATRIX_CAPACITY_PER_LEVEL.get() * level;
+        return (int) Math.clamp(Math.floor(value + 1.0e-9), 0, 1024);
+    }
+
+    /** 1.0.7: {@code 60 * L^2}; coefficient is {@code machines.matrix.bandwidthPerLevelSquared}. */
+    public static double bandwidthFor(int level) {
+        return com.mohistmc.academy.config.MachineConfig.MATRIX_BANDWIDTH_PER_LEVEL_SQUARED.get() * level * level;
+    }
+
+    /** 1.0.7: {@code 24 * sqrt(L)}; coefficient is {@code machines.matrix.rangePerSqrtLevel}. */
+    public static double rangeFor(int level) {
+        return Math.min(256.0, com.mohistmc.academy.config.MachineConfig.MATRIX_RANGE_PER_SQRT_LEVEL.get() * Math.sqrt(level));
     }
 
     /** Legacy core metadata 0..2 maps to operational levels 1..3. */
@@ -157,9 +173,9 @@ public class MatrixBlockEntity extends AcademyContainerBlockEntity implements IW
      */
     public void applyCoreLevel(int coreLevel) {
         int level = Math.clamp(coreLevel + 1, 1, 3);
-        this.capacity = 8 * level;
-        this.bandwidth = 60.0 * level * level;
-        this.range = 24.0 * Math.sqrt(level);
+        this.capacity = Math.clamp(capacityFor(level), 1, 1024);
+        this.bandwidth = bandwidthFor(level);
+        this.range = rangeFor(level);
         setChanged();
     }
 

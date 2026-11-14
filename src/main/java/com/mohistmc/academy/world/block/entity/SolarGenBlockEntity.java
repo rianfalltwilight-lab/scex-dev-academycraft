@@ -2,6 +2,7 @@ package com.mohistmc.academy.world.block.entity;
 
 import com.mohistmc.academy.capability.EnergyItemHelper;
 import com.mohistmc.academy.capability.IFEnergyStorage;
+import com.mohistmc.academy.config.MachineConfig;
 import com.mohistmc.academy.energy.api.block.IWirelessGenerator;
 import com.mohistmc.academy.world.AcademyBlockEntities;
 import net.minecraft.core.BlockPos;
@@ -22,9 +23,12 @@ import net.neoforged.neoforge.items.IItemHandler;
 public class SolarGenBlockEntity extends AcademyContainerBlockEntity
         implements IFEnergyStorage, IWirelessGenerator {
 
-    private static final float STRONG_RATE = 3.0f;
-    private static final float WEAK_RATE = 0.6f;
-    private static final int MAX_STORAGE = 1000;
+    // Legacy 1.0.7 values; live numbers come from machines.solarGen in the server config.
+    public static final float STRONG_RATE = 3.0f;
+    public static final float WEAK_RATE = 0.6f;
+    public static final int MAX_STORAGE = 1000;
+
+    private static int maxStorage() { return MachineConfig.SOLAR_BUFFER.get(); }
 
     private float storedEnergy = 0.0f;
     private final IItemHandler inputItems = MachineAutomationItems.chargingSlot(this, Direction.UP, () -> true);
@@ -48,14 +52,16 @@ public class SolarGenBlockEntity extends AcademyContainerBlockEntity
     public void tick(Level level, BlockPos pos, BlockState state) {
         if (level.isClientSide) return;
         float rate = switch (getStatus()) {
-            case STRONG -> STRONG_RATE;
-            case WEAK -> WEAK_RATE;
+            case STRONG -> (float) MachineConfig.SOLAR_DAY_RATE.get();
+            case WEAK -> (float) MachineConfig.SOLAR_RAIN_RATE.get();
             case STOPPED -> 0.0f;
         };
 
         float oldEnergy = storedEnergy;
+        int maxStorage = maxStorage();
+        if (storedEnergy > maxStorage) storedEnergy = maxStorage;
         if (rate > 0.0f) {
-            storedEnergy = Math.min(MAX_STORAGE, storedEnergy + rate);
+            storedEnergy = Math.min(maxStorage, storedEnergy + rate);
         }
 
         int chargeAmount = Math.min((int) storedEnergy, (int) getBandwidth());
@@ -76,18 +82,18 @@ public class SolarGenBlockEntity extends AcademyContainerBlockEntity
     public int getEnergyStored() { return (int) storedEnergy; }
 
     @Override
-    public int getMaxEnergyStored() { return MAX_STORAGE; }
+    public int getMaxEnergyStored() { return maxStorage(); }
 
     @Override
     public void setEnergy(int energy) {
-        float bounded = Math.clamp(energy, 0, MAX_STORAGE);
+        float bounded = Math.clamp(energy, 0, maxStorage());
         if (storedEnergy == bounded) return;
         this.storedEnergy = bounded;
         markMachineChanged();
     }
 
     @Override public int receiveEnergy(int amount, boolean simulate) {
-        int accepted = Math.min(Math.max(0, amount), (int) (MAX_STORAGE - storedEnergy));
+        int accepted = Math.min(Math.max(0, amount), Math.max(0, (int) (maxStorage() - storedEnergy)));
         if (!simulate && accepted > 0) { storedEnergy += accepted; markMachineChanged(); }
         return accepted;
     }
@@ -113,7 +119,7 @@ public class SolarGenBlockEntity extends AcademyContainerBlockEntity
 
     @Override
     public double getBandwidth() {
-        return 100; // 1.0.7 IFConstants.LATENCY_MK2
+        return MachineConfig.SOLAR_BANDWIDTH.get(); // 1.0.7 IFConstants.LATENCY_MK2 = 100
     }
 
     // ==================== NBT ====================
@@ -122,11 +128,11 @@ public class SolarGenBlockEntity extends AcademyContainerBlockEntity
     public void loadAdditional(CompoundTag tag, HolderLookup.Provider provider) {
         super.loadAdditional(tag, provider);
         if (tag.contains("storedEnergy")) {
-            this.storedEnergy = MachineStateSanitizer.clampFinite(tag.getFloat("storedEnergy"), MAX_STORAGE);
+            this.storedEnergy = MachineStateSanitizer.clampFinite(tag.getFloat("storedEnergy"), maxStorage());
         }
         // The fractional value is authoritative; accept the old integer key
         // only when loading a save without it.
-        else if (tag.contains("if_energy")) storedEnergy = Math.clamp(tag.getInt("if_energy"), 0, MAX_STORAGE);
+        else if (tag.contains("if_energy")) storedEnergy = Math.clamp(tag.getInt("if_energy"), 0, maxStorage());
     }
 
     @Override
