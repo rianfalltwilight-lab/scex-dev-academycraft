@@ -12,7 +12,7 @@ import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 /** Registers the mod's datapack-driven tuning and keeps clients in step with the server. */
 @EventBusSubscriber(modid = AcademyCraft.MODID)
 public final class AcademyDataManager {
-    static final List<SyncedJsonData> ALL = List.of(SkillTuningData.INSTANCE, ProgressionData.INSTANCE);
+    static final List<SyncedJsonData> ALL = List.of(BalanceProfileData.INSTANCE, SkillTuningData.INSTANCE, ProgressionData.INSTANCE);
 
     private AcademyDataManager() {}
 

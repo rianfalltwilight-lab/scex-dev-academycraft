@@ -52,6 +52,9 @@ public final class ACConfig {
                 "academy-craft.ac_Entity_EntityMagHook", "VillagerGolem");
         /** Entries use skill.property=value, e.g. railgun.enabled=false. */
         public static final ModConfigSpec.ConfigValue<List<? extends String>> SKILL_OVERRIDES;
+        public static final ModConfigSpec.DoubleValue COOLDOWN_MULTIPLIER;
+        public static final ModConfigSpec.DoubleValue CP_COST_MULTIPLIER;
+        public static final ModConfigSpec.EnumValue<BalanceProfile> BALANCE_PROFILE;
 
         static {
             ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
@@ -72,6 +75,20 @@ public final class ACConfig {
             PROFICIENCY_INCREASE_RATE = builder.defineInRange("proficiencyIncreaseRate", 1.0, 0.0, 100.0);
             SKILL_OVERRIDES = builder.comment("Per-skill: skill.property=value; properties enabled, damage, cp, overload, exp, destroy_blocks")
                     .defineListAllowEmpty("overrides", List.of(), () -> "", value -> value instanceof String);
+            COOLDOWN_MULTIPLIER = builder
+                    .comment("Global multiplier on every skill cooldown, players and mobs. 1.0 = default.")
+                    .defineInRange("cooldownMultiplier", 1.0, 0.0, 100.0);
+            CP_COST_MULTIPLIER = builder
+                    .comment("Global multiplier on every skill CP cost. 1.0 = default.")
+                    .defineInRange("cpCostMultiplier", 1.0, 0.0, 100.0);
+            builder.pop();
+
+            builder.push("balance");
+            BALANCE_PROFILE = builder
+                    .comment("Balance profile. MODERN layers data/academy/academy_balance/modern/ over the 1.0.7 numbers;",
+                            "LEGACY keeps the 1.0.7 numbers. Datapack overrides apply on top of either.",
+                            "Takes effect at once; no /reload needed.")
+                    .defineEnum("profile", BalanceProfile.MODERN);
             builder.pop();
 
             builder.push("ability");
@@ -134,8 +151,10 @@ public final class ACConfig {
             } catch (IllegalStateException unloaded) { return LegacyAbilityRules.DEFAULTS; }
         }
         public static LegacyAbilityRules.SkillTuning skill(String id) {
-            try { return LegacyAbilityRules.parseSkill(id, SKILL_OVERRIDES.get()); }
-            catch (IllegalStateException unloaded) { return LegacyAbilityRules.parseSkill(id, List.of()); }
+            try {
+                return LegacyAbilityRules.withGlobal(LegacyAbilityRules.parseSkill(id, SKILL_OVERRIDES.get()),
+                        CP_COST_MULTIPLIER.get().floatValue(), COOLDOWN_MULTIPLIER.get().floatValue());
+            } catch (IllegalStateException unloaded) { return LegacyAbilityRules.parseSkill(id, List.of()); }
         }
         public static boolean generateOres() {
             try { return GENERATE_ORES.get(); }

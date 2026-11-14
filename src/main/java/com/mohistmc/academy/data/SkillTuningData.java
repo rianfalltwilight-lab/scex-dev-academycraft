@@ -1,5 +1,6 @@
 package com.mohistmc.academy.data;
 
+import com.mohistmc.academy.config.BalanceProfile;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -14,15 +15,24 @@ import java.util.function.Predicate;
 import net.minecraft.resources.ResourceLocation;
 
 /**
- * {@code data/academy/academy_skills/<skill>.json}: per-skill tuning overrides (see docs/MODPACK-SKILLS.md).
+ * {@code data/<namespace>/academy_skills/<skill>.json}: per-skill tuning overrides (see docs/MODPACK-SKILLS.md).
  *
- * <p>Every field is optional; an absent field keeps the built-in value.  Multipliers and switches combine
+ * <p>Every field is optional; an absent field keeps the built-in value.  Files of the same skill in several
+ * namespaces stack: {@code academy} first, then the others in namespace order; multipliers multiply and a
+ * later explicit field replaces an earlier one.  The whole result sits on top of the balance profile layer
+ * ({@link BalanceProfileData}).  Multipliers and switches combine
  * with the server config {@code skill.overrides} lines in {@code LegacyAbilityRules.parseSkill}; level,
  * prerequisites, tree position and base costs are read by the {@link Skill} getters.
  */
 public final class SkillTuningData extends SyncedJsonData {
     public static final SkillTuningData INSTANCE = new SkillTuningData();
     private static volatile Map<String, SkillOverride> overrides = Map.of();
+
+    /** {@code academy} first, then the other namespaces alphabetically; ties by path. */
+    static final java.util.Comparator<ResourceLocation> NAMESPACE_ORDER = java.util.Comparator
+            .comparing((ResourceLocation id) -> !AcademyCraft.MODID.equals(id.getNamespace()))
+            .thenComparing(ResourceLocation::getNamespace)
+            .thenComparing(ResourceLocation::getPath);
 
     private SkillTuningData() { super("skill_tuning", "academy_skills"); }
 
@@ -31,9 +41,40 @@ public final class SkillTuningData extends SyncedJsonData {
                                 float exp, float cooldown, Integer level, List<Skill.Prerequisite> prerequisites,
                                 Double treeX, Double treeY, Float baseCp, Float baseOverload) {}
 
-    /** The installed override for {@code skillId}, or {@code null}. */
+    /** The balance profile layer and the datapack override for {@code skillId} combined, or {@code null}. */
     public static SkillOverride override(String skillId) {
-        return skillId == null ? null : overrides.get(skillId);
+        if (skillId == null) return null;
+        return layer(BalanceProfileData.skill(BalanceProfile.current(), skillId), overrides.get(skillId));
+    }
+
+    /**
+     * {@code top} applied over {@code base}: multipliers multiply, a skill disabled in either is disabled,
+     * and {@code top}'s explicit fields (level, prerequisites, tree position, base costs) win.
+     */
+    public static SkillOverride layer(SkillOverride base, SkillOverride top) {
+        if (base == null) return top;
+        if (top == null) return base;
+        return new SkillOverride(both(base.enabled(), top.enabled()), both(base.destroyBlocks(), top.destroyBlocks()),
+                product(base.damage(), top.damage()), product(base.cp(), top.cp()),
+                product(base.overload(), top.overload()), product(base.exp(), top.exp()),
+                product(base.cooldown(), top.cooldown()),
+                top.level() != null ? top.level() : base.level(),
+                top.prerequisites() != null ? top.prerequisites() : base.prerequisites(),
+                top.treeX() != null ? top.treeX() : base.treeX(),
+                top.treeY() != null ? top.treeY() : base.treeY(),
+                top.baseCp() != null ? top.baseCp() : base.baseCp(),
+                top.baseOverload() != null ? top.baseOverload() : base.baseOverload());
+    }
+
+    private static Boolean both(Boolean a, Boolean b) {
+        if (a == null) return b;
+        if (b == null) return a;
+        return a && b;
+    }
+
+    private static float product(float a, float b) {
+        float v = a * b;
+        return Float.isFinite(v) && v >= 0 ? v : 1;
     }
 
     @Override
@@ -46,14 +87,17 @@ public final class SkillTuningData extends SyncedJsonData {
         INSTANCE.accept(files);
     }
 
-    /** Parses the files; other namespaces, unknown skills and bad prerequisite entries are skipped with a warning. */
+    /**
+     * Parses the files; unknown skills and bad prerequisite entries are skipped with a warning.  Files for
+     * the same skill stack in {@link #NAMESPACE_ORDER}.
+     */
     public static Map<String, SkillOverride> parse(Map<ResourceLocation, JsonElement> files, Predicate<String> knownSkill) {
         Map<String, SkillOverride> out = new HashMap<>();
-        files.forEach((file, json) -> {
-            if (!AcademyCraft.MODID.equals(file.getNamespace())) {
-                LOGGER.warn("Ignoring skill tuning {}: only the '{}' namespace is read", file, AcademyCraft.MODID);
-                return;
-            }
+        List<Map.Entry<ResourceLocation, JsonElement>> ordered = new ArrayList<>(files.entrySet());
+        ordered.sort(Map.Entry.comparingByKey(NAMESPACE_ORDER));
+        ordered.forEach(entry -> {
+            ResourceLocation file = entry.getKey();
+            JsonElement json = entry.getValue();
             String id = file.getPath();
             if (!knownSkill.test(id)) {
                 LOGGER.warn("Ignoring skill tuning {}: unknown skill '{}'", file, id);
@@ -63,7 +107,7 @@ public final class SkillTuningData extends SyncedJsonData {
                 LOGGER.warn("Ignoring skill tuning {}: not a JSON object", file);
                 return;
             }
-            out.put(id, parseOne(file, id, json.getAsJsonObject(), knownSkill));
+            out.merge(id, parseOne(file, id, json.getAsJsonObject(), knownSkill), SkillTuningData::layer);
         });
         return Map.copyOf(out);
     }

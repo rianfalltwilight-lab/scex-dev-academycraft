@@ -1,10 +1,31 @@
 # 技能数据包调整 / Skill tuning datapacks
 
-每个技能一个文件：`data/academy/academy_skills/<技能id>.json`（只读取 `academy` 命名空间；文件名即技能 id，如 `railgun`）。
-`/reload` 生效，并自动同步到客户端（技能树、等级与前置判断一致）。模组不附带默认 JSON，内置数值写在代码里；所有字段都可省略，省略即用内置值。
+每个技能一个文件：`data/<命名空间>/academy_skills/<技能id>.json`，文件名即技能 id（如 `railgun`）。任何命名空间都会读取；同一技能在多个命名空间都有文件时按顺序叠加：先 `academy`，再按命名空间字母序。倍率相乘，后面的文件写出的字段覆盖前面的，任一文件禁用即禁用。
+`/reload` 生效，并自动同步到客户端（技能树、等级与前置判断一致）。所有字段都可省略，省略即用内置值。
 
-One file per skill: `data/academy/academy_skills/<skill_id>.json` (only the `academy` namespace is read; the file name is the skill id, e.g. `railgun`).
-Applied on `/reload` and synced to clients (skill tree, level and prerequisite checks agree). The mod ships no default JSON; built-in values live in code. Every field is optional; an absent field keeps the built-in value.
+One file per skill: `data/<namespace>/academy_skills/<skill_id>.json`; the file name is the skill id (e.g. `railgun`). Every namespace is read; files for the same skill stack in order — `academy` first, then the other namespaces alphabetically. Multipliers multiply, a later file's explicit fields replace earlier ones, and a skill disabled in any file is disabled.
+Applied on `/reload` and synced to clients (skill tree, level and prerequisite checks agree). Every field is optional; an absent field keeps the built-in value.
+
+## 平衡档位 / Balance profile
+
+服务端配置 `balance.profile`：`MODERN`（默认）或 `LEGACY`。层次从下到上：
+
+1. 代码里的 1.0.7 数值；
+2. 档位层 `data/<命名空间>/academy_balance/<modern|legacy>/skills/<技能id>.json`（格式与 `academy_skills` 相同）；只使用当前档位的文件，切换档位立即生效，不需要 `/reload`；
+3. `academy_skills/` 覆盖文件；
+4. 服务端配置 `skill.overrides` 与全局倍率。
+
+`LEGACY` 档位不附带文件，即 1.0.7 数值。`MODERN` 档位的文件随各现代化阶段加入。整合包可以用同路径的文件替换或补充档位层。
+
+Server config `balance.profile`: `MODERN` (default) or `LEGACY`. Layers, bottom to top: (1) the 1.0.7 numbers in code; (2) the profile layer `data/<namespace>/academy_balance/<modern|legacy>/skills/<skill_id>.json` (same format as `academy_skills`) — only the configured profile's files are used, and switching applies at once without `/reload`; (3) the `academy_skills/` overrides; (4) the server config `skill.overrides` lines and the global multipliers. `LEGACY` ships no files, i.e. the 1.0.7 numbers; `MODERN` files arrive with the modernization phases. Packs may replace or add profile files at the same paths.
+
+## 全局倍率 / Global multipliers
+
+| 配置 / Config | 默认 / Default | 作用 / Effect |
+|---|---|---|
+| `skill.skillDamageMultiplier` | 1.0 | 所有技能伤害 / every skill's damage |
+| `skill.cooldownMultiplier` | 1.0 | 所有技能冷却（玩家与生物）/ every cooldown, players and mobs |
+| `skill.cpCostMultiplier` | 1.0 | 所有技能的 CP 消耗 / every CP cost |
 
 ## 字段 / Fields
 

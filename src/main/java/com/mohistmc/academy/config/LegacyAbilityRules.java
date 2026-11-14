@@ -30,6 +30,13 @@ public final class LegacyAbilityRules {
     }
     private static float product(float a, float b) { float v=a*b; return Float.isFinite(v)&&v>=0?v:1; }
 
+    /** Applies the global {@code skill.cpCostMultiplier} and {@code skill.cooldownMultiplier}. */
+    public static SkillTuning withGlobal(SkillTuning tuning, float cpCost, float cooldown) {
+        if (cpCost == 1f && cooldown == 1f) return tuning;
+        return new SkillTuning(tuning.enabled(), tuning.damage(), product(tuning.cp(), cpCost), tuning.overload(),
+                tuning.exp(), tuning.destroyBlocks(), product(tuning.cooldown(), cooldown));
+    }
+
     /** The config lines alone ({@code <id>.<key>=<value>}). */
     public static SkillTuning parseConfig(String skillId, List<? extends String> entries) {
         boolean enabled=true, destroy=true; float damage=1, cp=1, overload=1, exp=1, cooldown=1;
