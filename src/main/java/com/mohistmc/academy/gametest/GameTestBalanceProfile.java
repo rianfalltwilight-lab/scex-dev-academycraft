@@ -18,6 +18,23 @@ public final class GameTestBalanceProfile {
 
     @SubscribeEvent
     public static void started(ServerStartedEvent event) {
-        if (GameTestHooks.isGametestServer()) ACConfig.Server.BALANCE_PROFILE.set(BalanceProfile.LEGACY);
+        if (!GameTestHooks.isGametestServer()) return;
+        ACConfig.Server.BALANCE_PROFILE.set(BalanceProfile.LEGACY);
+        // Saved, so a config file correction (new keys) that reloads the spec keeps LEGACY.
+        ACConfig.Server.save();
+    }
+
+    /** A reload from disk (for example after a spec change rewrote the file) must not bring MODERN back. */
+    @EventBusSubscriber(modid = AcademyCraft.MODID, bus = EventBusSubscriber.Bus.MOD)
+    public static final class Reload {
+        private Reload() {}
+
+        @SubscribeEvent
+        public static void reloading(net.neoforged.fml.event.config.ModConfigEvent.Reloading event) {
+            if (event.getConfig().getSpec() == ACConfig.Server.SPEC && GameTestHooks.isGametestServer()
+                    && ACConfig.Server.BALANCE_PROFILE.get() != BalanceProfile.LEGACY) {
+                ACConfig.Server.BALANCE_PROFILE.set(BalanceProfile.LEGACY);
+            }
+        }
     }
 }

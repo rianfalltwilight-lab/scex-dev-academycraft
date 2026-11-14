@@ -19,6 +19,11 @@ public final class ExternalEnergyConversion {
         return Math.max(0, fe) / fePerIf();
     }
 
+    /** "stored/max IF (stored/max FE)", so packs with FE mods (and IE's own "IF") read the same number. */
+    public static String describe(int stored, int max) {
+        return stored + "/" + max + " IF (" + ifToFe(stored) + "/" + ifToFe(max) + " FE)";
+    }
+
     public static int ifToFe(int imaginaryEnergy) {
         long converted = (long) Math.max(0, imaginaryEnergy) * fePerIf();
         return (int) Math.min(Integer.MAX_VALUE, converted);

@@ -74,7 +74,7 @@ public final class ImagEnergyArmorItem extends ArmorItem implements IEnergyItem 
     @Override
     public void appendHoverText(ItemStack stack, Item.TooltipContext context,
                                 List<Component> tooltip, TooltipFlag flag) {
-        tooltip.add(Component.literal(getEnergyStored(stack) + "/" + maxEnergy() + " IF")
+        tooltip.add(Component.literal(com.mohistmc.academy.capability.ExternalEnergyConversion.describe(getEnergyStored(stack), maxEnergy()))
                 .withStyle(ChatFormatting.AQUA));
         tooltip.add(Component.translatable("item.academy.imag_energy_armor.desc")
                 .withStyle(ChatFormatting.GRAY));

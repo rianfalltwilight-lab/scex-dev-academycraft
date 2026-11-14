@@ -64,7 +64,8 @@ public class ChargingHudOverlay {
         int barWidth = 120;
         int barHeight = 10;
         int x = (screenWidth - barWidth) / 2;
-        int y = screenHeight - 60;
+        // Above the action bar (skill reject reasons) and the held-item name; 1.12.2 used -60.
+        int y = screenHeight - 84;
 
         graphics.fill(x, y, x + barWidth, y + barHeight, 0xFF333333);
 

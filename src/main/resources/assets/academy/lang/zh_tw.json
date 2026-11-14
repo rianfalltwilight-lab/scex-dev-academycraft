@@ -1012,5 +1012,18 @@
     "attribute.name.academy.cp_cost": "技能 CP 消耗",
     "attribute.name.academy.cooldown": "技能冷卻",
     "attribute.name.academy.proficiency_gain": "熟練度獲取",
-    "attribute.name.academy.skill_power": "技能強度"
+    "attribute.name.academy.skill_power": "技能強度",
+    "ac.skill_stats.cooldown": "冷卻：%s 秒",
+    "ac.skill_stats.damage": "傷害：%s",
+    "ac.skill_stats.damage_per_hit": "每次命中傷害：%s",
+    "ac.skill_stats.at_max": "（滿熟練度：%s）",
+    "ac.settings.ability.cp_growth": "CP 成長",
+    "ac.settings.ability.overload_growth": "過載成長",
+    "jei.academy.time_energy": "%s 秒 · %s IF（%s FE）",
+    "jei.academy.info.factor": "誘導因子只能在地牢、廢棄礦坑等結構的箱子裡找到，無法合成。開發機為你覺醒能力時，背包裡帶著一個即可指定能力類別。",
+    "jei.academy.info.developer": "開發機用於覺醒能力、提升等級和學習技能。便攜開發機使用自身電量；普通和高級開發機是多方塊結構，由無線節點或 FE 線纜供電。越高級的開發機能學越高等級的技能，速度也越快。",
+    "jei.academy.info.terminal": "使用終端安裝器安裝資料終端（用終端鍵開啟）。終端裡有設定、技能樹、媒體等應用。",
+    "academy.configuration.cpBarScale": "CP 條大小",
+    "academy.configuration.keyHintScale": "按鍵提示大小",
+    "academy.configuration.tutorialToInventory": "教程物品放入背包"
 }

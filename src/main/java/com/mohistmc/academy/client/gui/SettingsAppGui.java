@@ -120,6 +120,14 @@ public class SettingsAppGui extends AcademyScreen {
                         Component.literal(String.format("%.0f / %.0f", data.getCurrentCp(), data.getMaxCp())), RowType.INFO));
                 rows.add(new SettingRow(Component.translatable("ac.settings.ability.overload"),
                         Component.literal(String.format("%.0f / %.0f", data.getCurrentOverload(), data.getMaxOverload())), RowType.INFO));
+                // Usage growth: max CP / overload earned by spending them, capped per level.
+                int level = data.getPlayerLevel();
+                rows.add(new SettingRow(Component.translatable("ac.settings.ability.cp_growth"),
+                        Component.literal(String.format("%.0f / %.0f", data.getUsageMaxCp(),
+                                com.mohistmc.academy.data.ProgressionData.maxAddedCp(level))), RowType.INFO));
+                rows.add(new SettingRow(Component.translatable("ac.settings.ability.overload_growth"),
+                        Component.literal(String.format("%.0f / %.0f", data.getUsageMaxOverload(),
+                                com.mohistmc.academy.data.ProgressionData.maxAddedOverload(level))), RowType.INFO));
                 rows.add(new SettingRow(Component.translatable("ac.settings.ability.skills"),
                         Component.translatable("ac.settings.ability.skill_count", data.getLearnedSkills().size()), RowType.INFO));
                 boolean active = data.isAbilityActive();

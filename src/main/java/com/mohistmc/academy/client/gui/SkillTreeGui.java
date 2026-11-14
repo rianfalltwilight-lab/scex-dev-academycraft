@@ -852,12 +852,8 @@ public class SkillTreeGui extends AcademyScreen {
         tooltip.add(Component.translatable("ac.skill_slot.level_type", skill.getLevel(),
                 Component.translatable(skill.getType() == SkillType.PASSIVE ? "ac.skill_slot.passive" : "ac.skill_slot.active"))
                 .withStyle(ChatFormatting.WHITE));
-        if (skill.getBaseCpCost() > 0) {
-            tooltip.add(Component.empty()
-                    .append(Component.translatable("ac.skill_slot.cp", (int) skill.getBaseCpCost()).withStyle(ChatFormatting.AQUA))
-                    .append("  ")
-                    .append(Component.translatable("ac.skill_slot.overload", (int) skill.getBaseOverload()).withStyle(ChatFormatting.RED)));
-        }
+        // Real numbers at the current and at full proficiency (tuning, attributes, level, profile).
+        tooltip.addAll(com.mohistmc.academy.skill.SkillStats.lines(mc.player, data, skill));
 
         if (hoveredNode.learned) {
             // 已学习状态

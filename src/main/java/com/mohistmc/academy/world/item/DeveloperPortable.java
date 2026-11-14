@@ -84,6 +84,6 @@ public class DeveloperPortable extends AcademyItem implements IEnergyItem {
     public void appendHoverText(ItemStack p_41421_, Item.TooltipContext p_333372_, List<Component> p_41423_, TooltipFlag p_41424_) {
         super.appendHoverText(p_41421_, p_333372_, p_41423_, p_41424_);
         int energy = getEnergyStored(p_41421_);
-        p_41423_.add(Component.literal(energy + "/" + maxEnergy() + " IF"));
+        p_41423_.add(Component.literal(com.mohistmc.academy.capability.ExternalEnergyConversion.describe(energy, maxEnergy())));
     }
 }

@@ -52,8 +52,20 @@ public class AbilityHudOverlay {
     }
 
     private static void renderHints(Minecraft mc, GuiGraphics g, PlayerAbilityData data) {
-        int screenW = mc.getWindow().getGuiScaledWidth();
-        int screenH = mc.getWindow().getGuiScaledHeight();
+        // keyHintScale: draw the column in a scaled space so its right-centre anchor stays put.
+        float scale = ACConfig.Client.keyHintScale();
+        g.pose().pushPose();
+        g.pose().scale(scale, scale, 1);
+        try {
+            renderHintsScaled(mc, g, data, scale);
+        } finally {
+            g.pose().popPose();
+        }
+    }
+
+    private static void renderHintsScaled(Minecraft mc, GuiGraphics g, PlayerAbilityData data, float scale) {
+        int screenW = Math.round(mc.getWindow().getGuiScaledWidth() / scale);
+        int screenH = Math.round(mc.getWindow().getGuiScaledHeight() / scale);
 
         SkillPreset preset = data.getCurrentPreset();
         KeyMapping[] keys = KeyInputHandler.getSkillKeys();

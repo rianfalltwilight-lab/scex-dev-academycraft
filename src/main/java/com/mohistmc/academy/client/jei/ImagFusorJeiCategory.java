@@ -21,7 +21,14 @@ public final class ImagFusorJeiCategory implements IRecipeCategory<RecipeHolder<
     @Override public Component getTitle() { return Component.translatable("container.academy.imag_fusor"); }
     @Override public IDrawable getIcon() { return icon; }
     @Override public int getWidth() { return 116; }
-    @Override public int getHeight() { return 48; }
+    @Override public int getHeight() { return 58; }
+
+    @Override
+    public void draw(RecipeHolder<ImagFusorRecipe> holder, mezz.jei.api.gui.ingredient.IRecipeSlotsView slots,
+                     net.minecraft.client.gui.GuiGraphics graphics, double mouseX, double mouseY) {
+        graphics.drawString(net.minecraft.client.Minecraft.getInstance().font, AcademyJeiPlugin.timeAndEnergy(
+                holder.value().processTime(), holder.value().energyPerTick()), 2, 48, 0xFF404040, false);
+    }
     @Override public void setRecipe(IRecipeLayoutBuilder b, RecipeHolder<ImagFusorRecipe> holder, IFocusGroup focuses) {
         var recipe = holder.value();
         b.addInputSlot(8, 16).setStandardSlotBackground().addItemStacks(

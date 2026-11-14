@@ -282,11 +282,7 @@ public class SkillSlotGui extends AcademyScreen {
                 tooltip.add(Component.translatable("ac.skill_slot.level_type", skill.getLevel(),
                         Component.translatable(skill.getType() == SkillType.PASSIVE ? "ac.skill_slot.passive" : "ac.skill_slot.active"))
                         .withStyle(ChatFormatting.WHITE));
-                if (skill.getBaseCpCost() > 0) {
-                    tooltip.add(Component.translatable("ac.skill_slot.cp", (int) skill.getBaseCpCost()).withStyle(ChatFormatting.AQUA)
-                            .append(Component.literal("  "))
-                            .append(Component.translatable("ac.skill_slot.overload", (int) skill.getBaseOverload()).withStyle(ChatFormatting.RED)));
-                }
+                tooltip.addAll(com.mohistmc.academy.skill.SkillStats.lines(minecraft.player, data, skill));
                 float prof = data.getProficiency(skillId);
                 tooltip.add(Component.translatable("ac.skill_slot.proficiency", String.format(java.util.Locale.ROOT, "%.1f", prof * 100))
                         .withStyle(ChatFormatting.YELLOW));
@@ -327,11 +323,7 @@ public class SkillSlotGui extends AcademyScreen {
         tooltip.add(Component.translatable("ac.skill_slot.level_type", skill.getLevel(),
                 Component.translatable(skill.getType() == SkillType.PASSIVE ? "ac.skill_slot.passive" : "ac.skill_slot.active"))
                 .withStyle(ChatFormatting.WHITE));
-        if (skill.getBaseCpCost() > 0) {
-            tooltip.add(Component.translatable("ac.skill_slot.cp", (int) skill.getBaseCpCost()).withStyle(ChatFormatting.AQUA)
-                    .append(Component.literal("  "))
-                    .append(Component.translatable("ac.skill_slot.overload", (int) skill.getBaseOverload()).withStyle(ChatFormatting.RED)));
-        }
+        tooltip.addAll(com.mohistmc.academy.skill.SkillStats.lines(minecraft.player, data, skill));
         float prof = data.getProficiency(entry.skillId());
         tooltip.add(Component.translatable("ac.skill_slot.proficiency", String.format(java.util.Locale.ROOT, "%.1f", prof * 100))
                 .withStyle(ChatFormatting.YELLOW));

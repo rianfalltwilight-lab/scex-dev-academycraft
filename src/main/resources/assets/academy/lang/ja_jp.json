@@ -1012,5 +1012,18 @@
   "attribute.name.academy.cp_cost": "スキル CP 消費",
   "attribute.name.academy.cooldown": "スキルのクールダウン",
   "attribute.name.academy.proficiency_gain": "熟練度の獲得",
-  "attribute.name.academy.skill_power": "スキル威力"
+  "attribute.name.academy.skill_power": "スキル威力",
+  "ac.skill_stats.cooldown": "クールダウン：%s 秒",
+  "ac.skill_stats.damage": "ダメージ：%s",
+  "ac.skill_stats.damage_per_hit": "1 ヒットあたりのダメージ：%s",
+  "ac.skill_stats.at_max": "（熟練度最大：%s）",
+  "ac.settings.ability.cp_growth": "CP の成長",
+  "ac.settings.ability.overload_growth": "過負荷の成長",
+  "jei.academy.time_energy": "%s 秒 · %s IF（%s FE）",
+  "jei.academy.info.factor": "誘導因子はダンジョンや廃坑などの構造物のチェストでのみ見つかり、作れません。開発機で能力を覚醒させるときにインベントリに入れておくと、その系統を選べます。",
+  "jei.academy.info.developer": "開発機は能力の覚醒、レベルアップ、スキルの習得に使います。携帯開発機は自身の電力で動き、通常・高度開発機はワイヤレスノードか FE ケーブルから給電するマルチブロックです。上位の開発機ほど高レベルのスキルを速く習得できます。",
+  "jei.academy.info.terminal": "端末インストーラーを使うとデータ端末が入ります（端末キーで開きます）。設定、スキルツリー、メディアなどのアプリがあります。",
+  "academy.configuration.cpBarScale": "CP バーの大きさ",
+  "academy.configuration.keyHintScale": "キーヒントの大きさ",
+  "academy.configuration.tutorialToInventory": "チュートリアルアイテムをインベントリに入れる"
 }

@@ -1012,5 +1012,18 @@
     "attribute.name.academy.cp_cost": "스킬 CP 소모",
     "attribute.name.academy.cooldown": "스킬 재사용 대기",
     "attribute.name.academy.proficiency_gain": "숙련도 획득",
-    "attribute.name.academy.skill_power": "스킬 위력"
+    "attribute.name.academy.skill_power": "스킬 위력",
+    "ac.skill_stats.cooldown": "재사용 대기: %s초",
+    "ac.skill_stats.damage": "피해: %s",
+    "ac.skill_stats.damage_per_hit": "타격당 피해: %s",
+    "ac.skill_stats.at_max": " (최대 숙련도: %s)",
+    "ac.settings.ability.cp_growth": "CP 성장",
+    "ac.settings.ability.overload_growth": "과부하 성장",
+    "jei.academy.time_energy": "%s초 · %s IF (%s FE)",
+    "jei.academy.info.factor": "유도 인자는 던전, 폐광 등 구조물의 상자에서만 얻을 수 있으며 제작할 수 없습니다. 개발기로 능력을 각성할 때 인벤토리에 지니고 있으면 그 계열이 선택됩니다.",
+    "jei.academy.info.developer": "개발기는 능력 각성, 레벨 상승, 스킬 습득에 쓰입니다. 휴대용 개발기는 자체 전력으로 작동하고, 일반·고급 개발기는 무선 노드나 FE 케이블로 전력을 받는 멀티블록입니다. 상위 개발기일수록 높은 레벨의 스킬을 더 빨리 배웁니다.",
+    "jei.academy.info.terminal": "단말기 설치기를 사용하면 데이터 단말기가 설치됩니다(단말기 키로 엽니다). 설정, 스킬 트리, 미디어 등의 앱이 있습니다.",
+    "academy.configuration.cpBarScale": "CP 바 크기",
+    "academy.configuration.keyHintScale": "키 힌트 크기",
+    "academy.configuration.tutorialToInventory": "튜토리얼 아이템을 인벤토리에 넣기"
 }

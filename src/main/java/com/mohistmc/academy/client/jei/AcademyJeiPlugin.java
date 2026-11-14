@@ -88,7 +88,29 @@ public final class AcademyJeiPlugin implements IModPlugin {
         var gui = r.getJeiHelpers().getGuiHelper();
         r.addRecipeCategories(new MetalFormerJeiCategory(gui), new ImagFusorJeiCategory(gui));
     }
+    /** "6.0 s · 1440 IF (5760 FE)": one craft's time and total energy. */
+    static net.minecraft.network.chat.Component timeAndEnergy(int ticks, double energyPerTick) {
+        int total = (int) Math.min(Integer.MAX_VALUE, Math.ceil(Math.max(0, ticks) * Math.max(0, energyPerTick)));
+        return net.minecraft.network.chat.Component.translatable("jei.academy.time_energy",
+                String.format(java.util.Locale.ROOT, "%.1f", ticks / 20.0), total,
+                com.mohistmc.academy.capability.ExternalEnergyConversion.ifToFe(total));
+    }
+
+    private static void info(IRecipeRegistration r, String key, net.minecraft.world.item.Item... items) {
+        java.util.List<net.minecraft.world.item.ItemStack> stacks = new java.util.ArrayList<>();
+        for (var item : items) stacks.add(new net.minecraft.world.item.ItemStack(item));
+        r.addIngredientInfo(stacks, mezz.jei.api.constants.VanillaTypes.ITEM_STACK,
+                net.minecraft.network.chat.Component.translatable(key));
+    }
+
     @Override public void registerRecipes(IRecipeRegistration r) {
+        // First-hour guidance: where induction factors come from and which machine does what.
+        info(r, "jei.academy.info.factor", AcademyItems.FACTOR_ELECTROMASTER.get(), AcademyItems.FACTOR_MELTDOWNER.get(),
+                AcademyItems.FACTOR_TELEPORTER.get(), AcademyItems.FACTOR_VECMANIP.get(),
+                AcademyItems.FACTOR_AEROHAND.get(), AcademyItems.FACTOR_TELEKINESIS.get());
+        info(r, "jei.academy.info.developer", AcademyItems.DEVELOPER_PORTABLE.get(), AcademyItems.DEV_NORMAL.get(),
+                AcademyItems.DEV_ADVANCED.get());
+        info(r, "jei.academy.info.terminal", AcademyItems.TERMINAL_INSTALLER.get());
         var level = Minecraft.getInstance().level;
         if (level == null) return;
         r.addRecipes(METAL_FORMING, level.getRecipeManager().getAllRecipesFor(AcademyRecipeTypes.METAL_FORMING.get()));

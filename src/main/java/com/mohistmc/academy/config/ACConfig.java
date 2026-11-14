@@ -36,6 +36,7 @@ public final class ACConfig {
         public static final ModConfigSpec.BooleanValue GENERATE_ORES;
         public static final ModConfigSpec.BooleanValue GENERATE_PHASE_LIQUID;
         public static final ModConfigSpec.BooleanValue GIVE_CLOUD_TERMINAL;
+        public static final ModConfigSpec.BooleanValue TUTORIAL_TO_INVENTORY;
         public static final ModConfigSpec.BooleanValue DESTROY_BLOCKS;
         public static final ModConfigSpec.ConfigValue<List<? extends String>> BLOCK_DESTRUCTION_DIMENSION_ALLOWLIST;
         public static final ModConfigSpec.ConfigValue<List<? extends String>> NORMAL_METAL_BLOCKS;
@@ -116,6 +117,10 @@ public final class ACConfig {
             GIVE_CLOUD_TERMINAL = builder
                     .comment("Whether a player receives the tutorial terminal item once on first login (legacy generic.giveCloudTerminal).")
                     .define("giveCloudTerminal", true);
+            TUTORIAL_TO_INVENTORY = builder
+                    .comment("Put the first-join tutorial item into the inventory (dropped only when full).",
+                            "false = 1.0.7: always dropped at the player's feet.")
+                    .define("tutorialToInventory", true);
             DESTROY_BLOCKS = builder
                     .comment("Whether AcademyCraft skills may modify or destroy blocks (legacy generic.destroyBlocks).")
                     .define("destroyBlocks", true);
@@ -169,6 +174,10 @@ public final class ACConfig {
         }
         public static boolean generatePhaseLiquid() {
             try { return GENERATE_PHASE_LIQUID.get(); }
+            catch (IllegalStateException unloaded) { return true; }
+        }
+        public static boolean tutorialToInventory() {
+            try { return TUTORIAL_TO_INVENTORY.get(); }
             catch (IllegalStateException unloaded) { return true; }
         }
         public static boolean giveCloudTerminal() {
@@ -227,6 +236,8 @@ public final class ACConfig {
         public static final ModConfigSpec.BooleanValue ALWAYS_SHOW_RESOURCE_NUMBERS;
         public static final ModConfigSpec.BooleanValue SHOW_HUD_WHEN_INACTIVE;
         public static final ModConfigSpec.BooleanValue REDUCE_FLASHING;
+        public static final ModConfigSpec.DoubleValue CP_BAR_SCALE;
+        public static final ModConfigSpec.DoubleValue KEY_HINT_SCALE;
 
         static {
             ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
@@ -271,6 +282,12 @@ public final class ACConfig {
             REDUCE_FLASHING = builder
                     .comment("Replace the flashing held-key outline and charge-bar flicker with steady highlights.")
                     .define("reduceFlashing", false);
+            CP_BAR_SCALE = builder
+                    .comment("Size of the CP bar relative to its 1.12.2 size.")
+                    .defineInRange("cpBarScale", 1.0, 0.5, 2.0);
+            KEY_HINT_SCALE = builder
+                    .comment("Size of the skill key hints relative to their 1.12.2 size.")
+                    .defineInRange("keyHintScale", 1.0, 0.5, 2.0);
             builder.pop();
 
             builder.push("generic");
@@ -306,6 +323,13 @@ public final class ACConfig {
         public static boolean alwaysShowResourceNumbers() { return booleanOr(ALWAYS_SHOW_RESOURCE_NUMBERS, false); }
         public static boolean showHudWhenInactive() { return booleanOr(SHOW_HUD_WHEN_INACTIVE, false); }
         public static boolean reduceFlashing() { return booleanOr(REDUCE_FLASHING, false); }
+        public static float cpBarScale() { return doubleOr(CP_BAR_SCALE, 1.0); }
+        public static float keyHintScale() { return doubleOr(KEY_HINT_SCALE, 1.0); }
+
+        private static float doubleOr(ModConfigSpec.DoubleValue value, double fallback) {
+            try { return (float) Math.clamp(value.get(), 0.5, 2.0); }
+            catch (IllegalStateException unloaded) { return (float) fallback; }
+        }
         public static boolean enableSkillSounds() { return booleanOr(ENABLE_SKILL_SOUNDS, true); }
         public static float mediaPlayerVolume() {
             try { return MEDIA_PLAYER_VOLUME.get().floatValue(); }

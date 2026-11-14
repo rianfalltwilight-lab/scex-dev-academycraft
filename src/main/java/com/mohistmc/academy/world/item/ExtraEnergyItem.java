@@ -69,7 +69,7 @@ public class ExtraEnergyItem extends AcademyItem implements IEnergyItem {
     public void appendHoverText(ItemStack stack, Item.TooltipContext context,
                                 List<Component> tooltip, TooltipFlag flag) {
         super.appendHoverText(stack, context, tooltip, flag);
-        tooltip.add(Component.literal(getEnergyStored(stack) + "/" + capacity() + " IF")
+        tooltip.add(Component.literal(com.mohistmc.academy.capability.ExternalEnergyConversion.describe(getEnergyStored(stack), capacity()))
                 .withStyle(ChatFormatting.AQUA));
     }
 }

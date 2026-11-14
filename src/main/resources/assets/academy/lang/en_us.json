@@ -1012,5 +1012,18 @@
   "attribute.name.academy.cp_cost": "Skill CP Cost",
   "attribute.name.academy.cooldown": "Skill Cooldown",
   "attribute.name.academy.proficiency_gain": "Proficiency Gain",
-  "attribute.name.academy.skill_power": "Skill Power"
+  "attribute.name.academy.skill_power": "Skill Power",
+  "ac.skill_stats.cooldown": "Cooldown: %s s",
+  "ac.skill_stats.damage": "Damage: %s",
+  "ac.skill_stats.damage_per_hit": "Damage per hit: %s",
+  "ac.skill_stats.at_max": " (at full proficiency: %s)",
+  "ac.settings.ability.cp_growth": "CP growth",
+  "ac.settings.ability.overload_growth": "Overload growth",
+  "jei.academy.time_energy": "%s s · %s IF (%s FE)",
+  "jei.academy.info.factor": "Induction factors are found in dungeon, mineshaft and other structure chests; none of them is craftable. Carry one in your inventory when a developer awakens your ability to choose that category.",
+  "jei.academy.info.developer": "Developers awaken your ability, raise its level and teach skills. The portable developer runs on its own charge; the normal and advanced developers are multiblocks fed by a wireless node or by FE cables. Better developers allow higher-level skills and work faster.",
+  "jei.academy.info.terminal": "Use the terminal installer to install the data terminal (open it with the terminal key). Its apps include Settings, the skill tree and media.",
+  "academy.configuration.cpBarScale": "CP bar size",
+  "academy.configuration.keyHintScale": "Key hint size",
+  "academy.configuration.tutorialToInventory": "Put the tutorial item in the inventory"
 }

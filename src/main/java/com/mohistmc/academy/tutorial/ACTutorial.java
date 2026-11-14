@@ -74,6 +74,8 @@ public class ACTutorial {
                 + "## Tutorial unavailable\nThe tutorial resource could not be loaded. Try reloading resources or reinstalling the mod.";
         try {
             String s = readMd(lang);
+            // Traditional Chinese reads the Simplified pages before falling back to English.
+            if (s == null && ("zh_tw".equals(lang) || "zh_hk".equals(lang))) s = readMd("zh_cn");
             if (s == null) s = readMd("en_us");
             return s == null ? unknown : s;
         } catch (Exception e) {

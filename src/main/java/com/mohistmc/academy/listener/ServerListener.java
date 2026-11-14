@@ -81,6 +81,11 @@ public class ServerListener {
 
         data.setTutorialItemGranted(true);
         ItemStack stack = new ItemStack(AcademyItems.TUTORIAL.get());
+        // generic.tutorialToInventory: hand it over directly; a full inventory still drops it (1.0.7).
+        if (ACConfig.Server.tutorialToInventory() && player.getInventory().add(stack)) {
+            data.syncTo(player);
+            return;
+        }
         ItemEntity drop = new ItemEntity(player.serverLevel(), player.getX(), player.getY() + 1.0,
                 player.getZ(), stack);
         if (!player.serverLevel().addFreshEntity(drop)) {

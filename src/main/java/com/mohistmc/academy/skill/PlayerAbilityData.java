@@ -248,6 +248,7 @@ public class PlayerAbilityData {
     }
 
     public float getProficiencyGainScale() { return proficiencyGainScale; }
+    public float getCooldownScale() { return cooldownScale; }
 
     /**
      * The owner's CP cost factor for {@code skillId}: the {@code academy:cp_cost} attribute times the

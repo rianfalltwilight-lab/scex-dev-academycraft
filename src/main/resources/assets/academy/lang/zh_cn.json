@@ -1012,5 +1012,18 @@
   "attribute.name.academy.cp_cost": "技能 CP 消耗",
   "attribute.name.academy.cooldown": "技能冷却",
   "attribute.name.academy.proficiency_gain": "熟练度获取",
-  "attribute.name.academy.skill_power": "技能强度"
+  "attribute.name.academy.skill_power": "技能强度",
+  "ac.skill_stats.cooldown": "冷却：%s 秒",
+  "ac.skill_stats.damage": "伤害：%s",
+  "ac.skill_stats.damage_per_hit": "每次命中伤害：%s",
+  "ac.skill_stats.at_max": "（满熟练度：%s）",
+  "ac.settings.ability.cp_growth": "CP 成长",
+  "ac.settings.ability.overload_growth": "过载成长",
+  "jei.academy.time_energy": "%s 秒 · %s IF（%s FE）",
+  "jei.academy.info.factor": "诱导因子只能在地牢、废弃矿井等结构的箱子里找到，无法合成。开发机为你觉醒能力时，背包里带着一个即可指定能力类别。",
+  "jei.academy.info.developer": "开发机用于觉醒能力、提升等级和学习技能。便携开发机使用自身电量；普通和高级开发机是多方块结构，由无线节点或 FE 线缆供电。越高级的开发机能学越高等级的技能，速度也越快。",
+  "jei.academy.info.terminal": "使用终端安装器安装数据终端（用终端键打开）。终端里有设置、技能树、媒体等应用。",
+  "academy.configuration.cpBarScale": "CP 条大小",
+  "academy.configuration.keyHintScale": "按键提示大小",
+  "academy.configuration.tutorialToInventory": "教程物品放入背包"
 }

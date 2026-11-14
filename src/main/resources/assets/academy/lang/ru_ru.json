@@ -1012,5 +1012,18 @@
     "attribute.name.academy.cp_cost": "Расход CP навыков",
     "attribute.name.academy.cooldown": "Перезарядка навыков",
     "attribute.name.academy.proficiency_gain": "Получение мастерства",
-    "attribute.name.academy.skill_power": "Сила навыков"
+    "attribute.name.academy.skill_power": "Сила навыков",
+    "ac.skill_stats.cooldown": "Перезарядка: %s с",
+    "ac.skill_stats.damage": "Урон: %s",
+    "ac.skill_stats.damage_per_hit": "Урон за попадание: %s",
+    "ac.skill_stats.at_max": " (при полном мастерстве: %s)",
+    "ac.settings.ability.cp_growth": "Рост CP",
+    "ac.settings.ability.overload_growth": "Рост перегрузки",
+    "jei.academy.time_energy": "%s с · %s IF (%s FE)",
+    "jei.academy.info.factor": "Факторы индукции встречаются только в сундуках подземелий, шахт и других построек; их нельзя создать. Держите фактор в инвентаре, когда разработчик пробуждает способность, чтобы выбрать её категорию.",
+    "jei.academy.info.developer": "Разработчики пробуждают способность, повышают её уровень и обучают навыкам. Портативный работает на собственном заряде; обычный и продвинутый — мультиблоки, питаемые от беспроводного узла или FE-кабелей. Чем лучше разработчик, тем выше уровень навыков и тем быстрее обучение.",
+    "jei.academy.info.terminal": "Установщик терминала устанавливает терминал данных (открывается клавишей терминала). В нём есть приложения «Настройки», дерево навыков и медиа.",
+    "academy.configuration.cpBarScale": "Размер полосы CP",
+    "academy.configuration.keyHintScale": "Размер подсказок клавиш",
+    "academy.configuration.tutorialToInventory": "Класть учебник в инвентарь"
 }
