@@ -159,6 +159,9 @@ public final class TelekinesisPassiveHandler {
         if (!HARDENED.containsKey(player.getUUID())) return;
         HARDENED.remove(player.getUUID());
         if (cooldown && !data.isDevMode()) data.setCooldown("psycho_harden", 160);
+        // ExtraAcC removed the hardening Slowness X first.  Without that, 1.21 keeps the
+        // stronger effect running and only stores Slowness V as hidden, freezing the player.
+        player.removeEffect(MobEffects.MOVEMENT_SLOWDOWN);
         player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 80, 4,
                 false, false, false));
     }
