@@ -8,6 +8,7 @@ All attributes take ordinary attribute modifiers (gear, effects, Curios, Apotheo
 |---|---|---|---|
 | `academy:skill_damage` | 所有生物 / every living entity | 1 | 该实体造成的技能伤害 / ability damage it deals |
 | `academy:skill_resistance` | 所有生物 / every living entity | 0 | 受到的技能伤害 ×(1 − 值)；负值为易伤 / incoming ability damage × (1 − value); negative = vulnerable |
+| `academy:skill_power` | 所有生物 / every living entity | 0 | 每次技能命中先加上这么多伤害，再乘各种倍率 / flat damage added to every ability hit before the multipliers |
 | `academy:max_cp` | 玩家 / players | 1 | CP 上限（等级基础、用量增长与课程加成）/ max CP (level base, usage growth and courses) |
 | `academy:cp_regen` | 玩家 / players | 1 | CP 回复速度 / CP recovery |
 | `academy:max_overload` | 玩家 / players | 1 | 过载上限 / max overload |

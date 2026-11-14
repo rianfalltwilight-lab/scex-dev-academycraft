@@ -36,6 +36,15 @@ Server config `balance.profile` (default `MODERN`) picks the layer `data/<namesp
 | `rules.proficiency_cp_discount` | 0 | 0.5 |
 | `rules.prerequisite_proficiency_cap` | 1 | 0.75 |
 | `cp_potion.max_restore` | 2000 | 1000000000 |
+| `combat.level_damage_multiplier` | 1 ×6 | 1, 1, 1.5, 2.25, 3.4, 5 |
+| `combat.boss_max_health_fraction` / `boss_bonus_cap` | 0 / 0 | 0.02 / 2 |
+| `combat.armor_pierce` | 0 | 0.25 |
+| `combat.mob_attack_scaling` / `mob_hit_cap_vs_players` | false / 0 | true / 0.5 |
+| `combat.defense_cost_exponent` | 1 | 0.7 |
+| `combat.deviation_cost_per_damage` | 0 | 0.5 |
+| `combat.light_shield_absorb_fraction` | 0 | 0.3 |
+| `combat.reflection_uses_offense_scaling` | true | false |
+| `combat.level_max_health` | 0 ×6 | 0, 0, 2, 4, 8, 12 |
 
 ## Schema（括号内为默认值 / defaults in brackets）
 
@@ -71,6 +80,21 @@ Server config `balance.profile` (default `MODERN`) picks the layer `data/<namesp
 | `rules.prerequisite_proficiency_cap` | 高于此值的前置熟练度要求降到此值 `1` / prerequisite proficiency requirements above this are lowered to it |
 | `cp_potion.restore_fraction` | CP 药水最多回复到最大 CP 的此比例 `0.5` / a CP potion refills up to this fraction of max CP |
 | `cp_potion.max_restore` | 单瓶最多回复的 CP `2000` / at most this much CP per potion |
+
+| `combat.level_damage_multiplier` | 玩家造成的技能伤害按能力等级 L0..L5 相乘 `[1,1,1,1,1,1]` / ability damage a player deals, per ability level |
+| `combat.boss_max_health_fraction` | 对 `c:bosses` 额外造成其最大生命值的此比例 `0` / extra damage on `c:bosses`: this fraction of its max health |
+| `combat.boss_bonus_cap` | 上述额外伤害最多为本次伤害的此倍数 `0` / that bonus is at most this multiple of the hit |
+| `combat.armor_pierce` | 技能伤害无视护甲减免的比例 `0`（0..1）/ fraction of the armour reduction ability damage ignores |
+| `combat.mob_attack_scaling` | 生物施法按施法者攻击力 / 基础攻击力放大（1..100 倍）`false` / mob casts scale with the caster's attack damage over its base |
+| `combat.mob_hit_cap_vs_players` | 生物施法对玩家的单次伤害上限，玩家最大生命值的比例 `0`（0 = 不限）/ a mob-cast hit on a player is capped at this fraction of the player's max health |
+| `combat.defense_cost_exponent` | 矢量反射、念力硬化、绝缘按伤害计费时使用 伤害^指数 `1` / Vector Reflection, Psycho Harden and Insulation charge per `damage ^ exponent` |
+| `combat.deviation_cost_per_damage` | 矢量偏移在固定消耗外，每点伤害再付的 CP `0` / extra CP per damage point for Vector Deviation |
+| `combat.light_shield_absorb_fraction` | 光盾在固定吸收外再吸收本次伤害的比例 `0` / Light Shield also absorbs this fraction of the hit |
+| `combat.reflection_uses_offense_scaling` | 反射伤害是否吃反射者的 `skill_damage`、`skill_power` 与等级倍率 `true` / whether reflected damage takes the reflector's offence scaling |
+| `combat.level_max_health` | 各能力等级额外最大生命值 `[0,0,0,0,0,0]` / extra max health per ability level |
+
+战斗结算顺序：技能自身数值 → 技能调参与全局倍率 → `skill_power`（加法）→ 等级倍率或生物缩放 → `skill_damage` × (1 − `skill_resistance`) → Boss 额外伤害 → 对玩家的上限 → `SkillDamage` 事件 → 原版受伤（护甲按 `armor_pierce` 减弱）。
+Order of a hit: the skill's own number → skill tuning and global multipliers → `skill_power` (added) → level multiplier or mob scaling → `skill_damage` × (1 − `skill_resistance`) → boss bonus → player cap → `SkillDamage` event → vanilla hurt (armour weakened by `armor_pierce`).
 
 刺激次数被夹取到 1..1000。/ Stimulation counts are clamped to 1..1000.
 
