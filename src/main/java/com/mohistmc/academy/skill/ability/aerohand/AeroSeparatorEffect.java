@@ -48,7 +48,7 @@ public final class AeroSeparatorEffect implements DynamicOneShotSkillEffect {
                 SoundEvents.BREEZE_INHALE, SoundSource.PLAYERS, 1.5F, 0.45F);
         AABB area = new AABB(centre, centre).inflate(radius);
         for (Projectile projectile : level.getEntitiesOfClass(Projectile.class, area,
-                Projectile::isAlive)) projectile.discard();
+                p -> p.isAlive() && AeroProjectileRules.clearsLikeLegacy(p))) projectile.discard();
         int affected = 0;
         for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, area, LivingEntity::isAlive)) {
             boolean hurt = living == player

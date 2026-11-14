@@ -171,7 +171,7 @@ public final class AeroPassiveRuntime {
                 new net.minecraft.world.phys.AABB(player.position().add(0, player.getBbHeight() / 2, 0),
                         player.position().add(0, player.getBbHeight() / 2, 0)).inflate(ARMOUR_RADIUS), Entity::isAlive)) {
             if (entity instanceof Projectile projectile) {
-                if (hostileProjectile(player, projectile)) {
+                if (AeroProjectileRules.clearsLikeLegacy(projectile) && hostileProjectile(player, projectile)) {
                     if (!DynamicSkillRules.tryPay(data, OFFENSE_ARMOUR, 10F, 0)) {
                         stopArmour(player, data, true);
                         return;
@@ -181,18 +181,17 @@ public final class AeroPassiveRuntime {
                 }
                 continue;
             }
-            if (entity instanceof LivingEntity living && player.isAlliedTo(living)) continue;
-            if (entity instanceof LivingEntity living) {
-                if (!DynamicSkillRules.tryPay(data, OFFENSE_ARMOUR,
-                        100F * living.getBbHeight(), 0)) {
-                    stopArmour(player, data, true);
-                    return;
-                }
-                com.mohistmc.academy.skill.AcademyDamageHelper.hurt(player, living,
-                        com.mohistmc.academy.skill.SkillDamageSource.attack(player), DynamicSkillRules.damage(
-                                OFFENSE_ARMOUR, 8F + 4F * data.getProficiency(OFFENSE_ARMOUR)));
-                DynamicSkillRules.addExp(player, data, OFFENSE_ARMOUR, 0.002F);
+            // ExtraAcC only damaged and pushed living targets; items, orbs and vehicles stay put.
+            if (!(entity instanceof LivingEntity living) || player.isAlliedTo(living)) continue;
+            if (!DynamicSkillRules.tryPay(data, OFFENSE_ARMOUR,
+                    100F * living.getBbHeight(), 0)) {
+                stopArmour(player, data, true);
+                return;
             }
+            com.mohistmc.academy.skill.AcademyDamageHelper.hurt(player, living,
+                    com.mohistmc.academy.skill.SkillDamageSource.attack(player), DynamicSkillRules.damage(
+                            OFFENSE_ARMOUR, 8F + 4F * data.getProficiency(OFFENSE_ARMOUR)));
+            DynamicSkillRules.addExp(player, data, OFFENSE_ARMOUR, 0.002F);
             Vec3 away = entity.position().subtract(player.position());
             if (away.lengthSqr() < 1.0e-6) away = new Vec3(0, 0.1, 0);
             away = away.normalize().scale(2.0);

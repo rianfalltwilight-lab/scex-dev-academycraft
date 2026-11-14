@@ -86,7 +86,7 @@ public final class AirWallEffect implements DynamicOneShotSkillEffect {
             for (Entity entity : ring.level.getEntities(owner, area, Entity::isAlive)) {
                 if (!owner.isAlive() || owner.level()!=ring.level || !RINGS.contains(ring)) break;
                 if (entity instanceof Projectile projectile) {
-                    projectile.discard();
+                    if (AeroProjectileRules.clearsLikeLegacy(projectile)) projectile.discard();
                     continue;
                 }
                 if (!(entity instanceof LivingEntity living) || living == owner || owner.isAlliedTo(living)) continue;

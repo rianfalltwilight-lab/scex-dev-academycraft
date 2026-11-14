@@ -78,7 +78,7 @@ public final class StormCoreEffect implements DynamicOneShotSkillEffect {
             for (Entity entity : core.level.getEntities(owner, area, Entity::isAlive)) {
                 if (!owner.isAlive() || owner.level()!=core.level || !CORES.contains(core)) break;
                 if (entity instanceof Projectile projectile) {
-                    projectile.discard();
+                    if (AeroProjectileRules.clearsLikeLegacy(projectile)) projectile.discard();
                     continue;
                 }
                 if (!(entity instanceof LivingEntity living) || living == owner || owner.isAlliedTo(living)) continue;
