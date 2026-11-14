@@ -221,7 +221,7 @@ public class SkillTreeGui extends AcademyScreen {
         if (!(mc.screen instanceof SkillTreeGui gui) || gui.sessionNonce == null
                 || !gui.sessionNonce.equals(result.nonce())) return;
         gui.energy = Math.clamp(result.energy(), 0, Math.max(0, result.maxEnergy()));
-        boolean developing = result.reason().startsWith("开发中 ");
+        boolean developing = result.inProgress();
         if (!developing) { gui.pendingSkillId = null; gui.pendingLevel = -1; }
         else if (mc.level != null) gui.pendingSince = mc.level.getGameTime();
         gui.serverFeedback = Component.literal((result.success() ? "§a" : developing ? "§b" : "§c") + result.reason());

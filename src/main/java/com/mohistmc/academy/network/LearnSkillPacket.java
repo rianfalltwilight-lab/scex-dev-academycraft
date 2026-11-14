@@ -214,6 +214,11 @@ public record LearnSkillPacket(String skillId, int typeOrdinal, Optional<BlockPo
 
     private static void result(ServerPlayer player, LearnSkillPacket packet, DevMachineType type,
                                boolean success, String reason) {
+        result(player, packet, type, success, reason, false);
+    }
+
+    private static void result(ServerPlayer player, LearnSkillPacket packet, DevMachineType type,
+                               boolean success, String reason, boolean inProgress) {
         int energy = 0, maximum = 0;
         if (type == DevMachineType.PORTABLE) {
             ItemStack stack = player.getMainHandItem();
@@ -228,7 +233,7 @@ public record LearnSkillPacket(String skillId, int typeOrdinal, Optional<BlockPo
             }
         }
         SafePayloadSender.send(player, new DevLearningResultPacket(packet.nonce(), success,
-                Math.max(0, energy), Math.max(0, maximum), reason));
+                Math.max(0, energy), Math.max(0, maximum), reason, inProgress));
     }
 
     static boolean consumeEnergy(ServerPlayer player, DevMachineType devType, int cost, BlockPos devPos) {
@@ -298,7 +303,7 @@ public record LearnSkillPacket(String skillId, int typeOrdinal, Optional<BlockPo
 
     static void progress(ServerPlayer player, UUID nonce, DevMachineType type, Optional<BlockPos> pos,
                          int stimulation, int maximum, String reason) {
-        result(player, new LearnSkillPacket("", type.ordinal(), pos, nonce), type, false, reason);
+        result(player, new LearnSkillPacket("", type.ordinal(), pos, nonce), type, false, reason, true);
     }
 
     static void completeDevelopment(ServerPlayer player, UUID nonce, DevMachineType type,
