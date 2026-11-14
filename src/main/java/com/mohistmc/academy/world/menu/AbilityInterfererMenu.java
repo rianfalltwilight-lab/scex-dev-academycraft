@@ -27,18 +27,20 @@ public final class AbilityInterfererMenu extends AcademyMenu {
             data = new ContainerData() {
                 @Override public int get(int index) {
                     return switch (index) {
-                        case 0 -> be.getEnergyStored();
-                        case 1 -> be.getMaxEnergyStored();
+                        case 0 -> MenuDataWords.low(Math.max(0, be.getEnergyStored()));
+                        case 1 -> MenuDataWords.low(Math.max(0, be.getMaxEnergyStored()));
                         case 2 -> be.getRange();
                         case 3 -> be.isEnabled() ? 1 : 0;
+                        case 4 -> MenuDataWords.high(Math.max(0, be.getEnergyStored()));
+                        case 5 -> MenuDataWords.high(Math.max(0, be.getMaxEnergyStored()));
                         default -> 0;
                     };
                 }
                 @Override public void set(int index, int value) {}
-                @Override public int getCount() { return 4; }
+                @Override public int getCount() { return 6; }
             };
         } else {
-            data = new SimpleContainerData(4);
+            data = new SimpleContainerData(6);
         }
         addDataSlots(data);
 
@@ -51,8 +53,8 @@ public final class AbilityInterfererMenu extends AcademyMenu {
         });
     }
 
-    public int getEnergy() { return Math.clamp(data.get(0), 0, com.mohistmc.academy.config.MachineConfig.INTERFERER_BUFFER.get()); }
-    public int getMaxEnergy() { return Math.max(1, data.get(1)); }
+    public int getEnergy() { return Math.clamp(MenuDataWords.join(data.get(0), data.get(4)), 0, com.mohistmc.academy.config.MachineConfig.INTERFERER_BUFFER.get()); }
+    public int getMaxEnergy() { return Math.max(1, MenuDataWords.join(data.get(1), data.get(5))); }
     public int getRange() { return AbilityInterferenceRules.clampRange(data.get(2)); }
     public boolean isEnabled() { return data.get(3) != 0; }
 

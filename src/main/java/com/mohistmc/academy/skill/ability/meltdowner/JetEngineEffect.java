@@ -42,7 +42,7 @@ public final class JetEngineEffect implements ChargingSkillEffect, MobCastable {
     @Override
     public boolean canStartCharging(ServerPlayer player, PlayerAbilityData data) {
         return DynamicSkillRules.enabled(getId()) && (data.isDevMode()
-                || data.getCurrentCp() >= DynamicSkillRules.cp(getId(), holdCpRequirement(data)));
+                || data.getCurrentCp() >= DynamicSkillRules.playerCp(data, getId(), holdCpRequirement(data)));
     }
 
     @Override public void onChargingStart(ServerPlayer player, PlayerAbilityData data) {}
@@ -50,7 +50,7 @@ public final class JetEngineEffect implements ChargingSkillEffect, MobCastable {
     @Override
     public boolean onChargingTick(ServerPlayer player, PlayerAbilityData data, int ticks) {
         return data.isDevMode()
-                || data.getCurrentCp() >= DynamicSkillRules.cp(getId(), holdCpRequirement(data));
+                || data.getCurrentCp() >= DynamicSkillRules.playerCp(data, getId(), holdCpRequirement(data));
     }
 
     @Override

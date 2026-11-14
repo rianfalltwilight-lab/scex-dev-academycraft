@@ -479,7 +479,7 @@ public class SkillTreeGui extends AcademyScreen {
                 Skill dependency = SkillRegistry.getSkill(skill.getCategory(), prerequisite.skillId());
                 if (dependency != null) {
                     boolean accepted = data.hasLearnedSkill(dependency.getId())
-                            && data.getProficiency(dependency.getId()) >= prerequisite.proficiencyRequired();
+                            && data.getProficiency(dependency.getId()) >= prerequisite.effectiveProficiency();
                     requirements.add(new RequirementIcon(dependency.getIconLocation(), accepted));
                 }
             }
@@ -840,9 +840,11 @@ public class SkillTreeGui extends AcademyScreen {
 
         String desc = Component.translatable(skill.getDescKey()).getString();
         if (!desc.equals(skill.getDescKey())) {
-            int maxCharsPerLine = Math.max(16, guiWidth / 18);
-            for (int i = 0; i < desc.length(); i += maxCharsPerLine) {
-                tooltip.add(Component.literal("§7" + desc.substring(i, Math.min(i + maxCharsPerLine, desc.length()))));
+            // Wrap by rendered width at word boundaries; the old fixed character count split words.
+            int width = Math.max(96, guiWidth / 3);
+            for (net.minecraft.network.chat.FormattedText line : mc.font.getSplitter()
+                    .splitLines(desc, width, net.minecraft.network.chat.Style.EMPTY)) {
+                tooltip.add(Component.literal(line.getString()).withStyle(ChatFormatting.GRAY));
             }
         }
 
@@ -850,12 +852,8 @@ public class SkillTreeGui extends AcademyScreen {
         tooltip.add(Component.translatable("ac.skill_slot.level_type", skill.getLevel(),
                 Component.translatable(skill.getType() == SkillType.PASSIVE ? "ac.skill_slot.passive" : "ac.skill_slot.active"))
                 .withStyle(ChatFormatting.WHITE));
-        if (skill.getBaseCpCost() > 0) {
-            tooltip.add(Component.empty()
-                    .append(Component.translatable("ac.skill_slot.cp", (int) skill.getBaseCpCost()).withStyle(ChatFormatting.AQUA))
-                    .append("  ")
-                    .append(Component.translatable("ac.skill_slot.overload", (int) skill.getBaseOverload()).withStyle(ChatFormatting.RED)));
-        }
+        // Real numbers at the current and at full proficiency (tuning, attributes, level, profile).
+        tooltip.addAll(com.mohistmc.academy.skill.SkillStats.lines(mc.player, data, skill));
 
         if (hoveredNode.learned) {
             // 已学习状态
@@ -901,10 +899,10 @@ public class SkillTreeGui extends AcademyScreen {
                             .withStyle(ChatFormatting.GRAY));
                 } else {
                     String prereqName = Component.translatable("item.academy.factor_" + skill.getCategory().id() + "." + prereqId).getString();
-                    boolean met = data.hasLearnedSkill(prereqId) && data.getProficiency(prereqId) >= prereq.proficiencyRequired();
+                    boolean met = data.hasLearnedSkill(prereqId) && data.getProficiency(prereqId) >= prereq.effectiveProficiency();
                     String status = met ? "§a✓" : "§c✗";
-                    String reqText = prereq.proficiencyRequired() > 0
-                            ? String.format(" %.0f%%", prereq.proficiencyRequired() * 100)
+                    String reqText = prereq.effectiveProficiency() > 0
+                            ? String.format(" %.0f%%", prereq.effectiveProficiency() * 100)
                             : "";
                     tooltip.add(Component.literal(status + " §7" + prereqName + reqText));
                 }

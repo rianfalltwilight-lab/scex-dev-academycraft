@@ -13,6 +13,42 @@
   Invalid fields (array length not 6, non-finite, negative, wrong type) are logged and keep the previous
   value; some values are clamped.
 
+## 平衡档位 / Balance profile
+
+服务端配置 `balance.profile`（默认 `MODERN`）选择档位层 `data/<命名空间>/academy_balance/<modern|legacy>/progression/*.json`，格式与本页相同。层次：内置 1.0.7 数值 → 当前档位的文件 → `academy_progression/` 文件，后者逐字段覆盖前者。切换档位立即生效。
+
+Server config `balance.profile` (default `MODERN`) picks the layer `data/<namespace>/academy_balance/<modern|legacy>/progression/*.json`, in the format below. Layers: built-in 1.0.7 values → the profile's files → the `academy_progression/` files, each overriding single fields. Switching applies at once.
+
+本模组附带的 `modern` 档位 / the shipped `modern` profile (`academy_balance/modern/progression/modern.json`)：
+
+| 字段 / Field | 1.0.7（legacy） | modern |
+|---|---|---|
+| `cp.initial` | 1800, 1800, 2800, 4000, 5800, 8000 | 2000, 2000, 3500, 6000, 10000, 16000 |
+| `cp.max_added` | 0, 900, 1000, 1500, 1700, 12000 | 0, 1000, 1750, 3000, 5000, 8000 |
+| `overload.initial` | 100, 100, 150, 240, 350, 500 | 150, 150, 240, 380, 560, 800 |
+| `overload.max_added` | 0, 40, 70, 80, 100, 500 | 0, 60, 105, 120, 150, 750 |
+| `level_up.threshold_per_skill` | 0.666 ×4, 1.333, 0.666 | 0.4 ×4, 0.8, 0.4 |
+| `rules.cp_recovery_multiplier` | 1（空到满约 115 秒 / ~115 s empty to full） | 2.25（约 51 秒 / ~51 s） |
+| `rules.usage_growth_multiplier` | 1 | 8 |
+| `rules.proficiency_gain_multiplier` | 1 | 2 |
+| `rules.keep_usage_growth_on_level_up` | false | true |
+| `rules.overload_unlock_fraction` | 0 | 0.5 |
+| `rules.proficiency_cp_discount` | 0 | 0.5 |
+| `rules.prerequisite_proficiency_cap` | 1 | 0.75 |
+| `cp_potion.max_restore` | 2000 | 1000000000 |
+| `combat.level_damage_multiplier` | 1 ×6 | 1, 1, 1.5, 2.25, 3.4, 5 |
+| `combat.boss_max_health_fraction` / `boss_bonus_cap` | 0 / 0 | 0.02 / 2 |
+| `combat.armor_pierce` | 0 | 0.25 |
+| `combat.mob_attack_scaling` / `mob_hit_cap_vs_players` | false / 0 | true / 0.5 |
+| `combat.defense_cost_exponent` | 1 | 0.7 |
+| `combat.deviation_cost_per_damage` | 0 | 0.5 |
+| `combat.light_shield_absorb_fraction` | 0 | 0.3 |
+| `combat.reflection_uses_offense_scaling` | true | false |
+| `combat.level_max_health` | 0 ×6 | 0, 0, 2, 4, 8, 12 |
+| `machines.storage_multiplier` / `bandwidth_multiplier` | 1 / 1 | 10 / 10 |
+| `machines.generation_multiplier` / `range_multiplier` / `item_energy_multiplier` | 1 / 1 / 1 | 4 / 1.5 / 10 |
+| `developer.<portable\|normal\|advanced>.energy_per_stimulation` | 750 / 700 / 600 | 3000 / 2800 / 2400 |
+
 ## Schema（括号内为默认值 / defaults in brackets）
 
 | 字段 Field | 说明 Meaning |
@@ -36,6 +72,34 @@
 | `stimulations.reset_per_level` | 重置能力刺激次数 = 该值 × 当前等级，`10` |
 | `stimulations.induction` | 初次觉醒刺激次数 `5` |
 | `induction.category_weights.<id>` | 无因子觉醒时随机选择类别的权重，默认每类 `1`；`0` = 永不随机到（因子仍可强制该类别）；全为 0 时退回均匀随机。类别 id: `electromaster`, `meltdowner`, `teleporter`, `vecmanip`, `aerohand`, `telekinesis` |
+
+| `rules.cp_recovery_multiplier` | 乘在配置 `cpRecoverSpeed` 上 `1` / multiplies the config `cpRecoverSpeed` |
+| `rules.overload_recovery_multiplier` | 乘在配置 `overloadRecoverSpeed` 上 `1` |
+| `rules.usage_growth_multiplier` | 乘在配置 `maxCpIncreaseRate` 与 `maxOverloadIncreaseRate` 上 `1` |
+| `rules.proficiency_gain_multiplier` | 乘在配置 `proficiencyIncreaseRate` 上 `1` |
+| `rules.keep_usage_growth_on_level_up` | 升级时保留用量增长（仍受新等级上限约束）`false`；1.0.7 升级时清零 / keep usage growth on level-up (still capped by the new level); 1.0.7 cleared it |
+| `rules.overload_unlock_fraction` | 过载降到上限的这一比例以下即解除锁定 `0`（1.0.7：降到 0）/ the lock lifts at or below this fraction of max overload |
+| `rules.proficiency_cp_discount` | 满熟练度时 CP 消耗减少的比例，按熟练度线性 `0`（0..0.9）/ CP cost cut at full proficiency, linear in proficiency |
+| `rules.prerequisite_proficiency_cap` | 高于此值的前置熟练度要求降到此值 `1` / prerequisite proficiency requirements above this are lowered to it |
+| `cp_potion.restore_fraction` | CP 药水最多回复到最大 CP 的此比例 `0.5` / a CP potion refills up to this fraction of max CP |
+| `cp_potion.max_restore` | 单瓶最多回复的 CP `2000` / at most this much CP per potion |
+
+| `combat.level_damage_multiplier` | 玩家造成的技能伤害按能力等级 L0..L5 相乘 `[1,1,1,1,1,1]` / ability damage a player deals, per ability level |
+| `combat.boss_max_health_fraction` | 对 `c:bosses` 额外造成其最大生命值的此比例 `0` / extra damage on `c:bosses`: this fraction of its max health |
+| `combat.boss_bonus_cap` | 上述额外伤害最多为本次伤害的此倍数 `0` / that bonus is at most this multiple of the hit |
+| `combat.armor_pierce` | 技能伤害无视护甲减免的比例 `0`（0..1）/ fraction of the armour reduction ability damage ignores |
+| `combat.mob_attack_scaling` | 生物施法按施法者攻击力 / 基础攻击力放大（1..100 倍）`false` / mob casts scale with the caster's attack damage over its base |
+| `combat.mob_hit_cap_vs_players` | 生物施法对玩家的单次伤害上限，玩家最大生命值的比例 `0`（0 = 不限）/ a mob-cast hit on a player is capped at this fraction of the player's max health |
+| `combat.defense_cost_exponent` | 矢量反射、念力硬化、绝缘按伤害计费时使用 伤害^指数 `1` / Vector Reflection, Psycho Harden and Insulation charge per `damage ^ exponent` |
+| `combat.deviation_cost_per_damage` | 矢量偏移在固定消耗外，每点伤害再付的 CP `0` / extra CP per damage point for Vector Deviation |
+| `combat.light_shield_absorb_fraction` | 光盾在固定吸收外再吸收本次伤害的比例 `0` / Light Shield also absorbs this fraction of the hit |
+| `combat.reflection_uses_offense_scaling` | 反射伤害是否吃反射者的 `skill_damage`、`skill_power` 与等级倍率 `true` / whether reflected damage takes the reflector's offence scaling |
+| `combat.level_max_health` | 各能力等级额外最大生命值 `[0,0,0,0,0,0]` / extra max health per ability level |
+
+| `machines.storage_multiplier` 等 | 机器数值的档位倍率，见 docs/MODPACK-MACHINES.md `1` / machine multipliers, see docs/MODPACK-MACHINES.md |
+
+战斗结算顺序：技能自身数值 → 技能调参与全局倍率 → `skill_power`（加法）→ 等级倍率或生物缩放 → `skill_damage` × (1 − `skill_resistance`) → Boss 额外伤害 → 对玩家的上限 → `SkillDamage` 事件 → 原版受伤（护甲按 `armor_pierce` 减弱）。
+Order of a hit: the skill's own number → skill tuning and global multipliers → `skill_power` (added) → level multiplier or mob scaling → `skill_damage` × (1 − `skill_resistance`) → boss bonus → player cap → `SkillDamage` event → vanilla hurt (armour weakened by `armor_pierce`).
 
 刺激次数被夹取到 1..1000。/ Stimulation counts are clamped to 1..1000.
 

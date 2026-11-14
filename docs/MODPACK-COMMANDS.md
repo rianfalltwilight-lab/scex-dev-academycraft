@@ -1,11 +1,12 @@
 # /academy 命令参考 / Command reference
 
-需要权限等级 2。`<targets>` 是实体选择器；非玩家实体会被跳过并提示（生物支持以后再加）。技能可写 `railgun` 或 `academy:railgun`。所有修改只在服务端进行，会发出公开的能力事件并立即同步。返回值可用于 `execute store result`。
+除 `/academy info` 外都需要权限等级 2。`<targets>` 是实体选择器；非玩家实体会被跳过并提示（生物支持以后再加）。技能可写 `railgun` 或 `academy:railgun`。所有修改只在服务端进行，会发出公开的能力事件并立即同步。返回值可用于 `execute store result`。
 
-Permission level 2. `<targets>` is an entity selector; non-player entities are skipped with a message (mob support comes later). Skills accept `railgun` or `academy:railgun`. Every change is server-side, posts the public ability events and syncs at once. Return values work with `execute store result`.
+Permission level 2, except `/academy info`. `<targets>` is an entity selector; non-player entities are skipped with a message (mob support comes later). Skills accept `railgun` or `academy:railgun`. Every change is server-side, posts the public ability events and syncs at once. Return values work with `execute store result`.
 
 | 命令 / Command | 作用 / Effect | 返回 / Returns |
 |---|---|---|
+| `/academy info` | 任何玩家：查看自己的类别、等级、CP、过载、技能熟练度、冷却和当前平衡档位 / Any player: your own category, level, CP, overload, skill proficiency, cooldowns and the balance profile | 等级 / level |
 | `/academy learn <targets> <skill> [respectPrerequisites]` | 学习技能；技能不属于当前类别时失败，提示先用 `/academy category`。`true` 时检查等级和前置。/ Learn a skill; fails if it belongs to another category. `true` checks level and prerequisites. | 新学会的玩家数 / players who learned it |
 | `/academy unlearn <targets> <skill>` | 遗忘技能（保留熟练度，清除预设槽位）/ Unlearn (proficiency kept, preset slots cleared) | 玩家数 / players changed |
 | `/academy learn_all <targets>` | 学会当前类别全部技能 / Learn every skill of the current category | 新学会的技能总数 / skills learned |

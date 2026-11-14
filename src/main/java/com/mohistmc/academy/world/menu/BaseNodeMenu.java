@@ -20,7 +20,7 @@ public abstract class BaseNodeMenu extends AcademyMenu {
     // Container-set-data payloads are signed 16-bit values on the wire. Split
     // the two potentially large energy values into words; 50,000/200,000 must
     // never wrap negative or appear as 3,392 in the standard/advanced GUI.
-    private static final int DATA_COUNT = 9;
+    private static final int DATA_COUNT = 10;
     private final ContainerData nodeData;
     private final String initialNodeName;
     private final String ownerLabel;
@@ -55,9 +55,10 @@ public abstract class BaseNodeMenu extends AcademyMenu {
                         case 3 -> MenuDataWords.high(boundedInt(node.getEnergy()));
                         case 4 -> MenuDataWords.low(boundedInt(node.getMaxEnergy()));
                         case 5 -> MenuDataWords.high(boundedInt(node.getMaxEnergy()));
-                        case 6 -> boundedInt(node.getBandwidth());
+                        case 6 -> MenuDataWords.low(boundedInt(node.getBandwidth()));
                         case 7 -> boundedInt(node.getRange());
                         case 8 -> node.isConnected() ? 1 : 0;
+                        case 9 -> MenuDataWords.high(boundedInt(node.getBandwidth()));
                         default -> 0;
                     };
                 }
@@ -107,7 +108,7 @@ public abstract class BaseNodeMenu extends AcademyMenu {
     public int getNodeCapacity() { return Math.max(0, nodeData.get(1)); }
     public int getNodeEnergy() { return Math.max(0, MenuDataWords.join(nodeData.get(2), nodeData.get(3))); }
     public int getNodeMaxEnergy() { return Math.max(1, MenuDataWords.join(nodeData.get(4), nodeData.get(5))); }
-    public int getNodeBandwidth() { return Math.max(0, nodeData.get(6)); }
+    public int getNodeBandwidth() { return Math.max(0, MenuDataWords.join(nodeData.get(6), nodeData.get(9))); }
     public int getNodeRange() { return Math.max(0, nodeData.get(7)); }
     public boolean isConnected() { return nodeData.get(8) != 0; }
     public String getInitialNodeName() { return initialNodeName; }

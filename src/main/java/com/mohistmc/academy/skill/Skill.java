@@ -110,6 +110,11 @@ public class Skill {
     }
 
     public record Prerequisite(String skillId, float proficiencyRequired) {
+        /** The requirement after the balance profile's {@code rules.prerequisite_proficiency_cap}. */
+        public float effectiveProficiency() {
+            return Math.min(proficiencyRequired,
+                    com.mohistmc.academy.data.ProgressionData.prerequisiteProficiencyCap());
+        }
     }
 
     public static class Builder {

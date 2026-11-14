@@ -36,6 +36,7 @@ public final class ACConfig {
         public static final ModConfigSpec.BooleanValue GENERATE_ORES;
         public static final ModConfigSpec.BooleanValue GENERATE_PHASE_LIQUID;
         public static final ModConfigSpec.BooleanValue GIVE_CLOUD_TERMINAL;
+        public static final ModConfigSpec.BooleanValue TUTORIAL_TO_INVENTORY;
         public static final ModConfigSpec.BooleanValue DESTROY_BLOCKS;
         public static final ModConfigSpec.ConfigValue<List<? extends String>> BLOCK_DESTRUCTION_DIMENSION_ALLOWLIST;
         public static final ModConfigSpec.ConfigValue<List<? extends String>> NORMAL_METAL_BLOCKS;
@@ -52,6 +53,9 @@ public final class ACConfig {
                 "academy-craft.ac_Entity_EntityMagHook", "VillagerGolem");
         /** Entries use skill.property=value, e.g. railgun.enabled=false. */
         public static final ModConfigSpec.ConfigValue<List<? extends String>> SKILL_OVERRIDES;
+        public static final ModConfigSpec.DoubleValue COOLDOWN_MULTIPLIER;
+        public static final ModConfigSpec.DoubleValue CP_COST_MULTIPLIER;
+        public static final ModConfigSpec.EnumValue<BalanceProfile> BALANCE_PROFILE;
 
         static {
             ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
@@ -72,6 +76,20 @@ public final class ACConfig {
             PROFICIENCY_INCREASE_RATE = builder.defineInRange("proficiencyIncreaseRate", 1.0, 0.0, 100.0);
             SKILL_OVERRIDES = builder.comment("Per-skill: skill.property=value; properties enabled, damage, cp, overload, exp, destroy_blocks")
                     .defineListAllowEmpty("overrides", List.of(), () -> "", value -> value instanceof String);
+            COOLDOWN_MULTIPLIER = builder
+                    .comment("Global multiplier on every skill cooldown, players and mobs. 1.0 = default.")
+                    .defineInRange("cooldownMultiplier", 1.0, 0.0, 100.0);
+            CP_COST_MULTIPLIER = builder
+                    .comment("Global multiplier on every skill CP cost. 1.0 = default.")
+                    .defineInRange("cpCostMultiplier", 1.0, 0.0, 100.0);
+            builder.pop();
+
+            builder.push("balance");
+            BALANCE_PROFILE = builder
+                    .comment("Balance profile. MODERN layers data/academy/academy_balance/modern/ over the 1.0.7 numbers;",
+                            "LEGACY keeps the 1.0.7 numbers. Datapack overrides apply on top of either.",
+                            "Takes effect at once; no /reload needed.")
+                    .defineEnum("profile", BalanceProfile.MODERN);
             builder.pop();
 
             builder.push("ability");
@@ -99,6 +117,10 @@ public final class ACConfig {
             GIVE_CLOUD_TERMINAL = builder
                     .comment("Whether a player receives the tutorial terminal item once on first login (legacy generic.giveCloudTerminal).")
                     .define("giveCloudTerminal", true);
+            TUTORIAL_TO_INVENTORY = builder
+                    .comment("Put the first-join tutorial item into the inventory (dropped only when full).",
+                            "false = 1.0.7: always dropped at the player's feet.")
+                    .define("tutorialToInventory", true);
             DESTROY_BLOCKS = builder
                     .comment("Whether AcademyCraft skills may modify or destroy blocks (legacy generic.destroyBlocks).")
                     .define("destroyBlocks", true);
@@ -125,17 +147,26 @@ public final class ACConfig {
             try { return PVP_ENABLED.get(); }
             catch (IllegalStateException unloaded) { return true; }
         }
+        /** The config rates times the balance profile's {@code rules} multipliers (all 1 in LEGACY). */
         public static LegacyAbilityRules.Snapshot legacyRules() {
+            LegacyAbilityRules.Snapshot config;
             try {
-                return new LegacyAbilityRules.Snapshot(CP_RECOVER_COOLDOWN.get(), CP_RECOVER_SPEED.get().floatValue(),
+                config = new LegacyAbilityRules.Snapshot(CP_RECOVER_COOLDOWN.get(), CP_RECOVER_SPEED.get().floatValue(),
                         OVERLOAD_RECOVER_COOLDOWN.get(), OVERLOAD_RECOVER_SPEED.get().floatValue(),
                         MAX_CP_INCREASE_RATE.get().floatValue(), MAX_OVERLOAD_INCREASE_RATE.get().floatValue(),
                         PROFICIENCY_INCREASE_RATE.get().floatValue());
-            } catch (IllegalStateException unloaded) { return LegacyAbilityRules.DEFAULTS; }
+            } catch (IllegalStateException unloaded) { config = LegacyAbilityRules.DEFAULTS; }
+            return LegacyAbilityRules.withProfile(config,
+                    com.mohistmc.academy.data.ProgressionData.cpRecoveryMultiplier(),
+                    com.mohistmc.academy.data.ProgressionData.overloadRecoveryMultiplier(),
+                    com.mohistmc.academy.data.ProgressionData.usageGrowthMultiplier(),
+                    com.mohistmc.academy.data.ProgressionData.proficiencyGainMultiplier());
         }
         public static LegacyAbilityRules.SkillTuning skill(String id) {
-            try { return LegacyAbilityRules.parseSkill(id, SKILL_OVERRIDES.get()); }
-            catch (IllegalStateException unloaded) { return LegacyAbilityRules.parseSkill(id, List.of()); }
+            try {
+                return LegacyAbilityRules.withGlobal(LegacyAbilityRules.parseSkill(id, SKILL_OVERRIDES.get()),
+                        CP_COST_MULTIPLIER.get().floatValue(), COOLDOWN_MULTIPLIER.get().floatValue());
+            } catch (IllegalStateException unloaded) { return LegacyAbilityRules.parseSkill(id, List.of()); }
         }
         public static boolean generateOres() {
             try { return GENERATE_ORES.get(); }
@@ -143,6 +174,10 @@ public final class ACConfig {
         }
         public static boolean generatePhaseLiquid() {
             try { return GENERATE_PHASE_LIQUID.get(); }
+            catch (IllegalStateException unloaded) { return true; }
+        }
+        public static boolean tutorialToInventory() {
+            try { return TUTORIAL_TO_INVENTORY.get(); }
             catch (IllegalStateException unloaded) { return true; }
         }
         public static boolean giveCloudTerminal() {
@@ -197,6 +232,12 @@ public final class ACConfig {
         public static final ModConfigSpec.BooleanValue ENABLE_SKILL_SOUNDS;
         public static final ModConfigSpec.DoubleValue MEDIA_PLAYER_VOLUME;
         public static final ModConfigSpec.BooleanValue HEADS_OR_TAILS;
+        public static final ModConfigSpec.BooleanValue SHOW_COOLDOWN_SECONDS;
+        public static final ModConfigSpec.BooleanValue ALWAYS_SHOW_RESOURCE_NUMBERS;
+        public static final ModConfigSpec.BooleanValue SHOW_HUD_WHEN_INACTIVE;
+        public static final ModConfigSpec.BooleanValue REDUCE_FLASHING;
+        public static final ModConfigSpec.DoubleValue CP_BAR_SCALE;
+        public static final ModConfigSpec.DoubleValue KEY_HINT_SCALE;
 
         static {
             ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
@@ -229,6 +270,24 @@ public final class ACConfig {
             SHOW_KEY_HINTS = builder
                     .comment("Show key binding hints.")
                     .define("showKeyHints", true);
+            SHOW_COOLDOWN_SECONDS = builder
+                    .comment("Print the remaining cooldown in seconds on each key-hint icon.")
+                    .define("showCooldownSeconds", true);
+            ALWAYS_SHOW_RESOURCE_NUMBERS = builder
+                    .comment("Always print CP and overload numbers on the CP bar (1.12.2: only while V is held).")
+                    .define("alwaysShowResourceNumbers", false);
+            SHOW_HUD_WHEN_INACTIVE = builder
+                    .comment("Keep the CP bar and key hints visible, dimmed, while the ability is switched off.")
+                    .define("showHudWhenInactive", false);
+            REDUCE_FLASHING = builder
+                    .comment("Replace the flashing held-key outline and charge-bar flicker with steady highlights.")
+                    .define("reduceFlashing", false);
+            CP_BAR_SCALE = builder
+                    .comment("Size of the CP bar relative to its 1.12.2 size.")
+                    .defineInRange("cpBarScale", 1.0, 0.5, 2.0);
+            KEY_HINT_SCALE = builder
+                    .comment("Size of the skill key hints relative to their 1.12.2 size.")
+                    .defineInRange("keyHintScale", 1.0, 0.5, 2.0);
             builder.pop();
 
             builder.push("generic");
@@ -260,6 +319,17 @@ public final class ACConfig {
         public static boolean autoAvoidJade() { return booleanOr(AUTO_AVOID_JADE, true); }
         public static boolean showChargingHud() { return booleanOr(SHOW_CHARGING_HUD, true); }
         public static boolean showKeyHints() { return booleanOr(SHOW_KEY_HINTS, true); }
+        public static boolean showCooldownSeconds() { return booleanOr(SHOW_COOLDOWN_SECONDS, true); }
+        public static boolean alwaysShowResourceNumbers() { return booleanOr(ALWAYS_SHOW_RESOURCE_NUMBERS, false); }
+        public static boolean showHudWhenInactive() { return booleanOr(SHOW_HUD_WHEN_INACTIVE, false); }
+        public static boolean reduceFlashing() { return booleanOr(REDUCE_FLASHING, false); }
+        public static float cpBarScale() { return doubleOr(CP_BAR_SCALE, 1.0); }
+        public static float keyHintScale() { return doubleOr(KEY_HINT_SCALE, 1.0); }
+
+        private static float doubleOr(ModConfigSpec.DoubleValue value, double fallback) {
+            try { return (float) Math.clamp(value.get(), 0.5, 2.0); }
+            catch (IllegalStateException unloaded) { return (float) fallback; }
+        }
         public static boolean enableSkillSounds() { return booleanOr(ENABLE_SKILL_SOUNDS, true); }
         public static float mediaPlayerVolume() {
             try { return MEDIA_PLAYER_VOLUME.get().floatValue(); }

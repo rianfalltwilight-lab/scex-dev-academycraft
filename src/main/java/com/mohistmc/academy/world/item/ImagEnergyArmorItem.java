@@ -12,6 +12,8 @@ import net.minecraft.world.item.TooltipFlag;
 /** 100,000 IF powered armour; damage absorption is settled atomically by the event handler. */
 public final class ImagEnergyArmorItem extends ArmorItem implements IEnergyItem {
     public static final int MAX_ENERGY = 100_000;
+    private static int rate() { return com.mohistmc.academy.config.MachineConfig.scale(200, com.mohistmc.academy.config.MachineConfig.Scale.ITEM); }
+    public static int maxEnergy() { return com.mohistmc.academy.config.MachineConfig.scale(MAX_ENERGY, com.mohistmc.academy.config.MachineConfig.Scale.ITEM); }
 
     public ImagEnergyArmorItem(Type type) {
         super(ExtraArmorMaterials.IMAGINARY, type, new Item.Properties().rarity(net.minecraft.world.item.Rarity.UNCOMMON)
@@ -22,7 +24,7 @@ public final class ImagEnergyArmorItem extends ArmorItem implements IEnergyItem 
 
     @Override public void verifyComponentsAfterLoad(ItemStack stack) {
         super.verifyComponentsAfterLoad(stack);
-        ExtraItemData.migrateEnergy(stack, MAX_ENERGY);
+        ExtraItemData.migrateEnergy(stack, maxEnergy());
     }
 
     /** The add-on changes the worn shell at 500 IF; inventory icons remain constant. */
@@ -36,19 +38,19 @@ public final class ImagEnergyArmorItem extends ArmorItem implements IEnergyItem 
     }
 
     @Override public int getEnergyStored(ItemStack stack) {
-        return ExtraItemData.energy(stack, MAX_ENERGY);
+        return ExtraItemData.energy(stack, maxEnergy());
     }
-    @Override public int getMaxEnergyStored(ItemStack stack) { return MAX_ENERGY; }
+    @Override public int getMaxEnergyStored(ItemStack stack) { return maxEnergy(); }
     @Override public void setEnergy(ItemStack stack, int energy) {
-        ExtraItemData.setEnergy(stack, energy, MAX_ENERGY);
+        ExtraItemData.setEnergy(stack, energy, maxEnergy());
     }
     @Override public int extractEnergy(ItemStack stack, int maximum, boolean simulate) {
-        int extracted = Math.min(getEnergyStored(stack), Math.min(Math.max(0, maximum), 200));
+        int extracted = Math.min(getEnergyStored(stack), Math.min(Math.max(0, maximum), rate()));
         if (!simulate && extracted > 0) setEnergy(stack, getEnergyStored(stack) - extracted);
         return extracted;
     }
     @Override public int receiveEnergy(ItemStack stack, int maximum, boolean simulate) {
-        int received = Math.min(MAX_ENERGY - getEnergyStored(stack), Math.min(Math.max(0, maximum), 200));
+        int received = Math.min(maxEnergy() - getEnergyStored(stack), Math.min(Math.max(0, maximum), rate()));
         if (!simulate && received > 0) setEnergy(stack, getEnergyStored(stack) + received);
         return received;
     }
@@ -60,11 +62,11 @@ public final class ImagEnergyArmorItem extends ArmorItem implements IEnergyItem 
     }
 
     @Override public boolean isBarVisible(ItemStack stack) {
-        return getEnergyStored(stack) < MAX_ENERGY;
+        return getEnergyStored(stack) < maxEnergy();
     }
 
     @Override public int getBarWidth(ItemStack stack) {
-        return Math.round(13F * getEnergyStored(stack) / MAX_ENERGY);
+        return Math.round(13F * getEnergyStored(stack) / maxEnergy());
     }
 
     @Override public int getBarColor(ItemStack stack) { return 0x38C7FF; }
@@ -72,7 +74,7 @@ public final class ImagEnergyArmorItem extends ArmorItem implements IEnergyItem 
     @Override
     public void appendHoverText(ItemStack stack, Item.TooltipContext context,
                                 List<Component> tooltip, TooltipFlag flag) {
-        tooltip.add(Component.literal(getEnergyStored(stack) + "/" + MAX_ENERGY + " IF")
+        tooltip.add(Component.literal(com.mohistmc.academy.capability.ExternalEnergyConversion.describe(getEnergyStored(stack), maxEnergy()))
                 .withStyle(ChatFormatting.AQUA));
         tooltip.add(Component.translatable("item.academy.imag_energy_armor.desc")
                 .withStyle(ChatFormatting.GRAY));

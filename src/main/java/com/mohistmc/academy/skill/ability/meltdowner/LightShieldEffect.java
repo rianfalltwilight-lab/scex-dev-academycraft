@@ -187,8 +187,10 @@ public final class LightShieldEffect implements ChargingSkillEffect {
             // Final 1.12.2 handleAttacked passed these in the opposite order
             // from touch damage: 3..5 CP and 30..50 overload.
             if (pay(data, lerpf(5, 3, state.exp), lerpf(50, 30, state.exp))) {
-                float left = Math.max(0, event.getAmount()
-                        - DynamicSkillRules.damage("light_shield", lerpf(15, 50, state.exp)));
+                // 1.0.7 absorbed a flat amount; the profile may add a fraction of the hit (modern 30%).
+                float absorbed = DynamicSkillRules.damage("light_shield", lerpf(15, 50, state.exp))
+                        + com.mohistmc.academy.data.ProgressionData.lightShieldAbsorbFraction() * event.getAmount();
+                float left = Math.max(0, event.getAmount() - absorbed);
                 event.setAmount(left);
                 if (left == 0) event.setCanceled(true);
             }

@@ -31,6 +31,13 @@ import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
 public class PhaseGen extends BaseEntityBlock {
+    /** Comparators read the stored energy (MZ5 / UX-10). */
+    @Override public boolean hasAnalogOutputSignal(net.minecraft.world.level.block.state.BlockState state) { return true; }
+    @Override public int getAnalogOutputSignal(net.minecraft.world.level.block.state.BlockState state,
+            net.minecraft.world.level.Level level, net.minecraft.core.BlockPos pos) {
+        return MachineComparator.signal(level, pos);
+    }
+
     public static final MapCodec<PhaseGen> CODEC = simpleCodec(PhaseGen::new);
     private static final IntegerProperty WORKING = IntegerProperty.create("working", 0, 4);
     private static final BooleanProperty LIT = BooleanProperty.create("lit");

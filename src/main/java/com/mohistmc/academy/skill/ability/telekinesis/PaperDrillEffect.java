@@ -124,12 +124,20 @@ public final class PaperDrillEffect implements ChargingSkillEffect {
             float damage = DynamicSkillRules.damage(getId(),
                     TelekinesisRules.paperDrillDamage(proficiency));
             for (LivingEntity target : targets(player, from, to)) {
-                if (!DynamicSkillRules.tryPay(data, getId(), 100F * target.getBbHeight(), 0)) {
+                float cost = 100F * target.getBbHeight();
+                if (!DynamicSkillRules.canPay(data, getId(), cost, 0)) {
+                    stop(player, data);
+                    return false;
+                }
+                // Pulses run every tick but invulnerability frames eat most of them; only a hit that
+                // lands is paid for and trains the skill (1.12.2 charged every pulse).
+                if (!AcademyDamageHelper.hurt(player, target, com.mohistmc.academy.skill.SkillDamageSource.attack(player), damage))
+                    continue;
+                if (!DynamicSkillRules.tryPay(data, getId(), cost, 0)) {
                     stop(player, data);
                     return false;
                 }
                 DynamicSkillRules.addExp(player, data, getId(), 0.002F);
-                AcademyDamageHelper.hurt(player, target, com.mohistmc.academy.skill.SkillDamageSource.attack(player), damage);
             }
         }
         return true;

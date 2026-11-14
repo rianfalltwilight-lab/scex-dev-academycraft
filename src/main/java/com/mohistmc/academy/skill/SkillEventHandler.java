@@ -32,6 +32,7 @@ public class SkillEventHandler {
     public static void onPlayerTick(PlayerTickEvent.Post event) {
         PlayerAbilityData data = event.getEntity().getData(AcademyAttachments.PLAYER_ABILITY);
         if (event.getEntity() instanceof ServerPlayer player) data.setCreativeExempt(player.isCreative());
+        data.applyAttributes(event.getEntity());
         data.tick(); // 服务端和客户端都递减冷却
 
 

@@ -25,6 +25,9 @@ public class CPBarOverlay {
     private static final float WIDTH = 964;
     private static final float HEIGHT = 147;
     private static final float SCALE = 0.2f;
+
+    /** The 1.12.2 scale times the client option cpBarScale. */
+    private static float scale() { return SCALE * ACConfig.Client.cpBarScale(); }
     private static final int MARGIN_RIGHT = 12;
     private static final int MARGIN_TOP = 12;
 
@@ -64,19 +67,34 @@ public class CPBarOverlay {
 
         PlayerAbilityData data = mc.player.getData(AcademyAttachments.PLAYER_ABILITY);
         if (!data.hasAbility()) return;
-        if (!data.isAbilityActive()) return;
+        boolean inactive = !data.isAbilityActive();
+        if (inactive && !ACConfig.Client.showHudWhenInactive()) return;
 
         GuiGraphics g = graphics;
+        if (inactive) g.setColor(0.6f, 0.6f, 0.6f, 0.45f);
+        try {
+            renderBar(mc, g, data);
+        } finally {
+            if (inactive) g.setColor(1f, 1f, 1f, 1f);
+        }
+    }
+
+    /** 1.12.2 showed numbers only while V was held; the client option keeps them on. */
+    private static boolean numbersVisible() {
+        return showNumbers || ACConfig.Client.alwaysShowResourceNumbers();
+    }
+
+    private static void renderBar(Minecraft mc, GuiGraphics g, PlayerAbilityData data) {
         int screenW = mc.getWindow().getGuiScaledWidth();
         int screenH = mc.getWindow().getGuiScaledHeight();
 
-        float hudW = WIDTH * SCALE;
+        float hudW = WIDTH * scale();
         HudPosition position = position(screenW, screenH);
         float hudX = position.x(), hudY = position.y();
 
         g.pose().pushPose();
         g.pose().translate(hudX, hudY, 0);
-        g.pose().scale(SCALE, SCALE, 1.0f);
+        g.pose().scale(scale(), scale(), 1.0f);
 
         // Legacy CPBar: overload art during the recovery delay, then the normal bar
         // drawn faint (alpha .3) until overload drains to zero and the lock lifts.
@@ -93,29 +111,35 @@ public class CPBarOverlay {
 
         // 1.0.7 showed exact resource values only while the V activation key
         // was held. A short (<300 ms) release toggles the ability separately.
-        if (showNumbers) {
+        int textY = Math.round(hudY + HEIGHT * scale() + 2);
+        if (numbersVisible()) {
             String cp = "CP " + Math.round(data.getCurrentCp()) + " / " + Math.round(data.getMaxCp());
             String ol = "OL " + Math.round(data.getCurrentOverload()) + " / " + Math.round(data.getMaxOverload());
             int textX = Math.round(hudX + hudW - Math.max(mc.font.width(cp), mc.font.width(ol)));
-            int textY = Math.round(hudY + HEIGHT * SCALE + 2);
             g.drawString(mc.font, cp, textX, textY, 0xFFFFFFFF, true);
             g.drawString(mc.font, ol, textX, textY + 10, 0xFFFFC0A0, true);
+            textY += 20;
+        }
+        // Not only the faded bar: say that every skill is locked until overload drains.
+        if (data.isOverloadLocked() && !data.isDevMode()) {
+            var locked = net.minecraft.network.chat.Component.translatable("ac.hud.overload_locked");
+            g.drawString(mc.font, locked, Math.round(hudX + hudW - mc.font.width(locked)), textY, 0xFFFF5555, true);
         }
     }
 
     private record HudPosition(float x, float y) {}
 
     private static HudPosition position(int screenW, int screenH) {
-        float hudW = WIDTH * SCALE;
+        float hudW = WIDTH * scale();
         float hudX = screenW - hudW - MARGIN_RIGHT + ACConfig.Client.cpBarX();
         // Jade's default tooltip occupies the upper centre/right on narrow windows.
         // Keep both overlays readable without taking a compile/runtime dependency on Jade.
         float configuredY = ACConfig.Client.cpBarY();
         float hudY = ModList.get().isLoaded("jade") && ACConfig.Client.autoAvoidJade()
-                ? Math.max(configuredY, screenH - HEIGHT * SCALE - 44)
+                ? Math.max(configuredY, screenH - HEIGHT * scale() - 44)
                 : configuredY;
         hudX = Math.clamp(hudX, 0, Math.max(0, screenW - hudW));
-        hudY = Math.clamp(hudY, 0, Math.max(0, screenH - HEIGHT * SCALE));
+        hudY = Math.clamp(hudY, 0, Math.max(0, screenH - HEIGHT * scale()));
         return new HudPosition(hudX, hudY);
     }
 
@@ -127,9 +151,9 @@ public class CPBarOverlay {
         if (!data.hasAbility() || !data.isAbilityActive()) return y;
         int screenH = mc.getWindow().getGuiScaledHeight();
         HudPosition p = position(mc.getWindow().getGuiScaledWidth(), screenH);
-        int bottom = showNumbers ? Math.round(p.y() + HEIGHT * SCALE + 2) + 10 + mc.font.lineHeight
-                : (int) Math.ceil(p.y() + HEIGHT * SCALE);
-        if (x + width <= p.x() || x >= p.x() + WIDTH * SCALE || y + height <= p.y() || y >= bottom) return y;
+        int bottom = numbersVisible() ? Math.round(p.y() + HEIGHT * scale() + 2) + 10 + mc.font.lineHeight
+                : (int) Math.ceil(p.y() + HEIGHT * scale());
+        if (x + width <= p.x() || x >= p.x() + WIDTH * scale() || y + height <= p.y() || y >= bottom) return y;
         int below = bottom + 4;
         if (below + height <= screenH) return below;
         int above = (int) p.y() - height - 4;

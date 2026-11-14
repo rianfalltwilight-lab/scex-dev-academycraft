@@ -13,7 +13,7 @@ class JadeCompatibilityContractTest {
     @Test void cpHudAvoidsJadeAndJadeRemainsOptional() throws Exception {
         String hud=source("com/mohistmc/academy/client/gui/CPBarOverlay.java");
         assertTrue(hud.contains("isLoaded(\"jade\")"));
-        assertTrue(hud.contains("screenH - HEIGHT * SCALE - 44"));
+        assertTrue(hud.contains("screenH - HEIGHT * scale() - 44"), "the Jade avoidance must follow cpBarScale");
     }
 
     @Test void everyDeveloperStructurePartSharesNameAndAuthoritativeEnergy() throws Exception {

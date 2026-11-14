@@ -51,16 +51,16 @@ public record UseSkillPacket(int slotIndex, SkillInputToken actionToken) impleme
             if (!SkillInputSessionManager.accept(player, packet.actionToken())) return;
             if (AbilityInterferenceService.isInterfered(player)) { AbilityInterferenceService.notifyBlocked(player); return; }
             if (!data.isAbilityActive()) { reject(player, now, "inactive", Component.translatable("message.academy.ability.inactive")); return; }
-            if (data.isOnCooldown(skill.getId())) return;
+            if (data.isOnCooldown(skill.getId())) { com.mohistmc.academy.skill.SkillRejectFeedback.sendFor(player, now, data, skill); return; }
             // PlayerAbilityData.canUseSkill checks enabled/learned/cooldown for
             // every skill, but deliberately skips registry CP/OL for dynamic
             // contexts before their live preflight below.
             if (!data.canUseSkill(skill)) {
-                reject(player, now, "resource", Component.translatable("message.academy.skill.insufficient_cp"));
+                com.mohistmc.academy.skill.SkillRejectFeedback.sendFor(player, now, data, skill);
                 return;
             }
 
-            if (!effect.canActivate(player, data)) return;
+            if (!effect.canActivate(player, data)) { com.mohistmc.academy.skill.SkillRejectFeedback.sendFor(player, now, data, skill); return; }
             if (!com.mohistmc.academy.skill.SkillCastGate.allow(player, skill)) return;
 
             float preActivationProficiency = data.getProficiency(skill.getId());
@@ -93,7 +93,6 @@ public record UseSkillPacket(int slotIndex, SkillInputToken actionToken) impleme
     }
 
     private static void reject(ServerPlayer player, long now, String reason, Component message) {
-        if (PayloadRateLimiter.allow(player.getUUID(), "use_skill_feedback:" + reason, now, 20, 1))
-            player.sendSystemMessage(message.copy().withStyle(ChatFormatting.RED));
+        com.mohistmc.academy.skill.SkillRejectFeedback.send(player, now, reason, message);
     }
 }

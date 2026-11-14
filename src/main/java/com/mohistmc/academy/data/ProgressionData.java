@@ -1,5 +1,6 @@
 package com.mohistmc.academy.data;
 
+import com.mohistmc.academy.config.BalanceProfile;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -33,21 +34,50 @@ public final class ProgressionData extends SyncedJsonData {
     public static final int MAX_ENERGY_PER_STIMULATION = 1_000_000;
     public static final int MAX_TICKS_PER_STIMULATION = 72_000;
 
-    private static volatile Values values = new Builder().build();
+    private static final Values DEFAULTS = new Builder().build();
+    /** Built values per balance profile: built-in defaults, then the profile files, then the pack files. */
+    private static volatile Map<BalanceProfile, Values> perProfile = Map.of();
+    private static volatile Map<ResourceLocation, JsonElement> packFiles = Map.of();
+    private static volatile Map<BalanceProfile, Map<ResourceLocation, JsonElement>> profileFiles = Map.of();
 
     private ProgressionData() { super("progression", "academy_progression"); }
 
+    private static Values values() {
+        Values v = perProfile.get(BalanceProfile.current());
+        return v == null ? DEFAULTS : v;
+    }
+
     @Override
     protected void accept(Map<ResourceLocation, JsonElement> files) {
-        Builder builder = new Builder();
-        files.forEach((id, json) -> {
+        packFiles = Map.copyOf(files);
+        rebuild();
+    }
+
+    /** {@link BalanceProfileData} hands over the {@code <profile>/progression/} files. */
+    static void acceptProfileFiles(Map<BalanceProfile, Map<ResourceLocation, JsonElement>> files) {
+        profileFiles = Map.copyOf(files);
+        rebuild();
+    }
+
+    private static synchronized void rebuild() {
+        Map<BalanceProfile, Values> out = new java.util.EnumMap<>(BalanceProfile.class);
+        for (BalanceProfile profile : BalanceProfile.values()) {
+            Builder builder = new Builder();
+            apply(builder, profileFiles.getOrDefault(profile, Map.of()));
+            apply(builder, packFiles);
+            out.put(profile, builder.build());
+        }
+        perProfile = Map.copyOf(out);
+    }
+
+    private static void apply(Builder builder, Map<ResourceLocation, JsonElement> files) {
+        new TreeMap<>(files).forEach((id, json) -> {
             if (json == null || !json.isJsonObject()) {
                 LOGGER.warn("Progression file {} is not a JSON object; ignored", id);
                 return;
             }
             builder.apply(id, json.getAsJsonObject());
         });
-        values = builder.build();
     }
 
     /** Test hook: install these files as if a datapack reload delivered them (merged in id order). */
@@ -55,28 +85,91 @@ public final class ProgressionData extends SyncedJsonData {
         INSTANCE.accept(new TreeMap<>(files));
     }
 
-    /** Test hook: back to the built-in defaults. */
+    /** Test hook: back to the built-in defaults (the profile layer stays). */
     public static void resetForTest() {
         INSTANCE.accept(Map.of());
     }
 
+    // ---- machines (balance profile multipliers over the [machines] config; 1 in 1.0.7) -------------
+
+    /** Multiplier for one category of machine numbers; see {@code MachineConfig.Scale}. */
+    public static float machineScale(com.mohistmc.academy.config.MachineConfig.Scale scale) {
+        Values v = values();
+        return switch (scale) {
+            case NONE -> 1;
+            case STORAGE -> v.machineStorage;
+            case BANDWIDTH -> v.machineBandwidth;
+            case GENERATION -> v.machineGeneration;
+            case RANGE -> v.machineRange;
+            case ITEM -> v.itemEnergy;
+        };
+    }
+
+    // ---- combat (balance profile knobs; all neutral in 1.0.7) --------------------------------------
+
+    /** Ability damage a player deals is multiplied by this per ability level L0..L5. */
+    public static float levelDamageMultiplier(int level) { return values().levelDamageMultiplier[level(level)]; }
+    /** Extra damage on {@code c:bosses}: this fraction of the target's max health ... */
+    public static float bossMaxHealthFraction() { return values().bossMaxHealthFraction; }
+    /** ... but at most this multiple of the hit itself. */
+    public static float bossBonusCap() { return values().bossBonusCap; }
+    /** Fraction of the target's armour reduction that ability damage ignores. */
+    public static float armorPierce() { return values().armorPierce; }
+    /** Mob casts scale with the caster's attack damage relative to its base value. */
+    public static boolean mobAttackScaling() { return values().mobAttackScaling; }
+    /** A mob-cast hit on a player is capped at this fraction of the player's max health (0 = no cap). */
+    public static float mobHitCapVsPlayers() { return values().mobHitCapVsPlayers; }
+    /** Defensive CP costs per damage point use {@code damage ^ exponent} (1.0.7: 1, linear). */
+    public static float defenseCostExponent() { return values().defenseCostExponent; }
+    /** Vector Deviation pays this much CP per damage point on top of its flat cost. */
+    public static float deviationCostPerDamage() { return values().deviationCostPerDamage; }
+    /** Light Shield also absorbs this fraction of the hit on top of its flat amount. */
+    public static float lightShieldAbsorbFraction() { return values().lightShieldAbsorbFraction; }
+    /** Whether reflected damage takes the reflector's skill_damage, skill_power and level scaling. */
+    public static boolean reflectionUsesOffenseScaling() { return values().reflectionUsesOffenseScaling; }
+    /** Extra max health a player gets per ability level L0..L5. */
+    public static float levelMaxHealth(int level) { return values().levelMaxHealth[level(level)]; }
+
+    // ---- rules (balance profile knobs) -----------------------------------------------------------
+
+    /** Multiplies the config {@code cpRecoverSpeed}. */
+    public static float cpRecoveryMultiplier() { return values().cpRecoveryMultiplier; }
+    /** Multiplies the config {@code overloadRecoverSpeed}. */
+    public static float overloadRecoveryMultiplier() { return values().overloadRecoveryMultiplier; }
+    /** Multiplies the config {@code maxCpIncreaseRate} and {@code maxOverloadIncreaseRate}. */
+    public static float usageGrowthMultiplier() { return values().usageGrowthMultiplier; }
+    /** Multiplies the config {@code proficiencyIncreaseRate}. */
+    public static float proficiencyGainMultiplier() { return values().proficiencyGainMultiplier; }
+    /** 1.0.7 cleared usage growth on every level change; true keeps it (still capped by the new level). */
+    public static boolean keepUsageGrowthOnLevelUp() { return values().keepUsageGrowthOnLevelUp; }
+    /** The overload lock lifts at or below this fraction of max overload (1.0.7: 0, i.e. fully drained). */
+    public static float overloadUnlockFraction() { return values().overloadUnlockFraction; }
+    /** CP cost at full proficiency is {@code 1 - discount} of the cost at zero (linear in proficiency). */
+    public static float proficiencyCpDiscount() { return values().proficiencyCpDiscount; }
+    /** Prerequisite proficiency requirements above this are lowered to it (1.0.7: 1, no cap). */
+    public static float prerequisiteProficiencyCap() { return values().prerequisiteProficiencyCap; }
+    /** A CP potion refills up to this fraction of max CP (1.0.7: 0.5). */
+    public static float cpPotionRestoreFraction() { return values().cpPotionRestoreFraction; }
+    /** ... but at most this much CP (1.0.7: 2000). */
+    public static float cpPotionMaxRestore() { return values().cpPotionMaxRestore; }
+
     // ---- resources -------------------------------------------------------------------------------
 
     private static int level(int value) { return Math.clamp(value, 0, 5); }
-    public static float initialCp(int level) { return values.cpInitial[level(level)]; }
-    public static float maxAddedCp(int level) { return values.cpMaxAdded[level(level)]; }
-    public static float initialOverload(int level) { return values.overloadInitial[level(level)]; }
-    public static float maxAddedOverload(int level) { return values.overloadMaxAdded[level(level)]; }
+    public static float initialCp(int level) { return values().cpInitial[level(level)]; }
+    public static float maxAddedCp(int level) { return values().cpMaxAdded[level(level)]; }
+    public static float initialOverload(int level) { return values().overloadInitial[level(level)]; }
+    public static float maxAddedOverload(int level) { return values().overloadMaxAdded[level(level)]; }
 
-    public static float brainCourseCp() { return values.brainCourseCp; }
-    public static float brainCourseAdvancedCp() { return values.brainCourseAdvancedCp; }
-    public static float brainCourseAdvancedOverload() { return values.brainCourseAdvancedOverload; }
-    public static float mindCourseRecovery() { return values.mindCourseRecovery; }
+    public static float brainCourseCp() { return values().brainCourseCp; }
+    public static float brainCourseAdvancedCp() { return values().brainCourseAdvancedCp; }
+    public static float brainCourseAdvancedOverload() { return values().brainCourseAdvancedOverload; }
+    public static float mindCourseRecovery() { return values().mindCourseRecovery; }
 
     // ---- level-up gauge --------------------------------------------------------------------------
 
     /** Gauge experience needed per controllable skill of the current level before the next level-up. */
-    public static float thresholdPerSkill(int level) { return values.thresholdPerSkill[level(level)]; }
+    public static float thresholdPerSkill(int level) { return values().thresholdPerSkill[level(level)]; }
 
     // ---- developer machines ----------------------------------------------------------------------
 
@@ -84,7 +177,7 @@ public final class ProgressionData extends SyncedJsonData {
 
     /** The datapack value of one developer field, or {@code fallback} (the enum's built-in value). */
     public static int developer(DevMachineType type, DeveloperField field, int fallback) {
-        Integer[] row = values.developer.get(type);
+        Integer[] row = values().developer.get(type);
         Integer value = row == null ? null : row[field.ordinal()];
         return value == null ? fallback : value;
     }
@@ -98,28 +191,28 @@ public final class ProgressionData extends SyncedJsonData {
 
     /** 1.0.7 DevelopActionSkill: {@code (int)(3 + level * level * 0.5)}. */
     public static int learnStimulations(int skillLevel) {
-        Values v = values;
+        Values v = values();
         return stimulations(v.learnBase + skillLevel * skillLevel * v.learnPerLevelSquared);
     }
 
     /** 1.0.7 DevelopActionLevel: {@code 5 * (currentLevel + 1)}. */
     public static int levelUpStimulations(int currentLevel) {
-        return stimulations((float) values.levelUpPerLevel * (currentLevel + 1));
+        return stimulations((float) values().levelUpPerLevel * (currentLevel + 1));
     }
 
     /** 1.0.7 DevelopActionReset: {@code currentLevel * 10}. */
     public static int resetStimulations(int currentLevel) {
-        return stimulations((float) values.resetPerLevel * currentLevel);
+        return stimulations((float) values().resetPerLevel * currentLevel);
     }
 
     /** 1.0.7 DevelopActionLevel at level zero: five stimulations. */
-    public static int inductionStimulations() { return stimulations(values.induction); }
+    public static int inductionStimulations() { return stimulations(values().induction); }
 
     // ---- induction -------------------------------------------------------------------------------
 
     /** Weight of a category in an induction without a factor (unlisted categories weigh 1). */
     public static double inductionWeight(AbilityCategory category) {
-        Double weight = values.categoryWeights.get(category.id());
+        Double weight = values().categoryWeights.get(category.id());
         return weight == null ? 1.0 : weight;
     }
 
@@ -157,7 +250,17 @@ public final class ProgressionData extends SyncedJsonData {
                           float mindCourseRecovery, float[] thresholdPerSkill,
                           Map<DevMachineType, Integer[]> developer,
                           float learnBase, float learnPerLevelSquared, int levelUpPerLevel, int resetPerLevel,
-                          int induction, Map<String, Double> categoryWeights) {}
+                          int induction, Map<String, Double> categoryWeights,
+                          float cpRecoveryMultiplier, float overloadRecoveryMultiplier, float usageGrowthMultiplier,
+                          float proficiencyGainMultiplier, boolean keepUsageGrowthOnLevelUp, float overloadUnlockFraction,
+                          float proficiencyCpDiscount, float prerequisiteProficiencyCap,
+                          float cpPotionRestoreFraction, float cpPotionMaxRestore,
+                          float[] levelDamageMultiplier, float bossMaxHealthFraction, float bossBonusCap,
+                          float armorPierce, boolean mobAttackScaling, float mobHitCapVsPlayers,
+                          float defenseCostExponent, float deviationCostPerDamage, float lightShieldAbsorbFraction,
+                          boolean reflectionUsesOffenseScaling, float[] levelMaxHealth,
+                          float machineStorage, float machineBandwidth, float machineGeneration, float machineRange,
+                          float itemEnergy) {}
 
     /** Holds the built-in defaults; each file overrides the fields it names. */
     private static final class Builder {
@@ -177,6 +280,28 @@ public final class ProgressionData extends SyncedJsonData {
         int resetPerLevel = 10;
         int induction = 5;
         final Map<String, Double> categoryWeights = new LinkedHashMap<>();
+        float cpRecoveryMultiplier = 1;
+        float overloadRecoveryMultiplier = 1;
+        float usageGrowthMultiplier = 1;
+        float proficiencyGainMultiplier = 1;
+        boolean keepUsageGrowthOnLevelUp = false;
+        float overloadUnlockFraction = 0;
+        float proficiencyCpDiscount = 0;
+        float prerequisiteProficiencyCap = 1;
+        float cpPotionRestoreFraction = .5f;
+        float cpPotionMaxRestore = 2000;
+        float[] levelDamageMultiplier = {1, 1, 1, 1, 1, 1};
+        float bossMaxHealthFraction = 0;
+        float bossBonusCap = 0;
+        float armorPierce = 0;
+        boolean mobAttackScaling = false;
+        float mobHitCapVsPlayers = 0;
+        float defenseCostExponent = 1;
+        float deviationCostPerDamage = 0;
+        float lightShieldAbsorbFraction = 0;
+        boolean reflectionUsesOffenseScaling = true;
+        float[] levelMaxHealth = {0, 0, 0, 0, 0, 0};
+        float machineStorage = 1, machineBandwidth = 1, machineGeneration = 1, machineRange = 1, itemEnergy = 1;
 
         private ResourceLocation file;
 
@@ -187,7 +312,14 @@ public final class ProgressionData extends SyncedJsonData {
                     overloadMaxAdded.clone(), brainCourseCp, brainCourseAdvancedCp, brainCourseAdvancedOverload,
                     mindCourseRecovery, thresholdPerSkill.clone(), dev, learnBase,
                     learnPerLevelSquared, levelUpPerLevel, resetPerLevel, induction,
-                    Map.copyOf(categoryWeights));
+                    Map.copyOf(categoryWeights), cpRecoveryMultiplier, overloadRecoveryMultiplier,
+                    usageGrowthMultiplier, proficiencyGainMultiplier, keepUsageGrowthOnLevelUp,
+                    overloadUnlockFraction, proficiencyCpDiscount, prerequisiteProficiencyCap,
+                    cpPotionRestoreFraction, cpPotionMaxRestore, levelDamageMultiplier.clone(),
+                    bossMaxHealthFraction, bossBonusCap, armorPierce, mobAttackScaling, mobHitCapVsPlayers,
+                    defenseCostExponent, deviationCostPerDamage, lightShieldAbsorbFraction,
+                    reflectionUsesOffenseScaling, levelMaxHealth.clone(), machineStorage, machineBandwidth,
+                    machineGeneration, machineRange, itemEnergy);
         }
 
         void apply(ResourceLocation id, JsonObject root) {
@@ -238,6 +370,51 @@ public final class ProgressionData extends SyncedJsonData {
                 resetPerLevel = integer(stim, "stimulations.", "reset_per_level", resetPerLevel,
                         1, MAX_STIMULATIONS);
                 induction = integer(stim, "stimulations.", "induction", induction, 1, MAX_STIMULATIONS);
+            }
+            JsonObject rules = object(root, "", "rules");
+            if (rules != null) {
+                cpRecoveryMultiplier = number(rules, "rules.", "cp_recovery_multiplier", cpRecoveryMultiplier, 100);
+                overloadRecoveryMultiplier = number(rules, "rules.", "overload_recovery_multiplier",
+                        overloadRecoveryMultiplier, 100);
+                usageGrowthMultiplier = number(rules, "rules.", "usage_growth_multiplier", usageGrowthMultiplier, 1000);
+                proficiencyGainMultiplier = number(rules, "rules.", "proficiency_gain_multiplier",
+                        proficiencyGainMultiplier, 100);
+                keepUsageGrowthOnLevelUp = bool(rules, "rules.", "keep_usage_growth_on_level_up",
+                        keepUsageGrowthOnLevelUp);
+                overloadUnlockFraction = number(rules, "rules.", "overload_unlock_fraction", overloadUnlockFraction, 1);
+                proficiencyCpDiscount = number(rules, "rules.", "proficiency_cp_discount", proficiencyCpDiscount, .9f);
+                prerequisiteProficiencyCap = number(rules, "rules.", "prerequisite_proficiency_cap",
+                        prerequisiteProficiencyCap, 1);
+            }
+            JsonObject potion = object(root, "", "cp_potion");
+            if (potion != null) {
+                cpPotionRestoreFraction = number(potion, "cp_potion.", "restore_fraction", cpPotionRestoreFraction, 1);
+                cpPotionMaxRestore = number(potion, "cp_potion.", "max_restore", cpPotionMaxRestore, 1e9f);
+            }
+            JsonObject combat = object(root, "", "combat");
+            if (combat != null) {
+                levelDamageMultiplier = levels(combat, "combat.", "level_damage_multiplier", levelDamageMultiplier);
+                bossMaxHealthFraction = number(combat, "combat.", "boss_max_health_fraction", bossMaxHealthFraction, 1);
+                bossBonusCap = number(combat, "combat.", "boss_bonus_cap", bossBonusCap, 100);
+                armorPierce = number(combat, "combat.", "armor_pierce", armorPierce, 1);
+                mobAttackScaling = bool(combat, "combat.", "mob_attack_scaling", mobAttackScaling);
+                mobHitCapVsPlayers = number(combat, "combat.", "mob_hit_cap_vs_players", mobHitCapVsPlayers, 100);
+                defenseCostExponent = number(combat, "combat.", "defense_cost_exponent", defenseCostExponent, 2);
+                deviationCostPerDamage = number(combat, "combat.", "deviation_cost_per_damage",
+                        deviationCostPerDamage, 1000);
+                lightShieldAbsorbFraction = number(combat, "combat.", "light_shield_absorb_fraction",
+                        lightShieldAbsorbFraction, 1);
+                reflectionUsesOffenseScaling = bool(combat, "combat.", "reflection_uses_offense_scaling",
+                        reflectionUsesOffenseScaling);
+                levelMaxHealth = levels(combat, "combat.", "level_max_health", levelMaxHealth);
+            }
+            JsonObject machines = object(root, "", "machines");
+            if (machines != null) {
+                machineStorage = number(machines, "machines.", "storage_multiplier", machineStorage, 1000);
+                machineBandwidth = number(machines, "machines.", "bandwidth_multiplier", machineBandwidth, 1000);
+                machineGeneration = number(machines, "machines.", "generation_multiplier", machineGeneration, 1000);
+                machineRange = number(machines, "machines.", "range_multiplier", machineRange, 10);
+                itemEnergy = number(machines, "machines.", "item_energy_multiplier", itemEnergy, 1000);
             }
             JsonObject induct = object(root, "", "induction");
             if (induct != null) {
@@ -338,6 +515,14 @@ public final class ProgressionData extends SyncedJsonData {
                 LOGGER.warn("Progression file {}: {} = {} used as {}", file, prefix + key, value, clamped);
             }
             return clamped;
+        }
+
+        private boolean bool(JsonObject parent, String prefix, String key, boolean fallback) {
+            if (!parent.has(key)) return fallback;
+            JsonElement e = parent.get(key);
+            if (e.isJsonPrimitive() && e.getAsJsonPrimitive().isBoolean()) return e.getAsBoolean();
+            warn(prefix + key, "must be true or false");
+            return fallback;
         }
 
         private static Double finiteNumber(JsonElement element) {

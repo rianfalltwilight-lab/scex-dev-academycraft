@@ -43,7 +43,9 @@ public final class EnergyBridgeOutputBlockEntity extends EnergyBridgeBlockEntity
                     BlockCapabilityCache.create(Capabilities.EnergyStorage.BLOCK, server,
                             worldPosition.relative(side), side.getOpposite(),
                             () -> !isRemoved() && getLevel() == server, () -> {})).getCapability();
-            if (target == null || !target.canReceive()) continue;
+            // AcademyCraft's own machines are fed by the wireless network; pushing into them would loop.
+            if (target == null || !target.canReceive()
+                    || target instanceof com.mohistmc.academy.capability.BandwidthFeView) continue;
             int offered = getStoredFe();
             int accepted = Math.clamp(target.receiveEnergy(offered, false), 0, offered);
             if (accepted > 0) extractExternalFe(accepted, false);

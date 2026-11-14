@@ -64,16 +64,20 @@ public class SettingsAppGui extends AcademyScreen {
         Minecraft mc = Minecraft.getInstance();
         rows.add(new SettingRow(Component.translatable("ac.settings.cat.keys"), Component.empty(), RowType.HEADER));
         rows.add(new SettingRow(Component.translatable("ac.settings.key.open_slots"),
-                KeyInputHandler.OPEN_SKILL_SLOT.getTranslatedKeyMessage(), RowType.INFO));
+                keyValue(mc, KeyInputHandler.OPEN_SKILL_SLOT), RowType.INFO));
         rows.add(new SettingRow(Component.translatable("ac.settings.key.toggle_ability"),
-                KeyInputHandler.TOGGLE_ABILITY.getTranslatedKeyMessage(), RowType.INFO));
+                keyValue(mc, KeyInputHandler.TOGGLE_ABILITY), RowType.INFO));
         rows.add(new SettingRow(Component.translatable("ac.settings.key.switch_preset"),
-                KeyInputHandler.SWITCH_PRESET.getTranslatedKeyMessage(), RowType.INFO));
+                keyValue(mc, KeyInputHandler.SWITCH_PRESET), RowType.INFO));
+        rows.add(new SettingRow(Component.translatable("key.academy.open_terminal"),
+                keyValue(mc, KeyInputHandler.OPEN_TERMINAL), RowType.INFO));
 
         for (int i = 0; i < KeyInputHandler.getSkillKeys().length; i++) {
             rows.add(new SettingRow(Component.translatable("ac.settings.key.slot", i + 1),
-                    KeyInputHandler.getSkillKeys()[i].getTranslatedKeyMessage(), RowType.INFO));
+                    keyValue(mc, KeyInputHandler.getSkillKeys()[i]), RowType.INFO));
         }
+        rows.add(new SettingRow(Component.translatable("ac.settings.key.rebind"), Component.literal(">"),
+                RowType.ACTION, SettingKey.REBIND, false));
 
         rows.add(new SettingRow(Component.empty(), Component.empty(), RowType.SEPARATOR));
         rows.add(new SettingRow(Component.translatable("ac.settings.cat.generic"), Component.empty(), RowType.HEADER));
@@ -95,6 +99,8 @@ public class SettingsAppGui extends AcademyScreen {
         rows.add(toggleRow("ac.settings.prop.autoAvoidJade", ACConfig.Client.autoAvoidJade(), SettingKey.AUTO_AVOID_JADE));
         rows.add(new SettingRow(Component.translatable("ac.settings.prop.editHud"), Component.literal(">"),
                 RowType.ACTION, SettingKey.EDIT_HUD, false));
+        rows.add(new SettingRow(Component.translatable("ac.settings.prop.allSettings"), Component.literal(">"),
+                RowType.ACTION, SettingKey.ALL_SETTINGS, false));
 
         rows.add(new SettingRow(Component.empty(), Component.empty(), RowType.SEPARATOR));
         rows.add(new SettingRow(Component.translatable("ac.settings.cat.audio"), Component.empty(), RowType.HEADER));
@@ -114,6 +120,14 @@ public class SettingsAppGui extends AcademyScreen {
                         Component.literal(String.format("%.0f / %.0f", data.getCurrentCp(), data.getMaxCp())), RowType.INFO));
                 rows.add(new SettingRow(Component.translatable("ac.settings.ability.overload"),
                         Component.literal(String.format("%.0f / %.0f", data.getCurrentOverload(), data.getMaxOverload())), RowType.INFO));
+                // Usage growth: max CP / overload earned by spending them, capped per level.
+                int level = data.getPlayerLevel();
+                rows.add(new SettingRow(Component.translatable("ac.settings.ability.cp_growth"),
+                        Component.literal(String.format("%.0f / %.0f", data.getUsageMaxCp(),
+                                com.mohistmc.academy.data.ProgressionData.maxAddedCp(level))), RowType.INFO));
+                rows.add(new SettingRow(Component.translatable("ac.settings.ability.overload_growth"),
+                        Component.literal(String.format("%.0f / %.0f", data.getUsageMaxOverload(),
+                                com.mohistmc.academy.data.ProgressionData.maxAddedOverload(level))), RowType.INFO));
                 rows.add(new SettingRow(Component.translatable("ac.settings.ability.skills"),
                         Component.translatable("ac.settings.ability.skill_count", data.getLearnedSkills().size()), RowType.INFO));
                 boolean active = data.isAbilityActive();
@@ -220,6 +234,18 @@ public class SettingsAppGui extends AcademyScreen {
                 Minecraft.getInstance().setScreen(new HudCustomizeGui());
                 return;
             }
+            case REBIND -> {
+                Minecraft mc = Minecraft.getInstance();
+                mc.setScreen(new net.minecraft.client.gui.screens.options.controls.KeyBindsScreen(this, mc.options));
+                return;
+            }
+            case ALL_SETTINGS -> {
+                Minecraft mc = Minecraft.getInstance();
+                net.neoforged.fml.ModList.get().getModContainerById(com.mohistmc.academy.AcademyCraft.MODID)
+                        .ifPresent(container -> mc.setScreen(
+                                new net.neoforged.neoforge.client.gui.ConfigurationScreen(container, this)));
+                return;
+            }
             case PVP -> PacketDistributor.sendToServer(new SettingsConfigPacket(
                     SettingsConfigPacket.PVP, !ACConfig.Server.pvpEnabled()));
             case DESTROY_BLOCKS -> {
@@ -281,7 +307,22 @@ public class SettingsAppGui extends AcademyScreen {
     private enum SettingKey {
         PVP, DESTROY_BLOCKS, HEADS_OR_TAILS,
         SHOW_HUD, SHOW_CP_BAR, SHOW_CHARGING_HUD, SHOW_KEY_HINTS,
-        AUTO_AVOID_JADE, EDIT_HUD, SKILL_SOUNDS
+        AUTO_AVOID_JADE, EDIT_HUD, SKILL_SOUNDS, REBIND, ALL_SETTINGS
+    }
+
+    /** The bound key, red with a marker when another key mapping uses the same key. */
+    private static Component keyValue(Minecraft mc, net.minecraft.client.KeyMapping mapping) {
+        Component name = mapping.getTranslatedKeyMessage();
+        // Mouse slots share LMB/RMB with attack/use on purpose: they only take over while the ability is on.
+        if (mapping.isUnbound() || mapping.getKey().getType() == com.mojang.blaze3d.platform.InputConstants.Type.MOUSE)
+            return name;
+        for (net.minecraft.client.KeyMapping other : mc.options.keyMappings) {
+            if (other != mapping && mapping.same(other)) {
+                return Component.translatable("ac.settings.key.conflict", name)
+                        .withStyle(net.minecraft.ChatFormatting.RED);
+            }
+        }
+        return name;
     }
 
     private record SettingRow(Component label, Component value, RowType type, SettingKey key, boolean enabled) {

@@ -36,22 +36,23 @@ public class MatrixMenu extends AcademyMenu {
                     return switch (index) {
                         case 0 -> be.isInitialized() ? 1 : 0;
                         case 1 -> be.getCapacity();
-                        case 2 -> (int) be.getBandwidth();
+                        case 2 -> MenuDataWords.low(clampInt(be.getBandwidth()));
                         case 3 -> (int) be.getRange();
                         case 4 -> (be.hasPasswordConfigured() ? 1 : 0)
                                 | (be.hasInitializationMaterials() ? 2 : 0);
+                        case 5 -> MenuDataWords.high(clampInt(be.getBandwidth()));
                         default -> 0;
                     };
                 }
                 @Override public void set(int index, int value) {}
-                @Override public int getCount() { return 5; }
+                @Override public int getCount() { return 6; }
             };
         } else {
             initialSsid = data != null && data.readableBytes() > 0
                     ? data.readUtf(NetworkInputLimits.SSID) : "";
             ownerLabel = data != null && data.readableBytes() > 0 ? data.readUtf(64) : "";
             canEdit = data != null && data.readableBytes() > 0 && data.readBoolean();
-            machineData = new SimpleContainerData(5);
+            machineData = new SimpleContainerData(6);
         }
         addDataSlots(machineData);
 
@@ -86,7 +87,12 @@ public class MatrixMenu extends AcademyMenu {
     public boolean isInitialized() { return machineData.get(0) != 0; }
     public boolean isOperational() { return isInitialized() && hasInitializationMaterials(); }
     public int getCapacity() { return Math.max(0, machineData.get(1)); }
-    public int getBandwidth() { return Math.max(0, machineData.get(2)); }
+    public int getBandwidth() { return Math.max(0, MenuDataWords.join(machineData.get(2), machineData.get(5))); }
+
+    /** Menu data words carry 32 bits; bandwidths above Integer.MAX_VALUE saturate. */
+    private static int clampInt(double value) {
+        return !Double.isFinite(value) || value <= 0 ? 0 : (int) Math.min(Integer.MAX_VALUE, value);
+    }
     public int getRange() { return Math.max(0, machineData.get(3)); }
     public boolean hasPasswordConfigured() { return (machineData.get(4) & 1) != 0; }
     public boolean hasInitializationMaterials() { return (machineData.get(4) & 2) != 0; }

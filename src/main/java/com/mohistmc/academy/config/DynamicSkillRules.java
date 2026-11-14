@@ -22,22 +22,26 @@ public final class DynamicSkillRules {
  public static boolean destroysBlocks(net.minecraft.world.level.Level level,String id){
   return tuning(id).destroyBlocks()&&ACConfig.Server.mayDestroyBlocks(level);
  }
+ /** CP a player pays: the tuned cost times the player's cp_cost attribute and proficiency discount. */
+ public static float playerCp(PlayerAbilityData data,String id,float raw){return scale(cp(id,raw),data.cpCostFactor(id));}
  public static boolean canPay(PlayerAbilityData data,String id,float rawCp,float rawOverload){
-  if(!enabled(id))return false;if(data.isDevMode())return true;float cp=cp(id,rawCp),ol=overload(id,rawOverload);
+  if(!enabled(id))return false;if(data.isDevMode())return true;float cp=playerCp(data,id,rawCp),ol=overload(id,rawOverload);
   // CPData.perform: only CP gates a cast; overload clamps at its cap and then locks every skill.
-  return cp>=0&&ol>=0&&!data.isOverloadLocked()&&data.canAffordCp(cp);
+  if(cp>=0&&ol>=0&&!data.isOverloadLocked()&&data.canAffordCp(cp))return true;
+  if(cp>0&&!data.canAffordCp(cp))data.noteCpShortfall(cp);
+  return false;
  }
  public static void addExp(ServerPlayer player,PlayerAbilityData data,String id,float raw){
   AbilityMutationService.addSkillExp(player,data,id,exp(id,raw));
  }
  public static boolean tryPay(PlayerAbilityData data,String id,float rawCp,float rawOverload){
-  if(!canPay(data,id,rawCp,rawOverload))return false;if(data.isDevMode())return true;float cp=cp(id,rawCp),ol=overload(id,rawOverload);
+  if(!canPay(data,id,rawCp,rawOverload))return false;if(data.isDevMode())return true;float cp=playerCp(data,id,rawCp),ol=overload(id,rawOverload);
   return data.tryConsumeDynamic(cp,ol);
  }
  public static boolean payForced(PlayerAbilityData data,String id,float rawCp,float rawOverload){
   if(!enabled(id)||!Float.isFinite(rawCp)||!Float.isFinite(rawOverload)||rawCp<0||rawOverload<0)return false;
   if(data.isDevMode())return true;
-  return data.consumeDynamicForced(cp(id,rawCp),overload(id,rawOverload));
+  return data.consumeDynamicForced(playerCp(data,id,rawCp),overload(id,rawOverload));
  }
  static float scale(float raw,float multiplier){if(!Float.isFinite(raw)||raw<0)return 0;float v=raw*multiplier;return Float.isFinite(v)?Math.max(0,v):0;}
 }

@@ -11,7 +11,7 @@ import java.util.List;
  * ({@code data/<ns>/data_maps/entity_type/mob_skills.json}): which skills every mob of that type casts
  * through {@link AbilityCastGoal}, and how often.
  */
-public record MobSkills(List<Entry> skills, int castInterval, boolean needsLineOfSight) {
+public record MobSkills(List<Entry> skills, int castInterval, boolean needsLineOfSight, float damageScale) {
     public static final int DEFAULT_CAST_INTERVAL = 40;
     public static final float DEFAULT_PROFICIENCY = 0.5F;
     public static final double DEFAULT_MAX_RANGE = 16.0;
@@ -53,13 +53,19 @@ public record MobSkills(List<Entry> skills, int castInterval, boolean needsLineO
     public static final Codec<MobSkills> CODEC = RecordCodecBuilder.create(i -> i.group(
             Entry.CODEC.listOf().optionalFieldOf("skills", List.of()).forGetter(MobSkills::skills),
             Codec.intRange(1, MAX_TICKS).optionalFieldOf("cast_interval", DEFAULT_CAST_INTERVAL).forGetter(MobSkills::castInterval),
-            Codec.BOOL.optionalFieldOf("needs_line_of_sight", true).forGetter(MobSkills::needsLineOfSight)
+            Codec.BOOL.optionalFieldOf("needs_line_of_sight", true).forGetter(MobSkills::needsLineOfSight),
+            Codec.floatRange(0F, 1000F).optionalFieldOf("damage_scale", 1F).forGetter(MobSkills::damageScale)
     ).apply(i, MobSkills::new));
 
     /** Used for mobs that only have attachment skills. */
-    public static final MobSkills DEFAULT = new MobSkills(List.of(), DEFAULT_CAST_INTERVAL, true);
+    public static final MobSkills DEFAULT = new MobSkills(List.of(), DEFAULT_CAST_INTERVAL, true, 1F);
 
     public MobSkills {
         skills = List.copyOf(skills);
+    }
+
+    /** Without a damage scale (1). */
+    public MobSkills(List<Entry> skills, int castInterval, boolean needsLineOfSight) {
+        this(skills, castInterval, needsLineOfSight, 1F);
     }
 }

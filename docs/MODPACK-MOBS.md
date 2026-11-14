@@ -61,6 +61,7 @@ Non-player mobs can cast skills whose effect implements `MobCastable`. `/academy
 | `skills[].cooldown_ticks` | 0 | 每个生物额外的最短冷却（与技能冷却取较大值）/ extra per-mob minimum cooldown (the longer one applies) |
 | `cast_interval` | 40 | 两次尝试之间的 tick / ticks between attempts (1..72000) |
 | `needs_line_of_sight` | true | 需要看见目标 / needs to see the target |
+| `damage_scale` | 1 | 该类型生物所有技能伤害的倍率（0..1000）/ multiplier on every skill hit this type deals |
 
 ```json
 {

@@ -14,7 +14,7 @@ public final class PenetrateTargeting {
 
     public static double maximumDistance(PlayerAbilityData data) {
         float exp = data.getProficiency("penetrate_teleport");
-        double perBlock = Math.max(.0001, DynamicSkillRules.cp("penetrate_teleport", lerpf(14, 9, exp)));
+        double perBlock = Math.max(.0001, DynamicSkillRules.playerCp(data, "penetrate_teleport", lerpf(14, 9, exp)));
         double distance = lerpf(10, 35, exp);
         return data.isDevMode() ? distance : Math.min(distance, data.getCurrentCp() / perBlock);
     }

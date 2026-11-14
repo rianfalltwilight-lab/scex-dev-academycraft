@@ -2775,13 +2775,17 @@ public final class AcademyServerGameTests {
         // area instead of each template's transformed X/Z.  Compare the
         // synchronous delta so tutorial drops belonging to other fixtures do
         // not make this per-player idempotency check order-dependent.
+        // MZ5: generic.tutorialToInventory (default true) hands the item over directly; count the
+        // inventory and the drops together so either delivery counts once.
         long before = helper.getLevel().getEntitiesOfClass(ItemEntity.class, area,
-                entity -> entity.getItem().is(AcademyItems.TUTORIAL.get())).size();
+                entity -> entity.getItem().is(AcademyItems.TUTORIAL.get())).size()
+                + player.getInventory().countItem(AcademyItems.TUTORIAL.get());
         var listener = new ServerListener();
         listener.onPlayerLogin(new PlayerEvent.PlayerLoggedInEvent(player));
         listener.onPlayerLogin(new PlayerEvent.PlayerLoggedInEvent(player));
         long after = helper.getLevel().getEntitiesOfClass(ItemEntity.class, area,
-                entity -> entity.getItem().is(AcademyItems.TUTORIAL.get())).size();
+                entity -> entity.getItem().is(AcademyItems.TUTORIAL.get())).size()
+                + player.getInventory().countItem(AcademyItems.TUTORIAL.get());
         if (!data.isTutorialItemGranted() || after - before != 1) {
             helper.fail("legacy first-login tutorial item delta was not exactly one: " + (after - before));
             return;

@@ -26,7 +26,7 @@ public final class MetalFormerJeiCategory implements IRecipeCategory<RecipeHolde
     @Override public Component getTitle() { return Component.translatable("container.academy.metal_former"); }
     @Override public IDrawable getIcon() { return icon; }
     @Override public int getWidth() { return 116; }
-    @Override public int getHeight() { return 54; }
+    @Override public int getHeight() { return 64; }
     @Override public void setRecipe(IRecipeLayoutBuilder b, RecipeHolder<MetalFormingRecipe> holder, IFocusGroup focuses) {
         var recipe = holder.value();
         List<ItemStack> inputs = Arrays.stream(recipe.getIngredients().getFirst().getItems())
@@ -43,6 +43,8 @@ public final class MetalFormerJeiCategory implements IRecipeCategory<RecipeHolde
     public void draw(RecipeHolder<MetalFormingRecipe> holder, IRecipeSlotsView slots, GuiGraphics graphics,
                      double mouseX, double mouseY) {
         graphics.drawString(Minecraft.getInstance().font, modeLabel(holder.value()), 8, 39, 0xFF404040, false);
+        graphics.drawString(Minecraft.getInstance().font, AcademyJeiPlugin.timeAndEnergy(holder.value().processTime(),
+                holder.value().energyPerTick()), 8, 53, 0xFF404040, false);
     }
 
     @Override

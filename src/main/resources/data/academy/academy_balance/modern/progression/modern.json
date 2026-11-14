@@ -1,0 +1,51 @@
+{
+  "cp": {
+    "initial": [2000, 2000, 3500, 6000, 10000, 16000],
+    "max_added": [0, 1000, 1750, 3000, 5000, 8000]
+  },
+  "overload": {
+    "initial": [150, 150, 240, 380, 560, 800],
+    "max_added": [0, 60, 105, 120, 150, 750]
+  },
+  "level_up": {
+    "threshold_per_skill": [0.4, 0.4, 0.4, 0.4, 0.8, 0.4]
+  },
+  "rules": {
+    "cp_recovery_multiplier": 2.25,
+    "usage_growth_multiplier": 8,
+    "proficiency_gain_multiplier": 2,
+    "keep_usage_growth_on_level_up": true,
+    "overload_unlock_fraction": 0.5,
+    "proficiency_cp_discount": 0.5,
+    "prerequisite_proficiency_cap": 0.75
+  },
+  "cp_potion": {
+    "restore_fraction": 0.5,
+    "max_restore": 1000000000
+  },
+  "combat": {
+    "level_damage_multiplier": [1, 1, 1.5, 2.25, 3.4, 5],
+    "boss_max_health_fraction": 0.02,
+    "boss_bonus_cap": 2,
+    "armor_pierce": 0.25,
+    "mob_attack_scaling": true,
+    "mob_hit_cap_vs_players": 0.5,
+    "defense_cost_exponent": 0.7,
+    "deviation_cost_per_damage": 0.5,
+    "light_shield_absorb_fraction": 0.3,
+    "reflection_uses_offense_scaling": false,
+    "level_max_health": [0, 0, 2, 4, 8, 12]
+  },
+  "machines": {
+    "storage_multiplier": 10,
+    "bandwidth_multiplier": 10,
+    "generation_multiplier": 4,
+    "range_multiplier": 1.5,
+    "item_energy_multiplier": 10
+  },
+  "developer": {
+    "portable": { "energy_per_stimulation": 3000 },
+    "normal": { "energy_per_stimulation": 2800 },
+    "advanced": { "energy_per_stimulation": 2400 }
+  }
+}

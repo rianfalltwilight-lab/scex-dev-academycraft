@@ -158,8 +158,11 @@ public final class ScatterBombEffect implements ChargingSkillEffect, MobCastable
             Vec3 from = raw == null ? player.getEyePosition() : raw.position();
             Entity target = nearestVisibleTarget(player, from, destination);
             if (target != null) {
+                int frames = target.invulnerableTime;
                 target.invulnerableTime = -1;
                 PassiveDamageHelper.meltdownerAttack(player, data, target, getId(), damage);
+                // A rejected hit must not leave the target open to everyone else's hits.
+                if (target.invulnerableTime == -1) target.invulnerableTime = frames;
             }
             EffectHelper.mdRaySmall(player.serverLevel(), from, destination);
             player.serverLevel().playSound(null, from.x, from.y, from.z,
@@ -264,8 +267,10 @@ public final class ScatterBombEffect implements ChargingSkillEffect, MobCastable
                     : legacyRandomDestination(caster, context.look());
             Entity target = nearestVisibleTarget(caster, from, destination);
             if (target != null && AcademyDamageHelper.allowsTarget(caster, target)) {
+                int frames = target.invulnerableTime;
                 target.invulnerableTime = -1;
                 AcademyDamageHelper.hurt(caster, target, com.mohistmc.academy.skill.SkillDamageSource.attack(caster), damage);
+                if (target.invulnerableTime == -1) target.invulnerableTime = frames;
             }
             EffectHelper.mdRaySmall(level, from, destination);
             level.playSound(null, from.x, from.y, from.z, AcademySounds.MD_RAY_SMALL, SoundSource.HOSTILE, .5F, 1.0F);

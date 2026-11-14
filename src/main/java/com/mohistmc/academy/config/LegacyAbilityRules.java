@@ -30,6 +30,22 @@ public final class LegacyAbilityRules {
     }
     private static float product(float a, float b) { float v=a*b; return Float.isFinite(v)&&v>=0?v:1; }
 
+    /** The balance profile's rate multipliers over the config snapshot. */
+    public static Snapshot withProfile(Snapshot config, float cpRecovery, float overloadRecovery, float usageGrowth,
+                                       float proficiencyGain) {
+        if (cpRecovery == 1f && overloadRecovery == 1f && usageGrowth == 1f && proficiencyGain == 1f) return config;
+        return new Snapshot(config.cpDelay(), config.cpSpeed() * cpRecovery, config.overloadDelay(),
+                config.overloadSpeed() * overloadRecovery, config.maxCpGrowth() * usageGrowth,
+                config.maxOverloadGrowth() * usageGrowth, config.proficiencyGrowth() * proficiencyGain);
+    }
+
+    /** Applies the global {@code skill.cpCostMultiplier} and {@code skill.cooldownMultiplier}. */
+    public static SkillTuning withGlobal(SkillTuning tuning, float cpCost, float cooldown) {
+        if (cpCost == 1f && cooldown == 1f) return tuning;
+        return new SkillTuning(tuning.enabled(), tuning.damage(), product(tuning.cp(), cpCost), tuning.overload(),
+                tuning.exp(), tuning.destroyBlocks(), product(tuning.cooldown(), cooldown));
+    }
+
     /** The config lines alone ({@code <id>.<key>=<value>}). */
     public static SkillTuning parseConfig(String skillId, List<? extends String> entries) {
         boolean enabled=true, destroy=true; float damage=1, cp=1, overload=1, exp=1, cooldown=1;

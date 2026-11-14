@@ -123,8 +123,11 @@ public final class ElectronMissileEffect implements ChargingSkillEffect, MobCast
         UUID id = state.orbs.remove(player.getRandom().nextInt(state.orbs.size()));
         Entity ball = player.serverLevel().getEntity(id);
         var from = ball == null ? player.getEyePosition() : ball.position();
+        int frames = target.invulnerableTime;
         target.invulnerableTime = -1;
         PassiveDamageHelper.meltdownerAttack(player, data, target, getId(), lerpf(10, 18, exp));
+        // A rejected hit must not leave the target open to everyone else's hits.
+        if (target.invulnerableTime == -1) target.invulnerableTime = frames;
         EffectHelper.mdRaySmall(player.serverLevel(), from, target.getEyePosition());
         player.serverLevel().playSound(null, from.x, from.y, from.z,
                 AcademySounds.MD_RAY_SMALL, SoundSource.PLAYERS, .5F, 1.0F);
@@ -211,9 +214,11 @@ public final class ElectronMissileEffect implements ChargingSkillEffect, MobCast
         MdBallEntity ball = orbs.remove(caster.getRandom().nextInt(orbs.size()));
         var from = ball.isRemoved() ? caster.getEyePosition() : ball.position();
         if (AcademyDamageHelper.allowsTarget(caster, target)) {
+            int frames = target.invulnerableTime;
             target.invulnerableTime = -1;
             AcademyDamageHelper.hurt(caster, target, com.mohistmc.academy.skill.SkillDamageSource.attack(caster),
                     DynamicSkillRules.damage(getId(), lerpf(10, 18, exp)));
+            if (target.invulnerableTime == -1) target.invulnerableTime = frames;
         }
         EffectHelper.mdRaySmall(level, from, target.getEyePosition());
         level.playSound(null, from.x, from.y, from.z, AcademySounds.MD_RAY_SMALL, SoundSource.HOSTILE, .5F, 1.0F);

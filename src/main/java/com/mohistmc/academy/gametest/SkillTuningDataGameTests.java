@@ -151,14 +151,14 @@ public final class SkillTuningDataGameTests {
                     "{\"level\": 3, \"tree_x\": 10, \"base_cp\": 4, \"prerequisites\": ["
                             + "{\"skill\": \"arc_gen\", \"proficiency\": 0.9}, {\"skill\": \"no_such_skill\"}]}",
                     "academy:no_such_skill", "{\"level\": 1}",
-                    "othermod:arc_gen", "{\"enabled\": false}"));
+                    "othermod:arc_gen", "{\"cp\": 2}"));
             if (magMovement.getLevel() != 3 || magMovement.getTreeX() != 10 || magMovement.getBaseCpCost() != 4) {
                 helper.fail("getters ignore the override: level " + magMovement.getLevel()); return;
             }
             if (magMovement.getPrerequisites().size() != 1) {
                 helper.fail("unknown prerequisite not skipped: " + magMovement.getPrerequisites()); return;
             }
-            if (!DynamicSkillRules.enabled("arc_gen")) { helper.fail("a non-academy namespace was read"); return; }
+            if (Math.abs(DynamicSkillRules.cp("arc_gen", 10) - 20) > 1e-4) { helper.fail("a non-academy namespace was ignored"); return; }
             if (data.canLearnSkill(magMovement)) { helper.fail("level 3 override ignored"); return; }
             data.setPlayerLevel(3);
             if (data.canLearnSkill(magMovement)) { helper.fail("arc_gen 0.9 prerequisite ignored"); return; }

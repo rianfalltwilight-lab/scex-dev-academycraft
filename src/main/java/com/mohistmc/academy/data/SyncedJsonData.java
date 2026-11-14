@@ -56,6 +56,9 @@ public abstract class SyncedJsonData extends SimpleJsonResourceReloadListener {
         }
     }
 
+    /** The files currently installed (tests restore them after injecting their own). */
+    protected final Map<ResourceLocation, JsonElement> installed() { return current; }
+
     /** The installed files as one JSON object, for the sync payload. */
     final String snapshot() {
         JsonObject out = new JsonObject();

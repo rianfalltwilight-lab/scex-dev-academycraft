@@ -54,7 +54,7 @@ public final class FleshRippingEffect implements ChargingSkillEffect, MobCastabl
     public boolean canStartCharging(ServerPlayer player, PlayerAbilityData data) {
         float rawCp = lerpf(130, 270, data.getProficiency(getId()));
         return DynamicSkillRules.enabled(getId())
-                && (data.isDevMode() || data.getCurrentCp() >= DynamicSkillRules.cp(getId(), rawCp));
+                && (data.isDevMode() || data.getCurrentCp() >= DynamicSkillRules.playerCp(data, getId(), rawCp));
     }
 
     @Override public void onChargingStart(ServerPlayer player, PlayerAbilityData data) {
@@ -65,7 +65,7 @@ public final class FleshRippingEffect implements ChargingSkillEffect, MobCastabl
     @Override
     public boolean onChargingTick(ServerPlayer player, PlayerAbilityData data, int ticks) {
         float rawCp = lerpf(130, 270, data.getProficiency(getId()));
-        if (!data.isDevMode() && data.getCurrentCp() < DynamicSkillRules.cp(getId(), rawCp)) return false;
+        if (!data.isDevMode() && data.getCurrentCp() < DynamicSkillRules.playerCp(data, getId(), rawCp)) return false;
         Target target = findTarget(player, player.getEyePosition(), player.getLookAngle(),
                 lerpf(6, 14, data.getProficiency(getId())));
         ACTIVE.put(player.getUUID(), target);

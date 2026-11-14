@@ -42,6 +42,9 @@ public final class SkillDamageMath {
         float configScaled = DynamicSkillRules.damage(skillId, raw);
         float attackerMul = attackerMultiplier(attacker);
         float targetMul = targetMultiplier(target);
-        return new Breakdown(raw, skill, global, attackerMul, targetMul, configScaled * attackerMul * targetMul);
+        float offense = attacker instanceof LivingEntity living ? CombatRules.offense(living, configScaled) : configScaled;
+        float result = CombatRules.bossBonus(target, offense * attackerMul * targetMul);
+        if (target != null) result = CombatRules.capVsPlayer(attacker instanceof LivingEntity l ? l : null, target, result);
+        return new Breakdown(raw, skill, global, attackerMul, targetMul, result);
     }
 }

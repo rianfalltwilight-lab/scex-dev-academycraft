@@ -17,6 +17,10 @@ import net.minecraft.world.level.Level;
 public final class CpPotionItem extends AcademyItem {
     public CpPotionItem() { super(new Properties().stacksTo(64)); }
 
+    private static float restoreFraction() {
+        return com.mohistmc.academy.data.ProgressionData.cpPotionRestoreFraction();
+    }
+
     @Override public UseAnim getUseAnimation(ItemStack stack) { return UseAnim.DRINK; }
     @Override public int getUseDuration(ItemStack stack, LivingEntity entity) { return 50; }
 
@@ -24,7 +28,7 @@ public final class CpPotionItem extends AcademyItem {
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
         PlayerAbilityData data = player.getData(AcademyAttachments.PLAYER_ABILITY);
-        if (data.getCurrentCp() >= data.getMaxCp() * 0.5F) return InteractionResultHolder.fail(stack);
+        if (data.getCurrentCp() >= data.getMaxCp() * restoreFraction()) return InteractionResultHolder.fail(stack);
         player.startUsingItem(hand);
         return InteractionResultHolder.consume(stack);
     }
@@ -34,7 +38,9 @@ public final class CpPotionItem extends AcademyItem {
         if (living instanceof ServerPlayer player) {
             PlayerAbilityData data = player.getData(AcademyAttachments.PLAYER_ABILITY);
             float before = data.getCurrentCp();
-            data.restoreCp(Math.min(2_000F, Math.max(0, data.getMaxCp() * 0.5F - before)));
+            // 1.0.7: up to half of max CP, at most 2000; the profile's cp_potion fields set both.
+            data.restoreCp(Math.min(com.mohistmc.academy.data.ProgressionData.cpPotionMaxRestore(),
+                    Math.max(0, data.getMaxCp() * restoreFraction() - before)));
             data.syncTo(player);
             if (!player.getAbilities().instabuild) {
                 stack.shrink(1);
