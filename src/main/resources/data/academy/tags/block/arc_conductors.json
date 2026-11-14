@@ -1,0 +1,57 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "mio_icif:wiring/cable/block_cable",
+      "required": false
+    },
+    {
+      "id": "mio_icif:wiring/cable/block_cable_o",
+      "required": false
+    },
+    {
+      "id": "mio_icif:wiring/cable/block_glass_cable",
+      "required": false
+    },
+    {
+      "id": "mio_icif:wiring/cable/block_gold_cable",
+      "required": false
+    },
+    {
+      "id": "mio_icif:wiring/cable/block_gold_cable_1",
+      "required": false
+    },
+    {
+      "id": "mio_icif:wiring/cable/block_gold_cable_2",
+      "required": false
+    },
+    {
+      "id": "mio_icif:wiring/cable/block_iron_cable",
+      "required": false
+    },
+    {
+      "id": "mio_icif:wiring/cable/block_iron_cable_1",
+      "required": false
+    },
+    {
+      "id": "mio_icif:wiring/cable/block_iron_cable_2",
+      "required": false
+    },
+    {
+      "id": "mio_icif:wiring/cable/block_iron_cable_3",
+      "required": false
+    },
+    {
+      "id": "mio_icif:wiring/cable/block_superconducting_cable",
+      "required": false
+    },
+    {
+      "id": "mio_icif:wiring/cable/block_tin_cable",
+      "required": false
+    },
+    {
+      "id": "mio_icif:wiring/cable/block_tin_cable_1",
+      "required": false
+    }
+  ]
+}

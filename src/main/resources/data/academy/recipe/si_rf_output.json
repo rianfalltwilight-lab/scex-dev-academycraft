@@ -1,0 +1,31 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "mio_icif"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ABC",
+    " D "
+  ],
+  "key": {
+    "A": {
+      "item": "mio_icif:wiring/block_bat_box"
+    },
+    "B": {
+      "item": "academy:machine_frame"
+    },
+    "C": {
+      "item": "mio_icif:wiring/cable/block_cable"
+    },
+    "D": {
+      "item": "academy:energy_convert_component"
+    }
+  },
+  "result": {
+    "count": 1,
+    "id": "academy:rf_output"
+  }
+}
