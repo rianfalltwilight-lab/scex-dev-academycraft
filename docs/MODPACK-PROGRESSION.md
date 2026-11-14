@@ -45,6 +45,9 @@ Server config `balance.profile` (default `MODERN`) picks the layer `data/<namesp
 | `combat.light_shield_absorb_fraction` | 0 | 0.3 |
 | `combat.reflection_uses_offense_scaling` | true | false |
 | `combat.level_max_health` | 0 ×6 | 0, 0, 2, 4, 8, 12 |
+| `machines.storage_multiplier` / `bandwidth_multiplier` | 1 / 1 | 10 / 10 |
+| `machines.generation_multiplier` / `range_multiplier` / `item_energy_multiplier` | 1 / 1 / 1 | 4 / 1.5 / 10 |
+| `developer.<portable\|normal\|advanced>.energy_per_stimulation` | 750 / 700 / 600 | 3000 / 2800 / 2400 |
 
 ## Schema（括号内为默认值 / defaults in brackets）
 
@@ -92,6 +95,8 @@ Server config `balance.profile` (default `MODERN`) picks the layer `data/<namesp
 | `combat.light_shield_absorb_fraction` | 光盾在固定吸收外再吸收本次伤害的比例 `0` / Light Shield also absorbs this fraction of the hit |
 | `combat.reflection_uses_offense_scaling` | 反射伤害是否吃反射者的 `skill_damage`、`skill_power` 与等级倍率 `true` / whether reflected damage takes the reflector's offence scaling |
 | `combat.level_max_health` | 各能力等级额外最大生命值 `[0,0,0,0,0,0]` / extra max health per ability level |
+
+| `machines.storage_multiplier` 等 | 机器数值的档位倍率，见 docs/MODPACK-MACHINES.md `1` / machine multipliers, see docs/MODPACK-MACHINES.md |
 
 战斗结算顺序：技能自身数值 → 技能调参与全局倍率 → `skill_power`（加法）→ 等级倍率或生物缩放 → `skill_damage` × (1 − `skill_resistance`) → Boss 额外伤害 → 对玩家的上限 → `SkillDamage` 事件 → 原版受伤（护甲按 `armor_pierce` 减弱）。
 Order of a hit: the skill's own number → skill tuning and global multipliers → `skill_power` (added) → level multiplier or mob scaling → `skill_damage` × (1 − `skill_resistance`) → boss bonus → player cap → `SkillDamage` event → vanilla hurt (armour weakened by `armor_pierce`).

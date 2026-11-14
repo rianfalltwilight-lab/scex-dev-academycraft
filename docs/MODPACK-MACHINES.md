@@ -4,6 +4,25 @@
 
 The `[machines]` section of the server config (`academy-server.toml`, per-world under `serverconfig/`) sets machine energy, buffers and processing. Defaults equal AcademyCraft 1.0.7. Values are read when used, so a config reload applies to placed machines. If a capacity is lowered, stored energy above it is clamped to the new capacity on load or on the next tick.
 
+## 平衡档位倍率 / Balance profile multipliers
+
+下表的配置值是 1.0.7 基准。平衡档位（`balance.profile`）在读取时再乘上进度数据 `machines` 段的倍率：容量类（缓存、节点容量、网络缓存）× `storage_multiplier`，带宽类 × `bandwidth_multiplier`，产能类（太阳能、风力、相位每 mB、猫引擎）× `generation_multiplier`，节点范围 × `range_multiplier`，能量物品（能量单元、能量单元组、便携开发机、虚数能量护甲及其他能量工具）的容量和速率 × `item_energy_multiplier`。开发机的缓存和带宽同样按容量、带宽倍率放大。`fePerIf` 不受档位影响，与奇点迭代的 1 IF = 1 EU 保持对等。
+
+The config values below are the 1.0.7 baseline. The balance profile multiplies them when read, by the `machines` section of the progression data: capacities × `storage_multiplier`, bandwidths × `bandwidth_multiplier`, generation (solar, wind, phase per mB, cat engine) × `generation_multiplier`, node range × `range_multiplier`, and energy items' capacity and rate × `item_energy_multiplier`. Developer buffers and bandwidth take the storage and bandwidth multipliers. `fePerIf` never scales, keeping Singularity Iteration's 1 IF = 1 EU.
+
+| 档位 / Profile | 容量 / storage | 带宽 / bandwidth | 产能 / generation | 范围 / range | 物品 / items |
+|---|---|---|---|---|---|
+| `legacy` | ×1 | ×1 | ×1 | ×1 | ×1 |
+| `modern` | ×10 | ×10 | ×4 | ×1.5 | ×10 |
+
+现代档的开发机每次刺激能耗也提高到约 4 倍（便携 3000、普通 2800、高级 2400 IF）。/ Modern developers also spend about 4x per stimulation (3000 / 2800 / 2400 IF).
+
+## FE 接口 / Forge-energy faces
+
+每台机器的 FE 接口每 tick 在每个方向上最多移动其 IF 带宽（× `fePerIf` FE）。用电设备（开发机、能力干扰器、虚数融合器、金属成型机）只接收；发电机（太阳能、风力底座、相位发电机）只输出；节点双向。RF 输出桥不会把电推回本模组自己的机器（它们走无线网络），避免回路。
+
+Each machine's FE face moves at most its IF bandwidth (× `fePerIf` FE) per tick in each direction. Consumers (developers, ability interferer, imaginary fusor, metal former) only receive; generators (solar, wind base, phase generator) only give; nodes do both. The RF output bridge never pushes into AcademyCraft's own machines (they use the wireless network), so no loop forms.
+
 ## 配置项 / Keys
 
 | 键 / Key | 默认 / Default | 说明 / Meaning |
