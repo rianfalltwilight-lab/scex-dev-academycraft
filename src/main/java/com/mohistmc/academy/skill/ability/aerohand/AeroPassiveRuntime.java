@@ -55,10 +55,23 @@ public final class AeroPassiveRuntime {
     }
 
     private static boolean passive(ServerPlayer player, PlayerAbilityData data, String skillId) {
+        return data.isAbilityActive() && learned(player, data, skillId);
+    }
+
+    /** ExtraAcC passives (Ascending Air, Airflow) only checked isSkillLearned, not activation. */
+    private static boolean learned(ServerPlayer player, PlayerAbilityData data, String skillId) {
         return player.isAlive() && !AbilityInterferenceService.isInterfered(player)
-                && data.isAbilityActive()
                 && data.getCurrentAbility() == AbilityCategory.AEROHAND
                 && data.hasLearnedSkill(skillId) && DynamicSkillRules.enabled(skillId);
+    }
+
+    private static void tickAirflow(ServerPlayer player, PlayerAbilityData data) {
+        if (player.tickCount % 20 == 0 && player.getAirSupply() < player.getMaxAirSupply()
+                && learned(player, data, AIRFLOW) && data.getProficiency(AIRFLOW) >= 0.5F
+                && DynamicSkillRules.tryPay(data, AIRFLOW, 50F, 0)) {
+            player.setAirSupply(player.getMaxAirSupply());
+            DynamicSkillRules.addExp(player, data, AIRFLOW, 0.001F);
+        }
     }
 
     public static boolean isOffenseArmourEngaged(ServerPlayer player) {
@@ -115,6 +128,7 @@ public final class AeroPassiveRuntime {
                 || data.getCurrentAbility() != AbilityCategory.AEROHAND) {
             stopArmour(player, data);
             stopFlying(player, data);
+            tickAirflow(player, data);
             return;
         }
         // Invalid passives must destroy their paid context, not merely hide its effects.
@@ -123,12 +137,7 @@ public final class AeroPassiveRuntime {
             stopArmour(player, data);
         if (ACTIVE_FLYING.contains(player.getUUID()) && !passive(player, data, FLYING))
             stopFlying(player, data);
-        if (player.tickCount % 20 == 0 && player.getAirSupply() < player.getMaxAirSupply()
-                && passive(player, data, AIRFLOW) && data.getProficiency(AIRFLOW) >= 0.5F
-                && DynamicSkillRules.tryPay(data, AIRFLOW, 50F, 0)) {
-            player.setAirSupply(player.getMaxAirSupply());
-            DynamicSkillRules.addExp(player, data, AIRFLOW, 0.001F);
-        }
+        tickAirflow(player, data);
         boolean armour = isOffenseArmourEngaged(player);
         if (armour) {
             applyArmourKnockbackResistance(player);
@@ -210,7 +219,7 @@ public final class AeroPassiveRuntime {
         PlayerAbilityData data = data(player);
         float original = event.getAmount();
         if (event.getSource().is(net.minecraft.world.damagesource.DamageTypes.FALL)
-                && passive(player, data, ASCENDING_AIR)) {
+                && learned(player, data, ASCENDING_AIR)) {
             float p = data.getProficiency(ASCENDING_AIR);
             float capped = AeroBehaviorMath.ascendingAirDamageCap(p);
             float saved = original - capped;
@@ -223,7 +232,7 @@ public final class AeroPassiveRuntime {
         }
         if ((event.getSource().is(net.minecraft.world.damagesource.DamageTypes.IN_WALL)
                 || event.getSource().is(DamageTypeTags.IS_DROWNING))
-                && passive(player, data, AIRFLOW)) {
+                && learned(player, data, AIRFLOW)) {
             // The released add-on accidentally keyed this curve to Ascending Air; preserve the played result.
             float p = data.getProficiency(ASCENDING_AIR);
             if (DynamicSkillRules.tryPay(data, AIRFLOW, (40F - 20F * p) * original, 0)) {

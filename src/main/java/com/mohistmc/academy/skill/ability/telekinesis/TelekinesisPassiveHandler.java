@@ -51,8 +51,12 @@ public final class TelekinesisPassiveHandler {
     private TelekinesisPassiveHandler() {}
 
     private static boolean passive(ServerPlayer player, PlayerAbilityData data, String id) {
+        return data.isAbilityActive() && learned(player, data, id);
+    }
+
+    /** ExtraAcC Insulation only checked isSkillLearned, not activation. */
+    private static boolean learned(ServerPlayer player, PlayerAbilityData data, String id) {
         return player.isAlive() && !AbilityInterferenceService.isInterfered(player)
-                && data.isAbilityActive()
                 && data.getCurrentAbility() == AbilityCategory.TELEKINESIS
                 && data.hasLearnedSkill(id) && DynamicSkillRules.enabled(id);
     }
@@ -62,7 +66,7 @@ public final class TelekinesisPassiveHandler {
         if (!(target instanceof ServerPlayer defender) || attacker == defender
                 || !Float.isFinite(amount) || amount <= 0) return amount;
         PlayerAbilityData defense = defender.getData(AcademyAttachments.PLAYER_ABILITY);
-        if (!passive(defender, defense, "insulation")) return amount;
+        if (!learned(defender, defense, "insulation")) return amount;
         PlayerAbilityData offense = attacker.getData(AcademyAttachments.PLAYER_ABILITY);
         AbilityCategory source = offense.getCurrentAbility();
         float proficiency = defense.getProficiency("insulation");
@@ -111,7 +115,7 @@ public final class TelekinesisPassiveHandler {
         if (!(event.getEntity() instanceof ServerPlayer player) || event.getAmount() <= 0) return;
         PlayerAbilityData data = player.getData(AcademyAttachments.PLAYER_ABILITY);
         if (event.getSource().is(net.minecraft.world.damagesource.DamageTypes.LIGHTNING_BOLT)
-                && passive(player, data, "insulation")) {
+                && learned(player, data, "insulation")) {
             float original = event.getAmount();
             if (DynamicSkillRules.tryPay(data, "insulation", 100F * original, 0)) {
                 float reduction = 0.20F + 0.20F * data.getProficiency("insulation");

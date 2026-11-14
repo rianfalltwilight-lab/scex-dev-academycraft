@@ -27,7 +27,7 @@ public final class PassiveDamageHelper {
     public static CritResult teleporter(ServerPlayer player, PlayerAbilityData data, Entity target,
                                         String skillId, float damage) {
         damage=com.mohistmc.academy.config.DynamicSkillRules.damage(skillId,damage);
-        if (!data.isAbilityActive()) return new CritResult(damage, -1);
+        // TPSkillHelper rolled the Dim Folding / Space Fluctuation crit for any learned passive.
         float dim = data.hasLearnedSkill("dim_folding_theorem") ? data.getProficiency("dim_folding_theorem") : -1;
         float fluct = data.hasLearnedSkill("space_fluct") ? data.getProficiency("space_fluct") : -1;
         for (int tier = 0; tier < 3; tier++) {
