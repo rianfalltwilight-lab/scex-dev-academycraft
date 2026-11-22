@@ -59,16 +59,16 @@ public final class RecheckCompatDamageGameTests {
         LogUtils.getLogger().info("RECHECK_COMPAT_REGISTERED cases=6 requiredMods={} snapshotOnly=true", REQUIRED_MODS);
     }
 
-    @GameTest(template = "empty", templateNamespace = "academy_recheck_compat", timeoutTicks = 180)
+    @GameTest(template = "empty", templateNamespace = "academy", timeoutTicks = 180)
     public static void realCuriosCloakZerosAcceptedDamage(GameTestHelper h) { cloak(h, "control"); }
 
-    @GameTest(template = "empty", templateNamespace = "academy_recheck_compat", timeoutTicks = 180)
+    @GameTest(template = "empty", templateNamespace = "academy", timeoutTicks = 180)
     public static void cloakZeroDoesNotChargeLightningInsulation(GameTestHelper h) { cloak(h, "lightning_insulation"); }
 
-    @GameTest(template = "empty", templateNamespace = "academy_recheck_compat", timeoutTicks = 180)
+    @GameTest(template = "empty", templateNamespace = "academy", timeoutTicks = 180)
     public static void cloakZeroDoesNotChargeAbilityInsulation(GameTestHelper h) { cloak(h, "ability_insulation"); }
 
-    @GameTest(template = "empty", templateNamespace = "academy_recheck_compat", timeoutTicks = 180)
+    @GameTest(template = "empty", templateNamespace = "academy", timeoutTicks = 180)
     public static void cloakZeroDoesNotChargeOffenseArmour(GameTestHelper h) { cloak(h, "offense_armour"); }
 
     private static void cloak(GameTestHelper h, String mode) {
@@ -127,7 +127,7 @@ public final class RecheckCompatDamageGameTests {
         });
     }
 
-    @GameTest(template = "empty", templateNamespace = "academy_recheck_compat")
+    @GameTest(template = "empty", templateNamespace = "academy")
     public static void realDummyRecordsDamageWithoutLosingHealthAndHonorsCancel(GameTestHelper h) {
         ResourceLocation id = ResourceLocation.parse("dummmmmmy:target_dummy");
         check(BuiltInRegistries.ENTITY_TYPE.containsKey(id), "actual dummy entity is not registered");
@@ -157,7 +157,7 @@ public final class RecheckCompatDamageGameTests {
         } finally { NeoForge.EVENT_BUS.unregister(observer); dummy.discard(); }
     }
 
-    @GameTest(template = "empty", templateNamespace = "academy_recheck_compat")
+    @GameTest(template = "empty", templateNamespace = "academy")
     public static void actualVoidSpikeUsesFakePlayerAndHonorsCancel(GameTestHelper h) {
         ResourceLocation id = ResourceLocation.parse("thaumicbases:void_spike");
         check(BuiltInRegistries.BLOCK.containsKey(id), "actual void spike is not registered");

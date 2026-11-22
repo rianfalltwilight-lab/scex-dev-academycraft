@@ -56,4 +56,15 @@ class DatapackOverhaulContractTest {
             SkillTuningData.applyForTest(previous);
         }
     }
+
+    @Test
+    void testOnlyStructureNamespacesDoNotPolluteMainDatapackAndExtraRecipesUseCommonTags() throws Exception {
+        assertFalse(Files.exists(Path.of("src/main/resources/data/academy_charging")));
+        assertFalse(Files.exists(Path.of("src/main/resources/data/academy_recheck_compat")));
+        String optical = Files.readString(dataPath("recipe/extra_optical_chip.json"));
+        String helmet = Files.readString(dataPath("recipe/extra_reso_helmet.json"));
+        assertTrue(optical.contains("\"tag\":\"c:ingots/imag_silicon\""));
+        assertTrue(helmet.contains("\"tag\":\"c:plates/constraint_metal\""));
+        assertTrue(helmet.contains("\"tag\":\"c:gems/resonant_crystal\""));
+    }
 }

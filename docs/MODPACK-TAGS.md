@@ -1,8 +1,8 @@
 # 整合包标签 / Modpack Tags
 
-本模组随附以下数据包标签，整合包可以用数据包增删成员（`"replace": false` 合并，`"replace": true` 覆盖）。配方暂未改用这些标签。
+本模组随附以下数据包标签，整合包可以用数据包增删成员（`"replace": false` 合并，`"replace": true` 覆盖）。金属成形机精炼配方与 ExtraAcC 扩展配方已消费 `c:` 通用标签，原版 1.0.7 核心配方保留精确物品 ID 以兼容既有契约。
 
-The mod ships the tags below. Packs can add or remove members with a datapack (`"replace": false` merges, `"replace": true` overrides). Recipes do not use these tags yet.
+The mod ships the tags below. Packs can add or remove members with a datapack (`"replace": false` merges, `"replace": true` overrides). Metal Former refining and ExtraAcC crafting recipes consume `c:` common tags; official 1.0.7 core recipes retain exact item IDs.
 
 ## 通用 `c:` 标签 / Common `c:` tags
 

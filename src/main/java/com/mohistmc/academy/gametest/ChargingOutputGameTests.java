@@ -30,10 +30,10 @@ public final class ChargingOutputGameTests {
         event.registerItem(Capabilities.EnergyStorage.ITEM,(stack,context)->ITEMS.get(stack),Items.STICK);
         event.registerBlock(Capabilities.EnergyStorage.BLOCK,(level,pos,state,be,side)->BLOCKS.get(pos),Blocks.GOLD_BLOCK);
     }
-    @GameTest(template="empty") public static void ifItemAllLevelsAndSteps(GameTestHelper h){run(h,0);}
-    @GameTest(template="empty") public static void ifBlockAllLevelsAndSteps(GameTestHelper h){run(h,1);}
-    @GameTest(template="empty") public static void feItemAllLevelsAndSteps(GameTestHelper h){run(h,2);}
-    @GameTest(template="empty") public static void feBlockAllLevelsAndSteps(GameTestHelper h){run(h,3);}
+    @GameTest(template="empty", templateNamespace="academy") public static void ifItemAllLevelsAndSteps(GameTestHelper h){run(h,0);}
+    @GameTest(template="empty", templateNamespace="academy") public static void ifBlockAllLevelsAndSteps(GameTestHelper h){run(h,1);}
+    @GameTest(template="empty", templateNamespace="academy") public static void feItemAllLevelsAndSteps(GameTestHelper h){run(h,2);}
+    @GameTest(template="empty", templateNamespace="academy") public static void feBlockAllLevelsAndSteps(GameTestHelper h){run(h,3);}
     private static void run(GameTestHelper h,int path) {
         if(!Boolean.getBoolean("academy.chargingOutputGate")) throw new IllegalStateException("explicit isolated fixture required");
         ServerPlayer player=h.makeMockServerPlayerInLevel();

@@ -29,7 +29,7 @@ import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 /** Real hurt/IF regressions using a negotiated EmbeddedChannel; not socket or full-pack acceptance. */
-@EventBusSubscriber(modid = AcademyCraft.MODID, bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = AcademyCraft.MODID)
 @PrefixGameTestTemplate(false)
 public final class RecheckEquipmentDamageGameTests {
     private static final String NAMESPACE = "academy_recheck_compat";
@@ -45,13 +45,13 @@ public final class RecheckEquipmentDamageGameTests {
         LogUtils.getLogger().info("RECHECK_EQUIPMENT_REGISTERED cases=4 namespace={} negotiatedMock=true", NAMESPACE);
     }
 
-    @GameTest(template = "empty", templateNamespace = NAMESPACE, timeoutTicks = 180)
+    @GameTest(template = "empty", templateNamespace = "academy", timeoutTicks = 180)
     public static void imaginaryIfDoesNotPayForLateIncomingCancel(GameTestHelper h) { rejected(h, "cancel"); }
 
-    @GameTest(template = "empty", templateNamespace = NAMESPACE, timeoutTicks = 180)
+    @GameTest(template = "empty", templateNamespace = "academy", timeoutTicks = 180)
     public static void imaginaryIfDoesNotPayForActualHurtCooldown(GameTestHelper h) { rejected(h, "iframe"); }
 
-    @GameTest(template = "empty", templateNamespace = NAMESPACE, timeoutTicks = 180)
+    @GameTest(template = "empty", templateNamespace = "academy", timeoutTicks = 180)
     public static void imaginaryIfDoesNotPayForActualShieldFullBlock(GameTestHelper h) { rejected(h, "shield"); }
 
     private static void rejected(GameTestHelper h, String mode) {
@@ -102,7 +102,7 @@ public final class RecheckEquipmentDamageGameTests {
         });
     }
 
-    @GameTest(template = "empty", templateNamespace = NAMESPACE, timeoutTicks = 180)
+    @GameTest(template = "empty", templateNamespace = "academy", timeoutTicks = 180)
     public static void ordinaryNestedHurtKeepsOrdinaryImaginaryIfRate(GameTestHelper h) {
         var defender = RecheckCompatPlayers.connect(h);
         var attacker = RecheckCompatPlayers.connect(h);
