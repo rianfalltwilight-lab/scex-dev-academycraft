@@ -8,7 +8,6 @@ public class ImagsilOre extends Block {
     public ImagsilOre() {
         super(Properties.of()
                 .sound(SoundType.STONE)
-                .noOcclusion()
                 .strength(4.0f)
                 .requiresCorrectToolForDrops()
         );

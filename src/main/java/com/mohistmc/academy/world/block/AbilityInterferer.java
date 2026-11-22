@@ -44,7 +44,7 @@ public final class AbilityInterferer extends BaseEntityBlock {
     public static final IntegerProperty STATUS = IntegerProperty.create("status", 0, 1);
 
     public AbilityInterferer() {
-        this(Properties.of().sound(SoundType.STONE).noOcclusion().strength(3.0f)
+        this(Properties.of().sound(SoundType.STONE).strength(3.0f)
                 .requiresCorrectToolForDrops());
     }
 

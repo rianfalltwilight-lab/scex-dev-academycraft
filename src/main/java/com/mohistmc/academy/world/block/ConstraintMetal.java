@@ -8,7 +8,6 @@ public class ConstraintMetal extends Block {
     public ConstraintMetal() {
         super(Properties.of()
                 .sound(SoundType.STONE)
-                .noOcclusion()
                 .strength(4.0f)
                 .requiresCorrectToolForDrops()
         );

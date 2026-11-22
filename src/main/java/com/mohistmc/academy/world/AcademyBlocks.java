@@ -54,24 +54,20 @@ public class AcademyBlocks {
     public static final DeferredBlock<Block> IMAGSIL_ORE = BLOCKS.register("imagsil_ore", ImagsilOre::new);
     public static final DeferredBlock<Block> IMAG_FUSOR = BLOCKS.register("imag_fusor", () -> new ImagFusor(Properties.of()
             .sound(SoundType.STONE)
-            .noOcclusion()
             .strength(4.0f)
             .requiresCorrectToolForDrops()));
     public static final DeferredBlock<Block> MACHINE_FRAME = BLOCKS.register("machine_frame", MachineFrame::new);
     public static final DeferredBlock<Block> METAL_FORMER = BLOCKS.register("metal_former", MetalFomer::new);
     public static final DeferredBlock<Block> NODE_BASIC = BLOCKS.register("node_basic", () -> new NodeBasic(Properties.of()
             .sound(SoundType.STONE)
-            .noOcclusion()
             .strength(4.0f)
             .requiresCorrectToolForDrops()));
     public static final DeferredBlock<Block> NODE_STANDARD = BLOCKS.register("node_standard", () -> new NodeStandard(Properties.of()
             .sound(SoundType.STONE)
-            .noOcclusion()
             .strength(4.0f)
             .requiresCorrectToolForDrops()));
     public static final DeferredBlock<Block> NODE_ADVANCED = BLOCKS.register("node_advanced", () -> new NodeAdvanced(Properties.of()
             .sound(SoundType.STONE)
-            .noOcclusion()
             .strength(4.0f)
             .requiresCorrectToolForDrops()));
     public static final DeferredBlock<Block> DEV_NORMAL = BLOCKS.register("dev_normal", () -> new DevNormal(Properties.of()

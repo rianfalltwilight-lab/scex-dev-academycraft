@@ -8,7 +8,6 @@ public class MachineFrame extends Block {
     public MachineFrame() {
         super(Properties.of()
                 .sound(SoundType.STONE)
-                .noOcclusion()
                 .strength(4.0f)
                 .requiresCorrectToolForDrops()
         );
