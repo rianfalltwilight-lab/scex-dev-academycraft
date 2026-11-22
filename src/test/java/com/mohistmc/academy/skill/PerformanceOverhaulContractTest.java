@@ -53,7 +53,7 @@ class PerformanceOverhaulContractTest {
     void mineDetectAndWirelessNetworksUseFastPaths() throws Exception {
         String mine = source("skill/ability/electromaster/MineDetectEffect.java");
         assertTrue(mine.contains("currentSection.maybeHas(MineDetectEffect::isOre)"));
-        assertTrue(mine.contains("if (state.isAir()) return false;"));
+        assertTrue(mine.contains("state.isAir()"));
 
         String net = source("energy/impl/WirelessNet.java");
         String conn = source("energy/impl/NodeConn.java");

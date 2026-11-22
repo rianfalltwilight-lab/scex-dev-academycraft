@@ -4,8 +4,9 @@ import com.mohistmc.academy.world.AcademyItems;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * 配方初始化 —— 注册 ImagFusor 配方。
+ * Legacy hardcoded ImagFusor recipe initializer; superseded by datapack {@code data/academy/recipe/*.json}.
  */
+@Deprecated(forRemoval = false)
 public final class MFIFRecipes {
 
     private MFIFRecipes() {}

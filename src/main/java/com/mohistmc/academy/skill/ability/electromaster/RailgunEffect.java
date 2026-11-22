@@ -50,6 +50,10 @@ public class RailgunEffect implements ChargingSkillEffect, MobCastable {
     private static final double MAX_INCREMENT = 50.0;
     private static final double RADIUS = 2.0;
     private static final double REFLECT_RANGE = 15.0;
+    public static final net.minecraft.tags.TagKey<net.minecraft.world.item.Item> RAILGUN_AMMO =
+            net.minecraft.tags.TagKey.create(net.minecraft.core.registries.Registries.ITEM,
+                    net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(
+                            com.mohistmc.academy.AcademyCraft.MODID, "railgun_ammo"));
     private static final Map<UUID, ShotSource> SOURCES = new HashMap<>();
 
     private enum ShotSource { COIN, ITEM }
@@ -171,7 +175,7 @@ public class RailgunEffect implements ChargingSkillEffect, MobCastable {
     }
 
     private static boolean isAcceptedItem(ItemStack stack) {
-        return stack.is(Items.IRON_INGOT) || stack.is(Items.IRON_BLOCK);
+        return stack.is(RAILGUN_AMMO);
     }
 
     private void performRailgun(ServerPlayer player, PlayerAbilityData data, float exp) {

@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "#c:ores",
+    "academy:crystal_ore",
+    "academy:imagsil_ore",
+    "academy:reso_ore",
+    "academy:constraint_metal"
+  ]
+}

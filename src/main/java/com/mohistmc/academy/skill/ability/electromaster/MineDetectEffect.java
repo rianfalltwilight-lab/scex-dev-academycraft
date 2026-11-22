@@ -41,6 +41,12 @@ public class MineDetectEffect implements SkillEffect {
     private static final int BLIND_TIME = 100;
     // Final 1.12.2 commit 22b5be7b raised WorldUtils' deterministic result limit to 8400.
     private static final int MAX_ORES = 8400;
+    public static final net.minecraft.tags.TagKey<net.minecraft.world.level.block.Block> MINE_DETECTABLE =
+            net.minecraft.tags.TagKey.create(net.minecraft.core.registries.Registries.BLOCK,
+                    net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(AcademyCraft.MODID, "mine_detectable"));
+    public static final net.minecraft.tags.TagKey<net.minecraft.world.level.block.Block> MINE_DETECT_EXCLUDED =
+            net.minecraft.tags.TagKey.create(net.minecraft.core.registries.Registries.BLOCK,
+                    net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(AcademyCraft.MODID, "mine_detect_excluded"));
     private static final Map<UUID, Session> SESSIONS = new ConcurrentHashMap<>();
     private record Session(float range, boolean advanced, long expiresAt, long nextScanAt,
                            List<MineDetectResultPacket.Entry> lastResults) {}
@@ -175,7 +181,8 @@ public class MineDetectEffect implements SkillEffect {
     // Legacy isOreBlock: BlockOre / redstone ore or any ore-dictionary "ore*" entry,
     // i.e. every vanilla and modded ore. c:ores is the modern equivalent.
     public static boolean isOre(BlockState state) {
-        if (state.isAir()) return false;
+        if (state.isAir() || state.is(MINE_DETECT_EXCLUDED)) return false;
+        if (state.is(MINE_DETECTABLE)) return true;
         return state.is(net.neoforged.neoforge.common.Tags.Blocks.ORES)
                 || state.is(BlockTags.COAL_ORES)
                 || state.is(BlockTags.IRON_ORES)

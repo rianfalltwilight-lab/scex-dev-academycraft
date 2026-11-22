@@ -66,13 +66,29 @@ public abstract class SyncedJsonData extends SimpleJsonResourceReloadListener {
         return GSON.toJson(out);
     }
 
-    /** Client side: install what the server sent. */
+    /** Client side: install what the server sent; malformed payloads fall back cleanly to built-in defaults. */
     final void acceptSnapshot(String json) {
         Map<ResourceLocation, JsonElement> files = new LinkedHashMap<>();
-        JsonParser.parseString(json).getAsJsonObject().entrySet().forEach(entry -> {
-            ResourceLocation key = ResourceLocation.tryParse(entry.getKey());
-            if (key != null) files.put(key, entry.getValue());
-        });
+        try {
+            JsonElement parsed = JsonParser.parseString(json);
+            if (!parsed.isJsonObject()) {
+                LOGGER.error("Invalid {} sync snapshot (expected JSON object), falling back to built-in defaults", id);
+                reset();
+                return;
+            }
+            parsed.getAsJsonObject().entrySet().forEach(entry -> {
+                ResourceLocation key = ResourceLocation.tryParse(entry.getKey());
+                if (key != null && entry.getValue() != null && !entry.getValue().isJsonNull()) {
+                    files.put(key, entry.getValue());
+                } else {
+                    LOGGER.warn("Skipping invalid {} sync entry '{}'", id, entry.getKey());
+                }
+            });
+        } catch (RuntimeException e) {
+            LOGGER.error("Failed to parse {} sync snapshot, falling back to built-in defaults", id, e);
+            reset();
+            return;
+        }
         install(new TreeMap<>(files));
     }
 
