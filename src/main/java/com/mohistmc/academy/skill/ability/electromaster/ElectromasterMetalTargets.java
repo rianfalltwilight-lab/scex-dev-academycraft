@@ -19,6 +19,9 @@ public final class ElectromasterMetalTargets {
     /** Pack-facing additions to the weakMetalBlocks config list (config OR tag). */
     public static final TagKey<Block> WEAK_METAL_TAG = TagKey.create(Registries.BLOCK,
             ResourceLocation.fromNamespaceAndPath("academy", "metal/weak"));
+    /** Pack-facing additions to the metalEntities config list (config OR tag). */
+    public static final TagKey<net.minecraft.world.entity.EntityType<?>> METAL_ENTITY_TAG = TagKey.create(
+            Registries.ENTITY_TYPE, ResourceLocation.fromNamespaceAndPath("academy", "metal"));
 
     private ElectromasterMetalTargets() {}
 
@@ -38,6 +41,7 @@ public final class ElectromasterMetalTargets {
 
     public static boolean isMetalEntity(Entity entity) {
         if (entity == null) return false;
+        if (entity.getType().is(METAL_ENTITY_TAG)) return true;
         ResourceLocation actual = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
         for (String raw : ACConfig.Server.metalEntities()) {
             String normalized = LegacyMetalIdRules.entityId(raw);

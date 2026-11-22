@@ -38,7 +38,8 @@ public class PhaseGenBlockEntity extends AcademyContainerBlockEntity implements 
     private final IItemHandler bottomItems = itemView(new int[]{1, 2}, false, true);
     private final IItemHandler internalItems = itemView(new int[]{0, 1, 2}, true, true);
     private final FluidTank tank = new FluidTank(TANK_SIZE,
-            fs -> fs.getFluid() == AcademyFluids.PHASE_LIQUID.get()) {
+            fs -> fs.getFluid() == AcademyFluids.PHASE_LIQUID.get()
+                    || com.mohistmc.academy.data.AcademyDataMaps.phaseGenFuel(fs.getFluid()) != null) {
         @Override protected void onContentsChanged() { markMachineChanged(); }
     };
 
@@ -69,10 +70,14 @@ public class PhaseGenBlockEntity extends AcademyContainerBlockEntity implements 
             storedEnergy = maxStorage;
             changed = true;
         }
-        double perMb = MachineConfig.PHASE_ENERGY_PER_MB.get();
+        var customFuel = tank.isEmpty() ? null
+                : com.mohistmc.academy.data.AcademyDataMaps.phaseGenFuel(tank.getFluid().getFluid());
+        double perMb = customFuel != null ? customFuel.energyPerMb() : MachineConfig.PHASE_ENERGY_PER_MB.get();
+        int maxDrainCap = customFuel != null && customFuel.maxDrainPerTick().isPresent()
+                ? customFuel.maxDrainPerTick().get() : MachineConfig.PHASE_MAX_DRAIN.get();
         double required = Math.max(0.0, maxStorage - storedEnergy);
         int maxDrain = perMb <= 0 ? 0
-                : (int) Math.min(MachineConfig.PHASE_MAX_DRAIN.get(), Math.floor(required / perMb));
+                : (int) Math.min(maxDrainCap, Math.floor(required / perMb));
         if (maxDrain > 0) {
             FluidStack drained = tank.drain(maxDrain,
                     net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE);
