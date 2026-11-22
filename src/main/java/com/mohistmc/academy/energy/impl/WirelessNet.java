@@ -32,7 +32,7 @@ public class WirelessNet {
     private final WiWorldData data;
     Level level;
 
-    private final List<VWNode> nodes = new LinkedList<>();
+    private final List<VWNode> nodes = new ArrayList<>();
     private final List<VWNode> toRemoveNodes = new ArrayList<>();
     private VWMatrix matrix;
 
@@ -264,25 +264,27 @@ public class WirelessNet {
     // ==================== Tick ====================
 
     void tick() {
-        validate();
-        if (!matrix.isLoaded(level)) return;
+        if (disposed || !matrix.isLoaded(level)) return;
 
         IWirelessMatrix imat = matrix.get(level);
         if (imat == null) {
             dispose();
             return;
         }
+        if (nodes.isEmpty()) return;
 
         // 随机打乱节点列表，避免总对同一个节点均衡
-        Collections.shuffle(nodes);
+        if (nodes.size() > 1) Collections.shuffle(nodes);
 
         double sum = 0, maxSum = 0;
+        List<IWirelessNode> loadedNodes = new ArrayList<>(nodes.size());
         for (VWNode vn : nodes) {
             if (vn.isLoaded(level)) {
                 IWirelessNode node = vn.get(level);
                 if (node == null) {
                     removeNode(vn);
                 } else {
+                    loadedNodes.add(node);
                     double max = EnergyBoundary.energy(node.getMaxEnergy());
                     sum = EnergyBoundary.saturatedAdd(sum, EnergyBoundary.bounded(node.getEnergy(), max), EnergyBoundary.MAX_NETWORK_ENERGY);
                     maxSum = EnergyBoundary.saturatedAdd(maxSum, max, EnergyBoundary.MAX_NETWORK_ENERGY);
@@ -291,22 +293,22 @@ public class WirelessNet {
         }
 
         // 清理待删除节点
-        for (VWNode node : toRemoveNodes) {
-            data.netLookup.remove(node, this);
+        if (!toRemoveNodes.isEmpty()) {
+            for (VWNode node : toRemoveNodes) {
+                data.netLookup.remove(node, this);
+            }
+            if (nodes.removeAll(toRemoveNodes)) data.setDirty();
+            toRemoveNodes.clear();
         }
-        if (nodes.removeAll(toRemoveNodes)) data.setDirty();
-        toRemoveNodes.clear();
+        if (loadedNodes.isEmpty()) return;
 
         // Buffered energy remains available even when every node has drained.
         double percent = EnergyBoundary.finiteRatio(
                 EnergyBoundary.saturatedAdd(sum, buffer, EnergyBoundary.MAX_NETWORK_ENERGY), maxSum);
         double transferLeft = EnergyBoundary.transfer(imat.getBandwidth());
+        double bufferMax = bufferMax();
 
-        for (VWNode vn : nodes) {
-            if (!vn.isLoaded(level)) continue;
-            IWirelessNode node = vn.get(level);
-            if (node == null) continue;
-
+        for (IWirelessNode node : loadedNodes) {
             double max = EnergyBoundary.energy(node.getMaxEnergy());
             double cur = EnergyBoundary.bounded(node.getEnergy(), max);
             double targ = max * percent;
@@ -317,7 +319,6 @@ public class WirelessNet {
 
             // Positive delta fills the node and drains the shared buffer.
             // Negative delta charges the buffer; neither side may mint energy.
-            double bufferMax = bufferMax();
             delta = Math.clamp(delta, buffer - bufferMax, buffer);
 
             transferLeft -= Math.abs(delta);

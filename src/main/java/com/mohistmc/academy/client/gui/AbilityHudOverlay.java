@@ -27,6 +27,15 @@ public class AbilityHudOverlay {
 
     private static final ResourceLocation TEX_ICON_BACK =
             ResourceLocation.fromNamespaceAndPath(AcademyCraft.MODID, "textures/guis/key_hint/icon_back.png");
+    private static final ResourceLocation[] TP_MARK_FRAMES = java.util.stream.IntStream.range(0, 8)
+            .mapToObj(i -> ResourceLocation.fromNamespaceAndPath(AcademyCraft.MODID, "textures/effects/tp_mark/" + i + ".png"))
+            .toArray(ResourceLocation[]::new);
+    private static final ResourceLocation[] FLASHING_CUES = {
+            ResourceLocation.fromNamespaceAndPath(AcademyCraft.MODID, "textures/abilities/teleporter/flashing/a.png"),
+            ResourceLocation.fromNamespaceAndPath(AcademyCraft.MODID, "textures/abilities/teleporter/flashing/d.png"),
+            ResourceLocation.fromNamespaceAndPath(AcademyCraft.MODID, "textures/abilities/teleporter/flashing/w.png"),
+            ResourceLocation.fromNamespaceAndPath(AcademyCraft.MODID, "textures/abilities/teleporter/flashing/s.png")
+    };
 
     private static final int ICON_SIZE = 18;
     private static final int SLOT_SPACING = 6;
@@ -116,19 +125,17 @@ public class AbilityHudOverlay {
                         g.renderOutline(x - 1, iy - 1, ICON_SIZE + 2, ICON_SIZE + 2, pulse);
                         if ("mark_teleport".equals(skillId)) {
                             int frame = (int) ((System.currentTimeMillis() / 70L) & 7L);
-                            ResourceLocation mark = ResourceLocation.fromNamespaceAndPath(AcademyCraft.MODID,
-                                    "textures/effects/tp_mark/" + frame + ".png");
                             int markSize = 32;
                             RenderUtils.render(markSize, markSize,
-                                    screenW / 2 - markSize / 2, screenH / 2 - markSize / 2, g, mark);
+                                    screenW / 2 - markSize / 2, screenH / 2 - markSize / 2, g, TP_MARK_FRAMES[frame]);
                         }
                     } else if ("flashing".equals(skillId) && KeyInputHandler.isFlashingActive()) {
                         g.renderOutline(x - 1, iy - 1, ICON_SIZE + 2, ICON_SIZE + 2, 0xFFBB66FF);
                         int direction=KeyInputHandler.getFlashingHeldDirection();
-                        if(direction>=0){String key=switch(direction){case 0->"a";case 1->"d";case 2->"w";default->"s";};
-                            ResourceLocation cue=ResourceLocation.fromNamespaceAndPath(AcademyCraft.MODID,"textures/abilities/teleporter/flashing/"+key+".png");int size=28;
+                        if(direction>=0&&direction<FLASHING_CUES.length){
+                            int size=28;
                             RenderUtils.render(size, size, screenW / 2 - size / 2,
-                                    screenH / 2 + 18, g, cue);
+                                    screenH / 2 + 18, g, FLASHING_CUES[direction]);
                         } else g.drawString(mc.font, "WASD", x - mc.font.width("WASD") - 6,
                                 iy + ICON_SIZE - mc.font.lineHeight, 0xFFCC99FF, false);
                     }

@@ -90,7 +90,6 @@ public final class PassiveSkillEventHandler {
         } else {
             VecDefenseRuntime.stop(player.getUUID());
         }
-        player.setData(AcademyAttachments.PLAYER_ABILITY, data);
     }
 
     private static boolean marked(Entity entity) {

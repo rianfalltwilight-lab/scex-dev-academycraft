@@ -21,7 +21,7 @@ import net.neoforged.neoforge.event.server.ServerStoppedEvent;
  */
 @EventBusSubscriber(modid = AcademyCraft.MODID)
 public final class AbilityInterferenceService {
-    private record ActiveSource(AbilityInterfererBlockEntity source, long validThrough) {}
+    private record ActiveSource(AbilityInterfererBlockEntity source, net.minecraft.core.BlockPos pos, long validThrough) {}
 
     private static final Map<ResourceKey<Level>, ConcurrentHashMap<Long, ActiveSource>> ACTIVE =
             new ConcurrentHashMap<>();
@@ -31,8 +31,9 @@ public final class AbilityInterferenceService {
     public static void publish(AbilityInterfererBlockEntity source, long validThrough) {
         if (!(source.getLevel() instanceof ServerLevel level)
                 || source.isRemoved() || !source.isPulseActive(level.getGameTime())) return;
+        var pos = source.getBlockPos();
         ACTIVE.computeIfAbsent(level.dimension(), ignored -> new ConcurrentHashMap<>())
-                .put(source.getBlockPos().asLong(), new ActiveSource(source, validThrough));
+                .put(pos.asLong(), new ActiveSource(source, pos, validThrough));
     }
 
     public static void remove(AbilityInterfererBlockEntity source) {
@@ -61,20 +62,23 @@ public final class AbilityInterferenceService {
         for (Map.Entry<Long, ActiveSource> indexed : dimension.entrySet()) {
             ActiveSource entry = indexed.getValue();
             AbilityInterfererBlockEntity source = entry.source;
-            if (entry.validThrough < now || source == null || source.isRemoved()
-                    || source.getLevel() != level || !level.isLoaded(source.getBlockPos())
-                    || level.getBlockEntity(source.getBlockPos()) != source
-                    || !source.isPulseActive(now)) {
+            if (entry.validThrough < now || source == null || source.isRemoved() || source.getLevel() != level) {
+                dimension.remove(indexed.getKey(), entry);
+                continue;
+            }
+            var pos = entry.pos;
+            // Distance-prune before chunk/block-entity verification so distant interferers cost only arithmetic.
+            if (!AbilityInterferenceRules.affects(false, false,
+                    pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
+                    player.getX(), player.getY(), player.getZ(), source.getRange())) {
+                continue;
+            }
+            if (!level.isLoaded(pos) || level.getBlockEntity(pos) != source || !source.isPulseActive(now)) {
                 dimension.remove(indexed.getKey(), entry);
                 continue;
             }
             if (source.isWhitelisted(player.getUUID())) continue;
-            var pos = source.getBlockPos();
-            if (AbilityInterferenceRules.affects(false, false,
-                    pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
-                    player.getX(), player.getY(), player.getZ(), source.getRange())) {
-                return true;
-            }
+            return true;
         }
         if (dimension.isEmpty()) ACTIVE.remove(level.dimension(), dimension);
         return false;

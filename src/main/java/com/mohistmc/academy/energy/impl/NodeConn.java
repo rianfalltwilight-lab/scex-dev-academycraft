@@ -29,8 +29,8 @@ public class NodeConn {
     private final VNNode node;
 
     private boolean disposed = false;
-    private final List<VNReceiver> receivers = new LinkedList<>();
-    private final List<VNGenerator> generators = new LinkedList<>();
+    private final List<VNReceiver> receivers = new ArrayList<>();
+    private final List<VNGenerator> generators = new ArrayList<>();
 
     public NodeConn(WiWorldData data, VNNode node) {
         this.data = data;
@@ -200,58 +200,65 @@ public class NodeConn {
     // ==================== Tick ====================
 
     void tick() {
-        if (!validate()) return;
+        if (disposed) return;
         Level level = getLevel();
         if (!node.isLoaded(level)) return;
         IWirelessNode iNode = node.get(level);
-        if (iNode == null) return;
+        if (iNode == null || (generators.isEmpty() && receivers.isEmpty())) {
+            dispose();
+            return;
+        }
         double transferLeft = EnergyBoundary.transfer(iNode.getBandwidth());
 
         // Callbacks may unlink/rebind users or create another connection. Each
         // endpoint present at the start of this phase is considered at most once.
-        List<VNGenerator> generatorSnapshot = new ArrayList<>(generators);
-        Collections.shuffle(generatorSnapshot);
-        for (VNGenerator generator : generatorSnapshot) {
-            if (transferLeft <= 0 || disposed) break;
-            if (data.nodeLookup.get(generator) != this || !generator.isLoaded(level)) continue;
-            IWirelessGenerator source = generator.get(level);
-            if (source == null) {
-                removeGenerator(generator);
-                continue;
+        if (!generators.isEmpty()) {
+            List<VNGenerator> generatorSnapshot = new ArrayList<>(generators);
+            if (generatorSnapshot.size() > 1) Collections.shuffle(generatorSnapshot);
+            for (VNGenerator generator : generatorSnapshot) {
+                if (transferLeft <= 0 || disposed) break;
+                if (data.nodeLookup.get(generator) != this || !generator.isLoaded(level)) continue;
+                IWirelessGenerator source = generator.get(level);
+                if (source == null) {
+                    removeGenerator(generator);
+                    continue;
+                }
+                double max = EnergyBoundary.energy(iNode.getMaxEnergy());
+                double current = EnergyBoundary.bounded(iNode.getEnergy(), max);
+                double required = Math.min(transferLeft,
+                        Math.min(EnergyBoundary.transfer(source.getBandwidth()), max - current));
+                if (required <= 0) continue;
+                double raw = source.getProvidedEnergy(required);
+                double amount = EnergyBoundary.bounded(raw, required);
+                if (raw != amount) LOGGER.warn("Energy input overflow for generator {}", source);
+                if (amount > 0) iNode.setEnergy(current + amount);
+                transferLeft -= amount;
             }
-            double max = EnergyBoundary.energy(iNode.getMaxEnergy());
-            double current = EnergyBoundary.bounded(iNode.getEnergy(), max);
-            double required = Math.min(transferLeft,
-                    Math.min(EnergyBoundary.transfer(source.getBandwidth()), max - current));
-            if (required <= 0) continue;
-            double raw = source.getProvidedEnergy(required);
-            double amount = EnergyBoundary.bounded(raw, required);
-            if (raw != amount) LOGGER.warn("Energy input overflow for generator {}", source);
-            if (amount > 0) iNode.setEnergy(current + amount);
-            transferLeft -= amount;
         }
 
-        transferLeft = EnergyBoundary.transfer(iNode.getBandwidth());
-        List<VNReceiver> receiverSnapshot = new ArrayList<>(receivers);
-        Collections.shuffle(receiverSnapshot);
-        for (VNReceiver receiver : receiverSnapshot) {
-            if (transferLeft <= 0 || disposed) break;
-            if (data.nodeLookup.get(receiver) != this || !receiver.isLoaded(level)) continue;
-            IWirelessReceiver target = receiver.get(level);
-            if (target == null) {
-                removeReceiver(receiver);
-                continue;
+        if (!receivers.isEmpty() && !disposed) {
+            transferLeft = EnergyBoundary.transfer(iNode.getBandwidth());
+            List<VNReceiver> receiverSnapshot = new ArrayList<>(receivers);
+            if (receiverSnapshot.size() > 1) Collections.shuffle(receiverSnapshot);
+            for (VNReceiver receiver : receiverSnapshot) {
+                if (transferLeft <= 0 || disposed) break;
+                if (data.nodeLookup.get(receiver) != this || !receiver.isLoaded(level)) continue;
+                IWirelessReceiver target = receiver.get(level);
+                if (target == null) {
+                    removeReceiver(receiver);
+                    continue;
+                }
+                double max = EnergyBoundary.energy(iNode.getMaxEnergy());
+                double current = EnergyBoundary.bounded(iNode.getEnergy(), max);
+                double give = Math.min(current,
+                        Math.min(transferLeft, EnergyBoundary.transfer(target.getBandwidth())));
+                give = Math.min(EnergyBoundary.transfer(target.getRequiredEnergy()), give);
+                if (give <= 0) continue;
+                double remainder = EnergyBoundary.bounded(target.injectEnergy(give), give);
+                double accepted = give - remainder;
+                if (accepted > 0) iNode.setEnergy(current - accepted);
+                transferLeft -= accepted;
             }
-            double max = EnergyBoundary.energy(iNode.getMaxEnergy());
-            double current = EnergyBoundary.bounded(iNode.getEnergy(), max);
-            double give = Math.min(current,
-                    Math.min(transferLeft, EnergyBoundary.transfer(target.getBandwidth())));
-            give = Math.min(EnergyBoundary.transfer(target.getRequiredEnergy()), give);
-            if (give <= 0) continue;
-            double remainder = EnergyBoundary.bounded(target.injectEnergy(give), give);
-            double accepted = give - remainder;
-            if (accepted > 0) iNode.setEnergy(current - accepted);
-            transferLeft -= accepted;
         }
     }
 }

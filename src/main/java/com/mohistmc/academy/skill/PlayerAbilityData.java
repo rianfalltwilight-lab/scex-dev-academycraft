@@ -1021,6 +1021,54 @@ public class PlayerAbilityData {
             "usage_max_cp", "usage_max_overload", "cp_regen", "cp_recovery_delay", "overload_recovery_delay",
             "overload_locked", "level_progress_exp", "proficiency", "current_preset", "ability_active", "cooldowns");
 
+    /** Zero-allocation fingerprint of low-frequency profile fields to skip redundant 20-tick NBT serialization. */
+    public long profileFingerprint() {
+        long h = 1469598103934665603L;
+        h = mix(h, currentAbility == null ? 0 : currentAbility.id().hashCode());
+        h = mix(h, playerLevel);
+        h = mix(h, learnedSkills.hashCode());
+        h = mix(h, obtainedItems.hashCode());
+        h = mix(h, activatedTutorials.hashCode());
+        h = mix(h, installedApps.hashCode());
+        h = mix(h, loadedMedia.hashCode());
+        h = mix(h, teleportLocations.hashCode());
+        h = mix(h, terminalInstalled ? 1 : 0);
+        h = mix(h, misakaId);
+        h = mix(h, devMode ? 1 : 0);
+        for (int p = 0; p < PRESET_COUNT; p++) {
+            for (int s = 0; s < SkillPreset.SLOT_COUNT; s++) {
+                String slot = presets[p].getSlot(s);
+                h = mix(h, slot == null ? 0 : slot.hashCode());
+            }
+        }
+        return h;
+    }
+
+    /** Zero-allocation fingerprint of high-frequency runtime fields to skip redundant 5-tick NBT serialization. */
+    public long runtimeFingerprint() {
+        long h = 1469598103934665603L;
+        h = mix(h, Float.floatToIntBits(currentCp));
+        h = mix(h, Float.floatToIntBits(maxCp));
+        h = mix(h, Float.floatToIntBits(currentOverload));
+        h = mix(h, Float.floatToIntBits(maxOverload));
+        h = mix(h, Float.floatToIntBits(usageMaxCp));
+        h = mix(h, Float.floatToIntBits(usageMaxOverload));
+        h = mix(h, Float.floatToIntBits(cpRegenRate));
+        h = mix(h, cpRecoveryDelay);
+        h = mix(h, overloadRecoveryDelay);
+        h = mix(h, overloadLocked ? 1 : 0);
+        h = mix(h, Float.floatToIntBits(levelProgressExp));
+        h = mix(h, currentPreset);
+        h = mix(h, abilityActive ? 1 : 0);
+        h = mix(h, skillProficiency.hashCode());
+        h = mix(h, cooldowns.hashCode());
+        return h;
+    }
+
+    private static long mix(long h, int value) {
+        return (h ^ (value & 0xFFFFFFFFL)) * 1099511628211L;
+    }
+
     /** Low-frequency configuration. Runtime changes never dirty this snapshot. */
     public CompoundTag toProfileSyncTag() {
         CompoundTag tag = toSyncTag();

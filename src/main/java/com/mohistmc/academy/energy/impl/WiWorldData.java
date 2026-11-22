@@ -312,10 +312,13 @@ public class WiWorldData extends SavedData {
     }
 
     private void tickNetwork() {
-        for (WirelessNet net : toRemove) {
-            doRemoveNetwork(net);
+        if (!toRemove.isEmpty()) {
+            for (WirelessNet net : toRemove) {
+                doRemoveNetwork(net);
+            }
+            toRemove.clear();
         }
-        toRemove.clear();
+        if (activeNetworks.isEmpty()) return;
 
         for (WirelessNet net : new ArrayList<>(activeNetworks)) {
             if (net.isDisposed()) {
@@ -328,10 +331,13 @@ public class WiWorldData extends SavedData {
     }
 
     private void tickNode() {
-        for (NodeConn nc : nToRemove) {
-            doRemoveNode(nc);
+        if (!nToRemove.isEmpty()) {
+            for (NodeConn nc : nToRemove) {
+                doRemoveNode(nc);
+            }
+            nToRemove.clear();
         }
-        nToRemove.clear();
+        if (activeNodes.isEmpty()) return;
 
         // A provider callback may create a connection while this tick runs.
         for (NodeConn conn : new ArrayList<>(activeNodes)) {

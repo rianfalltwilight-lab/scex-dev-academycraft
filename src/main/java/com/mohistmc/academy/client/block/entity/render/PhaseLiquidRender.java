@@ -67,6 +67,12 @@ public class PhaseLiquidRender implements BlockEntityRenderer<PhaseLiquidBlockEn
     }
 
     @Override
+    public int getViewDistance() {
+        // At 48 blocks, distanceAlpha is already below MIN_ALPHA (0.1).
+        return 48;
+    }
+
+    @Override
     public void render(PhaseLiquidBlockEntity blockEntity, float partialTick, PoseStack poseStack,
                        MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
         Level level = blockEntity.getLevel();
@@ -81,18 +87,18 @@ public class PhaseLiquidRender implements BlockEntityRenderer<PhaseLiquidBlockEn
         FluidState fluidState = level.getFluidState(pos);
         if (fluidState.isEmpty()) return;
         float liquidHeight = HEIGHT_SCALE * (float) Math.sqrt(fluidState.getHeight(level, pos));
+        double elapsedSeconds = Util.getMillis() / 1000.0;
 
         // 三层液面,高度偏移为相对液体深度的比例,速度控制贴图滚动方向与快慢
-        drawLayer(poseStack, bufferSource, 0, -0.30f * liquidHeight, 0.30f, 0.20f, alpha);
-        drawLayer(poseStack, bufferSource, 1, 0.35f * liquidHeight, 0.30f, 0.05f, alpha);
+        drawLayer(poseStack, bufferSource, 0, -0.30f * liquidHeight, 0.30f, 0.20f, alpha, elapsedSeconds);
+        drawLayer(poseStack, bufferSource, 1, 0.35f * liquidHeight, 0.30f, 0.05f, alpha, elapsedSeconds);
         if (liquidHeight > TOP_LAYER_THRESHOLD) {
-            drawLayer(poseStack, bufferSource, 2, 0.70f * liquidHeight, 0.10f, 0.25f, alpha);
+            drawLayer(poseStack, bufferSource, 2, 0.70f * liquidHeight, 0.10f, 0.25f, alpha, elapsedSeconds);
         }
     }
 
     private void drawLayer(PoseStack poseStack, MultiBufferSource bufferSource, int layer,
-                           float height, float speedU, float speedV, float alpha) {
-        double elapsedSeconds = Util.getMillis() / 1000.0;
+                           float height, float speedU, float speedV, float alpha, double elapsedSeconds) {
         float uOffset = (float) ((elapsedSeconds * speedU) % 1);
         float vOffset = (float) ((elapsedSeconds * speedV) % 1);
 

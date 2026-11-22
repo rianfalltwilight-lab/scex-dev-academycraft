@@ -42,9 +42,12 @@ public final class MineDetectBatchRenderer {
                     .setLightmapState(RenderStateShard.LIGHTMAP)
                     .setOverlayState(RenderStateShard.OVERLAY)
                     .createCompositeState(false));
-    private static final int[][] COLORS = {
-            {115, 200, 227}, {161, 181, 188}, {87, 231, 248},
-            {97, 204, 94}, {235, 109, 84}
+    private static final float[][] COLORS = {
+            {115 / 255f, 200 / 255f, 227 / 255f},
+            {161 / 255f, 181 / 255f, 188 / 255f},
+            {87 / 255f, 231 / 255f, 248 / 255f},
+            {97 / 255f, 204 / 255f, 94 / 255f},
+            {235 / 255f, 109 / 255f, 84 / 255f}
     };
 
     private MineDetectBatchRenderer() {}
@@ -65,15 +68,21 @@ public final class MineDetectBatchRenderer {
         VertexConsumer out = buffers.getBuffer(TYPE);
         Matrix4f matrix = pose.last().pose();
         double range = snapshot.range();
+        double invRange = 2.2 / range;
+        // alpha <= 0.01f whenever dist / range >= (1 + 0.29 / 0.7) / 2.2 (~0.64286); prune via distSq before sqrt.
+        double maxVisibleDistSq = (range * 0.65) * (range * 0.65);
+        double px = mc.player.getX(), py = mc.player.getY(), pz = mc.player.getZ();
         for (MineDetectResultPacket.Entry entry : snapshot.entries()) {
-            double dx = mc.player.getX() - entry.pos().getX();
-            double dy = mc.player.getY() - entry.pos().getY();
-            double dz = mc.player.getZ() - entry.pos().getZ();
-            float alpha = (float) Math.clamp(.3 + (1 - Math.sqrt(dx*dx + dy*dy + dz*dz) / range * 2.2) * .7, 0, 1);
+            double dx = px - entry.pos().getX();
+            double dy = py - entry.pos().getY();
+            double dz = pz - entry.pos().getZ();
+            double distSq = dx * dx + dy * dy + dz * dz;
+            if (distSq > maxVisibleDistSq) continue;
+            float alpha = (float) Math.clamp(.3 + (1 - Math.sqrt(distSq) * invRange) * .7, 0, 1);
             if (alpha <= .01f) continue;
-            int[] color = COLORS[Math.clamp(entry.harvestLevel(), 0, COLORS.length - 1)];
+            float[] color = COLORS[Math.clamp(entry.harvestLevel(), 0, COLORS.length - 1)];
             box(out, matrix, entry.pos().getX(), entry.pos().getY(), entry.pos().getZ(),
-                    color[0] / 255f, color[1] / 255f, color[2] / 255f, alpha);
+                    color[0], color[1], color[2], alpha);
         }
         buffers.endBatch(TYPE);
         pose.popPose();
@@ -81,22 +90,27 @@ public final class MineDetectBatchRenderer {
 
     private static void box(VertexConsumer out, Matrix4f matrix, float x, float y, float z,
                             float r, float g, float b, float a) {
-        float lo=.05f, hi=.95f;
-        face(out,matrix,r,g,b,a, x+lo,y+lo,z+hi, x+hi,y+lo,z+hi, x+hi,y+lo,z+lo, x+lo,y+lo,z+lo);
-        face(out,matrix,r,g,b,a, x+lo,y+hi,z+lo, x+hi,y+hi,z+lo, x+hi,y+hi,z+hi, x+lo,y+hi,z+hi);
-        face(out,matrix,r,g,b,a, x+lo,y+hi,z+hi, x+hi,y+hi,z+hi, x+hi,y+lo,z+hi, x+lo,y+lo,z+hi);
-        face(out,matrix,r,g,b,a, x+lo,y+lo,z+lo, x+hi,y+lo,z+lo, x+hi,y+hi,z+lo, x+lo,y+hi,z+lo);
-        face(out,matrix,r,g,b,a, x+lo,y+lo,z+lo, x+lo,y+hi,z+lo, x+lo,y+hi,z+hi, x+lo,y+lo,z+hi);
-        face(out,matrix,r,g,b,a, x+hi,y+lo,z+hi, x+hi,y+hi,z+hi, x+hi,y+hi,z+lo, x+hi,y+lo,z+lo);
+        float x0 = x + .05f, x1 = x + .95f;
+        float y0 = y + .05f, y1 = y + .95f;
+        float z0 = z + .05f, z1 = z + .95f;
+        face(out, matrix, r, g, b, a, x0, y0, z1, x1, y0, z1, x1, y0, z0, x0, y0, z0);
+        face(out, matrix, r, g, b, a, x0, y1, z0, x1, y1, z0, x1, y1, z1, x0, y1, z1);
+        face(out, matrix, r, g, b, a, x0, y1, z1, x1, y1, z1, x1, y0, z1, x0, y0, z1);
+        face(out, matrix, r, g, b, a, x0, y0, z0, x1, y0, z0, x1, y1, z0, x0, y1, z0);
+        face(out, matrix, r, g, b, a, x0, y0, z0, x0, y1, z0, x0, y1, z1, x0, y0, z1);
+        face(out, matrix, r, g, b, a, x1, y0, z1, x1, y1, z1, x1, y1, z0, x1, y0, z0);
     }
 
-    private static void face(VertexConsumer out, Matrix4f matrix, float r,float g,float b,float a,
-                             float... points) {
-        for (int i=0;i<4;i++) {
-            float u=(i==1||i==2)?1:0, v=i>=2?0:1;
-            out.addVertex(matrix,points[i*3],points[i*3+1],points[i*3+2])
-                    .setColor(r,g,b,a).setUv(u,v).setOverlay(OverlayTexture.NO_OVERLAY)
-                    .setLight(LightTexture.FULL_BRIGHT).setNormal(0,1,0);
-        }
+    private static void face(VertexConsumer out, Matrix4f matrix, float r, float g, float b, float a,
+                             float x0, float y0, float z0, float x1, float y1, float z1,
+                             float x2, float y2, float z2, float x3, float y3, float z3) {
+        out.addVertex(matrix, x0, y0, z0).setColor(r, g, b, a).setUv(0, 1)
+                .setOverlay(OverlayTexture.NO_OVERLAY).setLight(LightTexture.FULL_BRIGHT).setNormal(0, 1, 0);
+        out.addVertex(matrix, x1, y1, z1).setColor(r, g, b, a).setUv(1, 1)
+                .setOverlay(OverlayTexture.NO_OVERLAY).setLight(LightTexture.FULL_BRIGHT).setNormal(0, 1, 0);
+        out.addVertex(matrix, x2, y2, z2).setColor(r, g, b, a).setUv(1, 0)
+                .setOverlay(OverlayTexture.NO_OVERLAY).setLight(LightTexture.FULL_BRIGHT).setNormal(0, 1, 0);
+        out.addVertex(matrix, x3, y3, z3).setColor(r, g, b, a).setUv(0, 0)
+                .setOverlay(OverlayTexture.NO_OVERLAY).setLight(LightTexture.FULL_BRIGHT).setNormal(0, 1, 0);
     }
 }

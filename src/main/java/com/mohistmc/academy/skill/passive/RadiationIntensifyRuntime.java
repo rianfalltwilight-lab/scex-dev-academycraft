@@ -3,13 +3,18 @@ package com.mohistmc.academy.skill.passive;
 import com.mohistmc.academy.AcademyCraft;
 import com.mohistmc.academy.skill.PlayerAbilityData;
 import com.mohistmc.academy.world.AcademyParticles;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 
 /**
@@ -26,6 +31,8 @@ public final class RadiationIntensifyRuntime {
     private static final String MARK_TICKS = AcademyCraft.MODID + ":md_marktick";
     private static final String MARK_RATE = AcademyCraft.MODID + ":md_markrate";
     private static final String VISUAL_TICKS = AcademyCraft.MODID + ":md_mark_visual";
+    /** Tracks only entities with an active mark or visual timer so untouched entities never touch persistentData. */
+    private static final Set<UUID> TRACKED = ConcurrentHashMap.newKeySet();
 
     private RadiationIntensifyRuntime() {}
 
@@ -40,23 +47,36 @@ public final class RadiationIntensifyRuntime {
         float proficiency = PassiveSkillMath.radiationProficiency(
                 data.getMaxCp(), PlayerAbilityData.LEVEL_5_INITIAL_CP);
         targetData.putFloat(MARK_RATE, PassiveSkillMath.radiationMultiplier(proficiency));
+        TRACKED.add(target.getUUID());
 
         // MDDamageHelper.sync sent the caster rather than target in 1.0.7.
         casterData.putInt(VISUAL_TICKS, ticks);
+        TRACKED.add(caster.getUUID());
     }
 
     @SubscribeEvent
     public static void entityTick(EntityTickEvent.Post event) {
+        if (TRACKED.isEmpty()) return;
         Entity entity = event.getEntity();
-        if (!(entity.level() instanceof ServerLevel level)) return;
+        if (!(entity.level() instanceof ServerLevel level) || !TRACKED.contains(entity.getUUID())) return;
         CompoundTag data = entity.getPersistentData();
 
         int markTicks = data.getInt(MARK_TICKS);
-        if (markTicks > 0) data.putInt(MARK_TICKS, markTicks - 1);
+        if (markTicks > 0) {
+            markTicks--;
+            data.putInt(MARK_TICKS, markTicks);
+        }
 
         int visualTicks = data.getInt(VISUAL_TICKS);
-        if (visualTicks <= 0) return;
-        data.putInt(VISUAL_TICKS, visualTicks - 1);
+        boolean emitParticles = visualTicks > 0;
+        if (emitParticles) {
+            visualTicks--;
+            data.putInt(VISUAL_TICKS, visualTicks);
+        }
+        if (markTicks <= 0 && visualTicks <= 0) {
+            TRACKED.remove(entity.getUUID());
+        }
+        if (!emitParticles) return;
 
         int count = level.random.nextInt(3);
         for (int i = 0; i < count; i++) {
@@ -82,10 +102,21 @@ public final class RadiationIntensifyRuntime {
 
     @SubscribeEvent
     public static void incomingDamage(LivingIncomingDamageEvent event) {
+        if (TRACKED.isEmpty() || !TRACKED.contains(event.getEntity().getUUID())) return;
         CompoundTag data = event.getEntity().getPersistentData();
         if (data.getInt(MARK_TICKS) <= 0) return;
         float rate = data.getFloat(MARK_RATE);
         if (Float.isFinite(rate) && rate > 0) event.setAmount(event.getAmount() * rate);
+    }
+
+    @SubscribeEvent
+    public static void onEntityLeave(EntityLeaveLevelEvent event) {
+        if (!event.getLevel().isClientSide()) TRACKED.remove(event.getEntity().getUUID());
+    }
+
+    @SubscribeEvent
+    public static void onServerStopped(ServerStoppedEvent event) {
+        TRACKED.clear();
     }
 
     public static int markedTicks(Entity entity) {

@@ -39,7 +39,6 @@ public class SkillEventHandler {
         if (event.getEntity() instanceof ServerPlayer player) {
             if (data.consumeOverloadTrigger()) {
                 onOverloaded(player, data);
-                player.setData(AcademyAttachments.PLAYER_ABILITY, data);
                 return;
             }
             DevLearningSessionManager.tick(player);
@@ -54,14 +53,12 @@ public class SkillEventHandler {
                 }
                 FlashingSessionManager.abort(player);
                 LocationTeleportActionPacket.forgetPlayer(player.getUUID());
-                player.setData(AcademyAttachments.PLAYER_ABILITY, data);
                 return;
             }
             if (state != null && !state.releasing) {
                 if (com.mohistmc.academy.network.ChargingHandshake.serverStartExpired(state.acknowledged,state.startedAt,player.serverLevel().getGameTime())) {
                     SkillChargingManager.cancel(player);
                     notifyCharging(player,state,-1,0);
-                    player.setData(AcademyAttachments.PLAYER_ABILITY, data);
                     return;
                 }
                 Skill skill = data.getSlotSkill(data.getCurrentPresetIndex(), state.slotIndex);
@@ -128,8 +125,6 @@ public class SkillEventHandler {
                     }
                 }
             }
-
-            player.setData(AcademyAttachments.PLAYER_ABILITY, data);
         }
     }
 

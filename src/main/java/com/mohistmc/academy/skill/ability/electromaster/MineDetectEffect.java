@@ -108,19 +108,52 @@ public class MineDetectEffect implements SkillEffect {
         double centerX=player.getX(),centerY=player.getY(),centerZ=player.getZ();
         int minX=Mth.floor(centerX-range),minY=Mth.floor(centerY-range),minZ=Mth.floor(centerZ-range);
         int maxX=Mth.ceil(centerX+range),maxY=Mth.ceil(centerY+range),maxZ=Mth.ceil(centerZ+range);
+        int clampedMinY = Math.max(minY, level.getMinBuildHeight());
+        int clampedMaxY = Math.min(maxY, level.getMaxBuildHeight() - 1);
         double rangeSq=range*range;BlockPos.MutableBlockPos pos=new BlockPos.MutableBlockPos();
 
-        // Preserve WorldUtils' x/y/z iteration and its exact player-coordinate sphere.
+        // Preserve WorldUtils' x/y/z iteration and its exact player-coordinate sphere, while skipping
+        // unloaded chunks and ore-free 16x16x16 sections in O(1) via section palette checks.
         for (int x=minX;x<=maxX&&results.size()<MAX_ORES;x++) {
-            for (int y=minY;y<=maxY&&results.size()<MAX_ORES;y++) {
+            double dx=x-centerX;
+            double dxSq = dx * dx;
+            if (dxSq > rangeSq) continue;
+            int cx = x >> 4;
+            for (int y=clampedMinY;y<=clampedMaxY&&results.size()<MAX_ORES;y++) {
+                double dy=y-centerY;
+                double dxySq = dxSq + dy * dy;
+                if (dxySq > rangeSq) continue;
+                int sectionIdx = level.getSectionIndex(y);
+                int lastCz = Integer.MIN_VALUE;
+                net.minecraft.world.level.chunk.LevelChunkSection currentSection = null;
+                boolean sectionMayHaveOre = false;
                 for (int z=minZ;z<=maxZ&&results.size()<MAX_ORES;z++) {
-                    double dx=x-centerX,dy=y-centerY,dz=z-centerZ;
+                    int cz = z >> 4;
+                    if (cz != lastCz) {
+                        lastCz = cz;
+                        pos.set(x, y, z);
+                        // Detection must never force-load chunks around a player.
+                        if (!LoadedRaycast.isLoaded(level, pos)) {
+                            z = ((cz + 1) << 4) - 1;
+                            continue;
+                        }
+                        var chunk = level.getChunkSource().getChunkNow(cx, cz);
+                        if (chunk == null || sectionIdx < 0 || sectionIdx >= chunk.getSectionsCount()) {
+                            z = ((cz + 1) << 4) - 1;
+                            continue;
+                        }
+                        currentSection = chunk.getSection(sectionIdx);
+                        sectionMayHaveOre = !currentSection.hasOnlyAir() && currentSection.maybeHas(MineDetectEffect::isOre);
+                        if (!sectionMayHaveOre) {
+                            z = ((cz + 1) << 4) - 1;
+                            continue;
+                        }
+                    }
+                    double dz=z-centerZ;
                     if (dx*dx+dy*dy+dz*dz>rangeSq) continue;
-                    pos.set(x,y,z);
-                    // Detection must never force-load chunks around a player.
-                    if (!LoadedRaycast.isLoaded(level, pos)) continue;
-                    BlockState state = level.getBlockState(pos);
+                    BlockState state = currentSection.getBlockState(x & 15, y & 15, z & 15);
                     if (isOre(state)) {
+                        pos.set(x, y, z);
                         int harvestLevel = advanced ? getHarvestLevel(state) : 0;
                         results.add(new MineDetectResultPacket.Entry(pos.immutable(), harvestLevel));
                     }
@@ -142,6 +175,7 @@ public class MineDetectEffect implements SkillEffect {
     // Legacy isOreBlock: BlockOre / redstone ore or any ore-dictionary "ore*" entry,
     // i.e. every vanilla and modded ore. c:ores is the modern equivalent.
     public static boolean isOre(BlockState state) {
+        if (state.isAir()) return false;
         return state.is(net.neoforged.neoforge.common.Tags.Blocks.ORES)
                 || state.is(BlockTags.COAL_ORES)
                 || state.is(BlockTags.IRON_ORES)

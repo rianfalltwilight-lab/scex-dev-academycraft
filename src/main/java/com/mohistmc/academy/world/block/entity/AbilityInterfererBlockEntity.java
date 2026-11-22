@@ -47,6 +47,7 @@ public final class AbilityInterfererBlockEntity extends AcademyContainerBlockEnt
     /** Paid pulse state is runtime-only and must never survive save/reload. */
     private long activeUntil = -1;
     private long nextPaymentTick = Long.MIN_VALUE;
+    private boolean registeredInService;
 
     public AbilityInterfererBlockEntity(BlockPos pos, BlockState state) {
         super(AcademyBlockEntities.ABILITY_INTERFERER.get(), pos, state);
@@ -69,7 +70,10 @@ public final class AbilityInterfererBlockEntity extends AcademyContainerBlockEnt
         long now = level.getGameTime();
 
         if (!enabled) {
-            AbilityInterferenceService.remove(this);
+            if (registeredInService) {
+                AbilityInterferenceService.remove(this);
+                registeredInService = false;
+            }
             if (changed) markMachineChanged();
             return;
         }
@@ -86,6 +90,7 @@ public final class AbilityInterfererBlockEntity extends AcademyContainerBlockEnt
             activeUntil = now + AbilityInterferenceRules.PAYMENT_INTERVAL_TICKS - 1L;
             nextPaymentTick = now + AbilityInterferenceRules.PAYMENT_INTERVAL_TICKS;
             AbilityInterferenceService.publish(this, activeUntil);
+            registeredInService = true;
             changed = true;
         }
         if (changed) markMachineChanged();

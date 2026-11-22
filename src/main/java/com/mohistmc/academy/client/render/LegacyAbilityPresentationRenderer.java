@@ -50,6 +50,9 @@ public final class LegacyAbilityPresentationRenderer {
     private static boolean railgunWasCharging;
     private static final ResourceLocation GLOW_LINE = ResourceLocation.fromNamespaceAndPath(
             AcademyCraft.MODID, "textures/effects/glow_line.png");
+    private static final ResourceLocation[] TP_MARK_FRAMES = java.util.stream.IntStream.range(0, 8)
+            .mapToObj(i -> ResourceLocation.fromNamespaceAndPath(AcademyCraft.MODID, "textures/effects/tp_mark/" + i + ".png"))
+            .toArray(ResourceLocation[]::new);
     private LegacyAbilityPresentationRenderer() {}
 
     @SubscribeEvent
@@ -81,9 +84,7 @@ public final class LegacyAbilityPresentationRenderer {
                 mc.player.getViewVector(partial),distance);
         if(mark==null)return;
         int frame = (mc.player.tickCount / 2) & 7;
-        ResourceLocation texture = ResourceLocation.fromNamespaceAndPath(AcademyCraft.MODID,
-                "textures/effects/tp_mark/" + frame + ".png");
-        renderMarkModel(event, mark, texture, mc, 0xE8FFFFFF);
+        renderMarkModel(event, mark, TP_MARK_FRAMES[frame], mc, 0xE8FFFFFF);
         emitTeleportMarkerParticle(mc,mark);
     }
 
@@ -91,9 +92,8 @@ public final class LegacyAbilityPresentationRenderer {
         PlayerAbilityData data=mc.player.getData(AcademyAttachments.PLAYER_ABILITY);
         var destination=PenetrateTargeting.destination(mc.player,data,KeyInputHandler.getPenetrateDistance(data));
         int frame=(mc.player.tickCount/2)&7;
-        ResourceLocation texture=ResourceLocation.fromNamespaceAndPath(AcademyCraft.MODID,"textures/effects/tp_mark/"+frame+".png");
         Vec3 marker=destination.position().add(0,mc.player.getEyeHeight(),0);
-        renderMarkModel(event,marker,texture,mc,destination.available()?0xE8FFFFFF:0xE8FF3333);
+        renderMarkModel(event,marker,TP_MARK_FRAMES[frame],mc,destination.available()?0xE8FFFFFF:0xE8FF3333);
         if(destination.available())emitTeleportMarkerParticle(mc,marker);
     }
 
@@ -152,8 +152,7 @@ public final class LegacyAbilityPresentationRenderer {
         Vec3 mark=FlashingTargeting.destination(mc.player,direction,12+6*data.getProficiency("flashing"));
         if(mark==null)return;
         int frame=(mc.player.tickCount/2)&7;
-        ResourceLocation texture=ResourceLocation.fromNamespaceAndPath(AcademyCraft.MODID,"textures/effects/tp_mark/"+frame+".png");
-        renderMarkModel(event,mark,texture,mc,0xE8FFFFFF);
+        renderMarkModel(event,mark,TP_MARK_FRAMES[frame],mc,0xE8FFFFFF);
     }
 
     /** First-person 1.0.7 ParabolaEffect: 20 ms integration and the official glow line. */

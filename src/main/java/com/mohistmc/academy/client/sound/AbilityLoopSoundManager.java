@@ -96,6 +96,8 @@ public final class AbilityLoopSoundManager {
             STORM_WING.clear();
             return;
         }
+        // Avoid scanning a 128x128x128 entity volume every single tick when no Storm Wing is active nearby.
+        if (STORM_WING.isEmpty() && (mc.player.tickCount & 3) != 0) return;
         Set<Integer> seen = new HashSet<>();
         for (StormWingVisualEntity entity : mc.level.getEntitiesOfClass(StormWingVisualEntity.class,
                 mc.player.getBoundingBox().inflate(64), candidate -> !candidate.isTerminating())) {

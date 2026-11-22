@@ -32,6 +32,8 @@ public final class MatrixRender implements BlockEntityRenderer<MatrixBlockEntity
     private static final int PLATE_COUNT = 3;
     private static final float FLOAT_HEIGHT = 0.1f;
     private static final double HEIGHT_PHASE_OFFSET = 40.0;
+    private BakedModel cachedShieldModel;
+    private List<BakedQuad> cachedShieldQuads;
 
     public MatrixRender(BlockEntityRendererProvider.Context context) {}
 
@@ -57,7 +59,12 @@ public final class MatrixRender implements BlockEntityRenderer<MatrixBlockEntity
         float orbitPhase = (float) ((timeMillis / 20.0) % 360.0);
         float facing = facingDegrees(matrix.getBlockState().getValue(Matrix.FACING));
 
-        List<BakedQuad> quads = collectQuads(shield);
+        List<BakedQuad> quads = cachedShieldQuads;
+        if (cachedShieldModel != shield || quads == null) {
+            quads = collectQuads(shield);
+            cachedShieldModel = shield;
+            cachedShieldQuads = quads;
+        }
         var consumer = buffers.getBuffer(RenderType.cutout());
         for (int plate = 0; plate < PLATE_COUNT; plate++) {
             poseStack.pushPose();

@@ -21,6 +21,8 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 public class ChargingHudOverlay {
 
     private static final ChargePresentationState STATE = new ChargePresentationState();
+    private static final ResourceLocation RAILGUN_ICON = ResourceLocation.fromNamespaceAndPath(
+            AcademyCraft.MODID, "textures/effects/railgun.png");
 
     public static void setChargingState(int ticks, int max, String skillId) {
         STATE.accept(ticks, max, skillId);
@@ -105,10 +107,8 @@ public class ChargingHudOverlay {
                         graphics, skill.getIconLocation());
                 if ("railgun".equals(currentSkillId)) {
                     // The old railgun charge identity: coin/ray art and a server-neutral QTE cue.
-                    ResourceLocation railgun = ResourceLocation.fromNamespaceAndPath(AcademyCraft.MODID,
-                            "textures/effects/railgun.png");
                     RenderUtils.render(16, 16, x + barWidth + 3, y - 3,
-                            graphics, railgun);
+                            graphics, RAILGUN_ICON);
                 }
                 Component hint = chargeHint(currentSkillId, progress);
                 int hintWidth = mc.font.width(hint);

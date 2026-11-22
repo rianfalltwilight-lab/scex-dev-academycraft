@@ -72,8 +72,9 @@ public class CatEngineBlockEntity extends AcademyContainerBlockEntity implements
         thisTickGeneration = Math.min(required, MachineConfig.CAT_GENERATION.get());
         storedEnergy = Math.min(maxStorage, storedEnergy + (float) thisTickGeneration);
 
-        boolean nowLinked = false;
-        if (level instanceof ServerLevel server) {
+        boolean nowLinked = linked;
+        if (level instanceof ServerLevel server
+                && (lastGenerationSyncTick == Long.MIN_VALUE || (level.getGameTime() % 10) == 0)) {
             WiWorldData data = WiWorldData.getNonCreate(server);
             nowLinked = data != null && data.getNodeConnection(this) != null;
         }

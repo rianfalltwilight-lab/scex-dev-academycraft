@@ -28,6 +28,8 @@ public class WindGenFanRender implements BlockEntityRenderer<WindGenFanBlockEnti
      */
     static final float LEGACY_PROXY_BACK_OFFSET = 0.48f;
     static final float CONVERTED_MODEL_PIVOT_OFFSET = 0.20f;
+    private BakedModel cachedFanModel;
+    private List<BakedQuad> cachedFanQuads;
 
     public WindGenFanRender(BlockEntityRendererProvider.Context ctx) {
     }
@@ -75,14 +77,20 @@ public class WindGenFanRender implements BlockEntityRenderer<WindGenFanBlockEnti
         };
         p_112309_.rotateAround(spinAxis.rotationDegrees(angle), pivotX, 0.5f, pivotZ);
 
-        // 手动渲染BakedModel，避免与默认渲染重叠
+        // 手动渲染BakedModel，避免与默认渲染重叠；按 BakedModel 引用缓存 Quad 列表避免每帧分配
         BakedModel bakedModel = Minecraft.getInstance().getBlockRenderer().getBlockModel(blockState);
-        RandomSource random = RandomSource.create();
-        List<BakedQuad> quads = new ArrayList<>();
-        for (Direction direction : Direction.values()) {
-            quads.addAll(bakedModel.getQuads(blockState, direction, random));
+        List<BakedQuad> quads = cachedFanQuads;
+        if (cachedFanModel != bakedModel || quads == null) {
+            RandomSource random = RandomSource.create(0L);
+            List<BakedQuad> built = new ArrayList<>();
+            for (Direction direction : Direction.values()) {
+                built.addAll(bakedModel.getQuads(blockState, direction, random));
+            }
+            built.addAll(bakedModel.getQuads(blockState, null, random));
+            quads = List.copyOf(built);
+            cachedFanModel = bakedModel;
+            cachedFanQuads = quads;
         }
-        quads.addAll(bakedModel.getQuads(blockState, null, random));
 
         var consumer = p_112310_.getBuffer(RenderType.cutout());
         for (BakedQuad quad : quads) {
