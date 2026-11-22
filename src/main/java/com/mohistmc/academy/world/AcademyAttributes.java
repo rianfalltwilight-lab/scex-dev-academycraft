@@ -18,7 +18,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
  * Attributes modpacks can modify with ordinary attribute modifiers (gear, effects, KubeJS, curios).
  * Every living entity type gets them, so mobs and future mob casters scale the same way as players.
  */
-@EventBusSubscriber(modid = AcademyCraft.MODID, bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = AcademyCraft.MODID)
 public final class AcademyAttributes {
     public static final DeferredRegister<Attribute> ATTRIBUTES =
             DeferredRegister.create(Registries.ATTRIBUTE, AcademyCraft.MODID);

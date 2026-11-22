@@ -51,7 +51,7 @@ import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 
 /** Client registration events belong to the mod bus, not the runtime game bus. */
-@EventBusSubscriber(modid = AcademyCraft.MODID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = AcademyCraft.MODID, value = Dist.CLIENT)
 public final class ClientModListener {
     private ClientModListener() {}
 

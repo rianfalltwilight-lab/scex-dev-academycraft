@@ -37,11 +37,14 @@ public final class ExtraItemData {
     }
 
     public static boolean isActive(ItemStack stack) {
+        Boolean component = stack.get(AcademyDataComponents.ACTIVE.get());
+        if (component != null) return component;
         return tag(stack).getBoolean(ACTIVE);
     }
 
     public static void setActive(ItemStack stack, boolean active) {
-        update(stack, nbt -> nbt.putBoolean(ACTIVE, active));
+        stack.set(AcademyDataComponents.ACTIVE.get(), active);
+        removeLegacyKeys(stack, ACTIVE);
     }
 
     public static void toggleActive(ItemStack stack) {
@@ -101,12 +104,15 @@ public final class ExtraItemData {
     }
 
     public static long lastUse(ItemStack stack) {
+        Long component = stack.get(AcademyDataComponents.LAST_USE.get());
+        if (component != null) return component;
         CompoundTag nbt = tag(stack);
         return nbt.contains(LAST_USE) ? nbt.getLong(LAST_USE) : Long.MIN_VALUE;
     }
 
     public static void setLastUse(ItemStack stack, long gameTime) {
-        update(stack, nbt -> nbt.putLong(LAST_USE, gameTime));
+        stack.set(AcademyDataComponents.LAST_USE.get(), gameTime);
+        removeLegacyKeys(stack, LAST_USE);
     }
 
     /** Reads do not mutate stacks, including simulated capability calls and client tooltips. */

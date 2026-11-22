@@ -23,5 +23,15 @@ public final class AcademyDataComponents {
                     .persistent(ExtraItemData.TeleportTarget.CODEC)
                     .networkSynchronized(ExtraItemData.TeleportTarget.STREAM_CODEC).build());
 
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Boolean>> ACTIVE =
+            TYPES.register("active", () -> DataComponentType.<Boolean>builder()
+                    .persistent(Codec.BOOL)
+                    .networkSynchronized(ByteBufCodecs.BOOL).build());
+
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Long>> LAST_USE =
+            TYPES.register("last_use", () -> DataComponentType.<Long>builder()
+                    .persistent(Codec.LONG)
+                    .networkSynchronized(ByteBufCodecs.VAR_LONG).build());
+
     private AcademyDataComponents() {}
 }

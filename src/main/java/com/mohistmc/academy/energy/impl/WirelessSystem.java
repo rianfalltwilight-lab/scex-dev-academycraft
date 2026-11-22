@@ -19,7 +19,7 @@ import java.security.MessageDigest;
 /**
  * 无线能源系统入口 —— 监听服务端 tick，驱动所有网络和节点连接的更新。
  */
-@EventBusSubscriber
+@EventBusSubscriber(modid = com.mohistmc.academy.AcademyCraft.MODID)
 public class WirelessSystem {
 
     public enum MatrixNetworkState {

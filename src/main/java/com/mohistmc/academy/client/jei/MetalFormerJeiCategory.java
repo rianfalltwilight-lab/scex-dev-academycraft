@@ -3,6 +3,7 @@ package com.mohistmc.academy.client.jei;
 import com.mohistmc.academy.crafting.MetalFormingRecipe;
 import com.mohistmc.academy.world.AcademyItems;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
+import mezz.jei.api.gui.builder.ITooltipBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.helpers.IGuiHelper;
@@ -48,12 +49,11 @@ public final class MetalFormerJeiCategory implements IRecipeCategory<RecipeHolde
     }
 
     @Override
-    public List<Component> getTooltipStrings(RecipeHolder<MetalFormingRecipe> holder, IRecipeSlotsView slots,
-                                             double mouseX, double mouseY) {
+    public void getTooltip(ITooltipBuilder tooltip, RecipeHolder<MetalFormingRecipe> holder, IRecipeSlotsView slots,
+                           double mouseX, double mouseY) {
         if (mouseX >= 8 && mouseX < 108 && mouseY >= 37 && mouseY < 51) {
-            return List.of(modeLabel(holder.value()));
+            tooltip.add(modeLabel(holder.value()));
         }
-        return List.of();
     }
 
     private static Component modeLabel(MetalFormingRecipe recipe) {

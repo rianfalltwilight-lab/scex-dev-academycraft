@@ -21,7 +21,7 @@ import java.util.*;
 /** Isolated real capability/raycast fixture. Vanilla capabilities are default-off. */
 @GameTestHolder("academy_charging")
 @PrefixGameTestTemplate(false)
-@EventBusSubscriber(modid="academy", bus=EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid="academy")
 public final class ChargingOutputGameTests {
     private static final Map<ItemStack,EnergyStorage> ITEMS = new IdentityHashMap<>();
     private static final Map<BlockPos,EnergyStorage> BLOCKS = new HashMap<>();

@@ -91,7 +91,7 @@ public final class RecipeViews {
             }
         }
 
-        for (RecipeHolder<ImagFusorRecipe> holder : rm.getAllRecipesFor(AcademyRecipeTypes.IMAG_FUSING.get())) {
+        for (RecipeHolder<ImagFusorRecipe> holder : rm.getAllRecipesFor(AcademyRecipeTypes.IMAG_FUSOR.get())) {
             ImagFusorRecipe r = holder.value();
             if (sameItem(r.output(), target)) {
                 ItemStack[] inputs = java.util.Arrays.stream(r.input().getItems()).map(stack -> {

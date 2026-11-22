@@ -36,7 +36,8 @@ public final class MagManipBlockRenderer extends EntityRenderer<MagManipBlockEnt
         pose.mulPose(Axis.YP.rotationDegrees(age * yawSpeed));
         pose.mulPose(Axis.XP.rotationDegrees(age * pitchSpeed));
         pose.translate(-.5, -.5, -.5);
-        blocks.renderSingleBlock(entity.blockState(), pose, buffers, light, OverlayTexture.NO_OVERLAY);
+        blocks.renderSingleBlock(entity.blockState(), pose, buffers, light, OverlayTexture.NO_OVERLAY,
+                net.neoforged.neoforge.client.model.data.ModelData.EMPTY, null);
         pose.popPose();
 
         pose.pushPose();

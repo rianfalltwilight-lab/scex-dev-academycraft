@@ -45,7 +45,7 @@ public class ImagFusorBlockEntity extends AcademyContainerBlockEntity implements
     private int processingTime = 0;
     private ImagFusorRecipe processingRecipe;
     private final RecipeManager.CachedCheck<ImagFusorRecipeInput, ImagFusorRecipe> recipeCheck =
-            RecipeManager.createCheck(AcademyRecipeTypes.IMAG_FUSING.get());
+            RecipeManager.createCheck(AcademyRecipeTypes.IMAG_FUSOR.get());
     private double energy = 0;
     private final FluidTank tank = new FluidTank(MAX_FLUID,
             fs -> fs.getFluid() == AcademyFluids.PHASE_LIQUID.get()) {
@@ -253,7 +253,7 @@ public class ImagFusorBlockEntity extends AcademyContainerBlockEntity implements
         if (stack.isEmpty()) return false;
         return switch (machineSlot) {
             case INPUT_SLOT -> level != null && level.getRecipeManager()
-                    .getAllRecipesFor(AcademyRecipeTypes.IMAG_FUSING.get()).stream()
+                    .getAllRecipesFor(AcademyRecipeTypes.IMAG_FUSOR.get()).stream()
                     .anyMatch(holder -> holder.value().input().test(stack));
             case FLUID_INPUT_SLOT -> PhaseFluidContainers.isInput(stack);
             case ENERGY_INPUT_SLOT -> EnergyItemHelper.isEnergyItem(stack);

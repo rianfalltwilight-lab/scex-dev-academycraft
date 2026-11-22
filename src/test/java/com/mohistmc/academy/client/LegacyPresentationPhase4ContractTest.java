@@ -64,8 +64,8 @@ class LegacyPresentationPhase4ContractTest {
         assertTrue(registry.contains("clientTrackingRange(48)"));
         assertTrue(registry.contains("updateInterval(20)"));
         assertTrue(client.contains("BLOOD_SPRAY_DECAL"));
-        assertTrue(client.contains("EventBusSubscriber.Bus.MOD"),
-                "renderer registration must be subscribed to the mod bus");
+        assertTrue(client.contains("@EventBusSubscriber(modid = AcademyCraft.MODID, value = Dist.CLIENT)"),
+                "renderer registration must be subscribed via @EventBusSubscriber");
         assertTrue(renderer.contains("\"grnd\":\"wall\""));
         assertTrue(renderer.contains("blood_spray/"));
     }

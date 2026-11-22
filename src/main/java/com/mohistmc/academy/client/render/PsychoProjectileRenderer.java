@@ -10,9 +10,9 @@ import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.block.Blocks;
 import net.neoforged.neoforge.client.model.data.ModelData;
 
@@ -35,7 +35,7 @@ public final class PsychoProjectileRenderer extends EntityRenderer<PsychoProject
             pose.translate(-.5, -.5, -.5);
             blocks.renderSingleBlock(Blocks.COBBLESTONE.defaultBlockState(), pose, buffers, light,
                     OverlayTexture.NO_OVERLAY, ModelData.EMPTY,
-                    RenderType.entityCutoutNoCull(TextureAtlas.LOCATION_BLOCKS));
+                    RenderType.entityCutoutNoCull(InventoryMenu.BLOCK_ATLAS));
         } else {
             pose.mulPose(Axis.XP.rotationDegrees(45));
             quad(pose, buffers.getBuffer(RenderType.debugQuads()), .1F);
@@ -55,6 +55,6 @@ public final class PsychoProjectileRenderer extends EntityRenderer<PsychoProject
     }
 
     @Override public ResourceLocation getTextureLocation(PsychoProjectileEntity entity) {
-        return TextureAtlas.LOCATION_BLOCKS;
+        return InventoryMenu.BLOCK_ATLAS;
     }
 }

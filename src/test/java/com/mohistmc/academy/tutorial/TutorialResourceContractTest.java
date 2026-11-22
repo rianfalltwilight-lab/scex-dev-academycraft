@@ -93,7 +93,7 @@ class TutorialResourceContractTest {
     void reloadHookInvalidatesBothTutorialCaches() throws Exception {
         String listener = Files.readString(Path.of("src/main/java/com/mohistmc/academy/listener/ClientModListener.java"));
         assertTrue(listener.contains("RegisterClientReloadListenersEvent"));
-        assertTrue(listener.contains("EventBusSubscriber.Bus.MOD"));
+        assertTrue(listener.contains("@EventBusSubscriber(modid = AcademyCraft.MODID, value = Dist.CLIENT)"));
         assertTrue(listener.contains("TutorialMdParser.clearCache()"));
         assertTrue(listener.contains("ACTutorial.clearContentCache()"));
     }
@@ -103,7 +103,7 @@ class TutorialResourceContractTest {
         String views = Files.readString(Path.of("src/main/java/com/mohistmc/academy/client/gui/tutorial/RecipeViews.java"));
         String machine = Files.readString(Path.of("src/main/java/com/mohistmc/academy/world/block/entity/ImagFusorBlockEntity.java"));
         String jei = Files.readString(Path.of("src/main/java/com/mohistmc/academy/client/jei/AcademyJeiPlugin.java"));
-        String token = "AcademyRecipeTypes.IMAG_FUSING.get()";
+        String token = "AcademyRecipeTypes.IMAG_FUSOR.get()";
         assertTrue(views.contains("getAllRecipesFor(" + token + ")"));
         assertTrue(machine.contains("RecipeManager.CachedCheck<ImagFusorRecipeInput, ImagFusorRecipe> recipeCheck"),
                 "machine lookup must use the native cache for the Imag Fusor input/recipe pair");

@@ -17,7 +17,8 @@ class ClientRegistrationBusContractTest {
     @Test void everyClientRegistryHookLivesOnTheModBus() throws Exception {
         String mod = source("ClientModListener.java");
         String game = source("ClientListener.java");
-        assertTrue(mod.contains("bus = EventBusSubscriber.Bus.MOD"));
+        assertTrue(mod.contains("@EventBusSubscriber(modid = AcademyCraft.MODID, value = Dist.CLIENT)"));
+        assertFalse(mod.contains("EventBusSubscriber.Bus.MOD"), "NeoForge 21.1 auto-routes IModBusEvent without deprecated Bus.MOD");
         for (String event : List.of("RegisterMenuScreensEvent", "RegisterKeyMappingsEvent",
                 "RegisterParticleProvidersEvent", "RegisterClientReloadListenersEvent",
                 "EntityRenderersEvent.RegisterLayerDefinitions", "EntityRenderersEvent.RegisterRenderers")) {

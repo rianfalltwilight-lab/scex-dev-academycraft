@@ -49,7 +49,7 @@ public class ImagFusorMenu extends AcademyMenu {
                 // Accept ingredient kinds before the player has assembled the full recipe count.
                 // The machine's processing recipe remains responsible for quantity checks.
                 return inv.player.level().getRecipeManager()
-                        .getAllRecipesFor(AcademyRecipeTypes.IMAG_FUSING.get()).stream()
+                        .getAllRecipesFor(AcademyRecipeTypes.IMAG_FUSOR.get()).stream()
                         .anyMatch(holder -> holder.value().input().test(item));
             }
         });

@@ -129,8 +129,7 @@ public final class PsychoProjectileEntity extends Projectile implements ItemSupp
         if (!Double.isFinite(movement.lengthSqr()) || movement.lengthSqr() > 64 * 64
                 || to.y < level().getMinBuildHeight() || to.y >= level().getMaxBuildHeight()
                 || !level().getWorldBorder().isWithinBounds(BlockPos.containing(to))
-                || !level().hasChunksAt(BlockPos.containing(swept.minX, swept.minY, swept.minZ),
-                        BlockPos.containing(swept.maxX, swept.maxY, swept.maxZ))) {
+                || !com.mohistmc.academy.skill.ability.LoadedRaycast.isAreaLoaded(level(), swept)) {
             if (!level().isClientSide) { beginReturn(); settleReturn(); }
             return;
         }
@@ -198,7 +197,7 @@ public final class PsychoProjectileEntity extends Projectile implements ItemSupp
         if (!(getOwner() instanceof ServerPlayer owner) || !DynamicSkillRules.destroysBlocks(level(), skill())) return false;
         BlockPos pos = hit.getBlockPos();
         var state = level().getBlockState(pos);
-        if (state.isAir() || state.getDestroySpeed(level(), pos) != 0 || !owner.hasCorrectToolForDrops(state)
+        if (state.isAir() || state.getDestroySpeed(level(), pos) != 0 || !owner.hasCorrectToolForDrops(state, level(), pos)
                 || !owner.mayInteract(level(), pos) || !level().mayInteract(owner, pos)
                 || !owner.getAbilities().mayBuild) return false;
         var event = new BlockEvent.BreakEvent(level(), pos, state, owner);

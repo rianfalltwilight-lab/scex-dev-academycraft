@@ -1,6 +1,7 @@
 package com.mohistmc.academy.api.mob;
 
 import com.mohistmc.academy.AcademyCraft;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
@@ -11,7 +12,7 @@ import net.neoforged.neoforge.registries.datamaps.RegisterDataMapTypesEvent;
 import org.jetbrains.annotations.Nullable;
 
 /** Data map {@code academy:mob_skills} on entity types; AcademyCraft ships no entries. */
-@EventBusSubscriber(modid = AcademyCraft.MODID, bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = AcademyCraft.MODID)
 public final class AcademyMobDataMaps {
     private AcademyMobDataMaps() {}
 
@@ -27,6 +28,6 @@ public final class AcademyMobDataMaps {
     }
 
     public static @Nullable MobSkills get(EntityType<?> type) {
-        return type.builtInRegistryHolder().getData(MOB_SKILLS);
+        return BuiltInRegistries.ENTITY_TYPE.wrapAsHolder(type).getData(MOB_SKILLS);
     }
 }

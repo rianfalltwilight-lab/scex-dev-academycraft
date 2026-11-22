@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * AcademyCraft 配置系统(基于 NeoForge ModConfigSpec)
  */
-@EventBusSubscriber(modid = "academy", bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = "academy")
 public final class ACConfig {
 
     private ACConfig() {}

@@ -88,7 +88,7 @@ public final class CruiseBombEntity extends Projectile {
         var swept=getBoundingBox().expandTowards(movement).inflate(.01);
         if (!Double.isFinite(movement.lengthSqr()) || to.y<level().getMinBuildHeight() || to.y>=level().getMaxBuildHeight()
                 || !level().getWorldBorder().isWithinBounds(BlockPos.containing(to))
-                || !level().hasChunksAt(BlockPos.containing(swept.minX,swept.minY,swept.minZ),BlockPos.containing(swept.maxX,swept.maxY,swept.maxZ))) {
+                || !com.mohistmc.academy.skill.ability.LoadedRaycast.isAreaLoaded(level(), swept)) {
             discard(); return;
         }
         for(int impacts=0;impacts<16;impacts++) {
@@ -133,7 +133,7 @@ public final class CruiseBombEntity extends Projectile {
         }
         if(!level().isLoaded(pos)||!DynamicSkillRules.destroysBlocks(level(),"cruise_bomb"))return false;
         var state=level().getBlockState(pos);
-        if(state.isAir()||state.getDestroySpeed(level(),pos)!=0||!owner.hasCorrectToolForDrops(state)
+        if(state.isAir()||state.getDestroySpeed(level(),pos)!=0||!owner.hasCorrectToolForDrops(state,level(),pos)
                 ||!owner.getAbilities().mayBuild||!owner.mayInteract(level(),pos)||!level().mayInteract(owner,pos))return false;
         var event=new BlockEvent.BreakEvent(level(),pos,state,owner);
         impacting=true;

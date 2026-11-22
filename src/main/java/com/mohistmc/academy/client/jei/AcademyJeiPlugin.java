@@ -114,7 +114,7 @@ public final class AcademyJeiPlugin implements IModPlugin {
         var level = Minecraft.getInstance().level;
         if (level == null) return;
         r.addRecipes(METAL_FORMING, level.getRecipeManager().getAllRecipesFor(AcademyRecipeTypes.METAL_FORMING.get()));
-        r.addRecipes(IMAG_FUSING, level.getRecipeManager().getAllRecipesFor(AcademyRecipeTypes.IMAG_FUSING.get()));
+        r.addRecipes(IMAG_FUSING, level.getRecipeManager().getAllRecipesFor(AcademyRecipeTypes.IMAG_FUSOR.get()));
     }
     @Override public void registerRecipeCatalysts(IRecipeCatalystRegistration r) {
         r.addRecipeCatalyst(AcademyItems.METAL_FORMER.get(), METAL_FORMING);

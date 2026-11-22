@@ -84,9 +84,11 @@ public class WindGenFanRender implements BlockEntityRenderer<WindGenFanBlockEnti
             RandomSource random = RandomSource.create(0L);
             List<BakedQuad> built = new ArrayList<>();
             for (Direction direction : Direction.values()) {
-                built.addAll(bakedModel.getQuads(blockState, direction, random));
+                built.addAll(bakedModel.getQuads(blockState, direction, random,
+                        net.neoforged.neoforge.client.model.data.ModelData.EMPTY, RenderType.cutout()));
             }
-            built.addAll(bakedModel.getQuads(blockState, null, random));
+            built.addAll(bakedModel.getQuads(blockState, null, random,
+                    net.neoforged.neoforge.client.model.data.ModelData.EMPTY, RenderType.cutout()));
             quads = List.copyOf(built);
             cachedFanModel = bakedModel;
             cachedFanQuads = quads;

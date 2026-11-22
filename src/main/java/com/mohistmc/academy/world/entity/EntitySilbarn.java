@@ -94,7 +94,7 @@ public final class EntitySilbarn extends Entity implements ItemSupplier {
 
         Vec3 velocity = getDeltaMovement();
         if (!level().isClientSide) {
-            if (!level().hasChunkAt(BlockPos.containing(position().add(velocity)))) {
+            if (!level().isLoaded(BlockPos.containing(position().add(velocity)))) {
                 discard();
                 return;
             }

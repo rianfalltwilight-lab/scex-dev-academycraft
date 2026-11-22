@@ -100,9 +100,11 @@ public final class MatrixRender implements BlockEntityRenderer<MatrixBlockEntity
         RandomSource random = RandomSource.create(0L);
         List<BakedQuad> quads = new ArrayList<>();
         for (Direction direction : Direction.values()) {
-            quads.addAll(model.getQuads(null, direction, random));
+            quads.addAll(model.getQuads(null, direction, random,
+                    net.neoforged.neoforge.client.model.data.ModelData.EMPTY, RenderType.cutout()));
         }
-        quads.addAll(model.getQuads(null, null, random));
+        quads.addAll(model.getQuads(null, null, random,
+                net.neoforged.neoforge.client.model.data.ModelData.EMPTY, RenderType.cutout()));
         return quads;
     }
 

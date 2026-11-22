@@ -36,7 +36,7 @@ import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import org.jetbrains.annotations.Nullable;
 
 /** ExtraAcC Waterman: a transient owned mob using fixed vanilla navigation/goal sets. */
-@EventBusSubscriber(modid = AcademyCraft.MODID, bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = AcademyCraft.MODID)
 public final class LiquidShadowEntity extends TamableAnimal {
     public LiquidShadowEntity(EntityType<? extends LiquidShadowEntity> type, Level level) {
         super(type, level);
