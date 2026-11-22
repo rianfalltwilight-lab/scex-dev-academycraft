@@ -34,6 +34,7 @@ public record SyncAbilityDataPacket(CompoundTag data) implements CustomPacketPay
             Player player = context.player();
             PlayerAbilityData abilityData = PlayerAbilityData.fromSyncTag(packet.data());
             player.setData(AcademyAttachments.PLAYER_ABILITY, abilityData);
+            com.mohistmc.academy.client.ClientPacketBridge.abilityDataSynced(abilityData);
         });
     }
 }

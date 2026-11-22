@@ -69,13 +69,20 @@ public class ClientListener {
         }
 
         // In 1.0.7, mapped ability delegates owned their mouse buttons while
-        // abilities were active. Preserve normal mining/use for empty slots.
+        // abilities were active. Preserve normal mining/use/pick-block for empty slots.
         boolean overridden = event.isAttack()
                 ? com.mohistmc.academy.client.KeyInputHandler.overridesMouseButton(
                         GLFW.GLFW_MOUSE_BUTTON_LEFT)
                 : event.isUseItem()
+                ? com.mohistmc.academy.client.KeyInputHandler.overridesMouseButton(
+                        GLFW.GLFW_MOUSE_BUTTON_RIGHT)
+                : event.isPickBlock()
                 && com.mohistmc.academy.client.KeyInputHandler.overridesMouseButton(
-                        GLFW.GLFW_MOUSE_BUTTON_RIGHT);
+                        GLFW.GLFW_MOUSE_BUTTON_MIDDLE);
+        if (!overridden && event.getKeyMapping() != null) {
+            overridden = com.mohistmc.academy.client.KeyInputHandler.overridesInteractionKey(
+                    event.getKeyMapping());
+        }
         if (overridden) {
             event.setCanceled(true);
             event.setSwingHand(false);

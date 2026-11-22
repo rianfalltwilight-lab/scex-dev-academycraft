@@ -21,4 +21,10 @@ class ChargingHandshakeTest {
         assertTrue(ChargingHandshake.serverStartExpired(false,10,111));
         assertFalse(ChargingHandshake.serverStartExpired(true,10,1000));
     }
+    @Test void unacknowledgedTombstoneExpiresAfterServerStartWindow() {
+        assertFalse(ChargingHandshake.shouldExpireTombstone(true, false, 0, 101));
+        assertFalse(ChargingHandshake.shouldExpireTombstone(true, true, 0, 100));
+        assertFalse(ChargingHandshake.shouldExpireTombstone(true, true, 55, 101));
+        assertTrue(ChargingHandshake.shouldExpireTombstone(true, true, 0, 101));
+    }
 }

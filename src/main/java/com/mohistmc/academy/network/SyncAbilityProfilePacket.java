@@ -20,8 +20,9 @@ public record SyncAbilityProfilePacket(CompoundTag data) implements CustomPacket
     public static void handle(SyncAbilityProfilePacket packet, IPayloadContext context) {
         context.enqueueWork(() -> {
             var player = context.player();
-            player.setData(AcademyAttachments.PLAYER_ABILITY,
-                    player.getData(AcademyAttachments.PLAYER_ABILITY).withProfileSyncTag(packet.data()));
+            var updated = player.getData(AcademyAttachments.PLAYER_ABILITY).withProfileSyncTag(packet.data());
+            player.setData(AcademyAttachments.PLAYER_ABILITY, updated);
+            com.mohistmc.academy.client.ClientPacketBridge.abilityDataSynced(updated);
         });
     }
 }

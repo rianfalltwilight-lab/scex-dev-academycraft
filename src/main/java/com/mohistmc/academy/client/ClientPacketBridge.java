@@ -135,7 +135,10 @@ public final class ClientPacketBridge {
     }
     public static void flashing(FlashingStatePacket p) {
         boolean wasActive = FLASHING.active();
-        if (FLASHING.accept(p.active(), p.epoch()) || wasActive != FLASHING.active())
+        if (FLASHING.accept(p.active(), p.epoch()) || wasActive != FLASHING.active() || !p.active())
             KeyInputHandler.setFlashingActive(FLASHING.active());
+    }
+    public static void abilityDataSynced(com.mohistmc.academy.skill.PlayerAbilityData data) {
+        KeyInputHandler.reconcileWithAbilityData(data);
     }
 }

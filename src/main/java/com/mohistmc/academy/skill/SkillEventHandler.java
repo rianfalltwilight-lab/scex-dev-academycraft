@@ -73,7 +73,7 @@ public class SkillEventHandler {
                 } else {
                     SkillEffect effect = skill.getEffect();
                     if (effect instanceof ChargingSkillEffect chargingEffect) {
-                        if (!state.acknowledged) return;
+                        if (state.acknowledged) {
                         state.ticks++;
                         if (state.ticks % CHARGING_SYNC_INTERVAL_TICKS == 0) {
                             com.mohistmc.academy.network.SafePayloadSender.send(player,
@@ -120,6 +120,7 @@ public class SkillEventHandler {
                             }
                             notifyCharging(player,state,-1,0);
                             data.syncTo(player);
+                        }
                         }
                     } else {
                         SkillChargingManager.cancel(player);

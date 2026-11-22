@@ -117,6 +117,9 @@ public class KeyInputHandler {
     private static final long[] CHARGING_GENERATIONS = new long[SKILL_KEYS.length];
     private static final boolean[] CHARGING_TOMBSTONES = new boolean[SKILL_KEYS.length];
     private static final boolean[] CANCEL_PENDING = new boolean[SKILL_KEYS.length];
+    private record StaleTombstone(int slot, long generation, String skillId) {}
+    private static final int MAX_STALE_TOMBSTONES = 16;
+    private static final java.util.ArrayDeque<StaleTombstone> STALE_TOMBSTONES = new java.util.ArrayDeque<>();
 
     private static boolean screenWasOpen;
     private static boolean toggleWasDown;
@@ -157,6 +160,7 @@ public class KeyInputHandler {
         flashingActive = false;
         flashingHeldDirection = -1;
         penetrateDistance = Float.NaN;
+        STALE_TOMBSTONES.clear();
         LegacyVecmanipClientController.reset();
     }
 
@@ -178,6 +182,21 @@ public class KeyInputHandler {
         for (int i = 0; i < SKILL_KEYS.length; i++) {
             if (SKILL_KEYS[i].matchesMouse(button)
                     && data.getCurrentPreset().getSlot(i) != null) return true;
+        }
+        return false;
+    }
+
+    /** Whether any mapped active ability slot shares the same physical binding as a vanilla interaction key. */
+    public static boolean overridesInteractionKey(KeyMapping mapping) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mapping == null || mc.player == null || mc.screen != null) return false;
+        PlayerAbilityData data = mc.player.getData(AcademyAttachments.PLAYER_ABILITY);
+        if (!data.isAbilityActive()) return false;
+        InputConstants.Key target = mapping.getKey();
+        if (target.equals(InputConstants.UNKNOWN)) return false;
+        for (int i = 0; i < SKILL_KEYS.length; i++) {
+            if (data.getCurrentPreset().getSlot(i) != null
+                    && SKILL_KEYS[i].getKey().equals(target)) return true;
         }
         return false;
     }
@@ -208,17 +227,27 @@ public class KeyInputHandler {
         if (slot < 0 || slot >= CHARGING_SLOTS.length) return false;
         ChargingHandshake.AckAction action=ChargingHandshake.ack(CHARGING_SLOTS[slot],CHARGING_TOMBSTONES[slot],
                 CHARGING_GENERATIONS[slot],CHARGING_SKILLS[slot],generation,skillId,accepted,epoch);
-        if(action==ChargingHandshake.AckAction.IGNORE)return false;
+        if (action == ChargingHandshake.AckAction.IGNORE) {
+            if (accepted && epoch != 0 && consumeStaleTombstone(slot, generation, skillId)) {
+                PacketDistributor.sendToServer(new ChargingAckPacket(epoch, generation));
+                PacketDistributor.sendToServer(new ChargingCancelPacket(slot, skillId, epoch));
+            }
+            return false;
+        }
         if(action==ChargingHandshake.AckAction.CLEAR){resetChargingSlot(slot);return true;}
         if (CHARGING_EPOCHS[slot] != 0 && CHARGING_EPOCHS[slot] != epoch) return false;
         if (ticks < 0) { resetChargingSlot(slot); return true; }
+        boolean firstAck = CHARGING_EPOCHS[slot] == 0;
         CHARGING_EPOCHS[slot]=epoch;
         CHARGING_REQUEST_TICKS[slot]=0;
-        PacketDistributor.sendToServer(new ChargingAckPacket(epoch,generation));
+        if (firstAck || CANCEL_PENDING[slot] || action==ChargingHandshake.AckAction.ACK_AND_CANCEL) {
+            PacketDistributor.sendToServer(new ChargingAckPacket(epoch,generation));
+        }
         if (CANCEL_PENDING[slot] || action==ChargingHandshake.AckAction.ACK_AND_CANCEL) {
             PacketDistributor.sendToServer(new ChargingCancelPacket(slot, skillId, epoch));
             CANCEL_PENDING[slot]=false;
             RELEASE_PENDING[slot]=false;
+            return false;
         } else if (RELEASE_PENDING[slot]) {
             PacketDistributor.sendToServer(releasePacket(slot, skillId, epoch));
             // Keep the tombstone until the server's terminal state packet arrives.
@@ -239,36 +268,43 @@ public class KeyInputHandler {
     }
 
     /**
-     * 处理非技能按键（终端、技能槽、切换能力、切换预设）。
-     * 技能按键的充能逻辑已完全移至 onClientTick 进行边缘检测，
-     * 避免 consumeClick() 在长按期间因 GLFW_REPEAT 累积导致状态不同步。
+     * 处理非技能按键（终端、技能槽、切换预设及 Flashing 方向键）。
+     * 同时订阅键盘与鼠标按键事件，确保绑定到鼠标中键/侧键时同样生效。
      */
     @SubscribeEvent
     public static void onKeyInput(net.neoforged.neoforge.client.event.InputEvent.Key event) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
+        int direction = flashingDirection(mc, event.getKey(), event.getScanCode());
+        handleAuxiliaryInput(mc, event.getAction(), direction);
+    }
 
+    @SubscribeEvent
+    public static void onMouseButton(net.neoforged.neoforge.client.event.InputEvent.MouseButton.Post event) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null) return;
+        int direction = flashingMouseDirection(mc, event.getButton());
+        handleAuxiliaryInput(mc, event.getAction(), direction);
+    }
 
+    private static void handleAuxiliaryInput(Minecraft mc, int action, int flashingDir) {
         // Legacy Flashing semantics: a direction press creates a local destination marker;
         // releasing that same key asks the authoritative server to perform. A lost release
         // is also bounded by the server-side held-input timeout.  The final 1.12.2
         // implementation deliberately follows the player's Minecraft movement
         // bindings instead of assuming a US-layout WASD keyboard.
-        if (flashingActive && mc.screen == null) {
-            int direction = flashingDirection(mc, event.getKey(), event.getScanCode());
-            if (direction >= 0) {
-                if (event.getAction() == GLFW.GLFW_PRESS && flashingHeldDirection == -1) {
-                    flashingHeldDirection = direction;
-                    PacketDistributor.sendToServer(new FlashingActionPacket(FlashingActionPacket.HOLD_BASE + direction));
-                } else if (event.getAction() == GLFW.GLFW_RELEASE && flashingHeldDirection == direction) {
-                    PacketDistributor.sendToServer(new FlashingActionPacket(FlashingActionPacket.RELEASE_BASE + direction));
-                    flashingHeldDirection = -1;
-                }
-                return;
+        if (flashingActive && mc.screen == null && flashingDir >= 0) {
+            if (action == GLFW.GLFW_PRESS && flashingHeldDirection == -1) {
+                flashingHeldDirection = flashingDir;
+                PacketDistributor.sendToServer(new FlashingActionPacket(FlashingActionPacket.HOLD_BASE + flashingDir));
+            } else if (action == GLFW.GLFW_RELEASE && flashingHeldDirection == flashingDir) {
+                PacketDistributor.sendToServer(new FlashingActionPacket(FlashingActionPacket.RELEASE_BASE + flashingDir));
+                flashingHeldDirection = -1;
             }
+            return;
         }
 
-        if (event.getAction() != GLFW.GLFW_PRESS) return;
+        if (action != GLFW.GLFW_PRESS) return;
 
         if (OPEN_TERMINAL.consumeClick()) {
             if (com.mohistmc.academy.client.gui.FreqTransmitterGui.isTargetingWorldBlock()) {
@@ -310,6 +346,10 @@ public class KeyInputHandler {
         }
 
         if (SWITCH_PRESET.consumeClick()) {
+            if (hasAnyActiveCharge()) {
+                ClientSoundUtils.playClient(AcademySounds.ABILITY_DENY, SoundSource.MASTER, 0.4f, 1.0f);
+                return;
+            }
             int next = (data.getCurrentPresetIndex() + 1) % PlayerAbilityData.PRESET_COUNT;
             PacketDistributor.sendToServer(new SwitchPresetPacket(next));
             mc.player.displayClientMessage(Component.translatable("message.academy.preset.switch_requested", next + 1)
@@ -326,19 +366,24 @@ public class KeyInputHandler {
                 : penetrateMaximum(mc.player.getData(AcademyAttachments.PLAYER_ABILITY));
     }
 
-    /** Final 1.12.2 Penetrate Teleport owns the wheel while its marker is active. */
+    /** Final 1.12.2 Penetrate Teleport owns the wheel while its marker is active; other held charges lock hotbar scroll. */
     @SubscribeEvent
     public static void onMouseScroll(net.neoforged.neoforge.client.event.InputEvent.MouseScrollingEvent event) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.screen != null || event.getScrollDeltaY() == 0) return;
-        if (chargingSlot("penetrate_teleport") < 0) return;
-        PlayerAbilityData data = mc.player.getData(AcademyAttachments.PLAYER_ABILITY);
-        float maximum = penetrateMaximum(data);
-        float current = Float.isFinite(penetrateDistance) ? penetrateDistance : maximum;
-        float next = current + (float) Math.signum(event.getScrollDeltaY());
-        // The legacy UI changes only if the complete wheel step remains in range.
-        if (next >= .5f && next <= maximum) penetrateDistance = next;
-        event.setCanceled(true);
+        if (chargingSlot("penetrate_teleport") >= 0) {
+            PlayerAbilityData data = mc.player.getData(AcademyAttachments.PLAYER_ABILITY);
+            float maximum = penetrateMaximum(data);
+            float current = Float.isFinite(penetrateDistance) ? penetrateDistance : maximum;
+            float next = current + (float) Math.signum(event.getScrollDeltaY());
+            // The legacy UI changes only if the complete wheel step remains in range.
+            if (next >= .5f && next <= maximum) penetrateDistance = next;
+            event.setCanceled(true);
+            return;
+        }
+        if (hasActiveHeldCharge()) {
+            event.setCanceled(true);
+        }
     }
 
     /** Final 1.12.2 Flashing direction order: left, right, forward, back. */
@@ -347,6 +392,14 @@ public class KeyInputHandler {
         if (mc.options.keyRight.matches(keyCode, scanCode)) return 1;
         if (mc.options.keyUp.matches(keyCode, scanCode)) return 2;
         if (mc.options.keyDown.matches(keyCode, scanCode)) return 3;
+        return -1;
+    }
+
+    private static int flashingMouseDirection(Minecraft mc, int button) {
+        if (mc.options.keyLeft.matchesMouse(button)) return 0;
+        if (mc.options.keyRight.matchesMouse(button)) return 1;
+        if (mc.options.keyUp.matchesMouse(button)) return 2;
+        if (mc.options.keyDown.matchesMouse(button)) return 3;
         return -1;
     }
 
@@ -361,7 +414,7 @@ public class KeyInputHandler {
         if (mc.player == null) return;
         SkillInputClientState.tick();
         migrateFormerDefaults(mc);
-        boolean screenOpen = mc.screen != null;
+        boolean screenOpen = mc.screen != null || !mc.isWindowActive();
         if (screenOpen) {
             if (!screenWasOpen) cancelChargingForScreen();
             screenWasOpen = true;
@@ -369,7 +422,11 @@ public class KeyInputHandler {
                 PacketDistributor.sendToServer(new FlashingActionPacket(FlashingActionPacket.CANCEL_BASE + flashingHeldDirection));
                 flashingHeldDirection = -1;
             }
-            for (int i=0;i<SKILL_KEYS.length;i++) WAS_DOWN[i]=SKILL_KEYS[i].isDown();
+            for (int i=0;i<SKILL_KEYS.length;i++) {
+                while (SKILL_KEYS[i].consumeClick()) { /* drain queued clicks while UI/unfocused */ }
+                WAS_DOWN[i]=SKILL_KEYS[i].isDown();
+            }
+            while (TOGGLE_ABILITY.consumeClick()) { /* drain queued clicks while UI/unfocused */ }
             toggleWasDown = TOGGLE_ABILITY.isDown();
             togglePressedAtMillis = -1;
             com.mohistmc.academy.client.gui.CPBarOverlay.setShowNumbers(false);
@@ -400,10 +457,25 @@ public class KeyInputHandler {
 
         for (int i = 0; i < SKILL_KEYS.length; i++) {
             boolean down = SKILL_KEYS[i].isDown();
+            boolean clicked = false;
+            while (SKILL_KEYS[i].consumeClick()) { clicked = true; }
+            boolean rePressed = WAS_DOWN[i] && down && clicked;
+            if (rePressed) {
+                if (CHARGING_SLOTS[i] && !isToggleContextSkill(CHARGING_SKILLS[i])) {
+                    if (CHARGING_EPOCHS[i] != 0)
+                        PacketDistributor.sendToServer(releasePacket(i, CHARGING_SKILLS[i], CHARGING_EPOCHS[i]));
+                    else RELEASE_PENDING[i] = true;
+                }
+            }
+            boolean pressed = ((down || clicked) && !WAS_DOWN[i]) || rePressed;
+            boolean fastPulse = clicked && !down && !WAS_DOWN[i];
 
-            // 上升沿：按键按下
-            if (down && !WAS_DOWN[i]) {
-                while (SKILL_KEYS[i].consumeClick()) { /* drain KeyMapping click bookkeeping */ }
+            // 上升沿：按键按下（包含单 tick 内按下并抬起的快按脉冲）
+            if (pressed) {
+                if (CHARGING_SLOTS[i] && CHARGING_TOMBSTONES[i] && CHARGING_EPOCHS[i] == 0) {
+                    recordStaleTombstone(i);
+                    resetChargingSlot(i);
+                }
                 Skill skill = data.getSlotSkill(data.getCurrentPresetIndex(), i);
                 String skillId = data.getCurrentPreset().getSlot(i);
                 // Inactive ability delegates do not own the key in 1.0.7;
@@ -424,18 +496,24 @@ public class KeyInputHandler {
                                         CHARGING_SKILLS[i], CHARGING_EPOCHS[i]));
                             else RELEASE_PENDING[i] = true;
                         } else if (!CHARGING_SLOTS[i]) {
-                            CHARGING_SLOTS[i] = true;
-                            CHARGING_SKILLS[i] = skillId;
-                            CHARGING_EPOCHS[i] = 0;
-                            RELEASE_PENDING[i] = false;
-                            CHARGING_REQUEST_TICKS[i] = 0;
-                            CHARGING_TOMBSTONES[i] = false;
-                            if ("penetrate_teleport".equals(skillId)) penetrateDistance = penetrateMaximum(data);
-                            var inputToken = SkillInputClientState.next();
-                            long generation = inputToken.sequence();
-                            
-                            CHARGING_GENERATIONS[i] = generation;
-                            PacketDistributor.sendToServer(new SkillKeyDownPacket(i, inputToken));
+                            if (hasOtherActiveCharge(i)) {
+                                ClientSoundUtils.playClient(AcademySounds.ABILITY_DENY,
+                                        SoundSource.MASTER, 0.35f, 1.0f);
+                            } else {
+                                CHARGING_SLOTS[i] = true;
+                                CHARGING_SKILLS[i] = skillId;
+                                CHARGING_EPOCHS[i] = 0;
+                                RELEASE_PENDING[i] = fastPulse && !isToggleContextSkill(skillId);
+                                CHARGING_REQUEST_TICKS[i] = 0;
+                                CHARGING_TOMBSTONES[i] = false;
+                                CANCEL_PENDING[i] = false;
+                                if ("penetrate_teleport".equals(skillId)) penetrateDistance = penetrateMaximum(data);
+                                var inputToken = SkillInputClientState.next();
+                                long generation = inputToken.sequence();
+                                
+                                CHARGING_GENERATIONS[i] = generation;
+                                PacketDistributor.sendToServer(new SkillKeyDownPacket(i, inputToken));
+                            }
                         }
                     } else {
                         activateOneShot(mc, i, skillId);
@@ -464,12 +542,17 @@ public class KeyInputHandler {
 
             // A dropped ack/NACK must not latch a slot forever. Two seconds is well above normal
             // packet latency while still giving deterministic recovery after disconnect/race loss.
-            if (CHARGING_SLOTS[i] && !CHARGING_TOMBSTONES[i]
-                    && ChargingHandshake.shouldTombstone(true,CHARGING_EPOCHS[i],++CHARGING_REQUEST_TICKS[i])) {
-                // Do not forget request identity: an accepted ACK may have crossed this timeout.
-                // It will be answered immediately with the server epoch, closing the session.
-                CHARGING_TOMBSTONES[i] = true;
-                RELEASE_PENDING[i] = true;
+            if (CHARGING_SLOTS[i] && CHARGING_EPOCHS[i] == 0) {
+                int ticks = ++CHARGING_REQUEST_TICKS[i];
+                if (!CHARGING_TOMBSTONES[i] && ChargingHandshake.shouldTombstone(true, 0, ticks)) {
+                    // Do not forget request identity: an accepted ACK may have crossed this timeout.
+                    // It will be answered immediately with the server epoch, closing the session.
+                    CHARGING_TOMBSTONES[i] = true;
+                    RELEASE_PENDING[i] = true;
+                } else if (ChargingHandshake.shouldExpireTombstone(true, CHARGING_TOMBSTONES[i], 0, ticks)) {
+                    recordStaleTombstone(i);
+                    resetChargingSlot(i);
+                }
             }
 
         }
@@ -479,9 +562,8 @@ public class KeyInputHandler {
         if ("location_teleport".equals(skillId)) {
             mc.setScreen(new LocationTeleportGui());
         } else if ("flashing".equals(skillId)) {
-            flashingActive = !flashingActive;
             PacketDistributor.sendToServer(new FlashingActionPacket(
-                    flashingActive ? FlashingActionPacket.START : FlashingActionPacket.END));
+                    flashingActive ? FlashingActionPacket.END : FlashingActionPacket.START));
         } else {
             PacketDistributor.sendToServer(new UseSkillPacket(slot, SkillInputClientState.next()));
         }
@@ -560,14 +642,92 @@ public class KeyInputHandler {
         mc.options.save();
     }
 
+    /** Reconciles local input presentation when authoritative ability data changes on sync. */
+    public static void reconcileWithAbilityData(PlayerAbilityData data) {
+        boolean active = data != null && data.hasAbility() && data.isAbilityActive();
+        if (!active) {
+            boolean clearedAny = false;
+            for (int i = 0; i < CHARGING_SLOTS.length; i++) {
+                if (!CHARGING_SLOTS[i]) continue;
+                if (CHARGING_EPOCHS[i] == 0) recordStaleTombstone(i);
+                resetChargingSlot(i);
+                clearedAny = true;
+            }
+            if (clearedAny) ChargingHudOverlay.resetClientSession();
+            if (flashingActive) setFlashingActive(false);
+            return;
+        }
+        for (int i = 0; i < CHARGING_SLOTS.length; i++) {
+            if (!CHARGING_SLOTS[i]) continue;
+            String expectedSkill = CHARGING_SKILLS[i];
+            String boundSkill = data.getCurrentPreset().getSlot(i);
+            if (expectedSkill == null || !expectedSkill.equals(boundSkill) || !data.hasLearnedSkill(expectedSkill)) {
+                if (CHARGING_EPOCHS[i] == 0) recordStaleTombstone(i);
+                resetChargingSlot(i);
+                if (expectedSkill != null && ChargingHudOverlay.isCharging(expectedSkill)) {
+                    ChargingHudOverlay.resetClientSession();
+                }
+            }
+        }
+        if (flashingActive && !data.hasLearnedSkill("flashing")) {
+            setFlashingActive(false);
+        }
+    }
+
+    private static boolean hasAnyActiveCharge() {
+        for (int i = 0; i < CHARGING_SLOTS.length; i++) {
+            if (CHARGING_SLOTS[i] && !CHARGING_TOMBSTONES[i]) return true;
+        }
+        return false;
+    }
+
+    private static boolean hasOtherActiveCharge(int slot) {
+        for (int i = 0; i < CHARGING_SLOTS.length; i++) {
+            if (i != slot && CHARGING_SLOTS[i] && !CHARGING_TOMBSTONES[i]) return true;
+        }
+        return false;
+    }
+
+    private static boolean hasActiveHeldCharge() {
+        for (int i = 0; i < CHARGING_SLOTS.length; i++) {
+            if (CHARGING_SLOTS[i] && !CHARGING_TOMBSTONES[i] && !isToggleContextSkill(CHARGING_SKILLS[i])) return true;
+        }
+        return false;
+    }
+
+    private static void recordStaleTombstone(int slot) {
+        if (CHARGING_GENERATIONS[slot] == 0 || CHARGING_SKILLS[slot] == null) return;
+        while (STALE_TOMBSTONES.size() >= MAX_STALE_TOMBSTONES) STALE_TOMBSTONES.pollFirst();
+        STALE_TOMBSTONES.addLast(new StaleTombstone(slot, CHARGING_GENERATIONS[slot], CHARGING_SKILLS[slot]));
+    }
+
+    private static boolean consumeStaleTombstone(int slot, long generation, String skillId) {
+        var it = STALE_TOMBSTONES.iterator();
+        while (it.hasNext()) {
+            StaleTombstone entry = it.next();
+            if (entry.slot == slot && entry.generation == generation
+                    && java.util.Objects.equals(entry.skillId, skillId)) {
+                it.remove();
+                return true;
+            }
+        }
+        return false;
+    }
+
     private static void cancelChargingForScreen() {
         for (int i=0;i<CHARGING_SLOTS.length;i++) {
             if (!CHARGING_SLOTS[i]) continue;
-            CANCEL_PENDING[i]=true;
-            RELEASE_PENDING[i]=false;
-            CHARGING_TOMBSTONES[i]=true;
+            // Preserve active toggle defenses/flight (e.g. Vector Deviation/Reflection, Storm Wing, Paper Drill)
+            // when opening a screen, matching 1.12.2 behavior.
+            if (isToggleContextSkill(CHARGING_SKILLS[i])) continue;
             if (CHARGING_EPOCHS[i] != 0) {
+                CANCEL_PENDING[i]=true;
+                RELEASE_PENDING[i]=false;
+                CHARGING_TOMBSTONES[i]=true;
                 PacketDistributor.sendToServer(new ChargingCancelPacket(i, CHARGING_SKILLS[i], CHARGING_EPOCHS[i]));
+            } else {
+                recordStaleTombstone(i);
+                resetChargingSlot(i);
             }
         }
     }

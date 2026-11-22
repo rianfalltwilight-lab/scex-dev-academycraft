@@ -41,7 +41,12 @@ public record SkillKeyDownPacket(int slotIndex, SkillInputToken actionToken) imp
             long now = player.serverLevel().getGameTime();
             if (!PayloadRateLimiter.allow(player.getUUID(), "skill_key_down", now, 20, 20)) return;
             if (packet.slotIndex() < 0 || packet.slotIndex() >= SkillPreset.SLOT_COUNT) return;
-            if (!SkillInputSessionManager.canAccept(player, packet.actionToken())) { SkillInputSessionManager.refresh(player); return; }
+            if (!SkillInputSessionManager.canAccept(player, packet.actionToken())) {
+                SkillInputSessionManager.refresh(player);
+                Skill fallback = data.getSlotSkill(data.getCurrentPresetIndex(), packet.slotIndex());
+                reject(player, packet.slotIndex(), fallback == null ? "" : fallback.getId(), packet.generation(), now);
+                return;
+            }
             Skill skill = data.getSlotSkill(data.getCurrentPresetIndex(), packet.slotIndex());
             String skillId = skill == null ? "" : skill.getId();
             if (skill == null || !data.hasLearnedSkill(skillId)
@@ -50,7 +55,10 @@ public record SkillKeyDownPacket(int slotIndex, SkillInputToken actionToken) imp
             }
             // A structurally valid, learned charging intent is seen even if transient
             // cooldown/resources/interference reject it. It cannot revive later by replay.
-            if (!SkillInputSessionManager.accept(player, packet.actionToken())) return;
+            if (!SkillInputSessionManager.accept(player, packet.actionToken())) {
+                reject(player, packet.slotIndex(), skillId, packet.generation(), now);
+                return;
+            }
             if (AbilityInterferenceService.isInterfered(player)) {
                 AbilityInterferenceService.notifyBlocked(player);
                 reject(player, packet.slotIndex(), skillId, packet.generation(), now); return;
@@ -80,7 +88,8 @@ public record SkillKeyDownPacket(int slotIndex, SkillInputToken actionToken) imp
     }
 
     private static void reject(ServerPlayer player, int slot, String skillId, long generation, long now) {
-        if (PayloadRateLimiter.allow(player.getUUID(), "skill_key_down_feedback", now, 20, 1))
-            SafePayloadSender.send(player, new SyncChargingStatePacket(-1, 0, slot, skillId, 0, generation, false));
+        // Always reply with the correlated NACK (already bounded by skill_key_down's rate limiter);
+        // dropping it leaves the client slot waiting until tombstone timeout.
+        SafePayloadSender.send(player, new SyncChargingStatePacket(-1, 0, slot, skillId, 0, generation, false));
     }
 }

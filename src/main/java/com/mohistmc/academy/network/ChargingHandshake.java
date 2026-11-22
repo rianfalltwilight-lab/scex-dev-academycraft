@@ -14,6 +14,10 @@ public final class ChargingHandshake {
     public static boolean shouldTombstone(boolean pending, long epoch, int requestTicks) {
         return pending && epoch == 0 && requestTicks > 40;
     }
+    /** After the server start timeout window has elapsed, an unacknowledged tombstone can never be accepted. */
+    public static boolean shouldExpireTombstone(boolean pending, boolean tombstone, long epoch, int requestTicks) {
+        return pending && tombstone && epoch == 0 && requestTicks > 100;
+    }
     public static boolean serverStartExpired(boolean acknowledged, long startedAt, long now) {
         return !acknowledged && now - startedAt > 100;
     }

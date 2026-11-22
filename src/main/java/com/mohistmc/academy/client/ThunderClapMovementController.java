@@ -37,6 +37,10 @@ public final class ThunderClapMovementController {
                 originalSpeed, ChargingHudOverlay.chargeProgress()));
     }
 
+    public static void resetClientSession() {
+        restore();
+    }
+
     private static void restore() {
         if (slowedPlayer != null) slowedPlayer.getAbilities().setWalkingSpeed(originalSpeed);
         slowedPlayer = null;

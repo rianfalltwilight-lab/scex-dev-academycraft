@@ -19,6 +19,11 @@ public final class StormWingInputSender {
 
     private StormWingInputSender() {}
 
+    public static void resetClientSession() {
+        lastForward = lastLeft = 0;
+        sinceSent = 0;
+    }
+
     @SubscribeEvent
     public static void onClientTick(ClientTickEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();

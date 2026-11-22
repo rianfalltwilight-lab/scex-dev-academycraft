@@ -84,7 +84,8 @@ public class ChargingHudOverlay {
         graphics.renderOutline(x, y, barWidth, barHeight, 0xFFFFFFFF);
 
         float penetrate = KeyInputHandler.penetrateHintDistance();
-        if ("penetrate_teleport".equals(currentSkillId) && Float.isFinite(penetrate)) {
+        boolean showedPenetrateHint = "penetrate_teleport".equals(currentSkillId) && Float.isFinite(penetrate);
+        if (showedPenetrateHint) {
             // The wheel sets the distance; 1.12.2 gave no on-screen hint that it does.
             Component hint = Component.translatable("ac.hud.penetrate_scroll",
                     String.format(java.util.Locale.ROOT, "%.1f", penetrate));
@@ -111,8 +112,9 @@ public class ChargingHudOverlay {
                 }
                 Component hint = chargeHint(currentSkillId, progress);
                 int hintWidth = mc.font.width(hint);
+                int hintY = showedPenetrateHint ? y + barHeight + 14 : y + barHeight + 3;
                 graphics.drawString(mc.font, hint, (screenWidth - hintWidth) / 2,
-                        y + barHeight + 3, 0xFFB8D8FF);
+                        hintY, 0xFFB8D8FF);
             }
         }
     }

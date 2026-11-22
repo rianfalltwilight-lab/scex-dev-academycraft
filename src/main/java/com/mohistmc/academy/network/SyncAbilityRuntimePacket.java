@@ -18,7 +18,10 @@ public record SyncAbilityRuntimePacket(CompoundTag data) implements CustomPacket
             ByteBufCodecs.COMPOUND_TAG.map(SyncAbilityRuntimePacket::new, SyncAbilityRuntimePacket::data);
     @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
     public static void handle(SyncAbilityRuntimePacket packet, IPayloadContext context) {
-        context.enqueueWork(() -> context.player().getData(AcademyAttachments.PLAYER_ABILITY)
-                .applyRuntimeSyncTag(packet.data()));
+        context.enqueueWork(() -> {
+            var data = context.player().getData(AcademyAttachments.PLAYER_ABILITY);
+            data.applyRuntimeSyncTag(packet.data());
+            com.mohistmc.academy.client.ClientPacketBridge.abilityDataSynced(data);
+        });
     }
 }
