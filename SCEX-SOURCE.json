@@ -2,11 +2,11 @@
   "name": "AcademyCraft",
   "slug": "scex-academycraft",
   "sourcePath": "D:\\SCEX-Work\\01-Mods\\Other-Ports\\AcademyCraft\\20261114-modernization\\source",
-  "version": "0.0.34-scex-modern",
+  "version": "0.0.35-scex-modern",
   "evidence": [
-    "docs/RELEASE-0.0.34.md",
+    "docs/RELEASE-0.0.35.md",
     "gradle.properties",
-    "Gameplay source base: 074b599f518031f5986a39f6b4635dc8bfe70db4"
+    "Gameplay source base: 9298b0da26d687ef3718d3674f07fc68e864f9df"
   ],
   "notes": [
     "Public SCEX stable release; unofficial AcademyCraft port.",
